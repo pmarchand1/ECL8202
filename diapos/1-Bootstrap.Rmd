@@ -1,0 +1,726 @@
+---
+title: "La méthode du bootstrap"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 16) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+```
+
+# Introduction
+
+- Inférence statistique: Déterminer une caractéristique d'une population à partir de variables mesurées sur un échantillon.
+
+--
+
+- Exemple: Estimer l'âge moyen des arbres d'une forêt en comptant les cernes de 30 arbres sélectionnés de façon aléatoire.
+
+--
+
+- Dans certains cas, la théorie nous permet de déterminer comment un estimé varie d'un échantillon à l'autre.
+
+---
+
+# Introduction
+
+- Dans d'autres cas, la statistique qui nous intéresse ne correspond pas à un modèle théorique donné.
+
+--
+
+- Le *bootstrap* est une méthode polyvalente pour déterminer les propriétés statistiques d'un estimé. 
+
+--
+
+- Cette méthode n'utilise que l'information contenue dans l'échantillon pour approximer la distribution d'une variable dans la population.
+
+---
+
+# Contenu de ce cours
+
+- Révision des concepts liés à l'estimation de paramètres
+
+- Méthodes de Monte-Carlo
+
+- Le principe du bootstrap
+
+- Calcul du biais, de la variance et des intervalles de confiance
+
+- Application du bootstrap aux paramètres d'une régression
+
+---
+
+class: inverse, center, middle
+
+# Estimation de paramètres
+
+---
+
+# Exemple
+
+### Diamètre à hauteur de poitrine (DHP) de 90 pruches du Canada
+
+```{r}
+pruche <- read.csv("../donnees/pruche.csv", stringsAsFactors = FALSE)
+
+# Choisir un seul site et tracer l'histogramme du DHP
+pruche_bd <- filter(pruche, site == "BD")
+hist_pruche <- ggplot(pruche_bd, aes(x = dhp)) + 
+    labs(x = "DHP (cm)", y = "Fréquence") +
+    geom_histogram(col = "white", fill = "#b3452c") +
+    scale_y_continuous(expand = c(0, 0))
+hist_pruche
+```
+
+.footnote[
+Source: Données du Parc national de Kejimkujik, Parcs Canada
+]
+
+---
+
+# Terminologie
+
+- Considérons le DHP d'un arbre choisi au hasard dans cette population comme une **variable** aléatoire $x$.
+
+--
+
+- **Distribution** de $x$: Fonction qui associe à un intervalle de valeurs de $x$ $(x_1 < x < x_2)$ la probabilité qu'une observation de $x$ soit comprise dans cet intervalle.
+
+--
+
+- Un **paramètre** est une caractéristique de la distribution de $x$. On ne l'observe pas directement.
+
+--
+
+- Une **statistique** est une valeur calculée à partir d'observations de $x$. Elle est donc aussi une variable aléatoire. 
+
+---
+
+# Estimateur 
+
+- Un estimateur est une statistique qu'on utilise pour déterminer (approximativment) la valeur d'un paramètre donné.
+
+--
+
+- Par exemple, pour un échantillon de $n$ valeurs de $x$ $(x_1, x_2, ..., x_n)$, la moyenne de l'échantillon, $\bar{x}$, est un estimateur de $\mu$, la moyenne de la population:
+
+$$\hat{\mu} = \bar{x} = \frac{1}{n} \sum_{i = 1}^{n} x_i$$
+
+--
+
+- De même, la variance de l'échantillon, $s^2$, est un estimateur de $\sigma^2$, la variance de la population:
+
+$$\hat{\sigma^2} = s^2 = \frac{1}{n - 1} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2$$
+
+---
+
+# Propriétés d'un estimateur
+
+## Biais
+
+- Différence entre la moyenne de l'estimateur et la valeur du paramètre.
+
+$$B = \bar{\hat{\theta}} - \theta$$ 
+
+--
+
+- Ex.: L'estimateur suivant pour la variance sous-estime le paramètre (biais négatif).
+
+$$\hat{\sigma^2} = \frac{1}{n} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2$$
+
+---
+
+# Propriétés d'un estimateur
+
+## Erreur-type (*standard error*)
+
+- Écart-type d'un estimateur: $\sigma_{\hat{\theta}}$
+
+--
+
+- Erreur-type de $\bar{x}$:
+
+$$\sigma_\bar{x} = \frac{\sigma}{\sqrt{n}}$$ 
+--
+
+- Estimée à partir de l'échantillon:
+
+$$s = \sqrt{\frac{1}{n - 1} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2}$$
+
+$$s_\bar{x} = \frac{s}{\sqrt{n}}$$ 
+
+---
+
+# Exemple
+
+.pull-left[
+
+```{r}
+hist_pruche
+```
+
+]
+
+.pull-right[
+
+$\bar{x} = 24.5$
+
+$s = 17.8$
+
+$s_\bar{x} = \frac{17.8}{\sqrt{90}} = 1.9$
+
+]
+
+---
+
+# Distribution de $\bar{x}$
+
+- Selon le théorème de la limite centrale, si on a un échantillon assez grand, $\bar{x}$ suit une distribution normale:
+
+$$\bar{x} \sim N(\mu, \sigma_\bar{x})$$
+
+--
+
+- Dans l'exemple précédent, supposons que $\mu = 20$ et $\sigma_\bar{x} = 2$. Quelles sont les valeurs probables de $\bar{x}$ pour un échantillon de cette population?
+
+---
+
+# Distribution de $\bar{x}$
+
+.pull-left[
+
+```{r}
+ggplot(NULL, aes(x = c(13, 27))) +
+    labs(x = expression(bar(x)), y = expression(f(bar(x)))) +
+    stat_function(fun = function(x) dnorm(x, mean = 20, sd = 2), size = 1) +
+    stat_function(fun = function(x) ifelse(pnorm(x, mean = 20, sd = 2) > 0.025 & pnorm(x, mean = 20, sd = 2) < 0.975, dnorm(x, mean = 20, sd = 2), NA), geom = "area", fill = "#d3492a") +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+]
+
+--
+
+.pull-right[
+
+L'intervalle à $\pm$ 1.96 erreurs-types de $\mu$ contient 95% de la probabilité de $\bar{x}$.
+
+$$\left(- 1.96 \sigma_\bar{x} \le \bar{x} - \mu \le 1.96 \sigma_\bar{x} \right)$$
+
+]
+
+---
+
+# Intervalle de confiance pour $\mu$
+
+- Pour 95% des échantillons possibles, $\bar{x}$ se trouve au plus à 1.96 erreurs-type de $\mu$.
+
+--
+
+- Donc, un intervalle de cette largeur centré sur $\bar{x}$ contiendra la valeur de $\mu$ dans 95% des cas.
+
+$$\left(\bar{x} - 1.96 \sigma_\bar{x}, \bar{x} + 1.96 \sigma_\bar{x} \right)$$
+
+--
+
+- En pratique, nous ne connaissons pas $\sigma_\bar{x}$, donc on la remplace par $s_\bar{x}$ et on remplace les quantiles de la distribution normale $(\pm 1.96)$ par ceux de la distribution $t$ avec $n-1$ degrés de liberté.
+
+---
+
+# Interpréter l'intervalle de confiance
+
+- Le niveau de confiance (95%) est la probabilité d'obtenir un intervalle contenant $\mu$ pour un plan d'échantillonnage et un estimateur donnés. 
+
+--
+
+- L'intervalle obtenu avec un échantillon spécifique contient ou ne contient pas $\mu$. 
+- Un paramètre est une valeur fixe, pas une variable, donc on ne peut pas lui assigner une probabilité. Attention aux affirmations du type: "*la moyenne a 95% de chances de se trouver entre ... et ...*".
+
+---
+
+class: inverse, center, middle
+
+# Méthodes de Monte-Carlo
+
+---
+
+# Méthodes de Monte-Carlo
+
+- Stratégie générale pour obtenir la distribution d'une statistique pour laquelle on n'a pas de formule exacte.
+
+--
+
+- Cette distribution est approximée par la simulation d'un grand nombre d'échantillons à partir d'un générateur de nombre (pseudo-)aléatoires.
+
+--
+
+- L'erreur associée à cette approximation peut être réduite à volonté en augmentant le nombre d'échantillons simulés.
+
+---
+
+# Exemple
+
+Médiane d'un échantillon de 20 observations d'une distribution $N(5, 2)$.
+
+.pull-left[
+
+```{r, echo = TRUE}
+# Nombre d'échantillons simulés
+R <- 1000 
+    
+# n observations
+# moyenne m, écart-type s
+med_norm <- function(n, m, s) {
+  ech <- rnorm(n, m, s)
+  median(ech)
+}
+
+med <- replicate(R, med_norm(20, 5, 2))
+```
+
+]
+
+--
+
+.pull-right[
+
+```{r}
+ggplot(NULL, aes(x = med)) + 
+    labs(x = "med", y = "Fréquence") +
+    geom_histogram(col = "white", fill = "#b3452c") +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+]
+
+---
+
+# Convergence des simulations
+
+.center[
+
+```{r, echo = FALSE, fig.dim = c(10, 7)}
+set.seed(1000)
+
+Rmax <- 10000
+n <- 20
+m <- 5
+s <- 2
+
+cumul_stat <- function() {
+    med <- replicate(Rmax, median(rnorm(n, m, s)))
+
+    med_df <- data.frame(R = seq(100, 10000, 100)) %>%
+        mutate(biais = map_dbl(R, ~ mean(med[1:.])) - m,
+               err_type = map_dbl(R, ~ sd(med[1:.])))    
+}
+
+med_df <- bind_rows(replicate(2, cumul_stat(), simplify = FALSE), .id = "sim")
+
+
+p1 <- ggplot(med_df, aes(x = R, y = biais, color = sim)) +
+    labs(x = "", y = "Biais") +
+    geom_point() +
+    geom_line() +
+    geom_hline(yintercept = 0, color = "grey50") +
+    scale_color_brewer(palette = "Dark2") +
+    theme(legend.position = "none")
+  
+
+p2 <- ggplot(med_df, aes(x = R, y = err_type, color = sim)) +
+    labs(x = "Nombre d'échantillons simulés", y = "Erreur-type") +
+    geom_point() +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    theme(legend.position = "none")
+
+plot_grid(p1, p2, ncol = 1)
+```
+
+]
+
+---
+
+# Nombres pseudo-aléatoires
+
+- Les générateurs de nombres pseudo-aléatoires produisent une séquence de valeurs qui dépend d'une valeur initiale nommé graine (*seed*). Par défaut, cette valeur initiale est choisie par R en fonction de l'horloge interne de l'ordinateur.
+
+--
+
+- On peut spécifier manuellement cette graine au début d'un script avec la fonction `set.seed`. Dans ce cas, la séquence de nombres générés sera la même pour chaque exécution du script. 
+
+---
+
+# Nombres pseudo-aléatoires
+
+```{r, echo = TRUE}
+rnorm(5)
+
+set.seed(82)
+rnorm(5)
+
+set.seed(82)
+rnorm(5)
+```
+
+---
+
+# Applications dans ce cours
+
+- Techniques de ré-échantillonnage, dont le bootstrap
+
+- Tests d'hypothèses basés sur une randomisation des données
+
+- Calcul de l'incertitude des prédictions de modèles mixtes
+
+- Estimation des paramètres des modèles hiérarchique bayésiens
+
+---
+
+class: inverse, center, middle
+
+# Le principe du bootstrap
+
+---
+
+# Exemple
+
+Diamètre (DHP) de 90 pruches du Canada
+
+.pull-left[
+
+```{r}
+hist_pruche
+```
+
+]
+
+--
+
+.pull-right[
+
+- Le DHP médian est de 14.6 cm. Quel est son intervalle de confiance?
+
+- Nous ne pouvons pas supposer une distribution normale pour cette statistique.
+
+]
+
+---
+
+# Le principe du bootstrap
+
+- Si on ne peut pas assigner une distribution *a priori* à une variable aléatoire, alors l'échantillon observé est notre meilleure approximation de la distribution de cette variable.
+
+--
+
+- Les propriétés d'une statistique peuvent être estimées par un *ré-échantillonnage* de l'échantillon observé.
+
+--
+
+- Échantillon bootstrap: tirage avec remise des éléments de l'échantillon original pour obtenir un échantillon de même taille.
+
+--
+
+- **Les échantillons bootstrap sont à l'échantillon original ce que l'échantillon original est à la population.**
+
+---
+
+# Tirage avec remise
+
+Échantillon original
+
+```{r}
+ech <- sample(10:99, 10)
+cat(sort(ech))
+```
+
+--
+
+Échantillons bootstrap
+
+```{r}
+for (i in 1:3) {
+  cat(sort(sample(ech, 10, replace = TRUE)), "\n")  
+}
+```
+
+---
+
+# Biais et variance de l'estimateur
+
+- Supposons que $\hat{\theta}$ est un estimateur d'un paramètre $\theta$. La valeur de l'estimateur pour l'échantillon observé est notée $\hat{\theta}_0$.
+
+--
+
+- La variable $\hat{\theta}^*$ représente l'application de l'estimateur à un échantillon bootstrap.
+
+--
+
+- Selon le principe du bootstrap, la distribution de $\hat{\theta}^*$ par rapport à $\hat{\theta}_0$ approxime la distribution de $\hat{\theta}$ par rapport à $\theta$.
+
+--
+
+- En particulier, l'erreur-type de l'estimateur est donnée par l'écart-type de $\hat{\theta}^*$, tandis que son biais correspond à $\bar{\hat{\theta}^*} - \hat{\theta}_0$.
+
+---
+
+# Bootstrap dans R
+
+- La fonction `boot(x, f, R)` contenue dans le package du même nom génère $R$ échantillons bootstrap à partir d'un vecteur $x$, puis calcule la statistique donnée par une fonction $f$. 
+
+```{r}
+dhp <- pruche_bd$dhp
+```
+
+
+```{r, echo = TRUE}
+library(boot)
+
+# Calcule la médiane des éléments de x choisis par i
+med_boot <- function(x, i) median(x[i])
+
+# dhp est le vecteur des valeurs de DHP
+boot_res <- boot(dhp, med_boot, R = 10000)
+```
+
+--
+
+- Notez que la fonction calculant la statistique doit comporter deux arguments: $x$ correspond aux données complètes, tandis que $i$ est un vecteur d'indices servant à choisir des éléments de $x$. La fonction `boot` génère un vecteur $i$ aléatoire pour chaque échantillon bootstrap, puis appelle la fonction spécifiée.
+
+---
+
+# Bootstrap avec R
+
+```{r, message = FALSE}
+boot_hist <- ggplot(NULL, aes(x = boot_res$t)) + 
+    labs(x = "DHP médian (cm)", y = "Fréquence") +
+    geom_histogram(col = "white") +
+    geom_vline(xintercept = boot_res$t0, linetype = "dashed", color = "#b3452c") +
+    scale_y_continuous(expand = c(0, 0))
+boot_hist
+```
+
+.center[Distribution du DHP médian pour 10 000 échantillons bootstrap (ligne pointillée: échantillon original)]
+
+---
+
+# Bootstrap avec R
+
+L'élément `t` du résultat de `boot` est un vecteur contenant la valeur de la statistique pour chaque échantillon bootstrap, tandis que `t0` contient sa valeur pour l'échantillon original.
+
+```{r, echo = TRUE}
+# Valeur moyenne de la médiane
+mean(boot_res$t)
+
+# Biais
+mean(boot_res$t) - boot_res$t0
+
+# Erreur-type
+sd(boot_res$t)
+```
+
+---
+
+# Validité du bootstrap 
+
+- Le ré-échantillonnage doit être représentatif de la façon dont l'échantillonnage original a été obtenu. 
+
+--
+
+- Pour la méthode de base présentée ici, on suppose que les observations ont été tirées indépendamment et aléatoirement parmi l'ensemble de la population.
+
+--
+
+- Pour un échantillon stratifié, le bootstrap doit être stratifié de la même façon (argument `strata` de la fonction `boot`).
+
+---
+
+# Sources d'erreur
+
+- La méthode du bootstrap implique deux sources d'erreur: un erreur numérique et une erreur statistique.
+
+--
+
+- Erreur numérique: liée au ré-échantillonnage, peut être réduite en augmentant le nombre d'échantillons simulés (un minimum de 1000 est suggéré).
+
+--
+
+- Erreur statistique: liée à l'échantillon original. Peut être réduite en augmentant la taille de l'échantillon.
+
+--
+
+- Cependant, une partie de l'erreur statistique peut être systématique (due à un échantillonnage non-représentatif de la population).
+
+---
+
+# Correction du biais
+
+- Dans notre exemple, la moyenne du DHP médian des échantillons bootstrap (15.7 cm) surestime donc le DHP médian de l'échantillon original (14.6 cm) de 1.1 cm.
+
+--
+
+- Selon le principe du bootstrap, on pourrait donc supposer que le DHP médian de l'échantillon original surestime celui de la population. Dans ce cas, on peut corriger cet estimé en lui soustrayant le biais déterminé par le bootstrap: 14.6 cm - 1.1 cm = 13.5 cm.
+
+--
+
+- En réalité, la magnitude du biais peut varier selon la valeur du paramètre $\theta$. Dans ce cas, la correction simple présentée ici peut produire des résultats erronés. Ce problème devient plus important pour des distributions très asymétriques.
+
+---
+
+class: inverse, center, middle
+
+# Intervalles de confiance du bootstrap
+
+---
+
+# Exemple
+
+Distribution du DHP médian d'un peuplement de pruches du Canada obtenue à partir de 10 000 échantillons bootstrap.
+
+```{r}
+boot_hist
+```
+
+---
+
+# Intervalles de confiance
+
+La fonction `boot.ci` calcule différents types d'intervalles de confiance (à 95%, par défaut) à partir des résultats du bootstrap.
+
+.code60[
+
+```{r, echo = TRUE}
+boot.ci(boot_res)
+```
+
+]
+
+---
+
+# Intervalle normal
+
+- Utilise l'erreur-type $s_\hat{\theta}$ estimée par le bootstrap et suppose que la distribution de l'estimateur est normale.
+
+--
+
+- Intervalle de confiance à 95%:
+
+$$(\hat{\theta}_0 + t_{(n-1)0.025} s_\hat{\theta}, \hat{\theta}_0 + t_{(n-1)0.975} s_\hat{\theta})$$
+
+---
+
+# Intervalle des quantiles (*percentile*)
+
+- Calculé directement à partir des quantiles de la distribution de $\hat{\theta}^*$.
+
+- Intervalle de confiance à 95%:
+
+$$(\hat{\theta}^*_{0.025}, \hat{\theta}^*_{0.975})$$
+
+---
+
+# Intervalle de base (*basic*)
+
+- Utilise les quantiles de la différence $\hat{\theta}^* - \hat{\theta}_0$.
+
+- Intervalle de confiance à 95%:
+
+$$(\hat{\theta}^*_{0.025} - \hat{\theta}_0 \le \theta^* - \hat{\theta}_0 \le \hat{\theta}^*_{0.975} - \hat{\theta}_0)$$
+--
+
+Donc:
+
+$$\left( \hat{\theta}_0 - (\hat{\theta}^*_{0.975} - \hat{\theta}_0), \hat{\theta}_0 - (\hat{\theta}^*_{0.025} - \hat{\theta}_0) \right)$$
+
+--
+
+En simplifiant:
+$$(2\hat{\theta}_0 - \hat{\theta}^*_{0.975}, 2\hat{\theta}_0 - \hat{\theta}^*_{0.025})$$
+
+---
+
+# Intervalle de base (*basic*)
+
+- Dans notre exemple: $\hat{\theta}_0 = 14.6$, $\hat{\theta}^*_{0.025} = 11.25$ et $\hat{\theta}^*_{0.975} = 26.7$.
+
+--
+
+$$\hat{\theta}^*_{0.025} - \hat{\theta}_0 = -3.45$$
+$$\hat{\theta}^*_{0.975} - \hat{\theta}_0 = 12.1$$
+
+--
+
+- Si $\hat{\theta}_0$ est jusqu'à 3.45 cm sous à $\theta$ ou jusqu'à 12.1 cm au-dessus, alors l'intervalle pour $\theta$ est de:
+
+$$(14.6 - 12.1, 14.6 + 3.45) = (2.50, 18.05)$$
+
+---
+
+# Intervalle studentisé (*studentized*)
+
+- Utilise la différence $\hat{\theta}^* - \hat{\theta}_0$, normalisée par l'erreur-type de $\hat{\theta}^*$:
+
+$$t^* = \frac{\hat{\theta}^* - \hat{\theta}_0}{s_{\hat{\theta}^*}}$$
+
+--
+
+- Requiert une estimation de l'erreur-type variance $s_{\hat{\theta}^*}$ pour *chaque* valeur de $\hat{\theta}^*$.
+
+---
+
+# Intervalle BCa
+
+- Intervalle avec correction du biais et de l'accélération.
+
+- Basé sur l'intervalle des quantiles, mais ajuste les quantiles choisis en tenant compte du biais et de l'asymétrie de la distribution.
+
+---
+
+# Comparaison des intervalles
+
+```{r, echo = TRUE}
+boot.ci(boot_res)
+```
+
+---
+
+# Comparaison des intervalles
+
+- L'intervalle des quantiles fonctionne bien dans les cas où le biais de l'estimateur est faible et sa distribution est symétrique.
+
+--
+
+- L'intervalle BCa et l'intervalle studentisé sont les méthodes les plus précises en théorie.
+
+--
+
+- L'intervalle des quantiles et l'intervalle BCa utilisent directement les quantiles de $\hat{\theta}^*$; ils ne dépassent donc pas l'étendue des données observées.
+
+--
+
+- L'intervalle BCa peut demander davantage d'échantillons bootstrap pour être bien estimé.
+
+---
+
+class: inverse, center, middle
+
+# Application du bootstrap à une régression
+
+---
+
+

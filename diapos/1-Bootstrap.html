@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>La méthode du bootstrap</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# La méthode du bootstrap
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+# Introduction
+
+- Inférence statistique: Déterminer une caractéristique d'une population à partir de variables mesurées sur un échantillon.
+
+--
+
+- Exemple: Estimer l'âge moyen des arbres d'une forêt en comptant les cernes de 30 arbres sélectionnés de façon aléatoire.
+
+--
+
+- Dans certains cas, la théorie nous permet de déterminer comment un estimé varie d'un échantillon à l'autre.
+
+---
+
+# Introduction
+
+- Dans d'autres cas, la statistique qui nous intéresse ne correspond pas à un modèle théorique donné.
+
+--
+
+- Le *bootstrap* est une méthode polyvalente pour déterminer les propriétés statistiques d'un estimé. 
+
+--
+
+- Cette méthode n'utilise que l'information contenue dans l'échantillon pour approximer la distribution d'une variable dans la population.
+
+---
+
+# Contenu de ce cours
+
+- Révision des concepts liés à l'estimation de paramètres
+
+- Méthodes de Monte-Carlo
+
+- Le principe du bootstrap
+
+- Calcul du biais, de la variance et des intervalles de confiance
+
+- Application du bootstrap aux paramètres d'une régression
+
+---
+
+class: inverse, center, middle
+
+# Estimation de paramètres
+
+---
+
+# Exemple
+
+### Diamètre à hauteur de poitrine (DHP) de 90 pruches du Canada
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+
+.footnote[
+Source: Données du Parc national de Kejimkujik, Parcs Canada
+]
+
+---
+
+# Terminologie
+
+- Considérons le DHP d'un arbre choisi au hasard dans cette population comme une **variable** aléatoire `\(x\)`.
+
+--
+
+- **Distribution** de `\(x\)`: Fonction qui associe à un intervalle de valeurs de `\(x\)` `\((x_1 &lt; x &lt; x_2)\)` la probabilité qu'une observation de `\(x\)` soit comprise dans cet intervalle.
+
+--
+
+- Un **paramètre** est une caractéristique de la distribution de `\(x\)`. On ne l'observe pas directement.
+
+--
+
+- Une **statistique** est une valeur calculée à partir d'observations de `\(x\)`. Elle est donc aussi une variable aléatoire. 
+
+---
+
+# Estimateur 
+
+- Un estimateur est une statistique qu'on utilise pour déterminer (approximativment) la valeur d'un paramètre donné.
+
+--
+
+- Par exemple, pour un échantillon de `\(n\)` valeurs de `\(x\)` `\((x_1, x_2, ..., x_n)\)`, la moyenne de l'échantillon, `\(\bar{x}\)`, est un estimateur de `\(\mu\)`, la moyenne de la population:
+
+`$$\hat{\mu} = \bar{x} = \frac{1}{n} \sum_{i = 1}^{n} x_i$$`
+
+--
+
+- De même, la variance de l'échantillon, `\(s^2\)`, est un estimateur de `\(\sigma^2\)`, la variance de la population:
+
+`$$\hat{\sigma^2} = s^2 = \frac{1}{n - 1} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2$$`
+
+---
+
+# Propriétés d'un estimateur
+
+## Biais
+
+- Différence entre la moyenne de l'estimateur et la valeur du paramètre.
+
+`$$B = \bar{\hat{\theta}} - \theta$$` 
+
+--
+
+- Ex.: L'estimateur suivant pour la variance sous-estime le paramètre (biais négatif).
+
+`$$\hat{\sigma^2} = \frac{1}{n} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2$$`
+
+---
+
+# Propriétés d'un estimateur
+
+## Erreur-type (*standard error*)
+
+- Écart-type d'un estimateur: `\(\sigma_{\hat{\theta}}\)`
+
+--
+
+- Erreur-type de `\(\bar{x}\)`:
+
+`$$\sigma_\bar{x} = \frac{\sigma}{\sqrt{n}}$$` 
+--
+
+- Estimée à partir de l'échantillon:
+
+`$$s = \sqrt{\frac{1}{n - 1} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2}$$`
+
+`$$s_\bar{x} = \frac{s}{\sqrt{n}}$$` 
+
+---
+
+# Exemple
+
+.pull-left[
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+]
+
+.pull-right[
+
+`\(\bar{x} = 24.5\)`
+
+`\(s = 17.8\)`
+
+`\(s_\bar{x} = \frac{17.8}{\sqrt{90}} = 1.9\)`
+
+]
+
+---
+
+# Distribution de `\(\bar{x}\)`
+
+- Selon le théorème de la limite centrale, si on a un échantillon assez grand, `\(\bar{x}\)` suit une distribution normale:
+
+`$$\bar{x} \sim N(\mu, \sigma_\bar{x})$$`
+
+--
+
+- Dans l'exemple précédent, supposons que `\(\mu = 20\)` et `\(\sigma_\bar{x} = 2\)`. Quelles sont les valeurs probables de `\(\bar{x}\)` pour un échantillon de cette population?
+
+---
+
+# Distribution de `\(\bar{x}\)`
+
+.pull-left[
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+]
+
+--
+
+.pull-right[
+
+L'intervalle à `\(\pm\)` 1.96 erreurs-types de `\(\mu\)` contient 95% de la probabilité de `\(\bar{x}\)`.
+
+`$$\left(- 1.96 \sigma_\bar{x} \le \bar{x} - \mu \le 1.96 \sigma_\bar{x} \right)$$`
+
+]
+
+---
+
+# Intervalle de confiance de `\(\bar{x}\)`
+
+- Pour 95% des échantillons possibles, `\(\bar{x}\)` se trouve au plus à 1.96 erreurs-type de `\(\mu\)`.
+
+--
+
+- Donc, un intervalle de cette largeur centré sur `\(\bar{x}\)` contiendra la valeur de `\(\mu\)` dans 95% des cas.
+
+`$$\left(\bar{x} - 1.96 \sigma_\bar{x}, \bar{x} + 1.96 \sigma_\bar{x} \right)$$`
+
+--
+
+- En pratique, nous ne connaissons pas `\(\sigma_\bar{x}\)`, donc on la remplace par `\(s_\bar{x}\)` et on remplace les quantiles de la distribution normale `\((\pm 1.96)\)` par ceux de la distribution `\(t\)` avec `\(n-1\)` degrés de liberté.
+
+---
+
+# Interpréter l'intervalle de confiance
+
+- Le niveau de confiance (95%) est la probabilité d'obtenir un intervalle contenant `\(\mu\)` pour un plan d'échantillonnage et un estimateur donnés. 
+
+--
+
+- L'intervalle obtenu avec un échantillon spécifique contient ou ne contient pas `\(\mu\)`. 
+- Un paramètre est une valeur fixe, pas une variable, donc on ne peut pas lui assigner une probabilité. Attention aux affirmations du type: "*la moyenne a 95% de chances de se trouver entre ... et ...*".
+
+---
+
+class: inverse, center, middle
+
+# Méthodes de Monte-Carlo
+
+---
+
+# Méthodes de Monte-Carlo
+
+- Stratégie générale pour obtenir la distribution d'une statistique pour laquelle on n'a pas de formule exacte.
+
+--
+
+- Cette distribution est approximée par la simulation d'un grand nombre d'échantillons à partir d'un générateur de nombre (pseudo-)aléatoires.
+
+--
+
+- L'erreur associée à cette approximation peut être réduite à volonté en augmentant le nombre d'échantillons simulés.
+
+---
+
+# Exemple
+
+Médiane d'un échantillon de 20 observations d'une distribution `\(N(5, 2)\)`.
+
+.pull-left[
+
+
+```r
+# Nombre d'échantillons simulés
+R &lt;- 1000 
+    
+# N observations
+# moyenne m, écart-type s
+med_norm &lt;- function(N, m, s) {
+  ech &lt;- rnorm(N, m, s)
+  median(ech)
+}
+
+med &lt;- replicate(R, med_norm(20, 5, 2))
+```
+
+]
+
+--
+
+.pull-right[
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+]
+
+---
+
+# Convergence des simulations
+
+.center[
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+]
+
+---
+
+# Nombres pseudo-aléatoires
+
+- Les générateurs de nombres pseudo-aléatoires produisent une séquence de valeurs qui dépend d'une valeur initiale nommé graine (*seed*). Par défaut, cette valeur initiale est choisie par R en fonction de l'horloge interne de l'ordinateur.
+
+--
+
+- On peut spécifier manuellement cette graine au début d'un script avec la fonction `set.seed`. Dans ce cas, la séquence de nombres générés sera la même pour chaque exécution du script. 
+
+---
+
+# Nombres pseudo-aléatoires
+
+
+```r
+rnorm(5)
+```
+
+```
+## [1] -0.01702545  0.03844598  0.53606785  0.18343607 -2.01285543
+```
+
+```r
+set.seed(82)
+rnorm(5)
+```
+
+```
+## [1] -1.2195343  0.3033129 -0.3304770 -1.4031843  0.2212113
+```
+
+```r
+set.seed(82)
+rnorm(5)
+```
+
+```
+## [1] -1.2195343  0.3033129 -0.3304770 -1.4031843  0.2212113
+```
+
+---
+
+# Applications dans ce cours
+
+- Techniques de ré-échantillonnage, dont le bootstrap
+
+- Tests d'hypothèses basés sur une randomisation des données
+
+- Calcul de l'incertitude des prédictions de modèles mixtes
+
+- Estimation des paramètres des modèles hiérarchique bayésiens
+
+---
+
+class: inverse, center, middle
+
+# Le principe du bootstrap
+
+---
+
+# Exemple
+
+Diamètre (DHP) de 90 pruches du Canada
+
+.pull-left[
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+]
+
+--
+
+.pull-right[
+
+- Le DHP médian est de 14.6 cm. Quel est son intervalle de confiance?
+
+- Nous ne pouvons pas supposer une distribution normale pour cette statistique.
+
+]
+
+---
+
+# Le principe du boostrap
+
+- Si on ne peut pas assigner une distribution *a priori* à une variable aléatoire, alors l'échantillon observé est notre meilleure approximation de la distribution de cette variable.
+
+--
+
+- Les propriétés d'une statistique peuvent être estimées par un *ré-échantillonnage* de l'échantillon observé.
+
+--
+
+- Échantillon bootstrap: tirage avec remise des éléments de l'échantillon original pour obtenir un échantillon de même taille.
+
+--
+
+- **Les échantillons bootstrap sont à l'échantillon original ce que l'échantillon original est à la population.**
+
+---
+
+# Tirage avec remise
+
+Échantillon original
+
+
+```
+## 10 23 37 43 49 57 61 79 88 92
+```
+
+--
+
+Échantillons bootstrap
+
+
+```
+## 10 10 37 43 57 88 88 88 92 92 
+## 23 37 37 49 57 61 79 79 88 88 
+## 23 23 37 37 43 43 49 57 61 92
+```
+
+---
+
+# Biais et variance de l'estimateur
+
+- Supposons que `\(\hat{\theta}\)` est un estimateur d'un paramètre `\(\theta\)`. La valeur de l'estimateur pour l'échantillon observé est notée `\(\hat{\theta}_0\)`.
+
+--
+
+- La variable `\(\hat{\theta}^*\)` représente l'application de l'estimateur à un échantillon boostrap.
+
+--
+
+- Selon le principe du bootstrap, la distribution de `\(\hat{\theta}^*\)` par rapport à `\(\hat{\theta}_0\)` approxime la distribution de `\(\hat{\theta}\)` par rapport à `\(\theta\)`.
+
+--
+
+- En particulier, l'erreur-type de l'estimateur est donnée par l'écart-type de `\(\hat{\theta}^*\)`, tandis que son biais correspond à `\(\bar{\hat{\theta}^*} - \hat{\theta}_0\)`.
+
+---
+
+# Bootstrap dans R
+
+- La fonction `boot(x, f, R)` contenue dans le package du même nom génère `\(R\)` échantillons bootstrap à partir d'un vecteur `\(x\)`, puis calcule la statistique donnée par une fonction `\(f\)`. 
+
+
+
+
+
+```r
+library(boot)
+
+# Calcule la médiane des éléments de x choisis par i
+med_boot &lt;- function(x, i) median(x[i])
+
+# dhp est le vecteur des valeurs de DHP
+boot_res &lt;- boot(dhp, med_boot, R = 10000)
+```
+
+--
+
+- Notez que la fonction calculant la statistique doit comporter deux arguments: `\(x\)` correspond aux données complètes, tandis que `\(i\)` est un vecteur d'indices servant à choisir des éléments de `\(x\)`. La fonction `boot` génère un vecteur `\(i\)` aléatoire pour chaque échantillon bootstrap, puis appelle la fonction spécifiée.
+
+---
+
+# Bootstrap avec R
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+.center[Distribution du DHP médian pour 10 000 échantillons bootstrap (ligne pointillée: échantillon original)]
+
+---
+
+# Bootstrap avec R
+
+L'élément `t` du résultat de `boot` est un vecteur contenant la valeur de la statistique pour chaque échantillon bootstrap, tandis que `t0` contient sa valeur pour l'échantillon original.
+
+
+```r
+# Valeur moyenne de la médiane
+mean(boot_res$t)
+```
+
+```
+## [1] 15.705
+```
+
+```r
+# Biais
+mean(boot_res$t) - boot_res$t0
+```
+
+```
+## [1] 1.105005
+```
+
+```r
+# Erreur-type
+sd(boot_res$t)
+```
+
+```
+## [1] 4.032191
+```
+
+---
+
+# Validité du bootstrap 
+
+- Le ré-échantillonnage doit être représentatif de la façon dont l'échantillonnage original a été obtenu. 
+
+--
+
+- Pour la méthode de base présentée ici, on suppose que les observations ont été tirées indépendamment et aléatoirement parmi l'ensemble de la population.
+
+--
+
+- Pour un échantillon stratifié, le bootstrap doit être stratifié de la même façon (argument `strata` de la fonction `boot`).
+
+---
+
+# Sources d'erreur
+
+- La méthode du bootstrap implique deux sources d'erreur: un erreur numérique et une erreur statistique.
+
+--
+
+- Erreur numérique: liée au ré-échantillonnage, peut être réduite en augmentant le nombre d'échantillons simulés (un minimum de 1000 est suggéré).
+
+--
+
+- Erreur statistique: liée à l'échantillon original. Peut être réduite en augmentant la taille de l'échantillon.
+
+--
+
+- Cependant, une partie de l'erreur statistique peut être systématique (due à un échantillonnage non-représentatif de la population).
+
+---
+
+# Correction du biais
+
+- Dans notre exemple, la moyenne du DHP médian des échantillons bootstrap (15.7 cm) surestime donc le DHP médian de l'échantillon original (14.6 cm) de 1.1 cm.
+
+--
+
+- Selon le principe du bootstrap, on pourrait donc supposer que le DHP médian de l'échantillon original surestime celui de la population. Dans ce cas, on peut corriger cet estimé en lui soustrayant le biais déterminé par le bootstrap: 14.6 cm - 1.1 cm = 13.5 cm.
+
+--
+
+- En réalité, la magnitude du biais peut varier selon la valeur du paramètre `\(\theta\)`. Dans ce cas, la correction simple présentée ici peut produire des résultats erronés. Ce problème devient plus important pour des distributions très asymétriques.
+
+---
+
+class: inverse, center, middle
+
+# Intervalles de confiance du bootstrap
+
+---
+
+# Exemple
+
+Distribution du DHP médian d'un peuplement de pruches du Canada obtenue à partir de 10 000 échantillons bootstrap.
+
+![](1-Bootstrap_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+
+---
+
+# Intervalles de confiance
+
+La fonction `boot.ci` calcule différents types d'intervalles de confiance (à 95%, par défaut) à partir des résultats du bootstrap.
+
+.code60[
+
+
+```r
+boot.ci(boot_res)
+```
+
+```
+## Warning in boot.ci(boot_res): bootstrap variances needed for studentized
+## intervals
+```
+
+```
+## BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
+## Based on 10000 bootstrap replicates
+## 
+## CALL : 
+## boot.ci(boot.out = boot_res)
+## 
+## Intervals : 
+## Level      Normal              Basic         
+## 95%   ( 5.59, 21.40 )   ( 2.50, 18.05 )  
+## 
+## Level     Percentile            BCa          
+## 95%   (11.15, 26.70 )   (11.00, 26.55 )  
+## Calculations and Intervals on Original Scale
+```
+
+]
+
+---
+
+# Intervalle normal
+
+- Utilise l'erreur-type `\(s_\hat{\theta}\)` estimée par le bootstrap et suppose que la distribution de l'estimateur est normale.
+
+--
+
+- Intervalle de confiance à 95%:
+
+`$$(\hat{\theta}_0 - 1.96 s_\hat{\theta}, \hat{\theta}_0 + 1.96 s_\hat{\theta})$$`
+
+---
+
+# Intervalle des quantiles (*percentile*)
+
+- Calculé directement à partir des quantiles de la distribution de `\(\hat{\theta}^*\)`.
+
+- Intervalle de confiance à 95%:
+
+`$$(\hat{\theta}^*_{0.025}, \hat{\theta}^*_{0.975})$$`
+
+---
+
+# Intervalle de base (*basic*)
+
+- Utilise les quantiles de la différence `\(\hat{\theta}^* - \hat{\theta}_0\)`.
+
+- Intervalle de confiance à 95%:
+
+`$$(\hat{\theta}^*_{0.025} - \hat{\theta}_0 \le \theta^* - \hat{\theta}_0 \le \hat{\theta}^*_{0.975} - \hat{\theta}_0)$$`
+--
+
+Donc:
+
+`$$\left( \hat{\theta}_0 - (\hat{\theta}^*_{0.975} - \hat{\theta}_0), \hat{\theta}_0 - (\hat{\theta}^*_{0.025} - \hat{\theta}_0) \right)$$`
+
+--
+
+En simplifiant:
+`$$(2\hat{\theta}_0 - \hat{\theta}^*_{0.975}, 2\hat{\theta}_0 - \hat{\theta}^*_{0.025})$$`
+
+---
+
+# Intervalle de base (*basic*)
+
+- Dans notre exemple: `\(\hat{\theta}_0 = 14.6\)`, `\(\hat{\theta}^*_{0.025} = 11.25\)` et `\(\hat{\theta}^*_{0.975} = 26.7\)`.
+
+--
+
+`$$\hat{\theta}^*_{0.025} - \hat{\theta}_0 = -3.45$$`
+`$$\hat{\theta}^*_{0.975} - \hat{\theta}_0 = 12.1$$`
+
+--
+
+- Si `\(\hat{\theta}_0\)` est jusqu'à 3.45 cm sous à `\(\theta\)` ou jusqu'à 12.1 cm au-dessus, alors l'intervalle pour `\(\theta\)` est de:
+
+`$$(14.6 - 12.1, 14.6 + 3.45) = (2.50, 18.05)$$`
+
+---
+
+# Intervalle studentisé (*studentized*)
+
+- Utilise la différence `\(\hat{\theta}^* - \hat{\theta}_0\)`, normalisée par l'erreur-type de `\(\hat{\theta}^*\)`:
+
+`$$t^* = \frac{\hat{\theta}^* - \hat{\theta}_0}{s_{\hat{\theta}^*}}$$`
+
+--
+
+- Requiert une estimation de l'erreur-type variance `\(s_{\hat{\theta}^*}\)` pour *chaque* valeur de `\(\hat{\theta}^*\)`.
+
+---
+
+# Intervalle BCa
+
+- Intervalle avec correction du biais et de l'accélération.
+
+- Basé sur l'intervalle des quantiles, mais ajuste les quantiles choisis en tenant compte du biais et de l'asymétrie de la distribution.
+
+---
+
+# Comparaison des intervalles
+
+
+```r
+boot.ci(boot_res)
+```
+
+```
+## Warning in boot.ci(boot_res): bootstrap variances needed for studentized
+## intervals
+```
+
+```
+## BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
+## Based on 10000 bootstrap replicates
+## 
+## CALL : 
+## boot.ci(boot.out = boot_res)
+## 
+## Intervals : 
+## Level      Normal              Basic         
+## 95%   ( 5.59, 21.40 )   ( 2.50, 18.05 )  
+## 
+## Level     Percentile            BCa          
+## 95%   (11.15, 26.70 )   (11.00, 26.55 )  
+## Calculations and Intervals on Original Scale
+```
+
+---
+
+# Comparaison des intervalles
+
+- L'intervalle des quantiles fonctionne bien dans les cas où le biais de l'estimateur est faible et sa distribution est symétrique.
+
+--
+
+- L'intervalle BCa et l'intervalle studentisé sont les méthodes les plus précises en théorie.
+
+--
+
+- L'intervalle des quantiles et l'intervalle BCa utilisent directement les quantiles de `\(\hat{\theta}^*\)`; ils ne dépassent donc pas l'étendue des données observées.
+
+--
+
+- L'intervalle BCa peut demander davantage d'échantillons bootstrap pour être bien estimé.
+
+---
+
+class: inverse, center, middle
+
+# Application du bootstrap à une régression
+
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
