@@ -1,0 +1,68 @@
+---
+title: "ECL8202 - Analyses des données complexes"
+date: "Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Cours préalable
+
+### ECL7102 - Analyses et modélisation des données écologiques
+
+--
+
+- Modèles linéaires: régression linéaire, ANOVA
+
+--
+
+- Modèles linéaires généralisés: distribution non-normale de la réponse, transformation non-linéaire du prédicteur.
+
+--
+
+- Modèles linéaires mixtes: données groupées, variance due aux groupes et aux observations dans chaque groupe.
+
+---
+
+# Contenu du cours
+
+- La méthode du bootstrap (semaine 1)
+
+--
+
+- Tests de randomisation (semaine 2)
+
+--
+
+- Maximum de vraisemblance (semaine 3)
+
+--
+
+- Régression robuste aux valeurs extrêmes (semaine 4)
+
+--
+
+- Modèles linéaires mixtes généralisés (semaines 5-6)
+
+--
+
+- Modèles additifs généralisés (semaine 7)
+
+--
+
+- Modèles hiérarchiques bayésiens (semaines 8-10)
+
+--
+
+- Séries temporelles (semaines 11-12)
+
+- Données spatiales (semaines 13-14)

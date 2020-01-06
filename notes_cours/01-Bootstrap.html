@@ -319,7 +319,7 @@ ggplot(pruche_bd, aes(x = dhp)) +
     labs(x = &quot;DHP (cm)&quot;, y = &quot;Fréquence&quot;) +
     geom_histogram(col = &quot;white&quot;, fill = &quot;#d3492a&quot;) +
     scale_y_continuous(expand = c(0, 0))</code></pre>
-<p><img src="1-Bootstrap_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p><img src="01-Bootstrap_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <p>D’un point de vue statistique, le DHP d’un arbre choisi au hasard dans une population est une <strong>variable</strong> aléatoire; appelons cette variable <span class="math inline">\(x\)</span>.</p>
 <p>La <strong>distribution</strong> de <span class="math inline">\(x\)</span> est une fonction qui, pour n’importe quel intervalle de valeurs de <span class="math inline">\(x\)</span> <span class="math inline">\((x_1 &lt; x &lt; x_2)\)</span>, donne la probabilité qu’une observation de <span class="math inline">\(x\)</span> soit comprise dans cet intervalle.</p>
 <p>Les caractéristiques d’une distribution de probabilité sont représentées par des <strong>paramètres</strong> tels que la moyenne <span class="math inline">\(\mu\)</span>, la variance <span class="math inline">\(\sigma^2\)</span> et l’écart-type <span class="math inline">\(\sigma = \sqrt{\sigma^2}\)</span>. Ces paramètres ne sont pas directement observables.</p>
@@ -342,7 +342,7 @@ ggplot(pruche_bd, aes(x = dhp)) +
 <h2>Intervalle de confiance</h2>
 <p>Dans le cas de l’estimation de la moyenne <span class="math inline">\(\mu\)</span>, le théorème de la limite centrale nous dit qu’avec un échantillon assez grand, la distribution de <span class="math inline">\(\bar{x}\)</span> est très proche d’une distribution normale de moyenne <span class="math inline">\(\mu\)</span> et d’écart-type <span class="math inline">\(\sigma_{\bar{x}}\)</span>, et cela même si les observations individuelles ne sont pas distribuées normalement (comme dans notre exemple). En connaissant cette distribution théorique, nous pouvons déterminer la probabilité que <span class="math inline">\(\bar{x}\)</span> mesurée sur un échantillon soit à une certaine distance de <span class="math inline">\(\mu\)</span>.</p>
 <p>Par exemple, supposons que <span class="math inline">\(\mu = 20\)</span> et <span class="math inline">\(\sigma_ {\bar{x}} = 2\)</span>. Le graphique ci-dessous montre la distribution de probabilité de <span class="math inline">\(\bar{x}\)</span>. En retirant le 2.5% de valeurs extrêmes de chaque côté de cette distribution, on obtient un intervalle (en rouge) dans lequel se trouve <span class="math inline">\(\bar{x}\)</span> pour 95% des échantillons possibles.</p>
-<p><img src="1-Bootstrap_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="01-Bootstrap_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Pour une distribution normale, on sait que cet intervalle de 95% a une largeur de 1.96 erreurs-types de part et d’autre de <span class="math inline">\(\mu\)</span>.</p>
 <p><span class="math display">\[ \left(- 1.96 \frac{\sigma}{\sqrt{n}} \le \bar{x} - \mu \le 1.96 \frac{\sigma}{\sqrt{n}} \right)\]</span></p>
 <p>Donc, si notre supposition que <span class="math inline">\(\bar{x}\)</span> suit une distribution normale est correcte, nous savons que pour 95% des échantillons, l’estimateur <span class="math inline">\(\bar{x}\)</span> se trouve au plus à 1.96 erreurs-types de <span class="math inline">\(\mu\)</span>. Ceci équivaut à dire que si nous définissons un intervalle de 1.96 erreurs-types autour de la moyenne estimée <span class="math inline">\(\bar{x}\)</span>, alors dans 95% des cas, cet intervalle contiendra la valeur du paramètre <span class="math inline">\(\mu\)</span>.</p>
@@ -377,10 +377,10 @@ ggplot(NULL, aes(x = med)) +
     labs(x = &quot;Médiane&quot;, y = &quot;Fréquence&quot;) +
     geom_histogram(col = &quot;white&quot;, fill = &quot;#b3452c&quot;) +
     scale_y_continuous(expand = c(0, 0))</code></pre>
-<p><img src="1-Bootstrap_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="01-Bootstrap_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>La fonction <code>replicate(R, expr)</code> indique à R de répéter <em>R</em> fois l’évaluation de l’expression <em>expr</em>. Dans l’exemple, <code>rnorm</code> effectue un tirage de <em>n</em> observations d’une distribution normale avec paramètres <em>m</em> and <em>s</em>, puis <code>median</code> calcule la médiane de cet échantillon. Le résultat <code>med</code> est un vecteur de longueur <em>R</em> qui contient la valeur médiane de chacun des réplicats. Ce vecteur est une approximation de la distribution de la statistique qui nous intéresse (médiane de 20 observations d’une distribution normale). À partir de ces valeurs, nous pouvons ensuite estimer les propriétés de la statistique comme son biais ou son erreur-type.</p>
 <p>Le graphique ci-dessous montre l’estimé du biais et de l’erreur-type de la même statistique (médiane de <span class="math inline">\(n = 20\)</span> observations avec <span class="math inline">\(\mu = 5\)</span> et <span class="math inline">\(\sigma = 2\)</span>) pour deux simulations de Monte-Carlo différentes, en fonction du nombre d’échantillons simulés. Chaque simulation produit des valeurs différentes, mais le biais et l’erreur-type convergent en autant que le nombre de réplicats <em>R</em> soit suffisant. Les résultats ne sont jamais tout à fait exacts. Dans ce cas-ci, les deux simulations montrent un léger biais positif, même si on sait par des résultats théoriques que cette statistique n’est pas biaisée.</p>
-<p><img src="1-Bootstrap_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="01-Bootstrap_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Ces graphiques de convergence aident à déterminer combien de réplicats sont suffisants pour que la méthode de Monte-Carlo donne une estimation suffisamment précise. Le nombre de réplicats nécessaires varie en fonction de la distribution des données et de la statistique à estimer.</p>
 <div id="nombres-pseudo-aleatoires" class="section level2">
 <h2>Nombres pseudo-aléatoires</h2>
@@ -443,7 +443,7 @@ boot_res &lt;- boot(dhp, med_boot, R = 10000)</code></pre>
     geom_vline(xintercept = boot_res$t0, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;) +
     scale_y_continuous(expand = c(0, 0))
 boot_hist</code></pre>
-<p><img src="1-Bootstrap_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="01-Bootstrap_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <p>À partir de la distribution obtenue, nous pouvons estimer le biais et l’erreur-type du DHP médian de l’échantillon.</p>
 <pre class="r"><code># Biais
 mean(boot_res$t) - boot_res$t0</code></pre>
@@ -679,8 +679,8 @@ sd(boot_res$t)</code></pre>
 <td>…</td>
 <td>…</td>
 <td>…</td>
-<td></td>
-<td></td>
+<td>…</td>
+<td>…</td>
 </tr>
 </tbody>
 </table>
@@ -697,46 +697,46 @@ sd(boot_res$t)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>23.2</td>
+<td><strong>23.2</strong></td>
 <td>0.5</td>
 <td>15</td>
 <td>25.3</td>
-<td>-2.1</td>
+<td><strong>-2.1</strong></td>
 </tr>
 <tr class="even">
-<td>22.9</td>
+<td><strong>22.9</strong></td>
 <td>0.6</td>
 <td>10</td>
 <td>26.2</td>
-<td>-3.3</td>
+<td><strong>-3.3</strong></td>
 </tr>
 <tr class="odd">
-<td>45.1</td>
+<td><strong>45.1</strong></td>
 <td>1.7</td>
 <td>12</td>
 <td>41.0</td>
-<td>4.1</td>
+<td><strong>4.1</strong></td>
 </tr>
 <tr class="even">
-<td>33.3</td>
+<td><strong>33.3</strong></td>
 <td>0.8</td>
 <td>17</td>
 <td>29.9</td>
-<td>3.4</td>
+<td><strong>3.4</strong></td>
 </tr>
 <tr class="odd">
-<td>33.2</td>
+<td><strong>33.2</strong></td>
 <td>0.9</td>
 <td>13</td>
 <td>31.3</td>
-<td>1.9</td>
+<td><strong>1.9</strong></td>
 </tr>
 <tr class="even">
 <td>…</td>
 <td>…</td>
 <td>…</td>
-<td></td>
-<td></td>
+<td>…</td>
+<td>…</td>
 </tr>
 </tbody>
 </table>

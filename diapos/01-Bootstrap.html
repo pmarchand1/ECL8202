@@ -72,7 +72,7 @@ class: inverse, center, middle
 
 ### Diamètre à hauteur de poitrine (DHP) de 90 pruches du Canada
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
 
 .footnote[
 Source: Données du Parc national de Kejimkujik, Parcs Canada
@@ -100,7 +100,7 @@ Source: Données du Parc national de Kejimkujik, Parcs Canada
 
 # Estimateur 
 
-- Un estimateur est une statistique qu'on utilise pour déterminer (approximativment) la valeur d'un paramètre donné.
+- Un estimateur est une statistique qu'on utilise pour déterminer (approximativement) la valeur d'un paramètre donné.
 
 --
 
@@ -157,7 +157,7 @@ Source: Données du Parc national de Kejimkujik, Parcs Canada
 
 .pull-left[
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
 
 ]
 
@@ -189,7 +189,7 @@ Source: Données du Parc national de Kejimkujik, Parcs Canada
 
 .pull-left[
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
 
 ]
 
@@ -205,7 +205,7 @@ L'intervalle à `\(\pm\)` 1.96 erreurs-types de `\(\mu\)` contient 95% de la pro
 
 ---
 
-# Intervalle de confiance de `\(\bar{x}\)`
+# Intervalle de confiance pour `\(\mu\)`
 
 - Pour 95% des échantillons possibles, `\(\bar{x}\)` se trouve au plus à 1.96 erreurs-type de `\(\mu\)`.
 
@@ -263,10 +263,10 @@ Médiane d'un échantillon de 20 observations d'une distribution `\(N(5, 2)\)`.
 # Nombre d'échantillons simulés
 R &lt;- 1000 
     
-# N observations
+# n observations
 # moyenne m, écart-type s
-med_norm &lt;- function(N, m, s) {
-  ech &lt;- rnorm(N, m, s)
+med_norm &lt;- function(n, m, s) {
+  ech &lt;- rnorm(n, m, s)
   median(ech)
 }
 
@@ -279,7 +279,7 @@ med &lt;- replicate(R, med_norm(20, 5, 2))
 
 .pull-right[
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
 
 ]
 
@@ -289,7 +289,7 @@ med &lt;- replicate(R, med_norm(20, 5, 2))
 
 .center[
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
 
 ]
 
@@ -360,7 +360,7 @@ Diamètre (DHP) de 90 pruches du Canada
 
 .pull-left[
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
 
 ]
 
@@ -376,7 +376,7 @@ Diamètre (DHP) de 90 pruches du Canada
 
 ---
 
-# Le principe du boostrap
+# Le principe du bootstrap
 
 - Si on ne peut pas assigner une distribution *a priori* à une variable aléatoire, alors l'échantillon observé est notre meilleure approximation de la distribution de cette variable.
 
@@ -422,7 +422,7 @@ Diamètre (DHP) de 90 pruches du Canada
 
 --
 
-- La variable `\(\hat{\theta}^*\)` représente l'application de l'estimateur à un échantillon boostrap.
+- La variable `\(\hat{\theta}^*\)` représente l'application de l'estimateur à un échantillon bootstrap.
 
 --
 
@@ -434,7 +434,7 @@ Diamètre (DHP) de 90 pruches du Canada
 
 ---
 
-# Bootstrap dans R
+# Bootstrap avec R
 
 - La fonction `boot(x, f, R)` contenue dans le package du même nom génère `\(R\)` échantillons bootstrap à partir d'un vecteur `\(x\)`, puis calcule la statistique donnée par une fonction `\(f\)`. 
 
@@ -460,7 +460,7 @@ boot_res &lt;- boot(dhp, med_boot, R = 10000)
 
 # Bootstrap avec R
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
 
 .center[Distribution du DHP médian pour 10 000 échantillons bootstrap (ligne pointillée: échantillon original)]
 
@@ -556,7 +556,7 @@ class: inverse, center, middle
 
 Distribution du DHP médian d'un peuplement de pruches du Canada obtenue à partir de 10 000 échantillons bootstrap.
 
-![](1-Bootstrap_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+![](01-Bootstrap_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -604,7 +604,7 @@ boot.ci(boot_res)
 
 - Intervalle de confiance à 95%:
 
-`$$(\hat{\theta}_0 - 1.96 s_\hat{\theta}, \hat{\theta}_0 + 1.96 s_\hat{\theta})$$`
+`$$(\hat{\theta}_0 + t_{(n-1)0.025} s_\hat{\theta}, \hat{\theta}_0 + t_{(n-1)0.975} s_\hat{\theta})$$`
 
 ---
 
@@ -622,18 +622,19 @@ boot.ci(boot_res)
 
 - Utilise les quantiles de la différence `\(\hat{\theta}^* - \hat{\theta}_0\)`.
 
-- Intervalle de confiance à 95%:
+--
 
 `$$(\hat{\theta}^*_{0.025} - \hat{\theta}_0 \le \theta^* - \hat{\theta}_0 \le \hat{\theta}^*_{0.975} - \hat{\theta}_0)$$`
 --
 
-Donc:
+- Intervalle pour `\(\theta\)`:
 
 `$$\left( \hat{\theta}_0 - (\hat{\theta}^*_{0.975} - \hat{\theta}_0), \hat{\theta}_0 - (\hat{\theta}^*_{0.025} - \hat{\theta}_0) \right)$$`
 
 --
 
-En simplifiant:
+- En simplifiant:
+
 `$$(2\hat{\theta}_0 - \hat{\theta}^*_{0.975}, 2\hat{\theta}_0 - \hat{\theta}^*_{0.025})$$`
 
 ---
@@ -663,7 +664,7 @@ En simplifiant:
 
 --
 
-- Requiert une estimation de l'erreur-type variance `\(s_{\hat{\theta}^*}\)` pour *chaque* valeur de `\(\hat{\theta}^*\)`.
+- Requiert une estimation de l'erreur-type `\(s_{\hat{\theta}^*}\)` pour *chaque* valeur de `\(\hat{\theta}^*\)`.
 
 ---
 
@@ -728,6 +729,167 @@ class: inverse, center, middle
 # Application du bootstrap à une régression
 
 ---
+
+# Motivation
+
+### Exemple
+
+Régression linéaire d'une variable réponse `\(y\)` selon deux prédicteurs `\(x_1\)` et `\(x_2\)` provenant d'un jeu de données.
+
+| `\(y\)` | `\(x_1\)` | `\(x_2\)` |
+|-----|-------|-------|
+| 21 | 0.5 | 15 |
+| 27 | 0.6 | 10 |
+| 39 | 1.7 | 12 |
+| 30 | 0.8 | 17 |
+| 37 | 0.9 | 13 |
+| ... | ... | ... |
+
+---
+
+# Motivation
+
+- Intervalles de confiance théoriques pour les coefficients: basés sur la distribution `\(t\)`.
+
+--
+
+- Inexacts si les suppositions de la régression ne sont pas respectées (ex.: résidus pas normalement distribués, valeurs extrêmes).
+
+--
+
+- Deux stratégies pour l'application du bootstrap: ré-échantillonner soit les observations, soit les résidus du modèle.
+
+---
+
+# Ré-échantillonner les observations
+
+- Supposition: Les rangées du jeu de données représentent des individus échantillonnés de façon aléatoire et indépendante.
+
+--
+
+- Échantillons bootstrap générés par un tirage avec remise des rangées du jeu de données.
+
+--
+
+- Coefficients du modèle estimés pour chaque échantillon bootstrap.
+
+---
+
+# Ré-échantillonner les observations
+
+.pull-left[
+
+**Échantillon original**
+
+| `\(y\)` | `\(x_1\)` | `\(x_2\)` |
+|-----|-------|-------|
+| 21 | 0.5 | 15 |
+| 27 | 0.6 | 10 |
+| 39 | 1.7 | 12 |
+| 30 | 0.8 | 17 |
+| 37 | 0.9 | 13 |
+| ... | ... | ... |
+
+]
+
+.pull-right[
+
+**Échantillon bootstrap**
+
+| `\(y\)` | `\(x_1\)` | `\(x_2\)` |
+|-----|-------|-------|
+| 21 | 0.5 | 15 |
+| 27 | 0.6 | 10 |
+| 27 | 0.6 | 10 |
+| 39 | 1.7 | 12 |
+| 37 | 0.9 | 13 |
+| ... | ... | ... |
+
+]
+
+---
+
+# Ré-échantillonner les résidus
+
+- Modèle ajusté aux données originales:
+
+`$$y = \hat{\beta_0} + \hat{\beta_1} x_1 + \hat{\beta_2} x_2 + \hat{\epsilon} = \hat{y} + \hat{\epsilon}$$`
+
+--
+
+.center[
+`\(\hat{y}\)`: réponse moyenne selon les prédicteurs
+
+`\(\hat{\epsilon}\)`: résidu
+]
+
+--
+
+- Les résidus `\(\hat{\epsilon}\)` sont ré-échantillonnés, puis ajoutés aux `\(\hat{y}\)` pour obtenir un échantillon bootstrap de `\(y\)`
+
+--
+
+- Pour chaque échantillon bootstrap, les coefficients du modèle sont estimés en fonction des nouveaux `\(y\)` (prédicteurs restent inchangés).
+
+---
+
+# Ré-échantillonner les résidus
+
+.pull-left[
+
+| `\(y\)` | `\(x_1\)` | `\(x_2\)` | `\(\hat{y}\)` | `\(\hat{\epsilon}\)` |
+|-----|-------|-------|-----------|------------------|
+| 21 | 0.5 | 15 | 25.3 | -4.3 |
+| 27 | 0.6 | 10 | 26.2 | 0.8 |
+| 39 | 1.7 | 12 | 41.0 | -2.0 |
+| 30 | 0.8 | 17 | 29.9 | 0.1 |
+| 37 | 0.9 | 13 | 31.3 | 5.7 |
+| ... | ... | ... | ... | ... |
+
+]
+
+--
+
+.pull-right[
+
+| `\(y\)` | `\(x_1\)` | `\(x_2\)` | `\(\hat{y}\)` | `\(\hat{\epsilon}\)` |
+|-----|-------|-------|-----------|------------------|
+| **23.2** | 0.5 | 15 | 25.3 | **-2.1** |
+| **22.9** | 0.6 | 10 | 26.2 | **-3.3** |
+| **45.1** | 1.7 | 12 | 41.0 | **4.1** |
+| **33.3** | 0.8 | 17 | 29.9 | **3.4** |
+| **33.2** | 0.9 | 13 | 31.3 | **1.9** |
+| ... | ... | ... | ... | ... |
+
+]
+
+---
+
+# Ré-échantillonner les résidus
+
+- Comparé au ré-échantillonnage des observations, produit des intervalles de confiance moins larges.
+
+--
+
+### Suppositions
+
+- Valeurs des prédicteurs sont fixes (ex.: dispositif expérimental).
+
+- Modèle de régression représente bien la relation entre prédicteurs et réponse.
+
+- Résidus sont indépendants et suivent la même distribution (pas nécessairement normale).
+
+---
+
+# Bootstrap paramétrique
+
+- Bootstrap vu dans ce cours est "non-paramétrique".
+
+--
+
+- Bootstrap paramétrique: échantillons bootstrap obtenus à partir des simulations d'un modèle paramétrique.
+
+- Plus proche de la simulation de Monte-Carlo présentée plus tôt.
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

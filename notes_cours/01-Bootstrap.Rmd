@@ -1,6 +1,7 @@
 ---
 title: "La méthode du bootstrap"
 output:
+    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -425,18 +426,18 @@ $$y = \hat{\beta_0} + \hat{\beta_1} x_1 + \hat{\beta_2} x_2 + \hat{\epsilon} = \
 | 39 | 1.7 | 12 | 41.0 | -2.0 |
 | 30 | 0.8 | 17 | 29.9 | 0.1 |
 | 37 | 0.9 | 13 | 31.3 | 5.7 |
-| ... | ... | ... |
+| ... | ... | ... | ... | ... |
 
 Ensuite, nous effectuons un ré-échantillonnage des résidus $\hat{\epsilon}$ seulement, puis nous ajoutons ces résidus aux $\hat{y}$ pour obtenir l'échantillon bootstrap de $y$.
 
 | $y$ | $x_1$ | $x_2$ | $\hat{y}$ | $\hat{\epsilon}$ |
 |-----|-------|-------|-----------|------------------|
-| 23.2 | 0.5 | 15 | 25.3 | -2.1 |
-| 22.9 | 0.6 | 10 | 26.2 | -3.3 |
-| 45.1 | 1.7 | 12 | 41.0 | 4.1 |
-| 33.3 | 0.8 | 17 | 29.9 | 3.4 |
-| 33.2 | 0.9 | 13 | 31.3 | 1.9 |
-| ... | ... | ... |
+| **23.2** | 0.5 | 15 | 25.3 | **-2.1** |
+| **22.9** | 0.6 | 10 | 26.2 | **-3.3** |
+| **45.1** | 1.7 | 12 | 41.0 | **4.1** |
+| **33.3** | 0.8 | 17 | 29.9 | **3.4** |
+| **33.2** | 0.9 | 13 | 31.3 | **1.9** |
+| ... | ... | ... | ... | ... |
 
 Comme précédemment, le modèle est ajusté pour chaque échantillon bootstrap en fonction des nouvelles valeurs de la réponse et des prédicteurs (ces derniers restent identiques dans ce cas-ci).
 

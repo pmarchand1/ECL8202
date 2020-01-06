@@ -2,5 +2,5 @@
 
 ## Notes de cours
 
-1. [La méthode du bootstrap](notes_cours/1-Bootstrap.html) ([PDF](notes_cours/1-Bootstrap.pdf)) - Données: [pruche.csv](donnees/pruche.csv)
+1. [La méthode du bootstrap](notes_cours/01-Bootstrap.html) ([PDF](notes_cours/01-Bootstrap.pdf)) - Données: [pruche.csv](donnees/pruche.csv)
 
