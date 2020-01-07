@@ -4,3 +4,7 @@
 
 1. [La méthode du bootstrap](notes_cours/01-Bootstrap.html) ([PDF](notes_cours/01-Bootstrap.pdf)) - Données: [pruche.csv](donnees/pruche.csv)
 
+
+## Exercices
+
+1. [La méthode du bootstrap](labos/01-Bootstrap.html) ([PDF](labos/01-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)

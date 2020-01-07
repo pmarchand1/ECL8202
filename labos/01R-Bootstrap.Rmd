@@ -1,0 +1,239 @@
+---
+title: "La méthode du bootstrap"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Données
+
+Pour ce laboratoire, nous utiliserons le jeu de données [sphagnum_cover.csv](../donnees/sphagnum_cover.csv), qui provient de l'article:
+
+> Maanavilja, L., Kangas, L., Mehtätalo, L. and Tuittila, E.‐S. (2015), Rewetting of drained boreal spruce swamp forests results in rapid recovery of Sphagnum production. J Appl Ecol, 52: 1355-1363. [doi:10.1111/1365-2664.12474](https://doi.org/10.1111/1365-2664.12474))
+
+Ces données contiennent des mesures du pourcentage de couverture par les sphaignes (*sphcover*) pour 36 marécages boréaux divisés en trois types (*habitat*): *Dr* = drainés, *Re* = remouillés et *Un* = non-drainés.
+
+```{r}
+cover <- read.csv("../donnees/sphagnum_cover.csv")
+str(cover)
+```
+
+
+## 1. Estimation de la couverture moyenne pour les marécages drainés
+
+a) À partir du jeu de données, faites l'extraction des valeurs de *sphcover* pour les marécages drainés. Calculez le pourcentage de couverture moyen, ainsi que son erreur-type selon la formule classique (basée sur l'écart-type et la taille de l'échantillon). Finalement, calculez l'intervalle de confiance à 95% basé sur la distribution $t$:
+
+$$(\bar{x} + t_{(n-1)0.025} s_{\bar{x}}, \bar{x} + t_{(n-1)0.975} s_{\bar{x}})$$
+
+*Rappel*: La fonction `qt(p, df)` permet d'obtenir pour une valeur `p` donnée la valeur du quantile de la distribution $t$ avec `df` degrés de liberté.
+
+**Réponse**
+
+```{r}
+cov_dr <- cover$sphcover[cover$habitat == "Dr"]
+
+n <- length(cov_dr)
+
+# Moyenne
+moy <- mean(cov_dr)
+moy
+
+# Erreur-type
+err_type <- sd(cov_dr) / sqrt(n)
+err_type
+
+# Intervalle de confiance
+ic <- c(moy + qt(0.025, n - 1) * err_type, 
+        moy + qt(0.975, n - 1) * err_type)
+ic
+```
+
+
+b) Simulez 10 000 échantillons bootstrap pour la moyenne calculée en a). Quelle est son erreur-type selon le bootstrap? Est-ce que cette statistique apparait biasée? 
+
+**Réponse**
+
+```{r}
+library(boot)
+set.seed(5612)
+
+calc_moy <- function(x, i) mean(x[i])
+
+boot_moy <- boot(cov_dr, calc_moy, R = 10000)
+
+# Erreur-type
+sd(boot_moy$t)
+
+# Biais
+mean(boot_moy$t) - boot_moy$t0
+```
+
+Le biais est assez petit (comparé à l'erreur-type) et pourrait être dû à une erreur numérique plutôt qu'à un biais réel de la statistique.
+
+
+c) Comment la distribution du boostrap diffère-t-elle d'une distribution normale? Pour répondre à cette question, il peut être utile de tracer un graphique quantile-quantile (dans le code ci-dessous, `res` est le résultat du bootstrap):
+
+```{r, eval = FALSE}
+qqnorm(res$t)
+qqline(res$t)
+```
+
+**Réponse**
+
+```{r}
+qqnorm(boot_moy$t)
+qqline(boot_moy$t)
+```
+
+La distribution du boostrap est asymétrique: les plus petites valeurs s'approchent plus de la moyenne comparé à une distribution normale, tandis que les plus grandes valeurs s'en éloignent.
+
+
+d) Calculez l'intervalle de confiance à 95% de la moyenne selon la méthode BCa. Comment diffère-t-il de celui calculé en a) selon la formule classique? Pouvez-vous expliquer cette différence en fonction du résultat en c)?
+
+**Réponse**
+
+```{r}
+# Intervalle de confiance
+boot.ci(boot_moy)
+```
+
+L'intervalle BCa (3.44, 13.09) diffère de celui en a) (1.36, 12.97) surtout au niveau de la borne inférieure et les deux bornes sont corrigées vers le haut. En c), nous avons vu que les petites valeurs de la distribution du bootstrap sont plus rapprochées de la moyenne par rapport à la distribution normale et les plus grandes valeurs s'en éloignent.
+
+
+## 2. Estimation des différences entre habitats
+
+a) Voici la distribution des valeurs de *sphcover* dans chaque type d'habitat.
+
+```{r, message = FALSE}
+library(ggplot2)
+ggplot(cover, aes(x = habitat, y = sphcover)) +
+    geom_boxplot()
+```
+
+Quelles sont les suppositions d'un modèle d'ANOVA classique qui décrirait la couverture des sphaignes en fonction du type d'habitat? Est-ce que ces suppositions semblent respectées ici?
+
+**Réponse**
+
+L'ANOVA suppose que les résidus suivent une distribution normale de même variance pour chaque groupe. Ici, les distributions sont asymétriques et la variance du groupe *Dr* semble plus petite.
+
+
+b) Ajustez le modèle linéaire `sphcover ~ habitat` au jeu de données `cover`. Consultez le sommaire des résultats du modèle avec la fonction `summary` et les intervalles de confiance des coefficients avec la fonction `confint`. Quelle est l'interprétation de chaque coefficient? Les intervalles de confiance sont-ils plausibles?
+
+**Réponse**
+
+```{r}
+mod <- lm(sphcover ~ habitat, data = cover)
+summary(mod)
+```
+
+L'ordonnée à l'origine `(Intercept)` est la couverture moyenne pour le groupe de référence (marécages drainés, *Dr*). Le coefficient `habitatRe` (respectivement, `habitatUn`) est la différence entre la couverture moyenne des marécages remouillés et celle des marécages drainés (respectivement, la différence entre les marécages non-drainés et drainés).
+
+```{r}
+confint(mod)
+```
+
+L'intervalle de confiance pour la moyenne du groupe *Dr* atteint des valeurs négatives, ce qui n'est pas possible pour un pourcentage de couverture.
+
+
+c) Créez une fonction avec pour arguments `x` et `i `, qui ajuste le modèle linéaire en b) en remplaçant le jeu de données original (`data = cover`) par `data = x[i, ]`, puis retourne les coefficients du modèle avec la fonction `coef`. Ensuite, appliquez `boot` au jeu de données `cover` avec la fonction créée et en effectuant 10 000 réplicats.
+
+*Notes*
+
+- Lorsque le premier argument de `boot` est un jeu de données, ce sont les rangées de ce jeu de données qui sont ré-échantillonnées.
+
+- Puisque la statistique calculée par la fonction comporte plusieurs valeurs (chacun des coefficients), l'élément `t` du résultat de `boot` est une matrice plutôt qu'un vecteur. Les colonnes de cette matrice correspondent à chacun des coefficients dans l'ordre. Vous pouvez calculer une statistique pour chaque colonne avec la fonction `apply`, ex.: `apply(res$t, 2, mean)`. Ici, `2` indique de calculer la fonction `mean` par colonne (`1` signifierait par rangée).
+
+**Réponse**
+
+```{r}
+lm_hab <- function(x, i)  {
+    mod <- lm(sphcover ~ habitat, x[i,])
+    coef(mod)
+}
+
+boot_hab <- boot(cover, lm_hab, R = 10000)
+
+# Moyenne
+apply(boot_hab$t, 2, mean)
+
+# Erreur-type
+apply(boot_hab$t, 2, sd)
+```
+
+La moyenne du bootstrap est très proche des coefficients estimés en b), mais les erreurs-types ont diminué. 
+
+Notons que tous les coefficients dépendent de la moyenne du groupe de référence *Dr*. La moyenne et l'écart-type de ce groupe sont fortement affectés par deux valeurs extrêmes autour de 20, comme on peut voir sur le graphique en a). Ces valeurs extrêmes seront absentes dans plusieurs échantillons bootstrap, ce qui a pour effet de réduire l'écart-type estimée pour le groupe *Dr* et ainsi réduire l'erreur-type des coefficients du modèle.
+
+
+d) L'application du bootstrap en c) ré-échantillonne parmi l'ensemble des rangées, ce qui fait que le nombre d'observations dans chaque type d'habitat varie d'un échantillon à l'autre. S'il est préférable de considérer ces nombres comme des quantités fixes, on peut définir les types d'habitat comme des strates en ajoutant l'argument `strata = cover$habitat` à la fonction `boot`. 
+
+Répétez l'analyse en c) avec un ré-échantillonnage stratifié et comparez les erreurs-types obtenues pour chaque coefficient.
+
+**Réponse**
+
+```{r}
+boot_strat <- boot(cover, lm_hab, R = 10000, strata = cover$habitat)
+
+# Moyenne
+apply(boot_strat$t, 2, mean)
+
+# Erreur-type
+apply(boot_strat$t, 2, sd)
+```
+
+Toutes les erreurs-types ont diminué par rapport à c).
+
+
+e) Calculez l'intervalle de confiance pour le coefficient `habitatUn` selon le résultat du boostrap en d). Notez qu'il faut ajouter l'argument `index = 3` à la fonction `boot.ci` pour indiquer à R de calculer l'intervalle pour le 3e coefficient.
+
+**Réponse**
+
+```{r}
+boot.ci(boot_strat, index = 3)
+```
+
+
+f) Finalement, nous allons ré-échantillonner les résidus du modèle. 
+
+- Ajustez un modèle linéaire comme en b), puis ajoutez au jeu de données `cover`une colonne pour les valeurs attendues (`fitted`) du modèle.  
+
+- Écrivez une fonction qui crée un nouveau jeu de données en additionnant un vecteur ré-échantillonné `x[i]` aux valeurs attendues pour produire une nouvelle variable réponse, puis qui ajuste un modèle avec cette nouvelle variable réponse en fonction de l'habitat.
+
+- Simulez 10 000 échantillons avec la fonction `boot`, avec comme arguments (1) le vecteurs de résidus (`residuals`) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l'erreur-type et l'intervalle de confiance à 95% des coefficients.
+
+Le ré-échantillonnage des résidus est-il un bon choix pour ces données?
+
+**Réponse**
+
+```{r}
+
+mod <- lm(sphcover ~ habitat, data = cover)
+cover$fitted <- fitted(mod)
+
+lm_resid <- function(x, i) {
+    cover$cover_new <- cover$fitted + x[i]
+    mod_new <- lm(cover_new ~ habitat, data = cover)
+    coef(mod_new)
+}
+
+boot_resid <- boot(residuals(mod), lm_resid, R = 10000)
+
+# Moyenne
+apply(boot_resid$t, 2, mean)
+
+# Erreur-type
+apply(boot_resid$t, 2, sd)
+
+boot.ci(boot_resid, index = 3)
+```
+
+Le ré-échantillonnage des résidus suppose que les résidus dans chaque groupe proviennent de la même distribution. Dans ce cas-ci, les variances ne sont pas homogènes entre les groupes, donc il est préférable de ré-échantilonner les observations.

@@ -1,7 +1,6 @@
 ---
 title: "La méthode du bootstrap"
 output:
-    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -328,7 +327,7 @@ boot.ci(boot_res)
 
 Cette méthode calcule l'intervalle à partir des quantiles de la distribution $t$, comme si $\hat{\theta}$ suivait une distribution normale. Par exemple, l'intervalle de confiance à 95% est donné par: 
 
-$$(\hat{\theta}_0 + t_{(n-1)0.025} s_{\hat{\theta}}, \hat{\theta} + t_{(n-1)0.975} s_{\hat{\theta}})$$
+$$(\hat{\theta}_0 + t_{(n-1)0.025} s_{\hat{\theta}}, \hat{\theta_0} + t_{(n-1)0.975} s_{\hat{\theta}})$$
 
 où $s_{\hat{\theta}}$ est l'erreur-type estimée par le bootstrap, $n$ est la taille de l'échantillon et $t_{(n-1)q}$ est le quantile $q$ de la distribution $t$ avec $n - 1$ degrés de liberté. 
 
