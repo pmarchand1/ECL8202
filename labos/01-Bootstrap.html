@@ -309,7 +309,11 @@ str(cover)</code></pre>
 <div id="estimation-de-la-couverture-moyenne-pour-les-marecages-draines" class="section level2">
 <h2>1. Estimation de la couverture moyenne pour les marécages drainés</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>À partir du jeu de données, faites l’extraction des valeurs de <em>sphcover</em> pour les marécages drainés. Calculez le pourcentage de couverture moyen, ainsi que son erreur-type selon la formule classique (basée sur l’écart-type et la taille de l’échantillon). Finalement, calculez l’intervalle de confiance à 95% basé sur la distribution <span class="math inline">\(t\)</span>:</p></li>
+<li>À partir du jeu de données, faites l’extraction des valeurs de <em>sphcover</em> pour les marécages drainés. Calculez le pourcentage de couverture moyen, ainsi que son erreur-type selon la formule classique (basée sur l’écart-type et la taille de l’échantillon). Finalement, calculez l’intervalle de confiance à 95% basé sur la distribution <span class="math inline">\(t\)</span>:</li>
+</ol>
+<p><span class="math display">\[(\bar{x} + t_{(n-1)0.025} s_{\bar{x}}, \bar{x} + t_{(n-1)0.975} s_{\bar{x}})\]</span></p>
+<p><em>Rappel</em>: La fonction <code>qt(p, df)</code> permet d’obtenir pour une valeur <code>p</code> donnée la valeur du quantile de la distribution <span class="math inline">\(t\)</span> avec <code>df</code> degrés de liberté.</p>
+<ol start="2" style="list-style-type: lower-alpha">
 <li><p>Simulez 10 000 échantillons bootstrap pour la moyenne calculée en a). Quelle est son erreur-type selon le bootstrap? Est-ce que cette statistique apparait biasée?</p></li>
 <li><p>Comment la distribution du boostrap diffère-t-elle d’une distribution normale? Pour répondre à cette question, il peut être utile de tracer un graphique quantile-quantile (dans le code ci-dessous, <code>res</code> est le résultat du bootstrap):</p></li>
 </ol>

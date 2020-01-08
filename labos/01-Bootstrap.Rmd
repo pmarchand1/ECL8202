@@ -32,6 +32,9 @@ str(cover)
 
 a) À partir du jeu de données, faites l'extraction des valeurs de *sphcover* pour les marécages drainés. Calculez le pourcentage de couverture moyen, ainsi que son erreur-type selon la formule classique (basée sur l'écart-type et la taille de l'échantillon). Finalement, calculez l'intervalle de confiance à 95% basé sur la distribution $t$:
 
+$$(\bar{x} + t_{(n-1)0.025} s_{\bar{x}}, \bar{x} + t_{(n-1)0.975} s_{\bar{x}})$$
+
+*Rappel*: La fonction `qt(p, df)` permet d'obtenir pour une valeur `p` donnée la valeur du quantile de la distribution $t$ avec `df` degrés de liberté.
 
 b) Simulez 10 000 échantillons bootstrap pour la moyenne calculée en a). Quelle est son erreur-type selon le bootstrap? Est-ce que cette statistique apparait biasée? 
 
