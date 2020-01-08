@@ -39,7 +39,7 @@ $$(\bar{x} + t_{(n-1)0.025} s_{\bar{x}}, \bar{x} + t_{(n-1)0.975} s_{\bar{x}})$$
 b) Simulez 10 000 échantillons bootstrap pour la moyenne calculée en a). Quelle est son erreur-type selon le bootstrap? Est-ce que cette statistique apparait biasée? 
 
 
-c) Comment la distribution du boostrap diffère-t-elle d'une distribution normale? Pour répondre à cette question, il peut être utile de tracer un graphique quantile-quantile (dans le code ci-dessous, `res` est le résultat du bootstrap):
+c) Comment la distribution du bootstrap diffère-t-elle d'une distribution normale? Pour répondre à cette question, il peut être utile de tracer un graphique quantile-quantile (dans le code ci-dessous, `res` est le résultat du bootstrap):
 
 ```{r, eval = FALSE}
 qqnorm(res$t)
@@ -80,7 +80,7 @@ d) L'application du bootstrap en c) ré-échantillonne parmi l'ensemble des rang
 Répétez l'analyse en c) avec un ré-échantillonnage stratifié et comparez les erreurs-types obtenues pour chaque coefficient.
 
 
-e) Calculez l'intervalle de confiance pour le coefficient `habitatUn` selon le résultat du boostrap en d). Notez qu'il faut ajouter l'argument `index = 3` à la fonction `boot.ci` pour indiquer à R de calculer l'intervalle pour le 3e coefficient.
+e) Calculez l'intervalle de confiance pour le coefficient `habitatUn` selon le résultat du bootstrap en d). Notez qu'il faut ajouter l'argument `index = 3` à la fonction `boot.ci` pour indiquer à R de calculer l'intervalle pour le 3e coefficient.
 
 
 f) Finalement, nous allons ré-échantillonner les résidus du modèle. 

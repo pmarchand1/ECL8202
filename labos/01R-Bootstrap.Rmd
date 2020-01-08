@@ -80,7 +80,7 @@ mean(boot_moy$t) - boot_moy$t0
 Le biais est assez petit (comparé à l'erreur-type) et pourrait être dû à une erreur numérique plutôt qu'à un biais réel de la statistique.
 
 
-c) Comment la distribution du boostrap diffère-t-elle d'une distribution normale? Pour répondre à cette question, il peut être utile de tracer un graphique quantile-quantile (dans le code ci-dessous, `res` est le résultat du bootstrap):
+c) Comment la distribution du bootstrap diffère-t-elle d'une distribution normale? Pour répondre à cette question, il peut être utile de tracer un graphique quantile-quantile (dans le code ci-dessous, `res` est le résultat du bootstrap):
 
 ```{r, eval = FALSE}
 qqnorm(res$t)
@@ -94,7 +94,7 @@ qqnorm(boot_moy$t)
 qqline(boot_moy$t)
 ```
 
-La distribution du boostrap est asymétrique: les plus petites valeurs s'approchent plus de la moyenne comparé à une distribution normale, tandis que les plus grandes valeurs s'en éloignent.
+La distribution du bootstrap est asymétrique: les plus petites valeurs s'approchent plus de la moyenne comparé à une distribution normale, tandis que les plus grandes valeurs s'en éloignent.
 
 
 d) Calculez l'intervalle de confiance à 95% de la moyenne selon la méthode BCa. Comment diffère-t-il de celui calculé en a) selon la formule classique? Pouvez-vous expliquer cette différence en fonction du résultat en c)?
@@ -193,7 +193,7 @@ apply(boot_strat$t, 2, sd)
 Toutes les erreurs-types ont diminué par rapport à c).
 
 
-e) Calculez l'intervalle de confiance pour le coefficient `habitatUn` selon le résultat du boostrap en d). Notez qu'il faut ajouter l'argument `index = 3` à la fonction `boot.ci` pour indiquer à R de calculer l'intervalle pour le 3e coefficient.
+e) Calculez l'intervalle de confiance pour le coefficient `habitatUn` selon le résultat du bootstrap en d). Notez qu'il faut ajouter l'argument `index = 3` à la fonction `boot.ci` pour indiquer à R de calculer l'intervalle pour le 3e coefficient.
 
 **Réponse**
 
