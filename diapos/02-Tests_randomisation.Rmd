@@ -1,0 +1,671 @@
+---
+title: "Tests de randomisation"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 16) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+```
+
+# Introduction
+
+### Cours précédent: Bootstrap
+
+- Technique non-paramétrique, basée sur le ré-échantillonnage
+
+- Déterminer la distribution d'une statistique tirée d'un échantillon
+
+--
+
+### Tests de randomisation 
+
+- Technique non-paramétrique, basée sur le ré-échantillonnage
+
+- Déterminer la distribution d'une statistique selon une hypothèse nulle
+
+---
+
+# Contenu de ce cours
+
+- Révision: Tests d'hypothèse
+
+- Exemple de test de randomisation
+
+- Comparaison entre bootstrap et tests de randomisation
+
+- Randomisation pour un modèle d'ANOVA
+
+- Randomisation d'une régression linéaire simple ou multiple
+
+---
+
+class: inverse, center, middle
+
+# Tests d'hypothèse
+
+---
+
+# Tests d'hypothèse
+
+- Est-ce que la variation observée dans un échantillon est compatible avec un modèle "par défaut"?
+
+--
+
+- Est-ce que les observations sont si improbables selon ce modèle qu'il doit être rejeté?
+
+---
+
+# Test de la valeur d'une moyenne
+
+- Hypothèse nulle: La moyenne $\mu$ d'une variable $x$ est égale à une valeur de référence $\mu_0$.
+
+--
+
+- Échantillon de taille $n$, de moyenne $\bar{x}$ et d'écart-type $s$.
+
+--
+
+- Si on peut supposer que $\bar{x}$ suit une distribution normale, alors: 
+
+$$t_{n-1} = \frac{\bar{x} - \mu}{s / \sqrt{n}}$$
+
+$t_{n-1}$: Distribution $t$ avec $n - 1$ degrés de liberté.
+
+---
+
+# Test de la valeur d'une moyenne
+
+- Même si $\mu = \mu_0$ (hypothèse nulle est vraie), il y aura un écart entre $\bar{x}$ et $\mu_0$.
+
+--
+
+- Quelle est la probabilité d'avoir observé un écart égal ou plus extrême, si l'hypothèse nulle est vraie?
+
+--
+
+- Exemple: $\mu_0 = 1$, $n = 9$, $\bar{x} = 4$ et $s = 5$.
+
+Si $\mu = \mu_0$, $t = (4 - 1) / (5/3) = 1.8$.
+
+---
+
+# Test de la valeur d'une moyenne
+
+.pull-left[
+
+```{r}
+t_obs <- 1.8
+ggplot(NULL, aes(x = seq(-4, 4, 0.1))) +
+    labs(x = "t", y = "p(t)") +
+    stat_function(fun = function(x) dt(x, df = 8)) +
+    stat_function(fun = function(x) ifelse(abs(x) > t_obs, dt(x, df = 8), NA), geom = "area", fill = "#d3492a") +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+]
+
+--
+
+.pull-right[
+
+- Dans R, `pt(q, df)`: probabilité d'obtenir une valeur $\le q$ pour la distribution $t$ avec $df$ degrés de liberté.
+
+```{r, echo = TRUE}
+pt(-1.8, 8) + (1 - pt(1.8, 8))
+```
+]
+
+---
+
+# Valeur $p$
+
+- La probabilité ainsi calculée (0.11) est la valeur $p$ du test.
+
+--
+
+- Un seuil de signification $\alpha$ est fixé avant de réaliser le test. Si $p < \alpha$, l'hypothèse nulle est rejetée.
+
+--
+
+- Donc $\alpha$: probabilité de rejeter l'hypothèse nulle, si elle est vraie.
+
+- Le plus souvent, $\alpha = 0.05$ (par convention).
+
+---
+
+# Structure d'un test d'hypothèse
+
+![](../images/synthese_test.png)
+
+---
+
+# Exemples
+
+|        | test $t$ à un échantillon, $n$ individus | ANOVA à un facteur, $m$ groupes de $n$ individus |
+|--------|---------------------------|--------------------|
+| Hypothèse nulle | La moyenne $\mu$ est égale à $\mu_0$ | La moyenne est la même pour les $m$ groupes |
+| Statistique | $t = (\bar{x} - \mu_0) / (s/\sqrt{n})$ | $F = MSA/MSE$
+| Distribution | $t$ avec $n-1$ degrés de liberté | $F$ avec $m(n-1)$ et $(m - 1)$ degrés de liberté |
+
+--
+
+- Si les données ne respectent pas les suppositions d'une distribution connue? Les tests de randomisation offrent une solution approximative pour certaines hypothèses nulles.
+
+---
+
+class: inverse, center, middle
+
+# Principe des tests de randomisation
+
+---
+
+# Exemple
+
+- Pourcentage de couverture des sphaignes (*sphcover*) dans trois types d'habitats: des marécages drainés (*Dr*, $n = 9$), remouillés (*Re*, $n = 18$) et non-drainés (*Un*, $n = 9$).
+
+.pull-left[
+
+```{r}
+cover <- read.csv("../donnees/sphagnum_cover.csv")
+ggplot(cover, aes(x = habitat, y = sphcover)) + 
+    geom_boxplot()
+```
+
+]
+
+--
+
+.pull-right[
+
+- D'abord, nous comparons les marécages remouillés aux marécages drainés.
+
+```{r}
+cover2 <- filter(cover, habitat != "Un")
+```
+
+]
+
+---
+
+# Exemple
+
+- Supposons un dispositif expérimental: parmi 27 marécages drainés, 18 ont été choisi aléatoirement pour être restaurés, les 9 autres sont demeurés drainés (sites témoins).
+
+--
+
+- Hypothèse nulle: Le traitement *Re* n'a aucun effet sur la variable réponse *sphcover*. 
+
+- Dans ce cas, les différences de couverture observées entre les sites sont dues à des facteurs autres que le traitement.
+
+--
+
+- Un jeu de données obtenu en permutant aléatoirement les valeurs des traitements *Dr* et *Re* entre les sites est aussi probable, sous l'hypothèse nulle, que le jeu de données observé.
+
+---
+
+# Permutation des traitements
+
+- Fonction `sample` dans R: tire un échantillon des valeurs d'un vecteur. 
+
+- Par défaut, `sample(x)` tire un échantillon *sans* remise de taille égale à `x` (i.e. une permutation des valeurs originales).
+
+```{r}
+set.seed(82022)
+```
+
+```{r, echo = TRUE}
+cover_perm <- cover2
+cover_perm$habitat_perm <- sample(cover2$habitat)
+head(cover_perm)
+```
+
+---
+
+# Permutation des traitements
+
+```{r}
+ggplot(cover_perm, aes(x = habitat_perm, y = sphcover)) + 
+    geom_boxplot()
+```
+
+---
+
+# Différence entre deux moyennes
+
+- Dans notre échantillon, la couverture moyenne des sites *Re* est 16% supérieure à celle des sites *Dr*:
+
+```{r, echo = TRUE}
+diff_obs <- mean(cover2$sphcover[cover2$habitat == "Re"]) -
+            mean(cover2$sphcover[cover2$habitat == "Dr"])
+diff_obs
+```
+
+--
+
+<hr>
+
+- Quelle est la distribution de cette statistique sous l'hypothèse nulle?
+
+--
+
+- Stratégie du test de randomisation: approximer cette distribution en calculant la statistique pour un grand nombre de permutations des traitements de l'échantillon original.
+
+---
+
+# Test de randomisation pour deux moyennes
+
+```{r, echo = TRUE}
+diff_perm <- function() {
+   cover_perm <- cover2
+   cover_perm$habitat_perm <- sample(cover2$habitat)
+   mean(cover_perm$sphcover[cover_perm$habitat_perm == "Re"]) -
+       mean(cover_perm$sphcover[cover_perm$habitat_perm == "Dr"])
+}
+
+nperm <- 9999
+
+diff_null <- replicate(nperm, diff_perm())
+```
+
+---
+
+# Test de randomisation pour deux moyennes
+
+```{r, message = FALSE}
+perm_hist <- ggplot(NULL, aes(x = diff_null)) + 
+    labs(x = "Différence de couverture moyenne (Re - Dr)", y = "Fréquence") +
+    geom_histogram(color = "black", fill = "white") +
+    geom_vline(xintercept = diff_obs, linetype = "dashed", color = "#b3452c", size = 1) +
+    scale_y_continuous(expand = c(0, 0))
+perm_hist
+```
+
+---
+
+# Calcul de la valeur $p$
+
+- La statistique $T$ mesure la déviation des données observées par rapport à l'hypothèse nulle: $T = T_{obs}$ pour les données observées; $T^*$ l'ensemble des valeurs obtenues pour $N$ permutations.
+
+--
+
+$$p = \frac{\# \left(|T^*| \ge |T_{obs}| \right) + 1}{N + 1}$$
+
+- $\#(|T^*| \ge |T_{obs}|)$: Nombre de valeurs de $T^*$ aussi ou plus loin de 0 que $T_{obs}$ (test bilatéral)
+
+--
+
+- Valeur $p$ minimale possible: $1 / (N + 1)$.
+
+---
+
+# Calcul de la valeur $p$
+
+$$p = \frac{\# \left(|T^*| \ge |T_{obs}| \right) + 1}{N + 1}$$
+
+- Dans notre exemple:
+
+```{r, echo = TRUE}
+(sum(abs(diff_null) >= abs(diff_obs)) + 1) / (nperm + 1)
+```
+
+---
+
+# Suppositions du test de randomisation
+
+- Contexte expérimental: assignation aléatoire des traitements aux individus.
+
+--
+
+- Contexte d'observation: observations sont interchangeables (*exchangeable*) si l'hypothèse nulle est vraie.
+
+--
+
+- Ex.: On peut tester par randomisation l'hypothèse nulle selon laquelle la réponse est distribuée de même façon dans chaque groupe; mais pas l'hypothèse d'une même moyenne avec des variances différentes.
+
+--
+
+- Si les données sont groupées ou corrélées dans l'espace ou dans le temps, les permutations doivent être restreintes pour conserver la structure des données.
+
+---
+
+# Bootstrap vs. randomisation
+
+- Deux méthodes d'inférence non-paramétriques basées sur la simulation d'échantillons virtuels.
+
+.pull-left[
+
+### Bootstrap
+
+- Ré-échantillonne avec remise les observations dans chaque type d'habitat.
+
+- Conserve la relation entre *sphcover* et *habitat*. 
+
+]
+
+.pull-right[
+
+### Test de randomisation
+
+- Ré-échantillonne sans remise des types d'habitat.
+
+- Simule l'absence de relation entre *sphcover* et *habitat*.
+
+]
+
+---
+
+# Bootstrap vs. randomisation
+
+.pull-left[
+
+```{r, message = FALSE}
+library(boot)
+
+diff_boot <- function(x, i) {
+    cover_boot <- x[i, ]
+    mean(cover_boot$sphcover[cover_boot$habitat == "Re"]) -
+       mean(cover_boot$sphcover[cover_boot$habitat == "Dr"])
+}
+
+diff_boot_res <- boot(cover2, diff_boot, R = 10000)
+
+ggplot(NULL, aes(x = diff_boot_res$t)) + 
+    labs(x = "Différence de couverture moyenne (Re - Dr)", y = "Fréquence") +
+    geom_histogram(color = "black", fill = "white") +
+    geom_vline(xintercept = diff_obs, linetype = "dashed", color = "#b3452c", size = 1) +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+- Distribution de la statistique centrée sur sa valeur observée.
+
+- Calcul de l'intervalle de confiance pour une probabilité donnée.
+
+]
+
+.pull-right[
+
+```{r}
+perm_hist
+```
+
+- Distribution de la statistique centrée sur 0.
+
+- Calcul de la valeur $p$ selon l'hypothèse nulle.
+
+]
+
+---
+
+class: inverse, center, middle
+
+# Randomisation et ANOVA
+
+---
+
+# Rappel: ANOVA à un facteur
+
+- Réponse $y$: $m$ groupes de $n$ observations.
+
+$$y_{ik} = \mu + \alpha_i + \epsilon_{ik}$$
+
+$$\epsilon_{ik} \sim N(0, \sigma)$$
+
+--
+
+- Hypothèse nulle: moyenne des groupes est la même, donc les $\alpha_i = 0$.
+
+---
+
+# Rappel: ANOVA à un facteur
+
+- Décomposition de la somme des écarts au carré:
+
+$$SST = SSA + SSE$$
+
+$$\sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2 = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2 + \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2$$
+
+---
+
+# Rappel: ANOVA à un facteur
+
+| Composante | Somme des carrés (SS) | Degrés de liberté (df) | Carré moyen (MS) |
+|-|------|------|------|
+| Groupes | $SSA = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2$ | $m - 1$ | $MSA = \frac{SSA}{m - 1}$ |
+| Résidus | $SSE = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2$ | $m(n-1)$ | $MSE = \frac{SSE}{(n-1)m}$  |
+| Total | $SST = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2$ | $mn - 1$ | |
+
+--
+
+- Statistique du test: $F = MSA / MSE$.
+
+- Sous l'hypothèse nulle: distribution $F$ avec $m - 1$ et $m(n-1)$ degrés de liberté.
+
+--
+
+- Test unilatéral: $F$ plus élevée que prévu si l'hypothèse nulle est fausse.
+
+---
+
+# Exemple
+
+```{r, echo = TRUE}
+aov_cover <- aov(sphcover ~ habitat, data = cover)
+summary(aov_cover)
+```
+
+--
+
+- Extraire la valeur $F$:
+
+```{r, echo = TRUE}
+aov_sum <- summary(aov_cover)
+f_obs <- aov_sum[[1]][1, 4]
+f_obs
+```
+
+---
+
+# Randomisation de l'ANOVA
+
+- Si les suppositions de l'ANOVA classique ne sont pas respectées (ex.: les groupes ont la même distribution, mais elle n'est pas normale), la statistique du test ne suivra pas exactement une distribution $F$ sous l'hypothèse nulle.
+
+--
+
+- Nous pouvons déterminer cette distribution par un test de randomisation.
+
+- Comme pour la comparaison de deux moyennes, on permute les valeurs de la colonne *habitat*, puis on extrait la valeur $F$ de l'ANOVA appliquée aux données permutées. 
+
+--
+
+```{r, echo = TRUE}
+f_perm <- function() {
+   cover_perm <- cover
+   cover_perm$habitat_perm <- sample(cover$habitat)
+   aov_sum <- summary(aov(sphcover ~ habitat_perm, data = cover_perm))
+   aov_sum[[1]][1, 4]
+}
+
+nperm <- 9999
+
+f_null <- replicate(nperm, f_perm())
+```
+
+---
+
+# Randomisation de l'ANOVA
+
+```{r, message = FALSE}
+ggplot(NULL, aes(x = f_null)) + 
+    labs(x = "Différence de couverture moyenne (Re - Dr)", y = "Fréquence") +
+    geom_histogram(color = "black", fill = "white") +
+    geom_vline(xintercept = f_obs, linetype = "dashed", color = "#b3452c", size = 1) +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+--
+
+- La statistique $F$ observée dépasse toutes les valeurs obtenues par permutation, donc $p = 1/(N+1) = 0.0001$.
+
+---
+
+# ANOVA pour une réponse multivariée
+
+- Cas fréquent en écologie, ex.: comparer la composition végétale (abondance de plusieurs espèces) de sites ayant subi différents traitements.
+
+--
+
+- On choisit une mesure de distance appropriée pour quantifier les dissimilarités de composition entre sites.
+
+- La distance moyenne carrée entre sites ayant reçu (i) le même traitement ou (ii) des traitements différents est l'équivalent de la *MSE* et de la *MSA*. Leur ratio est analogue à $F$.
+
+- La distribution de la statistique du test est déterminée par randomisation, comme dans le cas univarié.
+
+--
+
+- PERMANOVA (*permutational multivariate analysis of variance*): implémentée dans le package R *vegan*, logiciel PRIMER, etc.
+
+---
+
+class: inverse, center, middle
+
+# Randomisation d'une régression
+
+---
+
+# Exemple
+
+- Mesures de biomasse racinaire (*biomass*, en g/m<sup>2</sup>) pour 10 sites en fonction de l'altitude (en m), de la température (en degrés C) et de la précipitation annuelle (*rainfall*, en m).
+
+```{r}
+enviro <- read.csv("../donnees/environment.csv")
+enviro
+```
+
+---
+
+# Régression linéaire simple
+
+```{r}
+ggplot(enviro, aes(x = rainfall, y = biomass)) +
+    geom_point()
+```
+
+---
+
+# Régression linéaire simple
+
+```{r, echo = TRUE}
+mod <- lm(biomass ~ rainfall, data = enviro)
+summary(mod)
+```
+
+---
+
+# Test de randomisation
+
+- Hypothèse nulle: aucun effet de la quantité de pluie sur la biomasse.
+
+--
+
+- On permute les valeurs du prédicteur et on calcule le coefficient de corrélation entre *rainfall* et *biomass* pour chaque permutation.
+
+--
+
+```{r, echo = TRUE}
+nperm <- 9999
+rain_cor <- function() {
+    rain_perm <- sample(enviro$rainfall)
+    cor(rain_perm, enviro$biomass)
+}
+
+rain_null <- replicate(nperm, rain_cor())
+```
+
+---
+
+# Test de randomisation
+
+```{r, echo = TRUE}
+rain_obs <- cor(enviro$rainfall, enviro$biomass)
+(sum(abs(rain_null) > abs(rain_obs)) + 1) / (nperm + 1)
+```
+
+--
+
+- La valeur obtenue par `lm` était $p = 0.034$.
+
+---
+
+# Régression linéaire multiple
+
+$$y = \beta_0 + \beta_1 x + \beta_2 w$$
+
+--
+
+- Comment tester l'hypothèse nulle $\beta_1 = 0$?
+
+---
+
+# Régression linéaire multiple
+
+### Méthode de Freedman et Lane
+
+- Estimer les paramètres du modèle sans $x$.
+
+$$y = \beta_0 + \beta_2 w$$
+
+--
+
+- Extraire les résidus de ce modèle réduit et effectuer un test de randomisation de ces résidus selon $x$.
+
+--
+
+- La même méthode s'applique aux modèles d'ANOVA à plusieurs facteurs.
+
+- Pour plus d'informations à ce sujet: 
+
+>Anderson, M.J. (2001) Permutation tests for univariate or multivariate analysis of variance and regression. *Canadian Journal of Fisheries and Aquatic Sciences* 58: 626-639.
+
+---
+
+# Régression linéaire multiple
+
+### Package *permuco*
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+library(permuco)
+
+lmperm(biomass ~ temperature + rainfall, data = enviro)
+```
+
+---
+
+# Résumé
+
+- Tests de randomisation: option non-paramétrique lorsque l'hypothèse nulle représente l'absence d'effet d'un prédicteur sur une réponse donnée.
+
+--
+
+- Distribution de la statistique du test selon l'hypothèse nulle approximée à partir d'un grand nombre de permutations des données.
+
+- Ces permutations visent à briser toute association entre la réponse et le prédicteur testé, tout en maintenant les autres caractéristiques du jeu de données.
+
+--
+
+- Application dans R: coder un test manuellement en permutant avec `sample`; où utiliser un package spécialisé (ex.: *permuco* pour les modèles linéaires).

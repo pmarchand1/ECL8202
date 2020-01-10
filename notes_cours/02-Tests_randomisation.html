@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Tests de randomisation</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Tests de randomisation</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Vu au cours précédent, le bootstrap est une méthode visant à déterminer la distribution d’une statistique tirée d’un échantillon, sans devoir supposer de modèle paramétrique pour le processus d’échantillonnage. Cette méthode est basée sur le ré-échantillonnage de l’échantillon observé.</p>
+<p>Les tests de randomisation sont une autre méthode non-paramétrique basée sur le ré-échantillonnage. Ces tests visent à approximer la distribution d’une statistique dans le cas où une certaine hypothèse nulle (ex.: indépendance entre deux variables) est vraie.</p>
+<div id="contenu-du-cours" class="section level2">
+<h2>Contenu du cours</h2>
+<ul>
+<li><p>Révisions des concepts liés aux tests d’hypothèse</p></li>
+<li><p>Exemple de test de randomisation</p></li>
+<li><p>Comparaison entre bootstrap et tests de randomisation</p></li>
+<li><p>Randomisation pour la régression linéaire simple ou l’ANOVA à un facteur</p></li>
+<li><p>Régression linéaire multiple et ANOVA à plusieurs facteurs</p></li>
+</ul>
+</div>
+</div>
+<div id="tests-dhypothese" class="section level1">
+<h1>Tests d’hypothèse</h1>
+<p>Un test d’hypothèse statistique vise à déterminer si une variation observée dans un échantillon de données est compatible avec un modèle “par défaut” (l’hypothèse nulle), ou si les observations sont si improbables selon cette hypothèse nulle qu’elle doit être rejetée.</p>
+<div id="exemple-moyenne-comparee-a-une-valeur-de-reference" class="section level2">
+<h2>Exemple: Moyenne comparée à une valeur de référence</h2>
+<p>Supposons qu’une théorie nous indique que la moyenne d’une variable <span class="math inline">\(x\)</span> dans une population serait égale à une valeur de référence <span class="math inline">\(\mu_0\)</span>. Nous échantillonnons <span class="math inline">\(n\)</span> valeurs de cette variable dans la population; la moyenne de l’échantillon est <span class="math inline">\(\bar{x}\)</span> et son écart-type est <span class="math inline">\(s\)</span>.</p>
+<p>Si nous pouvons supposer que <span class="math inline">\(\bar{x}\)</span> suit une distribution normale, alors la différence entre <span class="math inline">\(\bar{x}\)</span> et la moyenne de la population <span class="math inline">\(\mu\)</span>, divisée par l’erreur type de <span class="math inline">\(\bar{x}\)</span> (soit <span class="math inline">\(s / \sqrt{n}\)</span>), suit une distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n - 1\)</span> degrés de liberté.</p>
+<p><span class="math display">\[t_{n-1} = \frac{\bar{x} - \mu}{s / \sqrt{n}}\]</span></p>
+<p>Dans ce cas, une fois <span class="math inline">\(\bar{x}\)</span> et <span class="math inline">\(s\)</span> calculés, la distribution <span class="math inline">\(t\)</span> nous indique quelle est la probabilité, si l’hypothèse nulle <span class="math inline">\(\mu\)</span> = <span class="math inline">\(\mu_0\)</span> est exacte, d’obtenir une valeur de <span class="math inline">\(\bar{x}\)</span> aussi extrême ou plus extrême que celle calculée à partir de cet échantillon.</p>
+<p>Par exemple, supposons que <span class="math inline">\(\mu_0 = 1\)</span>, <span class="math inline">\(n = 9\)</span>, <span class="math inline">\(\bar{x} = 4\)</span> et <span class="math inline">\(s = 5\)</span>. Dans ce cas, <span class="math inline">\(t = (4 - 1) / (5/3) = 1.8\)</span> si l’hypothèse nulle est vraie. La probabilité d’observer une déviation aussi grande si <span class="math inline">\(\mu = \mu_0\)</span> est donnée par l’aire sous la courbe de la distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n - 1 = 8\)</span> degrés de liberté, pour <span class="math inline">\(t &gt; 1.8\)</span> ou <span class="math inline">\(t &lt; -1.8\)</span>:</p>
+<pre class="r"><code>t_obs &lt;- 1.8
+ggplot(NULL, aes(x = seq(-4, 4, 0.1))) +
+    labs(x = &quot;t&quot;, y = &quot;p(t)&quot;) +
+    stat_function(fun = function(x) dt(x, df = 8)) +
+    stat_function(fun = function(x) ifelse(abs(x) &gt; t_obs, dt(x, df = 8), NA), geom = &quot;area&quot;, fill = &quot;#d3492a&quot;) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>Dans R, la fonction de distribution cumulative <code>pt(q, df)</code> donne la probabilité qu’une valeur issue de la distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(df\)</span> degrés de liberté soit inférieure ou égale à <span class="math inline">\(q\)</span>. Donc, l’aire sous la courbe peut être calculée ainsi:</p>
+<pre class="r"><code>pt(-1.8, 8) + (1 - pt(1.8, 8))</code></pre>
+<pre><code>## [1] 0.109553</code></pre>
+<p>Il s’agit de la valeur <span class="math inline">\(p\)</span> (<span class="math inline">\(p\)</span>-value) du test.</p>
+<p>Les deux termes de l’addition sont égaux car la distribution <span class="math inline">\(t\)</span> est symétrique. Une hypothèse nulle du type <span class="math inline">\(\mu = \mu_0\)</span> est <em>bilatérale</em> car l’alternative peut se produire dans une direction ou l’autre. Pour une hypothèse unilatérale (ex.: <span class="math inline">\(\mu &lt;= \mu_0\)</span>), la valeur <span class="math inline">\(p\)</span> correspondrait à l’aire sous la courbe d’un seul côté.</p>
+<p>Finalement, la valeur <span class="math inline">\(p\)</span> est comparée à un seuil de signification <span class="math inline">\(\alpha\)</span> choisi avant de réaliser le test. L’hypothèse nulle est rejetée si <span class="math inline">\(p &lt; \alpha\)</span>. Le seuil de signification est donc la probabilité de rejeter l’hypothèse nulle si celle-ci est vraie. La valeur la plus couramment utilisée est <span class="math inline">\(\alpha = 0.05\)</span>.</p>
+</div>
+<div id="elements-dun-test-dhypothese" class="section level2">
+<h2>Éléments d’un test d’hypothèse</h2>
+<p>À partir d’une hypothèse nulle donnée, la construction d’un test statistique requiert trois principaux éléments:</p>
+<ul>
+<li>une statistique qui mesure l’écart des observations par rapport à l’hypothèse nulle;</li>
+<li>la distribution de cette statistique sous l’hypothèse nulle; et</li>
+<li>un seuil de signification.</li>
+</ul>
+<p><img src="../images/synthese_test.png" /></p>
+<p>Dans certains cas, comme pour le test <span class="math inline">\(t\)</span>, la distribution exacte de la statistique du test sous l’hypothèse nulle peut être dérivée mathématiquement. Un autre exemple est l’ANOVA à un facteur, où le rapport entre la variation observée entre les groupes et la variation à l’intérieur des groupes suit une distribution <span class="math inline">\(F\)</span> lorsque les observations de chaque groupe proviennent de la même distribution normale.</p>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="49%" />
+<col width="36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>test <span class="math inline">\(t\)</span> à un échantillon (<span class="math inline">\(n\)</span> individus)</th>
+<th>ANOVA à un facteur (<span class="math inline">\(m\)</span> groupes de <span class="math inline">\(n\)</span> individus)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Hypothèse nulle</td>
+<td>La moyenne <span class="math inline">\(\bar{x}\)</span> est égale à <span class="math inline">\(\mu_0\)</span></td>
+<td>La moyenne est la même pour les <span class="math inline">\(m\)</span> groupes</td>
+</tr>
+<tr class="even">
+<td>Statistique</td>
+<td><span class="math inline">\(t = (\bar{x} - \mu_0) / (s/\sqrt{n})\)</span></td>
+<td><span class="math inline">\(F = MSA/MSE\)</span></td>
+</tr>
+<tr class="odd">
+<td>Distribution</td>
+<td><span class="math inline">\(t\)</span> avec <span class="math inline">\(n-1\)</span> degrés de liberté</td>
+<td><span class="math inline">\(F\)</span> avec <span class="math inline">\(m(n-1)\)</span> et <span class="math inline">\((m - 1)\)</span> degrés de liberté</td>
+</tr>
+</tbody>
+</table>
+<p>Les tests de randomisation offrent une façon d’approximer la distribution de la statistique sous certaines hypothèses nulles, dans les cas où les données ne respectent pas les suppositions permettant d’utiliser une distribution théorique connue.</p>
+</div>
+</div>
+<div id="principe-des-tests-de-randomisation" class="section level1">
+<h1>Principe des tests de randomisation</h1>
+<div id="exemple" class="section level2">
+<h2>Exemple</h2>
+<p>Prenons le jeu de données <a href="sphagnum_cover.csv">sphagnum_cover.csv</a> que nous avions utilisé pour les exercices sur la méthode du bootstrap. Il contient des mesures du pourcentage de couverture des sphaignes (<em>sphcover</em>) dans trois types d’habitats: des marécages drainés (<em>Dr</em>, 9 réplicats), remouillés (<em>Re</em>, 18 réplicats) et non-drainés (<em>Un</em>, 9 réplicats).</p>
+<pre class="r"><code>cover &lt;- read.csv(&quot;../donnees/sphagnum_cover.csv&quot;)
+ggplot(cover, aes(x = habitat, y = sphcover)) + 
+    geom_boxplot()</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Concentrons-nous d’abord sur les marécages de type <em>Dr</em> et <em>Re</em>.</p>
+<pre class="r"><code>library(dplyr)
+cover2 &lt;- filter(cover, habitat != &quot;Un&quot;)
+head(cover2)</code></pre>
+<pre><code>##     site habitat   sphcover
+## 1 KoniOj      Dr 19.6287879
+## 2 LakkOj      Dr  5.6696970
+## 3 LiOjNx      Dr  0.1969697
+## 4 LiOjSx      Dr  4.8590909
+## 5 RuOjSP      Dr  5.3939394
+## 6 RuOjSu      Dr  0.0000000</code></pre>
+<p>Supposons qu’il s’agissait d’un dispositif expérimental où 27 marécages drainés ont été choisis dans une région et que 18 de ces 27 ont été choisis aléatoirement pour être restaurés, tandis que les 9 autres (sites témoins) sont demeurés drainés.</p>
+<p>Considérons l’hypothèse nulle selon laquelle le traitement <em>Re</em> n’a aucun effet sur la variable réponse <em>sphcover</em>. Dans ce cas, les différences de couverture observées entre les sites sont dues à des facteurs autres que le traitement. En particulier, un jeu de données obtenu en permutant aléatoirement les valeurs des traitements <em>Dr</em> et <em>Re</em> entre les sites est aussi probable, sous l’hypothèse nulle, que le jeu de données observé.</p>
+<p>Dans R, la fonction <code>sample</code> permet de tirer un échantillon d’un vecteur. Avec les paramètres par défaut, <code>sample(x)</code> tire un échantillon <em>sans</em> remise de taille égale au vecteur <code>x</code>, ce qui produit une permutation des données originales.</p>
+<pre class="r"><code>set.seed(82022)
+cover_perm &lt;- cover2
+cover_perm$habitat_perm &lt;- sample(cover2$habitat)
+head(cover_perm)</code></pre>
+<pre><code>##     site habitat   sphcover habitat_perm
+## 1 KoniOj      Dr 19.6287879           Re
+## 2 LakkOj      Dr  5.6696970           Dr
+## 3 LiOjNx      Dr  0.1969697           Re
+## 4 LiOjSx      Dr  4.8590909           Re
+## 5 RuOjSP      Dr  5.3939394           Re
+## 6 RuOjSu      Dr  0.0000000           Re</code></pre>
+<pre class="r"><code>ggplot(cover_perm, aes(x = habitat_perm, y = sphcover)) + 
+    geom_boxplot()</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="test-de-randomisation-pour-une-difference-entre-moyennes" class="section level2">
+<h2>Test de randomisation pour une différence entre moyennes</h2>
+<p>Pour les données observées, les sites remouillés ont une couverture moyenne supérieure d’environ 16 points de pourcentage par rapport aux sites drainés.</p>
+<pre class="r"><code>diff_obs &lt;- mean(cover2$sphcover[cover2$habitat == &quot;Re&quot;]) -
+            mean(cover2$sphcover[cover2$habitat == &quot;Dr&quot;])
+diff_obs</code></pre>
+<pre><code>## [1] 16.1413</code></pre>
+<p>Nous pouvons approximer la distribution de cette statistique sous l’hypothèse nulle en calculant la différence pour un grand nombre de permutations des traitements de l’échantillon original.</p>
+<p>Pour ce faire, nous définissons une fonction contenant l’opération de permutation et le calcul de la différence, puis nous répétons son exécution avec <code>replicate</code>. (Notez que pour une fonction sans argument, il est nécessaire d’inclure des parenthèses vides après le nom de la fonction dans l’instruction <code>replicate</code>.)</p>
+<pre class="r"><code>diff_perm &lt;- function() {
+   cover_perm &lt;- cover2
+   cover_perm$habitat_perm &lt;- sample(cover2$habitat)
+   mean(cover_perm$sphcover[cover_perm$habitat_perm == &quot;Re&quot;]) -
+       mean(cover_perm$sphcover[cover_perm$habitat_perm == &quot;Dr&quot;])
+}
+
+nperm &lt;- 9999
+
+diff_null &lt;- replicate(nperm, diff_perm())</code></pre>
+<p>Le graphique ci-dessous montre l’histogramme des valeurs de la différence obtenue par permutation, avec une ligne pointillée représentant la différence pour l’échantillon observé.</p>
+<pre class="r"><code>perm_hist &lt;- ggplot(NULL, aes(x = diff_null)) + 
+    labs(x = &quot;Différence de couverture moyenne (Re - Dr)&quot;, y = &quot;Fréquence&quot;) +
+    geom_histogram(color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_vline(xintercept = diff_obs, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;, size = 1) +
+    scale_y_continuous(expand = c(0, 0))
+perm_hist</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Puisque l’hypothèse nulle suppose une absence d’effet des traitements, la différence moyenne devrait être 0. La moyenne des résultats obtenu par permutation diffère quelque peu de zéro en raison de l’approximation numérique (9999 permutations choisies aléatoirement sur l’ensemble des permutations possibles).</p>
+<pre class="r"><code>mean(diff_null)</code></pre>
+<pre><code>## [1] 0.08801381</code></pre>
+</div>
+<div id="calcul-de-la-valeur-p" class="section level2">
+<h2>Calcul de la valeur <span class="math inline">\(p\)</span></h2>
+<p>De façon générale, supposons que la statistique <span class="math inline">\(T\)</span> mesure la déviation des données observées par rapport à l’hypothèse nulle. Pour l’échantillon observé, <span class="math inline">\(T = T_{obs}\)</span>; pour les <span class="math inline">\(N\)</span> permutations, on obtient un ensemble de valeurs <span class="math inline">\(T^*\)</span>.</p>
+<p>Dans ce cas, la valeur <span class="math inline">\(p\)</span> du test est calculée comme suit:</p>
+<p><span class="math display">\[\frac{\# \left(|T^*| \ge |T_{obs}| \right) + 1}{N + 1}\]</span></p>
+<p>Le terme <span class="math inline">\(\# (|T^*| \ge |T_{obs}| )\)</span> est le nombre de valeurs de <span class="math inline">\(T^*\)</span> dont la valeur absolue est supérieure ou égale à la valeur absolue de <span class="math inline">\(T_{obs}\)</span>. Donc si <span class="math inline">\(T_{obs} = 16\)</span>, on compte le nombre de valeurs <span class="math inline">\(\ge 16\)</span> ou <span class="math inline">\(\le -16\)</span>. Dans le cas d’un test d’hypothèse unilatéral, on compte les valeurs extrêmes d’un seul côté.</p>
+<p>Dans notre exemple, <span class="math inline">\(p = 0.009\)</span>.</p>
+<pre class="r"><code>(sum(abs(diff_null) &gt;= abs(diff_obs)) + 1) / (nperm + 1)</code></pre>
+<pre><code>## [1] 0.009</code></pre>
+<p>Notez que chaque comparaison produit une valeur logique (<code>TRUE</code> ou <code>FALSE</code>) et <code>sum</code> compte le nombre de valeurs <code>TRUE</code>.</p>
+<p>L’addition de 1 au numérateur et dénominateur dans l’équation de la valeur <span class="math inline">\(p\)</span> représente le fait que les données observées constituent une des permutations possibles. L’augmentation du nombre de permutations permet de déterminer <span class="math inline">\(p\)</span> avec une meilleure résolution. Pour un nombre de permutations <span class="math inline">\(N\)</span>, la valeur minimale possible pour <span class="math inline">\(p\)</span> est égale à <span class="math inline">\(1 / (N + 1)\)</span>, obtenue lorsque la statistique observée est plus extrême que l’ensemble des valeurs simulées.</p>
+</div>
+</div>
+<div id="suppositions-du-test-de-randomisation" class="section level1">
+<h1>Suppositions du test de randomisation</h1>
+<p>Dans un contexte expérimental, c’est l’assignation aléatoire des traitements aux individus qui assure que le test de randomisation soit valide, c’est-à-dire que les échantillons produits par permutation des traitements représentent bien la distribution de la statistique sous l’hypothèse nulle.</p>
+<p>Dans un contexte où les traitements ont été observés plutôt qu’assignés, le test de randomisation requiert que les observations soient interchangeables (<em>exchangeable</em>) si l’hypothèse nulle est vraie, c’est-à-dire que chaque échantillon obtenu par permutation soit aussi probable.</p>
+<p>Par exemple, on peut tester par randomisation l’hypothèse selon laquelle une variable réponse est distribuée de la même façon dans chaque groupe. Cependant, on ne pourrait pas tester l’hypothèse selon laquelle deux groupes ont la même moyenne mais une variance différente, puisque la permutation des étiquettes de groupes effacerait cette différence entre les variances.</p>
+<p>L’interchangeabilité des observations ne s’applique pas non plus si celles-ci sont groupées (ex.: parcelles regroupées dans des sites) ou corrélées dans l’espace et dans le temps. Ce type de cas requiert des types de permutation plus complexes qui conservent la structure des données.</p>
+<p>Les tests de randomisation sont aussi parfois nommés tests de permutation. Certains auteurs réservent ces deux noms à différentes situations (ex.: selon qu’il s’agit d’un dispositif expérimental ou non, selon qu’il s’agisse d’un test exact ou approximatif), mais nous ne ferons pas de distinction ici.</p>
+</div>
+<div id="comparaison-entre-bootstrap-et-tests-de-randomisation" class="section level1">
+<h1>Comparaison entre bootstrap et tests de randomisation</h1>
+<p>Le bootstrap et les tests de randomisation sont deux méthodes d’inférence non-paramétriques basées sur la simulation d’échantillons virtuels (méthodes de Monte-Carlo). Ils peuvent parfois être appliqués au même problème, comme dans notre exemple de la couverture des sphaignes dans différents habitats.</p>
+<p>Pour cet exemple, le bootstrap procède en ré-échantillonant avec remise les observations dans chaque type d’habitat (en conservant la relation entre <em>sphcover</em> et <em>habitat</em>). En calculant la différence de couverture moyenne, nous obtenons une distribution de cette différence centrée sur la valeur de la statistique pour l’échantillon observé (ligne pointillée). Cette distribution nous permet notamment de calculer l’intervalle de confiance pour une probabilité donnée.</p>
+<pre class="r"><code>library(boot)
+
+diff_boot &lt;- function(x, i) {
+    cover_boot &lt;- x[i, ]
+    mean(cover_boot$sphcover[cover_boot$habitat == &quot;Re&quot;]) -
+       mean(cover_boot$sphcover[cover_boot$habitat == &quot;Dr&quot;])
+}
+
+diff_boot_res &lt;- boot(cover2, diff_boot, R = 10000)
+
+ggplot(NULL, aes(x = diff_boot_res$t)) + 
+    labs(x = &quot;Différence de couverture moyenne (Re - Dr)&quot;, y = &quot;Fréquence&quot;) +
+    geom_histogram(color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_vline(xintercept = diff_obs, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;, size = 1) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Le test de randomisation effectue quant à lui un ré-échantillonnage sans remise (une permutation) des types d’habitat qui simule l’absence de relation entre <em>sphcover</em> et <em>habitat</em>. Nous obtenons donc une distribution de la différence de couverture moyenne sous l’hypothèse nulle, centrée sur 0. Cette distribution nous permet de calculer la probabilité d’avoir obtenu une valeur plus extrême que celle observée, si l’hypothèse nulle est vraie.</p>
+<pre class="r"><code>perm_hist</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>Il existe de façon générale une relation entre un test d’hypothèse et un intervalle de confiance. Si l’intervalle de confiance à <span class="math inline">\(100(1 - \alpha)\%\)</span> d’un paramètre <span class="math inline">\(\theta\)</span> n’inclut pas <span class="math inline">\(\theta_0\)</span>, alors l’hypothèse <span class="math inline">\(\theta = \theta_0\)</span> peut être rejetée avec un seuil de signification <span class="math inline">\(\alpha\)</span>.</p>
+<p>Par exemple, si l’intervalle de confiance à 95% pour la différence des moyennes exclut 0, nous savons que la valeur <span class="math inline">\(p\)</span> associée à l’hypothèse selon laquelle cette différence est zéro est inférieure à 0.05. Cependant, l’intervalle de confiance du bootstrap ne nous permet pas d’obtenir la valeur <span class="math inline">\(p\)</span> précise pour un test donné. D’autre part, si un test de randomisation nous permet de rejeter l’hypothèse nulle, il n’est pas facile de déduire l’intervalle de confiance pour la valeur du paramètre à partir de ce test.</p>
+<p>Finalement, il existe des tests statistiques ou l’hypothèse nulle ne peut pas être représentée par une randomisation. Par exemple, lorsqu’on compare la moyenne d’un seul groupe à une valeur de référence, il n’y a rien à randomiser. Dans ce cas, on peut tout de même obtenir un intervalle de confiance avec le bootstrap et vérifier s’il inclut la valeur de référence.</p>
+</div>
+<div id="randomisation-et-anova-a-un-facteur" class="section level1">
+<h1>Randomisation et ANOVA à un facteur</h1>
+<div id="modele-danova-a-un-facteur" class="section level2">
+<h2>Modèle d’ANOVA à un facteur</h2>
+<p>Supposons que nous mesurons la variable <span class="math inline">\(y\)</span> pour <span class="math inline">\(m\)</span> groupes comprenant chacun <span class="math inline">\(n\)</span> observations. Le modèle d’ANOVA à un facteur suppose que <span class="math inline">\(y_{ik}\)</span>, l’observation <span class="math inline">\(k\)</span> du groupe <span class="math inline">\(i\)</span> est la somme de trois termes: la moyenne générale de la population <span class="math inline">\(\mu\)</span>, l’écart <span class="math inline">\(\alpha_i\)</span> entre la moyenne du groupe <span class="math inline">\(i\)</span> et la moyenne génréale, puis un résidu <span class="math inline">\(\epsilon_{ik}\)</span>.</p>
+<p><span class="math display">\[y_{ik} = \mu + \alpha_i + \epsilon_{ik}\]</span></p>
+<p>En particulier, les résidus suivent une distribution normale de même variance (indépendamment du groupe).</p>
+<p><span class="math display">\[\epsilon_{ik} \sim N(0, \sigma)\]</span></p>
+<p>Pour ce modèle, l’hypothèse nulle est que la moyenne de tous les groupes est identique, i.e. tous les <span class="math inline">\(\alpha_i\)</span> sont 0.</p>
+<p>Notons par <span class="math inline">\(\bar{y}\)</span> la moyenne des générale des observations et par <span class="math inline">\(\bar{y_i}\)</span> la moyenne des observations du groupe <span class="math inline">\(i\)</span>. On peut décomposer la somme des écarts au carré entre les observations et la moyenne générale (<em>SST</em>) en deux parties: une partie due aux écarts entre les moyennes des groupes et la moyenne générale (<em>SSA</em>) et une partie due aux écarts entre les observations et la moyenne de leur groupe (<em>SSE</em>).</p>
+<p><span class="math display">\[SST = SSA + SSE\]</span> <span class="math display">\[\sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2 = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2 + \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2\]</span></p>
+<p>En divisant <em>SSA</em> et <em>SSE</em> par le nombre de degrés de libertés appropriés (soit <span class="math inline">\(m-1\)</span> pour les écarts entre groupes, <span class="math inline">\(m(n-1)\)</span> pour les écarts entre observations d’un même groupe), on obtient les écarts moyens <em>MSA</em> et <em>MSE</em>, que nous pouvons considérer comme des variances intra-groupe et inter-groupe, respectivement. La statistique <span class="math inline">\(F\)</span> correspond au ratio <em>MSA/MSE</em>. Plus <span class="math inline">\(F\)</span> est élevée, plus la variance inter-groupe est importante comparée à la variance intra-groupe.</p>
+<table style="width:100%;">
+<colgroup>
+<col width="5%" />
+<col width="31%" />
+<col width="31%" />
+<col width="31%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Composante</th>
+<th>Somme des carrés (SS)</th>
+<th>Degrés de liberté (df)</th>
+<th>Carré moyen (MS)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Groupes</td>
+<td><span class="math inline">\(SSA = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2\)</span></td>
+<td><span class="math inline">\(m - 1\)</span></td>
+<td><span class="math inline">\(MSA = \frac{SSA}{m - 1}\)</span></td>
+</tr>
+<tr class="even">
+<td>Résidus</td>
+<td><span class="math inline">\(SSE = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2\)</span></td>
+<td><span class="math inline">\(m(n-1)\)</span></td>
+<td><span class="math inline">\(MSE = \frac{SSE}{(n-1)m}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Total</td>
+<td><span class="math inline">\(SST = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2\)</span></td>
+<td><span class="math inline">\(mn - 1\)</span></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Si l’hypothèse nulle est vraie, donc que les différences observées entre groupes sont dues au hasard de l’échantillonnage, la statistique <span class="math inline">\(F\)</span> suit la distribution <span class="math inline">\(F\)</span>, dont les deux paramètres correspondent au nombre de degrés de liberté de <em>MSA</em> et <em>MSE</em>.</p>
+<p>Le test <span class="math inline">\(F\)</span> est unilatéral. Si les moyennes des groupes diffèrent, la statistique <span class="math inline">\(F\)</span> prendra une valeur plus grande que prévue selon l’hypothèse nulle.</p>
+<p>Voici par exemple le résultat d’une ANOVA classique comparant la couverture des sphaignes pour les trois types d’habitat du jeu de données <code>cover</code>.</p>
+<pre class="r"><code>aov_cover &lt;- aov(sphcover ~ habitat, data = cover)
+summary(aov_cover)</code></pre>
+<pre><code>##             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## habitat      2   7048    3524   14.88 2.47e-05 ***
+## Residuals   33   7814     237                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Il sera utile plus tard d’extraire la valeur <span class="math inline">\(F\)</span> correspondant à la différence entre les habitats, ce qui peut être fait en sauvegardant d’abord le sommaire.</p>
+<pre class="r"><code>aov_sum &lt;- summary(aov_cover)
+f_obs &lt;- aov_sum[[1]][1, 4]
+f_obs</code></pre>
+<pre><code>## [1] 14.8819</code></pre>
+<p>Dans le code précédent, <code>[[1]]</code> extrait le premier tableau d’ANOVA (il n’y en a qu’un seul ici), puis <code>[1, 4]</code> extrait la valeur du tableau pour la rangée 1 (<code>habitat</code>) et colonne 4 (<code>F value</code>).</p>
+</div>
+<div id="randomisation-de-lanova" class="section level2">
+<h2>Randomisation de l’ANOVA</h2>
+<p>Si les suppositions de l’ANOVA ne sont pas respectées, en particulier si les données de chaque groupe diffèrent beaucoup d’une distribution normale, alors la statistique <span class="math inline">\(F\)</span> calculée ne suivra pas exactement une distribution <span class="math inline">\(F\)</span>. Dans ce cas, nous pouvons déterminer la distribution de la statistique par un test de randomisation.</p>
+<p>Comme pour la comparaison de deux moyennes, nous effectuons une permutation des valeurs de la colonne <em>habitat</em>, puis nous extrayons la valeur <span class="math inline">\(F\)</span> de l’ANOVA appliquée aux données permutées.</p>
+<pre class="r"><code>f_perm &lt;- function() {
+   cover_perm &lt;- cover
+   cover_perm$habitat_perm &lt;- sample(cover$habitat)
+   aov_sum &lt;- summary(aov(sphcover ~ habitat_perm, data = cover_perm))
+   aov_sum[[1]][1, 4]
+}
+
+nperm &lt;- 9999
+
+f_null &lt;- replicate(nperm, f_perm())</code></pre>
+<pre class="r"><code>ggplot(NULL, aes(x = f_null)) + 
+    labs(x = &quot;Différence de couverture moyenne (Re - Dr)&quot;, y = &quot;Fréquence&quot;) +
+    geom_histogram(color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_vline(xintercept = f_obs, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;, size = 1) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>Ici, la statistique <span class="math inline">\(F\)</span> calculée à partir des observations dépasse toutes les valeurs obtenues par permutation, donc nous obtenons la valeur <span class="math inline">\(p\)</span> minimale possible selon le nombre de permutations, soit 1/10 000.</p>
+<pre class="r"><code>(sum(f_null &gt;= f_obs) + 1) / (nperm + 1)</code></pre>
+<pre><code>## [1] 1e-04</code></pre>
+</div>
+<div id="anova-pour-une-reponse-multivariee" class="section level2">
+<h2>ANOVA pour une réponse multivariée</h2>
+<p>Le modèle d’ANOVA se généralise au cas où la réponse <span class="math inline">\(y\)</span> est multivariée; par exemple, si on souhaite comparer la composition de la végétation (mesures d’abondance de plusieurs espèces) sur des sites ayant subi différents traitements.</p>
+<p>Après avoir choisi une mesure de distance appropriée pour caractériser le niveau de dissimilarité entre les compositions de deux sites, on calcule la distance carrée moyenne entre (i) les sites ayant reçu le même traitement et (ii) les sites ayant reçu différents traitements. Ces deux statistiques sont l’équivalent de la <em>MSE</em> et de la <em>MSA</em>, respectivement, donc leur ratio est analogue à la statistique <span class="math inline">\(F\)</span>. Comme dans le cas univarié, nous pouvons calculer la valeur <span class="math inline">\(p\)</span> de cette statistique par un test de randomisation des traitements, l’hypothèse nulle étant que les traitements n’ont aucun effet sur la composition multivariée.</p>
+<p>Cette méthode connue sous le nom de PERMANOVA (pour <em>permutational multivariate analysis of variance</em>) est implémentée dans plusieurs logiciels, incluant le package R <em>vegan</em> (fonction <code>adonis</code>) et le logiciel commercial PRIMER.</p>
+</div>
+</div>
+<div id="regression-lineaire-simple" class="section level1">
+<h1>Régression linéaire simple</h1>
+<p>Le jeu de données <a href="environment.csv">environment.csv</a> (tiré du manuel de Beckerman et Petchey, <em>Getting started with R: An introduction for biologists</em>) inclut des mesures de biomasse racinaire (<em>biomass</em>, en g/m<span class="math inline">\(^2\)</span>) pour 10 sites en fonction de l’altitude (en m), de la température (en degrés C) et de la précipitation annuelle (<em>rainfall</em>, en m).</p>
+<pre class="r"><code>enviro &lt;- read.csv(&quot;../donnees/environment.csv&quot;)</code></pre>
+<p>Pour cet exemple, nous considérons la variation de la biomasse en fonction de la précipitation.</p>
+<pre class="r"><code>ggplot(enviro, aes(x = rainfall, y = biomass)) +
+    geom_point()</code></pre>
+<p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>Selon le modèle de régression linéaire ci-dessous, on estime que la biomasse augmente de 144 g/m<span class="math inline">\(^2\)</span> lorsque les précipitations annuelles augmentent d’un mètre. La probabilité d’obtenir un estimé d’une telle magnitude lorsque le coefficient est égal à zéro est égale à <span class="math inline">\(p = 0.034\)</span>; cette valeur <span class="math inline">\(p\)</span> est basée sur une distribution normale pour cet estimé.</p>
+<pre class="r"><code>mod &lt;- lm(biomass ~ rainfall, data = enviro)
+summary(mod)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = biomass ~ rainfall, data = enviro)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -78.136 -24.178  -7.373   2.204 144.424 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)    43.93      38.18   1.151    0.283  
+## rainfall      144.40      56.55   2.553    0.034 *
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 67.44 on 8 degrees of freedom
+## Multiple R-squared:  0.449,  Adjusted R-squared:  0.3802 
+## F-statistic:  6.52 on 1 and 8 DF,  p-value: 0.03399</code></pre>
+<p>Pour réaliser un test de randomisation de cette même hypothèse (absence de corrélation entre <em>biomass</em> et <em>rainfall</em>), nous pouvons permuter les valeurs de précipitation et calculer le coefficient de corrélation entre ces données permutées et les observations de la biomasse.</p>
+<pre class="r"><code>nperm &lt;- 9999
+rain_cor &lt;- function() {
+    rain_perm &lt;- sample(enviro$rainfall)
+    cor(rain_perm, enviro$biomass)
+}
+
+rain_null &lt;- replicate(nperm, rain_cor())</code></pre>
+<p>Notez que le coefficient de corrélation entre <em>rainfall</em> et <em>biomass</em> est équivalent au coefficient de la régression ci-dessus à un facteur près et ce facteur (le ratio entre les variances de <em>biomass</em> et <em>rainfall</em>) reste inchangé avec les permutations. Ainsi, la valeur <span class="math inline">\(p\)</span> sera la même pour les deux statistiques: coefficient de régression et coefficient de corrélation.</p>
+<pre class="r"><code>rain_obs &lt;- cor(enviro$rainfall, enviro$biomass)
+(sum(abs(rain_null) &gt; abs(rain_obs)) + 1) / (nperm + 1)</code></pre>
+<pre><code>## [1] 0.0388</code></pre>
+<p>Ici, la valeur <span class="math inline">\(p\)</span> obtenue par le test de randomisation est très semblable à celle du modèle linéaire classique ci-dessus <span class="math inline">\((p = 0.034)\)</span>.</p>
+</div>
+<div id="modeles-incluant-des-predicteurs-multiples" class="section level1">
+<h1>Modèles incluant des prédicteurs multiples</h1>
+<p>Jusqu’à maintenant, nous avons considéré les tests de randomisation pour des modèles avec une seule variable prédictrice (numérique ou catégorielle). La distribution de la statistique, selon l’hypothèse nulle où le prédicteur n’a aucun effet, peut être obtenue en permutant aléatoirement les valeurs du prédicteur. Cette permutation a pour effet de “détruire” toute corrélation existante entre la réponse et le prédicteur.</p>
+<p>La situation se complique lorsque nous voulons tester l’absence d’effet d’un prédicteur dans un modèle comportant plusieurs prédicteurs. Par exemple, considérons le cas où <span class="math inline">\(y\)</span> est une fonction linéaire de <span class="math inline">\(x\)</span> et <span class="math inline">\(w\)</span>:</p>
+<p><span class="math display">\[y = \beta_0 + \beta_1 x + \beta_2 w\]</span></p>
+<p>Dans un modèle de régression multiple, chaque coefficient donne l’effet d’une variable si les autres termes demeurent constants. Supposons que nous voulons tester l’hypothèse <span class="math inline">\(\beta_1 = 0\)</span>.</p>
+<p>Dans ce cas, permuter <span class="math inline">\(y\)</span> élimine à la fois sa corrélation avec <span class="math inline">\(x\)</span> et <span class="math inline">\(w\)</span>. Cela simule donc l’hypothèse nulle où les deux prédicteurs n’ont aucun effet. Permuter <span class="math inline">\(x\)</span> conserve la relation entre <span class="math inline">\(y\)</span> et <span class="math inline">\(w\)</span>, mais élimine une corrélation possible entre <span class="math inline">\(x\)</span> et <span class="math inline">\(w\)</span>, donc les échantillons permutés obtenus ne sont plus représentatifs de la distribution conjointe des prédicteurs.</p>
+<p>L’article d’Anderson (2001) discute en détail de ce problème et recommande la méthode de Freedman et Lane, qui consiste à estimer d’abord les paramètres d’un modèle sans <span class="math inline">\(x\)</span>:</p>
+<p><span class="math display">\[y = \beta_0 + \beta_2 w\]</span></p>
+<p>puis effectuer un test de randomisation pour la corrélation entre les résidus de ce modèle (i.e. la partie de la réponse non expliquée par <span class="math inline">\(w\)</span>) et la variable <span class="math inline">\(x\)</span>.</p>
+<p>Anderson (2001) discute de cas particuliers ou d’autres méthodes, comme celles de Manly (permuter les valeurs de <span class="math inline">\(y\)</span>) et de ter Braak (permuter les résidus du modèle complet incluant <span class="math inline">\(x\)</span>), seraient aussi recommandées.</p>
+<p>Dans R, le package <em>permuco</em> permet de réaliser automatiquement les tests de permutation pour chaque prédicteur d’un modèle linéaire (fonction <code>lmperm</code>) ou d’une ANOVA (fonction <code>aovperm</code>), avec un choix de méthodes incluant celles décrites par Anderson (2001).</p>
+<p>Voici par exemple le résultat d’une régression de la biomasse racinaire en fonction de la température et des précipitations, pour le jeu de données <code>enviro</code>. Par défaut, les <code>lmperm</code> utilise la méthode de Freedman et Lane avec 5000 permutations.</p>
+<pre class="r"><code>library(permuco)</code></pre>
+<pre><code>## Warning: package &#39;permuco&#39; was built under R version 3.6.2</code></pre>
+<pre class="r"><code>lmperm(biomass ~ temperature + rainfall, data = enviro)</code></pre>
+<pre><code>## Table of marginal t-test of the betas
+## Permutation test using freedman_lane to handle nuisance variables and 5000 permutations.
+##             Estimate Std. Error t value parametric Pr(&gt;|t|)
+## (Intercept)   525.28     97.247  5.4015            0.001007
+## temperature   -22.32      4.423 -5.0465            0.001486
+## rainfall      -29.51     44.449 -0.6639            0.528029
+##             permutation Pr(&lt;t) permutation Pr(&gt;t) permutation Pr(&gt;|t|)
+## (Intercept)                                                           
+## temperature             0.0030             0.9972               0.0030
+## rainfall                0.2678             0.7324               0.5264</code></pre>
+<p>Le tableau de résultats montre à la fois la valeur <span class="math inline">\(p\)</span> pour le test paramétrique standard (bilatéral), ainsi que les valeurs <span class="math inline">\(p\)</span> unilatérales et bilatérale obtenues par randomisation. Dans ce cas-ci, il y a peu de différences entre le test de randomisation bilatéral (dernière colonne) et les tests paramétriques.</p>
+</div>
+<div id="resume" class="section level1">
+<h1>Résumé</h1>
+<ul>
+<li><p>Les tests de randomisation offrent une alternative non-paramétrique à plusieurs tests d’hypothèse classique, lorsque l’hypothèse nulle représente l’absence d’effet d’un prédicteur sur une réponse donnée.</p></li>
+<li><p>La distribution de la statistique du test sous l’hypothèse nulle est approximée en calculant cette statistique pour de nombreuses permutations du jeu de données original. Ces permutations visent à briser toute association entre la réponse et le prédicteur testé, tout en maintenant les autres caractéristiques du jeu de données.</p></li>
+<li><p>La fonction <code>sample</code> permet de réaliser des permutations d’un vecteur de valeurs dans R. En combinant permutation et calcul de la statistique dans une même fonction, on peut coder manuellement plusieurs tests de randomisation simples (comparaison de moyennes, ANOVA à un facteur, régression linéaire simple).</p></li>
+<li><p>Le package <em>permuco</em> dans R permet d’effectuer un test de randomisation pour chaque prédicteur d’un modèle linéaire multiple ou d’une ANOVA à plusieurs facteurs.</p></li>
+</ul>
+</div>
+<div id="reference" class="section level1">
+<h1>Référence</h1>
+<p>Anderson, M.J. (2001) Permutation tests for univariate or multivariate analysis of variance and regression. <em>Canadian Journal of Fisheries and Aquatic Sciences</em> 58: 626-639.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

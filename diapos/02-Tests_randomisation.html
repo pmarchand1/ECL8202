@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Tests de randomisation</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Tests de randomisation
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+# Introduction
+
+### Cours précédent: Bootstrap
+
+- Technique non-paramétrique, basée sur le ré-échantillonnage
+
+- Déterminer la distribution d'une statistique tirée d'un échantillon
+
+--
+
+### Tests de randomisation 
+
+- Technique non-paramétrique, basée sur le ré-échantillonnage
+
+- Déterminer la distribution d'une statistique selon une hypothèse nulle
+
+---
+
+# Contenu de ce cours
+
+- Révision: Tests d'hypothèse
+
+- Exemple de test de randomisation
+
+- Comparaison entre bootstrap et tests de randomisation
+
+- Randomisation pour un modèle d'ANOVA
+
+- Randomisation d'une régression linéaire simple ou multiple
+
+---
+
+class: inverse, center, middle
+
+# Tests d'hypothèse
+
+---
+
+# Tests d'hypothèse
+
+- Est-ce que la variation observée dans un échantillon est compatible avec un modèle "par défaut"?
+
+--
+
+- Est-ce que les observations sont si improbables selon ce modèle qu'il doit être rejeté?
+
+---
+
+# Test de la valeur d'une moyenne
+
+- Hypothèse nulle: La moyenne `\(\mu\)` d'une variable `\(x\)` est égale à une valeur de référence `\(\mu_0\)`.
+
+--
+
+- Échantillon de taille `\(n\)`, de moyenne `\(\bar{x}\)` et d'écart-type `\(s\)`.
+
+--
+
+- Si on peut supposer que `\(\bar{x}\)` suit une distribution normale, alors: 
+
+`$$t_{n-1} = \frac{\bar{x} - \mu}{s / \sqrt{n}}$$`
+
+`\(t_{n-1}\)`: Distribution `\(t\)` avec `\(n - 1\)` degrés de liberté.
+
+---
+
+# Test de la valeur d'une moyenne
+
+- Même si `\(\mu = \mu_0\)` (hypothèse nulle est vraie), il y aura un écart entre `\(\bar{x}\)` et `\(\mu_0\)`.
+
+--
+
+- Quelle est la probabilité d'avoir observé un écart égal ou plus extrême, si l'hypothèse nulle est vraie?
+
+--
+
+- Exemple: `\(\mu_0 = 1\)`, `\(n = 9\)`, `\(\bar{x} = 4\)` et `\(s = 5\)`.
+
+Si `\(\mu = \mu_0\)`, `\(t = (4 - 1) / (5/3) = 1.8\)`.
+
+---
+
+# Test de la valeur d'une moyenne
+
+.pull-left[
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+
+]
+
+--
+
+.pull-right[
+
+- Dans R, `pt(q, df)`: probabilité d'obtenir une valeur `\(\le q\)` pour la distribution `\(t\)` avec `\(df\)` degrés de liberté.
+
+
+```r
+pt(-1.8, 8) + (1 - pt(1.8, 8))
+```
+
+```
+## [1] 0.109553
+```
+]
+
+---
+
+# Valeur `\(p\)`
+
+- La probabilité ainsi calculée (0.11) est la valeur `\(p\)` du test.
+
+--
+
+- Un seuil de signification `\(\alpha\)` est fixé avant de réaliser le test. Si `\(p &lt; \alpha\)`, l'hypothèse nulle est rejetée.
+
+--
+
+- Donc `\(\alpha\)`: probabilité de rejeter l'hypothèse nulle, si elle est vraie.
+
+- Le plus souvent, `\(\alpha = 0.05\)` (par convention).
+
+---
+
+# Structure d'un test d'hypothèse
+
+![](../images/synthese_test.png)
+
+---
+
+# Exemples
+
+|        | test `\(t\)` à un échantillon, `\(n\)` individus | ANOVA à un facteur, `\(m\)` groupes de `\(n\)` individus |
+|--------|---------------------------|--------------------|
+| Hypothèse nulle | La moyenne `\(\mu\)` est égale à `\(\mu_0\)` | La moyenne est la même pour les `\(m\)` groupes |
+| Statistique | `\(t = (\bar{x} - \mu_0) / (s/\sqrt{n})\)` | `\(F = MSA/MSE\)`
+| Distribution | `\(t\)` avec `\(n-1\)` degrés de liberté | `\(F\)` avec `\(m(n-1)\)` et `\((m - 1)\)` degrés de liberté |
+
+--
+
+- Si les données ne respectent pas les suppositions d'une distribution connue? Les tests de randomisation offrent une solution approximative pour certaines hypothèses nulles.
+
+---
+
+class: inverse, center, middle
+
+# Principe des tests de randomisation
+
+---
+
+# Exemple
+
+- Pourcentage de couverture des sphaignes (*sphcover*) dans trois types d'habitats: des marécages drainés (*Dr*, `\(n = 9\)`), remouillés (*Re*, `\(n = 18\)`) et non-drainés (*Un*, `\(n = 9\)`).
+
+.pull-left[
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+]
+
+--
+
+.pull-right[
+
+- D'abord, nous comparons les marécages remouillés aux marécages drainés.
+
+
+
+]
+
+---
+
+# Exemple
+
+- Supposons un dispositif expérimental: parmi 27 marécages drainés, 18 ont été choisi aléatoirement pour être restaurés, les 9 autres sont demeurés drainés (sites témoins).
+
+--
+
+- Hypothèse nulle: Le traitement *Re* n'a aucun effet sur la variable réponse *sphcover*. 
+
+- Dans ce cas, les différences de couverture observées entre les sites sont dues à des facteurs autres que le traitement.
+
+--
+
+- Un jeu de données obtenu en permutant aléatoirement les valeurs des traitements *Dr* et *Re* entre les sites est aussi probable, sous l'hypothèse nulle, que le jeu de données observé.
+
+---
+
+# Permutation des traitements
+
+- Fonction `sample` dans R: tire un échantillon des valeurs d'un vecteur. 
+
+- Par défaut, `sample(x)` tire un échantillon *sans* remise de taille égale à `x` (i.e. une permutation des valeurs originales).
+
+
+
+
+```r
+cover_perm &lt;- cover2
+cover_perm$habitat_perm &lt;- sample(cover2$habitat)
+head(cover_perm)
+```
+
+```
+##     site habitat   sphcover habitat_perm
+## 1 KoniOj      Dr 19.6287879           Re
+## 2 LakkOj      Dr  5.6696970           Dr
+## 3 LiOjNx      Dr  0.1969697           Re
+## 4 LiOjSx      Dr  4.8590909           Re
+## 5 RuOjSP      Dr  5.3939394           Re
+## 6 RuOjSu      Dr  0.0000000           Re
+```
+
+---
+
+# Permutation des traitements
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+
+# Différence entre deux moyennes
+
+- Dans notre échantillon, la couverture moyenne des sites *Re* est 16% supérieure à celle des sites *Dr*:
+
+
+```r
+diff_obs &lt;- mean(cover2$sphcover[cover2$habitat == "Re"]) -
+            mean(cover2$sphcover[cover2$habitat == "Dr"])
+diff_obs
+```
+
+```
+## [1] 16.1413
+```
+
+--
+
+&lt;hr&gt;
+
+- Quelle est la distribution de cette statistique sous l'hypothèse nulle?
+
+--
+
+- Stratégie du test de randomisation: approximer cette distribution en calculant la statistique pour un grand nombre de permutations des traitements de l'échantillon original.
+
+---
+
+# Test de randomisation pour deux moyennes
+
+
+```r
+diff_perm &lt;- function() {
+   cover_perm &lt;- cover2
+   cover_perm$habitat_perm &lt;- sample(cover2$habitat)
+   mean(cover_perm$sphcover[cover_perm$habitat_perm == "Re"]) -
+       mean(cover_perm$sphcover[cover_perm$habitat_perm == "Dr"])
+}
+
+nperm &lt;- 9999
+
+diff_null &lt;- replicate(nperm, diff_perm())
+```
+
+---
+
+# Test de randomisation pour deux moyennes
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+---
+
+# Calcul de la valeur `\(p\)`
+
+- La statistique `\(T\)` mesure la déviation des données observées par rapport à l'hypothèse nulle: `\(T = T_{obs}\)` pour les données observées; `\(T^*\)` l'ensemble des valeurs obtenues pour `\(N\)` permutations.
+
+--
+
+`$$p = \frac{\# \left(|T^*| \ge |T_{obs}| \right) + 1}{N + 1}$$`
+
+- `\(\#(|T^*| \ge |T_{obs}|)\)`: Nombre de valeurs de `\(T^*\)` aussi ou plus loin de 0 que `\(T_{obs}\)` (test bilatéral)
+
+--
+
+- Valeur `\(p\)` minimale possible: `\(1 / (N + 1)\)`.
+
+---
+
+# Calcul de la valeur `\(p\)`
+
+`$$p = \frac{\# \left(|T^*| \ge |T_{obs}| \right) + 1}{N + 1}$$`
+
+- Dans notre exemple:
+
+
+```r
+(sum(abs(diff_null) &gt;= abs(diff_obs)) + 1) / (nperm + 1)
+```
+
+```
+## [1] 0.009
+```
+
+---
+
+# Suppositions du test de randomisation
+
+- Contexte expérimental: assignation aléatoire des traitements aux individus.
+
+--
+
+- Contexte d'observation: observations sont interchangeables (*exchangeable*) si l'hypothèse nulle est vraie.
+
+--
+
+- Ex.: On peut tester par randomisation l'hypothèse nulle selon laquelle la réponse est distribuée de même façon dans chaque groupe; mais pas l'hypothèse d'une même moyenne avec des variances différentes.
+
+--
+
+- Si les données sont groupées ou corrélées dans l'espace ou dans le temps, les permutations doivent être restreintes pour conserver la structure des données.
+
+---
+
+# Bootstrap vs. randomisation
+
+- Deux méthodes d'inférence non-paramétriques basées sur la simulation d'échantillons virtuels.
+
+.pull-left[
+
+### Bootstrap
+
+- Ré-échantillonne avec remise les observations dans chaque type d'habitat.
+
+- Conserve la relation entre *sphcover* et *habitat*. 
+
+]
+
+.pull-right[
+
+### Test de randomisation
+
+- Ré-échantillonne sans remise des types d'habitat.
+
+- Simule l'absence de relation entre *sphcover* et *habitat*.
+
+]
+
+---
+
+# Bootstrap vs. randomisation
+
+.pull-left[
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+
+- Distribution de la statistique centrée sur sa valeur observée.
+
+- Calcul de l'intervalle de confiance pour une probabilité donnée.
+
+]
+
+.pull-right[
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+
+- Distribution de la statistique centrée sur 0.
+
+- Calcul de la valeur `\(p\)` selon l'hypothèse nulle.
+
+]
+
+---
+
+class: inverse, center, middle
+
+# Randomisation et ANOVA
+
+---
+
+# Rappel: ANOVA à un facteur
+
+- Réponse `\(y\)`: `\(m\)` groupes de `\(n\)` observations.
+
+`$$y_{ik} = \mu + \alpha_i + \epsilon_{ik}$$`
+
+`$$\epsilon_{ik} \sim N(0, \sigma)$$`
+
+--
+
+- Hypothèse nulle: moyenne des groupes est la même, donc les `\(\alpha_i = 0\)`.
+
+---
+
+# Rappel: ANOVA à un facteur
+
+- Décomposition de la somme des écarts au carré:
+
+`$$SST = SSA + SSE$$`
+
+`$$\sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2 = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2 + \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2$$`
+
+---
+
+# Rappel: ANOVA à un facteur
+
+| Composante | Somme des carrés (SS) | Degrés de liberté (df) | Carré moyen (MS) |
+|-|------|------|------|
+| Groupes | `\(SSA = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2\)` | `\(m - 1\)` | `\(MSA = \frac{SSA}{m - 1}\)` |
+| Résidus | `\(SSE = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2\)` | `\(m(n-1)\)` | `\(MSE = \frac{SSE}{(n-1)m}\)`  |
+| Total | `\(SST = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2\)` | `\(mn - 1\)` | |
+
+--
+
+- Statistique du test: `\(F = MSA / MSE\)`.
+
+- Sous l'hypothèse nulle: distribution `\(F\)` avec `\(m - 1\)` et `\(m(n-1)\)` degrés de liberté.
+
+--
+
+- Test unilatéral: `\(F\)` plus élevée que prévu si l'hypothèse nulle est fausse.
+
+---
+
+# Exemple
+
+
+```r
+aov_cover &lt;- aov(sphcover ~ habitat, data = cover)
+summary(aov_cover)
+```
+
+```
+##             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## habitat      2   7048    3524   14.88 2.47e-05 ***
+## Residuals   33   7814     237                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+--
+
+- Extraire la valeur `\(F\)`:
+
+
+```r
+aov_sum &lt;- summary(aov_cover)
+f_obs &lt;- aov_sum[[1]][1, 4]
+f_obs
+```
+
+```
+## [1] 14.8819
+```
+
+---
+
+# Randomisation de l'ANOVA
+
+- Si les suppositions de l'ANOVA classique ne sont pas respectées (ex.: les groupes ont la même distribution, mais elle n'est pas normale), la statistique du test ne suivra pas exactement une distribution `\(F\)` sous l'hypothèse nulle.
+
+--
+
+- Nous pouvons déterminer cette distribution par un test de randomisation.
+
+- Comme pour la comparaison de deux moyennes, on permute les valeurs de la colonne *habitat*, puis on extrait la valeur `\(F\)` de l'ANOVA appliquée aux données permutées. 
+
+--
+
+
+```r
+f_perm &lt;- function() {
+   cover_perm &lt;- cover
+   cover_perm$habitat_perm &lt;- sample(cover$habitat)
+   aov_sum &lt;- summary(aov(sphcover ~ habitat_perm, data = cover_perm))
+   aov_sum[[1]][1, 4]
+}
+
+nperm &lt;- 9999
+
+f_null &lt;- replicate(nperm, f_perm())
+```
+
+---
+
+# Randomisation de l'ANOVA
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+
+--
+
+- La statistique `\(F\)` observée dépasse toutes les valeurs obtenues par permutation, donc `\(p = 1/(N+1) = 0.0001\)`.
+
+---
+
+# ANOVA pour une réponse multivariée
+
+- Cas fréquent en écologie, ex.: comparer la composition végétale (abondance de plusieurs espèces) de sites ayant subi différents traitements.
+
+--
+
+- On choisit une mesure de distance appropriée pour quantifier les dissimilarités de composition entre sites.
+
+- La distance moyenne carrée entre sites ayant reçu (i) le même traitement ou (ii) des traitements différents est l'équivalent de la *MSE* et de la *MSA*. Leur ratio est analogue à `\(F\)`.
+
+- La distribution de la statistique du test est déterminée par randomisation, comme dans le cas univarié.
+
+--
+
+- PERMANOVA (*permutational multivariate analysis of variance*): implémentée dans le package R *vegan*, logiciel PRIMER, etc.
+
+---
+
+class: inverse, center, middle
+
+# Randomisation d'une régression
+
+---
+
+# Exemple
+
+- Mesures de biomasse racinaire (*biomass*, en g/m&lt;sup&gt;2&lt;/sup&gt;) pour 10 sites en fonction de l'altitude (en m), de la température (en degrés C) et de la précipitation annuelle (*rainfall*, en m).
+
+
+```
+##    site altitude temperature rainfall biomass
+## 1     1       13          24     0.01      20
+## 2     2      160          18     0.50     120
+## 3     3      100          17     0.60     110
+## 4     4      205          15     1.10     200
+## 5     5       45          20     0.09      45
+## 6     6       84          21     0.20      70
+## 7     7      349          14     1.20     150
+## 8     8      509          11     0.60     275
+## 9     9      399          13     0.80     220
+## 10   10       30          19     0.50      38
+```
+
+---
+
+# Régression linéaire simple
+
+![](02-Tests_randomisation_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+---
+
+# Régression linéaire simple
+
+
+```r
+mod &lt;- lm(biomass ~ rainfall, data = enviro)
+summary(mod)
+```
+
+```
+## 
+## Call:
+## lm(formula = biomass ~ rainfall, data = enviro)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -78.136 -24.178  -7.373   2.204 144.424 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)    43.93      38.18   1.151    0.283  
+## rainfall      144.40      56.55   2.553    0.034 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 67.44 on 8 degrees of freedom
+## Multiple R-squared:  0.449,	Adjusted R-squared:  0.3802 
+## F-statistic:  6.52 on 1 and 8 DF,  p-value: 0.03399
+```
+
+---
+
+# Test de randomisation
+
+- Hypothèse nulle: aucun effet de la quantité de pluie sur la biomasse.
+
+--
+
+- On permute les valeurs du prédicteur et on calcule le coefficient de corrélation entre *rainfall* et *biomass* pour chaque permutation.
+
+--
+
+
+```r
+nperm &lt;- 9999
+rain_cor &lt;- function() {
+    rain_perm &lt;- sample(enviro$rainfall)
+    cor(rain_perm, enviro$biomass)
+}
+
+rain_null &lt;- replicate(nperm, rain_cor())
+```
+
+---
+
+# Test de randomisation
+
+
+```r
+rain_obs &lt;- cor(enviro$rainfall, enviro$biomass)
+(sum(abs(rain_null) &gt; abs(rain_obs)) + 1) / (nperm + 1)
+```
+
+```
+## [1] 0.0388
+```
+
+--
+
+- La valeur obtenue par `lm` était `\(p = 0.034\)`.
+
+---
+
+# Régression linéaire multiple
+
+`$$y = \beta_0 + \beta_1 x + \beta_2 w$$`
+
+--
+
+- Comment tester l'hypothèse nulle `\(\beta_1 = 0\)`?
+
+---
+
+# Régression linéaire multiple
+
+### Méthode de Freedman et Lane
+
+- Estimer les paramètres du modèle sans `\(x\)`.
+
+`$$y = \beta_0 + \beta_2 w$$`
+
+--
+
+- Extraire les résidus de ce modèle réduit et effectuer un test de randomisation de ces résidus selon `\(x\)`.
+
+--
+
+- La même méthode s'applique aux modèles d'ANOVA à plusieurs facteurs.
+
+- Pour plus d'informations à ce sujet: 
+
+&gt;Anderson, M.J. (2001) Permutation tests for univariate or multivariate analysis of variance and regression. *Canadian Journal of Fisheries and Aquatic Sciences* 58: 626-639.
+
+---
+
+# Régression linéaire multiple
+
+### Package *permuco*
+
+
+```r
+library(permuco)
+
+lmperm(biomass ~ temperature + rainfall, data = enviro)
+```
+
+```
+## Table of marginal t-test of the betas
+## Permutation test using freedman_lane to handle nuisance variables and 5000 permutations.
+##             Estimate Std. Error t value parametric Pr(&gt;|t|)
+## (Intercept)   525.28     97.247  5.4015            0.001007
+## temperature   -22.32      4.423 -5.0465            0.001486
+## rainfall      -29.51     44.449 -0.6639            0.528029
+##             permutation Pr(&lt;t) permutation Pr(&gt;t) permutation Pr(&gt;|t|)
+## (Intercept)                                                           
+## temperature             0.0030             0.9972               0.0030
+## rainfall                0.2678             0.7324               0.5264
+```
+
+---
+
+# Résumé
+
+- Tests de randomisation: option non-paramétrique lorsque l'hypothèse nulle représente l'absence d'effet d'un prédicteur sur une réponse donnée.
+
+--
+
+- Distribution de la statistique du test selon l'hypothèse nulle approximée à partir d'un grand nombre de permutations des données.
+
+- Ces permutations visent à briser toute association entre la réponse et le prédicteur testé, tout en maintenant les autres caractéristiques du jeu de données.
+
+--
+
+- Application dans R: coder un test manuellement en permutant avec `sample`; où utiliser un package spécialisé (ex.: *permuco* pour les modèles linéaires).
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
