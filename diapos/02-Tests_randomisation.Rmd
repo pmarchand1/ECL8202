@@ -491,7 +491,9 @@ f_obs
 
 - Comme pour la comparaison de deux moyennes, on permute les valeurs de la colonne *habitat*, puis on extrait la valeur $F$ de l'ANOVA appliquée aux données permutées. 
 
---
+---
+
+# Randomisation de l'ANOVA
 
 ```{r, echo = TRUE}
 f_perm <- function() {
@@ -570,10 +572,12 @@ ggplot(enviro, aes(x = rainfall, y = biomass)) +
 
 # Régression linéaire simple
 
+.code60[
 ```{r, echo = TRUE}
 mod <- lm(biomass ~ rainfall, data = enviro)
 summary(mod)
 ```
+]
 
 ---
 
@@ -668,4 +672,4 @@ lmperm(biomass ~ temperature + rainfall, data = enviro)
 
 --
 
-- Application dans R: coder un test manuellement en permutant avec `sample`; où utiliser un package spécialisé (ex.: *permuco* pour les modèles linéaires).
+- Application dans R: coder un test manuellement en permutant avec `sample`; ou utiliser un package spécialisé (ex.: *permuco* pour les modèles linéaires).

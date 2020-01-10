@@ -486,7 +486,9 @@ f_obs
 
 - Comme pour la comparaison de deux moyennes, on permute les valeurs de la colonne *habitat*, puis on extrait la valeur `\(F\)` de l'ANOVA appliquée aux données permutées. 
 
---
+---
+
+# Randomisation de l'ANOVA
 
 
 ```r
@@ -567,6 +569,7 @@ class: inverse, center, middle
 
 # Régression linéaire simple
 
+.code60[
 
 ```r
 mod &lt;- lm(biomass ~ rainfall, data = enviro)
@@ -593,6 +596,7 @@ summary(mod)
 ## Multiple R-squared:  0.449,	Adjusted R-squared:  0.3802 
 ## F-statistic:  6.52 on 1 and 8 DF,  p-value: 0.03399
 ```
+]
 
 ---
 
@@ -707,7 +711,7 @@ lmperm(biomass ~ temperature + rainfall, data = enviro)
 
 --
 
-- Application dans R: coder un test manuellement en permutant avec `sample`; où utiliser un package spécialisé (ex.: *permuco* pour les modèles linéaires).
+- Application dans R: coder un test manuellement en permutant avec `sample`; ou utiliser un package spécialisé (ex.: *permuco* pour les modèles linéaires).
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

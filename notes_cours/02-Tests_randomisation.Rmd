@@ -23,7 +23,7 @@ Les tests de randomisation sont une autre méthode non-paramétrique basée sur 
 
 ## Contenu du cours
 
-- Révisions des concepts liés aux tests d'hypothèse
+- Révision des concepts liés aux tests d'hypothèse
 
 - Exemple de test de randomisation
 
@@ -67,7 +67,7 @@ pt(-1.8, 8) + (1 - pt(1.8, 8))
 
 Il s'agit de la valeur $p$ ($p$-value) du test. 
 
-Les deux termes de l'addition sont égaux car la distribution $t$ est symétrique. Une hypothèse nulle du type $\mu = \mu_0$ est *bilatérale* car l'alternative peut se produire dans une direction ou l'autre. Pour une hypothèse unilatérale (ex.: $\mu <= \mu_0$), la valeur $p$ correspondrait à l'aire sous la courbe d'un seul côté.
+Les deux termes de l'addition sont égaux car la distribution $t$ est symétrique. Une hypothèse nulle du type $\mu = \mu_0$ est *bilatérale* car l'alternative peut se produire dans une direction ou l'autre. Pour une hypothèse unilatérale (ex.: $\mu \le \mu_0$), la valeur $p$ correspondrait à l'aire sous la courbe d'un seul côté.
 
 Finalement, la valeur $p$ est comparée à un seuil de signification $\alpha$ choisi avant de réaliser le test. L'hypothèse nulle est rejetée si $p < \alpha$. Le seuil de signification est donc la probabilité de rejeter l'hypothèse nulle si celle-ci est vraie. La valeur la plus couramment utilisée est $\alpha = 0.05$.
 
@@ -96,7 +96,7 @@ Les tests de randomisation offrent une façon d'approximer la distribution de la
 
 ## Exemple
 
-Prenons le jeu de données [sphagnum_cover.csv](sphagnum_cover.csv) que nous avions utilisé pour les exercices sur la méthode du bootstrap. Il contient des mesures du pourcentage de couverture des sphaignes (*sphcover*) dans trois types d'habitats: des marécages drainés (*Dr*, 9 réplicats), remouillés (*Re*, 18 réplicats) et non-drainés (*Un*, 9 réplicats).
+Prenons le jeu de données [sphagnum_cover.csv](../donnees/sphagnum_cover.csv) que nous avions utilisé pour les exercices sur la méthode du bootstrap. Il contient des mesures du pourcentage de couverture des sphaignes (*sphcover*) dans trois types d'habitats: des marécages drainés (*Dr*, 9 réplicats), remouillés (*Re*, 18 réplicats) et non-drainés (*Un*, 9 réplicats).
 
 ```{r}
 cover <- read.csv("../donnees/sphagnum_cover.csv")
@@ -337,7 +337,7 @@ Cette méthode connue sous le nom de PERMANOVA (pour *permutational multivariate
 
 # Régression linéaire simple
 
-Le jeu de données [environment.csv](environment.csv) (tiré du manuel de Beckerman et Petchey, *Getting started with R: An introduction for biologists*) inclut des mesures de biomasse racinaire (*biomass*, en g/m$^2$) pour 10 sites en fonction de l'altitude (en m), de la température (en degrés C) et de la précipitation annuelle (*rainfall*, en m).
+Le jeu de données [environment.csv](../donnees/environment.csv) (tiré du manuel de Beckerman et Petchey, *Getting started with R: An introduction for biologists*) inclut des mesures de biomasse racinaire (*biomass*, en g/m$^2$) pour 10 sites en fonction de l'altitude (en m), de la température (en degrés C) et de la précipitation annuelle (*rainfall*, en m).
 
 ```{r}
 enviro <- read.csv("../donnees/environment.csv")
@@ -403,7 +403,7 @@ Dans R, le package *permuco* permet de réaliser automatiquement les tests de pe
 
 Voici par exemple le résultat d'une régression de la biomasse racinaire en fonction de la température et des précipitations, pour le jeu de données `enviro`. Par défaut, les `lmperm` utilise la méthode de Freedman et Lane avec 5000 permutations.
 
-```{r, message = FALSE}
+```{r, message = FALSE, warning = FALSE}
 library(permuco)
 
 lmperm(biomass ~ temperature + rainfall, data = enviro)

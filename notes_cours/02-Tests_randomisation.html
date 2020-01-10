@@ -299,7 +299,7 @@ div.tocify {
 <div id="contenu-du-cours" class="section level2">
 <h2>Contenu du cours</h2>
 <ul>
-<li><p>Révisions des concepts liés aux tests d’hypothèse</p></li>
+<li><p>Révision des concepts liés aux tests d’hypothèse</p></li>
 <li><p>Exemple de test de randomisation</p></li>
 <li><p>Comparaison entre bootstrap et tests de randomisation</p></li>
 <li><p>Randomisation pour la régression linéaire simple ou l’ANOVA à un facteur</p></li>
@@ -328,7 +328,7 @@ ggplot(NULL, aes(x = seq(-4, 4, 0.1))) +
 <pre class="r"><code>pt(-1.8, 8) + (1 - pt(1.8, 8))</code></pre>
 <pre><code>## [1] 0.109553</code></pre>
 <p>Il s’agit de la valeur <span class="math inline">\(p\)</span> (<span class="math inline">\(p\)</span>-value) du test.</p>
-<p>Les deux termes de l’addition sont égaux car la distribution <span class="math inline">\(t\)</span> est symétrique. Une hypothèse nulle du type <span class="math inline">\(\mu = \mu_0\)</span> est <em>bilatérale</em> car l’alternative peut se produire dans une direction ou l’autre. Pour une hypothèse unilatérale (ex.: <span class="math inline">\(\mu &lt;= \mu_0\)</span>), la valeur <span class="math inline">\(p\)</span> correspondrait à l’aire sous la courbe d’un seul côté.</p>
+<p>Les deux termes de l’addition sont égaux car la distribution <span class="math inline">\(t\)</span> est symétrique. Une hypothèse nulle du type <span class="math inline">\(\mu = \mu_0\)</span> est <em>bilatérale</em> car l’alternative peut se produire dans une direction ou l’autre. Pour une hypothèse unilatérale (ex.: <span class="math inline">\(\mu \le \mu_0\)</span>), la valeur <span class="math inline">\(p\)</span> correspondrait à l’aire sous la courbe d’un seul côté.</p>
 <p>Finalement, la valeur <span class="math inline">\(p\)</span> est comparée à un seuil de signification <span class="math inline">\(\alpha\)</span> choisi avant de réaliser le test. L’hypothèse nulle est rejetée si <span class="math inline">\(p &lt; \alpha\)</span>. Le seuil de signification est donc la probabilité de rejeter l’hypothèse nulle si celle-ci est vraie. La valeur la plus couramment utilisée est <span class="math inline">\(\alpha = 0.05\)</span>.</p>
 </div>
 <div id="elements-dun-test-dhypothese" class="section level2">
@@ -379,7 +379,7 @@ ggplot(NULL, aes(x = seq(-4, 4, 0.1))) +
 <h1>Principe des tests de randomisation</h1>
 <div id="exemple" class="section level2">
 <h2>Exemple</h2>
-<p>Prenons le jeu de données <a href="sphagnum_cover.csv">sphagnum_cover.csv</a> que nous avions utilisé pour les exercices sur la méthode du bootstrap. Il contient des mesures du pourcentage de couverture des sphaignes (<em>sphcover</em>) dans trois types d’habitats: des marécages drainés (<em>Dr</em>, 9 réplicats), remouillés (<em>Re</em>, 18 réplicats) et non-drainés (<em>Un</em>, 9 réplicats).</p>
+<p>Prenons le jeu de données <a href="../donnees/sphagnum_cover.csv">sphagnum_cover.csv</a> que nous avions utilisé pour les exercices sur la méthode du bootstrap. Il contient des mesures du pourcentage de couverture des sphaignes (<em>sphcover</em>) dans trois types d’habitats: des marécages drainés (<em>Dr</em>, 9 réplicats), remouillés (<em>Re</em>, 18 réplicats) et non-drainés (<em>Un</em>, 9 réplicats).</p>
 <pre class="r"><code>cover &lt;- read.csv(&quot;../donnees/sphagnum_cover.csv&quot;)
 ggplot(cover, aes(x = habitat, y = sphcover)) + 
     geom_boxplot()</code></pre>
@@ -591,7 +591,7 @@ f_null &lt;- replicate(nperm, f_perm())</code></pre>
 </div>
 <div id="regression-lineaire-simple" class="section level1">
 <h1>Régression linéaire simple</h1>
-<p>Le jeu de données <a href="environment.csv">environment.csv</a> (tiré du manuel de Beckerman et Petchey, <em>Getting started with R: An introduction for biologists</em>) inclut des mesures de biomasse racinaire (<em>biomass</em>, en g/m<span class="math inline">\(^2\)</span>) pour 10 sites en fonction de l’altitude (en m), de la température (en degrés C) et de la précipitation annuelle (<em>rainfall</em>, en m).</p>
+<p>Le jeu de données <a href="../donnees/environment.csv">environment.csv</a> (tiré du manuel de Beckerman et Petchey, <em>Getting started with R: An introduction for biologists</em>) inclut des mesures de biomasse racinaire (<em>biomass</em>, en g/m<span class="math inline">\(^2\)</span>) pour 10 sites en fonction de l’altitude (en m), de la température (en degrés C) et de la précipitation annuelle (<em>rainfall</em>, en m).</p>
 <pre class="r"><code>enviro &lt;- read.csv(&quot;../donnees/environment.csv&quot;)</code></pre>
 <p>Pour cet exemple, nous considérons la variation de la biomasse en fonction de la précipitation.</p>
 <pre class="r"><code>ggplot(enviro, aes(x = rainfall, y = biomass)) +
@@ -645,9 +645,9 @@ rain_null &lt;- replicate(nperm, rain_cor())</code></pre>
 <p>Anderson (2001) discute de cas particuliers ou d’autres méthodes, comme celles de Manly (permuter les valeurs de <span class="math inline">\(y\)</span>) et de ter Braak (permuter les résidus du modèle complet incluant <span class="math inline">\(x\)</span>), seraient aussi recommandées.</p>
 <p>Dans R, le package <em>permuco</em> permet de réaliser automatiquement les tests de permutation pour chaque prédicteur d’un modèle linéaire (fonction <code>lmperm</code>) ou d’une ANOVA (fonction <code>aovperm</code>), avec un choix de méthodes incluant celles décrites par Anderson (2001).</p>
 <p>Voici par exemple le résultat d’une régression de la biomasse racinaire en fonction de la température et des précipitations, pour le jeu de données <code>enviro</code>. Par défaut, les <code>lmperm</code> utilise la méthode de Freedman et Lane avec 5000 permutations.</p>
-<pre class="r"><code>library(permuco)</code></pre>
-<pre><code>## Warning: package &#39;permuco&#39; was built under R version 3.6.2</code></pre>
-<pre class="r"><code>lmperm(biomass ~ temperature + rainfall, data = enviro)</code></pre>
+<pre class="r"><code>library(permuco)
+
+lmperm(biomass ~ temperature + rainfall, data = enviro)</code></pre>
 <pre><code>## Table of marginal t-test of the betas
 ## Permutation test using freedman_lane to handle nuisance variables and 5000 permutations.
 ##             Estimate Std. Error t value parametric Pr(&gt;|t|)
