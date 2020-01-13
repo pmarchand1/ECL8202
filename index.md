@@ -10,3 +10,6 @@
 ## Exercices
 
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
+
+2. [Tests de randomisation](labos/02-Tests_randomisation.html) ([PDF](labos/02-Tests_randomisation.pdf)) - Données: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_plots.csv](donnees/portal_plots.csv)
+
