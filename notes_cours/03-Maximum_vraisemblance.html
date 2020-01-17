@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Maximum de vraisemblance</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Maximum de vraisemblance</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Le maximum de vraisemblance est une méthode générale pour estimer les paramètres d’un modèle statistique. Par exemple, supposons que nous avons une série d’observations d’une variable aléatoire <span class="math inline">\(y\)</span> et un modèle statistique potentiel pour cette variable. Ce modèle peut inclure la dépendance de <span class="math inline">\(y\)</span> sur d’autres variables prédictrices, ainsi qu’une distribution statistique pour la portion non-expliquée de la variation de <span class="math inline">\(y\)</span>. En général, un tel modèle contient différents paramètres inconnus qui doivent être ajustés aux données observées.</p>
+<p>Selon le maximum de vraisemblance, les meilleurs estimés des paramètres d’un modèle sont ceux qui maximisent la probabilité des valeurs observées de la variable. Cette méthode peut être appliquée peu importe la forme mathématique du modèle, ce qui permet de choisir les modèles les plus compatibles avec notre compréhension des processus naturels, sans être limités par les modèles déjà implémentés dans des logiciels statistiques. (Les méthodes bayésiennes que nous verrons plus tard dans le cours ont aussi cette versatilité.)</p>
+<p>Si la méthode générale du maximum de vraisemblance n’a pas été présenté dans le cours préalable à celui-ci (ECL7102), certaines des méthodes vues dans ce cours étaient basées sur ce principe:</p>
+<ul>
+<li><p>La sélection de modèles au moyen de l’AIC est basée sur la fonction de vraisemblance.</p></li>
+<li><p>L’estimation des paramètres des modèles linéaires généralisés est effectuée en maximisant la vraisemblance.</p></li>
+<li><p>L’estimation des paramètres des modèles linéaires mixtes utilise une version modifiée du maximum de vraisemblance (le maximum de vraisemblance restreint ou REML).</p></li>
+</ul>
+<div id="contenu-du-cours" class="section level2">
+<h2>Contenu du cours</h2>
+<ul>
+<li><p>Principe du maximum de vraisemblance</p></li>
+<li><p>Application du maximum de vraisemblance dans R</p></li>
+<li><p>Test du rapport de vraisemblance</p></li>
+<li><p>Calcul des intervalles de confiance</p></li>
+<li><p>Estimation de plusieurs paramètres: vraisemblance profilée et approximation linéaire</p></li>
+</ul>
+</div>
+</div>
+<div id="principe-du-maximum-de-vraisemblance" class="section level1">
+<h1>Principe du maximum de vraisemblance</h1>
+<div id="fonction-de-vraisemblance" class="section level2">
+<h2>Fonction de vraisemblance</h2>
+<p>Supposons que nous souhaitons estimer le taux de germination d’un lot de semences en faisant germer 20 de ces semences dans les mêmes conditions. Si la variable <span class="math inline">\(y\)</span> représente le nombre de semences ayant germé avec succès pour une réalisation de l’expérience, alors <span class="math inline">\(y\)</span> suit une distribution binomiale:</p>
+<p><span class="math display">\[f(y \vert p) = {n \choose y} p^y (1-p)^{n-y} \]</span></p>
+<p>où le nombre d’essais <span class="math inline">\(n = 20\)</span>, <span class="math inline">\(p\)</span> est la probabilité de germination pour la population et <span class="math inline">\({n \choose y}\)</span> représente le nombre de façons de choisir <span class="math inline">\(y\)</span> individus parmi <span class="math inline">\(n\)</span>. Nous écrivons <span class="math inline">\(f(y \vert p)\)</span> pour préciser que cette distribution de <span class="math inline">\(y\)</span> est <em>conditionnelle</em> à une certaine valeur de <span class="math inline">\(p\)</span>.</p>
+<p>Par exemple, voici la distribution de <span class="math inline">\(y\)</span> si <span class="math inline">\(p = 0.2\)</span>. La probabilité d’obtenir <span class="math inline">\(y = 6\)</span> dans ce cas est d’environ 0.11 (ligne pointillée sur le graphique).</p>
+<pre class="r"><code>ggplot(NULL, aes(x = 0:20)) +
+    labs(x = &quot;y&quot;, y = &quot;f(y|p=0.2)&quot;) +
+    stat_function(fun = dbinom, n = 21, args = list(size = 20, prob = 0.2),
+                  geom = &quot;bar&quot;, color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_segment(aes(x = 0, xend = 6, y = dbinom(6, 20, 0.2),
+                     yend = dbinom(6, 20, 0.2)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>Si nous avons observé <span class="math inline">\(y = 6\)</span>, mais que nous ne connaissons pas <span class="math inline">\(p\)</span>, la même équation nous permet de calculer la probabilité d’avoir obtenu ce <span class="math inline">\(y\)</span> pour chaque valeur possible de <span class="math inline">\(p\)</span>. Vue comme une fonction de <span class="math inline">\(p\)</span>, plutôt que <span class="math inline">\(y\)</span>, cette même équation correspond à la fonction de <strong>vraisemblance</strong> (dénotée <span class="math inline">\(L\)</span>, pour <em>likelihood</em>) de <span class="math inline">\(p\)</span>.</p>
+<p><span class="math display">\[L(p) = f(y \vert p) = {n \choose y} p^y (1-p)^{n-y}\]</span></p>
+<p>Voici la forme de <span class="math inline">\(L(p)\)</span> pour <span class="math inline">\(y = 6\)</span> et <span class="math inline">\(n = 20\)</span>:</p>
+<pre class="r"><code>ggplot(NULL, aes(x = 0:1)) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = &quot;density&quot;) +
+    geom_segment(aes(x = 0, xend = 0.2, y = dbinom(6, 20, 0.2),
+                     yend = dbinom(6, 20, 0.2)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    geom_segment(aes(x = 0.2, xend = 0.2, y = 0, yend = dbinom(6, 20, 0.2)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>La vraisemblance de <span class="math inline">\(p = 0.2\)</span> pour cette observation de <span class="math inline">\(y\)</span> est donc également de 0.11. Notons que <span class="math inline">\(f(y \vert p)\)</span> était une distribution discrète, mais puisque <span class="math inline">\(p\)</span> est un paramètre continu, la vraisemblance <span class="math inline">\(L(p)\)</span> est définie pour toutes les valeurs réelles entre 0 et 1.</p>
+<p>De façon plus générale, supposons que <span class="math inline">\(y = (y_1, y_2, ..., y_n)\)</span> est un vecteur d’observations et <span class="math inline">\(\theta = (\theta_1, ..., \theta_m)\)</span> est un vecteur des paramètres ajustables du modèle proposé pour expliquer ces observations. Dans ce cas, la vraisemblance d’un vecteur spécifique de valeurs pour <span class="math inline">\(\theta\)</span> correspond à la probabilité conjointe des observations de <span class="math inline">\(y\)</span>, conditionnellement à ces valeurs de <span class="math inline">\(\theta\)</span>. Nous verrons un exemple spécifique du calcul de <span class="math inline">\(L\)</span> pour un modèle à plusieurs paramètres (distribution normale) dans la prochaine section.</p>
+<p><span class="math display">\[L(\theta) = p(y | \theta)\]</span></p>
+<p><em>Note</em>: Même si la valeur de <span class="math inline">\(L(\theta)\)</span> pour un <span class="math inline">\(\theta\)</span> donné correspond à une probabilité, la fonction de vraisemblance n’est pas une distribution de probabilité, car dans la théorie vue ici, <span class="math inline">\(\theta\)</span> n’est pas une variable aléatoire. Aussi, l’intégrale d’une fonction de vraisemblance (aire sous la courbe de <span class="math inline">\(L(\theta)\)</span> vs. <span class="math inline">\(\theta\)</span>) n’est pas toujours égale à 1, contrairement à celle d’une densité de probabilité.</p>
+</div>
+<div id="maximum-de-vraisemblance" class="section level2">
+<h2>Maximum de vraisemblance</h2>
+<p>Selon le principe du maximum de vraisemblance, le meilleur estimé des paramètres du modèle selon nos observations <span class="math inline">\(y\)</span> est le vecteur de valeurs <span class="math inline">\(\theta\)</span> qui maximise la valeur de <span class="math inline">\(L(\theta)\)</span>.</p>
+<div id="exemple-distribution-binomiale" class="section level3">
+<h3>Exemple: Distribution binomiale</h3>
+<p>Pour le modèle binomial présenté plus haut, il est possible de démontrer (voir le calcul dans le chapitre du livre de Bolker en référence) que l’estimé de <span class="math inline">\(p\)</span> selon le maximum de vraisemblance est donné par:</p>
+<p><span class="math display">\[\hat{p} = \frac{y}{n}\]</span></p>
+<p>Autrement dit, la proportion de succès dans l’échantillon est le meilleur estimé de la probabilité de succès dans la population. Avec <span class="math inline">\(y = 6\)</span> et <span class="math inline">\(n = 20\)</span>, on voit que le maximum de <span class="math inline">\(L(p)\)</span> est obtenu pour <span class="math inline">\(p = 0.3\)</span>.</p>
+<pre class="r"><code>ggplot(NULL, aes(x = 0:1)) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = &quot;density&quot;) +
+    geom_segment(aes(x = 0, xend = 0.3, y = dbinom(6, 20, 0.3),
+                     yend = dbinom(6, 20, 0.3)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    geom_segment(aes(x = 0.3, xend = 0.3, y = 0, yend = dbinom(6, 20, 0.3)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="exemple-modele-lineaire" class="section level3">
+<h3>Exemple: Modèle linéaire</h3>
+<p>Dans le modèle de régression linéaire simple, la variable réponse <span class="math inline">\(y\)</span> suit une distribution normale, avec une moyenne dépendant linéairement du prédicteur <span class="math inline">\(x\)</span> et un écart-type constant <span class="math inline">\(\sigma\)</span>:</p>
+<p><span class="math display">\[y \sim N(\beta_0 + \beta_1 x, \sigma)\]</span></p>
+<p>Ce modèle comporte trois paramètres à estimer: <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span> et <span class="math inline">\(\sigma\)</span>. La densité de probabilité d’une observation de <span class="math inline">\(y\)</span> correspond donc à:</p>
+<p><span class="math display">\[f(y \vert \beta_0, \beta_1, \sigma) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y - \beta_0 - \beta_1 x}{\sigma} \right)^2}\]</span></p>
+<p>Si nous réalisons <span class="math inline">\(n\)</span> observations indépendantes de <span class="math inline">\(y\)</span> (chacune avec la valeur du prédicteur <span class="math inline">\(x\)</span>), leur densité de probabilité conjointe est donnée par le produit (noté <span class="math inline">\(\Pi\)</span>) des densités de probabilité individuelles. Vue comme une fonction des paramètres, l’équation suivante donne donc la vraisemblance conjointe de <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span> et <span class="math inline">\(\sigma\)</span>:</p>
+<p><span class="math display">\[L(\beta_0, \beta_1, \sigma) = f(y_1, ..., y_n \vert \beta_0, \beta_1, \sigma) = \prod_{i=1}^n \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2}\]</span></p>
+</div>
+<div id="log-vraisemblance" class="section level3">
+<h3>Log-vraisemblance</h3>
+<p>En pratique, il est souvent plus facile de calculer la log-vraisemblance, soit <span class="math inline">\(l = \log L\)</span>. Puisque le logarithme est une fonction <em>monotone</em> – c’est-à-dire que si <span class="math inline">\(L\)</span> augmente, <span class="math inline">\(\log L\)</span> augmente aussi – alors la valeur des paramètres qui maximise <span class="math inline">\(l\)</span> maximisera aussi <span class="math inline">\(L\)</span>.</p>
+<p>Puisqu’un logarithme transforme un produit en somme:</p>
+<p><span class="math display">\[ \log(xy) = \log(x) + \log(y)\]</span></p>
+<p>la log-vraisemblance pour le problème de régression linéaire ci-dessus correspond à:</p>
+<p><span class="math display">\[l(\beta_0, \beta_1, \sigma) = \sum_{i=1}^n \left( \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2 \right)\]</span></p>
+<p>où en simplifiant un peu plus:</p>
+<p><span class="math display">\[l(\beta_0, \beta_1, \sigma) = n \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2 \sigma^2}  \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2\]</span></p>
+<p>Notons que les coefficient <span class="math inline">\(\beta\)</span> apparaissent seulement dans le deuxième terme de l’équation, qui contient la somme du carré des résidus du modèle. Plus ce terme diminue, plus <span class="math inline">\(l\)</span> augmente, ce qui explique pourquoi les estimés des coefficients <span class="math inline">\(\beta\)</span> par la méthode des moindres carrés sont les mêmes que ceux obtenus par le minimum de vraisemblance.</p>
+<p>Pour des fonctions assez simples, la position du maximum peut être déterminée en trouvant la valeur de chaque paramètre où la dérivée de <span class="math inline">\(l\)</span> en fonction de ce paramètre est 0. En particulier, pour la variance des résidus <span class="math inline">\(\sigma^2\)</span>, on obtient ainsi l’estimé suivant:</p>
+<p><span class="math display">\[\hat{\sigma^2} = \frac{1}{n} \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2\]</span></p>
+<p>Nous savons que cet estimateur de la variance est biaisé (pour un estimé non-biaisé, il faudrait <span class="math inline">\(n - 1\)</span> au dénominateur). Le maximum de vraisemblance ne garantit pas une absence de biais, mais la théorie indique que ce biais devient négligeable pour un échantillon assez grand assez grand; dans cet exemple, la différence entre <span class="math inline">\(n-1\)</span> et <span class="math inline">\(n\)</span> devient moins importante quand <span class="math inline">\(n\)</span> augmente.</p>
+</div>
+</div>
+</div>
+<div id="application-du-maximum-de-vraisemblance-dans-r" class="section level1">
+<h1>Application du maximum de vraisemblance dans R</h1>
+<div id="exemple-plantes-des-iles-galapagos" class="section level2">
+<h2>Exemple: Plantes des îles Galapagos</h2>
+<p>Le fichier <a href="../donnees/galapagos.csv">galapagos.csv</a> contient un jeu de données sur la richesse spécifique des plantes de 30 îles de l’archipel des Galapagos. (<em>Source</em>: Johnson, M.P. et Raven, P.H. 1973. Species number and endemism: The Galapagos Archipelago revisited. <em>Science</em> 179: 893–895.)</p>
+<pre class="r"><code>galap &lt;- read.csv(&quot;../donnees/galapagos.csv&quot;)
+str(galap)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    30 obs. of  8 variables:
+##  $ Name     : Factor w/ 30 levels &quot;Baltra&quot;,&quot;Bartolome&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+##  $ Species  : int  58 31 3 25 2 18 24 10 8 2 ...
+##  $ Endemics : int  23 21 3 9 1 11 0 7 4 2 ...
+##  $ Area     : num  25.09 1.24 0.21 0.1 0.05 ...
+##  $ Elevation: int  346 109 114 46 77 119 93 168 71 112 ...
+##  $ Nearest  : num  0.6 0.6 2.8 1.9 1.9 8 6 34.1 0.4 2.6 ...
+##  $ Scruz    : num  0.6 26.3 58.7 47.4 1.9 ...
+##  $ Adjacent : num  1.84 572.33 0.78 0.18 903.82 ...</code></pre>
+<p>Nous modéliserons ces données avec une distribution binomiale négative. Cette distribution est appropriée pour représenter les données de comptage dont la variance est supérieure à celle prévue par la distribution de Poisson.</p>
+<p>Si une variable <span class="math inline">\(y\)</span> suit une distribution de Poisson, alors sa moyenne et sa variance sont toutes deux données par un même paramètre <span class="math inline">\(\lambda\)</span>.</p>
+<p><span class="math display">\[y \sim \textrm{Pois}(\lambda)\]</span></p>
+<p>La distribution binomiale comprend deux paramètres, <span class="math inline">\(\mu\)</span> et <span class="math inline">\(\theta\)</span>.</p>
+<p><span class="math display">\[y \sim \textrm{NB}(\mu, \theta)\]</span></p>
+<p>Dans ce modèle, <span class="math inline">\(y\)</span> a une moyenne de <span class="math inline">\(\mu\)</span> et une variance de <span class="math inline">\(\mu + \frac{\mu^2}{\theta}\)</span>. Le paramètre <span class="math inline">\(\theta\)</span> est toujours positif. Une petite valeur de <span class="math inline">\(\theta\)</span> représente une distribution plus variable, tandis que si <span class="math inline">\(\theta\)</span> est très élevé, le deuxième terme est négligeable et la distribution tend vers celle de Poisson.</p>
+<p>Comme pour la régression de Poisson, le modèle binomial négatif utilise un lien logarithmique pour relier <span class="math inline">\(\mu\)</span> à une fonction linéaire des prédicteurs.</p>
+<p><span class="math display">\[\log\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ...\]</span></p>
+<p>Pour cet exemple, nous ajusterons le modèle du nombre d’espèces (<em>Species</em>) en fonction de la superficie de l’île (<em>Area</em>, en km<span class="math inline">\(^2\)</span>) et de la distance jusqu’à l’île la plus proche (<em>Nearest</em>, en km). Nous prenons aussi le logarithme de chaque prédicteur.</p>
+</div>
+<div id="utilisation-du-package-bbmle" class="section level2">
+<h2>Utilisation du package <em>bbmle</em></h2>
+<p>La plupart des modèles ne permettent pas de dériver analytiquement la position du maximum de vraisemblance. Dans ce cas, nous avons recours à des algorithmes d’optimisation qui estiment numériquement la valeur maximale de la fonction de (log-)vraisemblance et la valeur de chaque paramètre correspondant à ce maximum.</p>
+<p>Dans R, la fonction <code>optim</code> est un outil général pour déterminer le minimum ou maximum d’une fonction donnée. Toutefois, il existe aussi des fonctions spécialisées au problème d’estimation par le maximum de vraisemblance: dans ce cours, nous utiliserons la fonction <code>mle2</code> du package <em>bbmle</em>.</p>
+<p>Tout d’abord, nous devons écrire une fonction qui calcule l’opposé de la log-vraisemblance (<em>negative log-likelihood</em>) pour notre problème. Par convention, les algorithmes d’optimisation demandent une fonction à minimiser, donc au lieu de maximiser la log-vraisemblance, on minimise son opposé.</p>
+<pre class="r"><code>nll_galap &lt;- function(b_0, b_area, b_near, theta) {
+    mu_sp &lt;- exp(b_0 + b_area * log(galap$Area) + b_near * log(galap$Nearest))
+    -sum(dnbinom(galap$Species, mu = mu_sp, size = theta, log = TRUE))
+}</code></pre>
+<p>La fonction <code>nll_galap</code> ci-dessus accepte quatre paramètres qui correspondent aux trois coefficients du prédicteur linéaire et au paramètre <span class="math inline">\(\theta\)</span> de la distribution binomiale négative.</p>
+<ul>
+<li><p>La première ligne de la fonction calcule le prédicteur linéaire et prend son exponentielle pour obtenir le nombre d’espèces moyen <code>mu_sp</code>. <em>Rappel</em>: Dans R, la plupart des opérations mathématiques sont effectuées en parallèle sur les vecteurs. Ainsi, <code>mu_sp</code> contient 30 valeurs, la première calculée à partir des valeurs des prédicteurs pour l’île 1, la deuxième pour les valeurs de l’île 2, etc.</p></li>
+<li><p>La deuxième ligne calcule la log-vraisemblance de chaque observation selon le modèle binomial avec <code>dnbinom</code> (aussi en parallèle), puis fait leur somme et prend l’opposé.</p></li>
+</ul>
+<p>Notez que nous spécifions <code>log = TRUE</code> dans <code>dnbinom</code> pour calculer le logarithme de la vraisemblance. Tel que vu précédemment, la log-vraisemblance d’un ensemble d’observations est égale à la somme de leurs log-vraisemblances individuelles tant que les observations sont indépendantes.</p>
+<p>Finalement, nous chargeons le package <em>bbmle</em> et nous appelons la fonction <code>mle2</code>. Le premier argument de cette fonction est notre fonction calculant l’opposé de la log-vraisemblance. Nous devons aussi spécifier pour l’argument <code>start</code> une liste des valeurs initiales de chaque paramètre, que l’algorithme utilisera pour commencer la recherche du maximum.</p>
+<p>Le choix exact des valeurs initiales importe peu dans la plupart des cas, mais il est recommandé de donner des valeurs plausibles (pas trop extrêmes) des paramètres. Nous choisissons donc une valeur nulle pour chaque coefficient, mais une valeur positive pour <span class="math inline">\(\theta\)</span> qui doit être supérieur à zéro.</p>
+<pre class="r"><code>library(bbmle)
+
+mle_galap &lt;- mle2(nll_galap, start = list(b_0 = 0, b_area = 0, b_near = 0, theta = 1))
+mle_galap</code></pre>
+<pre><code>## 
+## Call:
+## mle2(minuslogl = nll_galap, start = list(b_0 = 0, b_area = 0, 
+##     b_near = 0, theta = 1))
+## 
+## Coefficients:
+##        b_0     b_area     b_near      theta 
+##  3.3352151  0.3544290 -0.1042696  2.7144722 
+## 
+## Log-likelihood: -137.98</code></pre>
+<p>L’exécution de la fonction produit plusieurs avertissements (<em>warnings</em>) dans R, qui ne sont pas montrés ici. Ceux-ci résultent probablement de cas où l’algorithme tente d’assigner une valeur négative à <code>theta</code> et produit une erreur. Dans ce cas il tente simplement une nouvelle valeur.</p>
+</div>
+<div id="intepretation-de-la-vraisemblance" class="section level2">
+<h2>Inteprétation de la vraisemblance</h2>
+<p>Remarquez que le maximum de la log-vraisemblance dans le résultat ci-dessus est égal à -137.98, ce qui correspond à une valeur infime de la vraisemblance:</p>
+<pre class="r"><code>exp(-137.98)</code></pre>
+<pre><code>## [1] 1.191372e-60</code></pre>
+<p>La vraisemblance correspond à la probabilité d’obtenir exactement les valeurs apparaissant dans le jeu de données, selon le modèle. Considérant les nombreuses valeurs possibles pour une observation de la variable et le fait que ces possibilités se multiplient pour chaque observation subséquente, il n’est pas suprenant que cette probabilité soit très faible et d’autant plus faible pour un grand échantillon.</p>
+<p>La valeur absolue de la vraisemblance n’est pas vraiment interprétable. C’est plutôt sa valeur relative qui permet de comparer l’ajustement de plusieurs valeurs des paramètres appliqués en fonction des mêmes données observées.</p>
+<p>Néanmoins, il est difficile de travailler avec des nombres extrêmement proches de zéro; c’est une des raisons pour lesquelles le logarithme de la vraisemblance est utilisé en pratique.</p>
+</div>
+<div id="quand-utiliser-le-maximum-de-vraisemblance" class="section level2">
+<h2>Quand utiliser le maximum de vraisemblance?</h2>
+<p>Pour notre exemple, nous aurions pu utiliser la fonction <code>glm.nb</code> du package <em>MASS</em>, conçue spécialement pour estimer les paramètres d’une régression binomiale négative. En ajustant notre modèle avec cette fonction, nous pouvons vérifier que les résultats concordent avec l’application de <code>mle2</code>.</p>
+<pre class="r"><code>library(MASS)
+glm.nb(Species ~ log(Area) + log(Nearest), galap)</code></pre>
+<pre><code>## 
+## Call:  glm.nb(formula = Species ~ log(Area) + log(Nearest), data = galap, 
+##     init.theta = 2.714482206, link = log)
+## 
+## Coefficients:
+##  (Intercept)     log(Area)  log(Nearest)  
+##       3.3352        0.3544       -0.1043  
+## 
+## Degrees of Freedom: 29 Total (i.e. Null);  27 Residual
+## Null Deviance:       138.7 
+## Residual Deviance: 32.7  AIC: 284</code></pre>
+<p>Les fonctions disponibles dans R et différents packages couvrent déjà un bon nombre de modèles courants, incluant les modèles linéaires, linéaires généralisés, mixtes et autres. Aussi, plusieurs modèles qui n’apparaissent pas linéaires peuvent être linéarisés avec une transformation appropriée. Par exemple, une loi de puissance entre le nombre d’espèces <span class="math inline">\(S\)</span> et la surperficie d’habitat <span class="math inline">\(A\)</span>:</p>
+<p><span class="math display">\[S = cA^z\]</span></p>
+<p>peut être transformée en relation linéaire en prenant le logarithme de chaque côté:</p>
+<p><span class="math display">\[\log(S) = \log(c) + z \log(A)\]</span></p>
+<p>Lorsqu’une fonction spécialisée est disponible pour estimer les paramètres d’un modèle, il est plus simple d’utiliser celle-ci plutôt que de coder le modèle soi-même et d’appliquer le maximum de vraisemblance.</p>
+<p>Toutefois, il existe des cas où le modèle présumé pour les données ne cadre pas dans un format standard. Voici quelques exemples en écologie forestière.</p>
+<p><strong>Ajustement d’une courbe de dispersion</strong> (ex.: Clark et al. 1999)</p>
+<p>Une façon d’estimer la capacité de dispersion d’une espèce de plantes est d’échantillonner les graines tombant dans des pièges placés à différentes distances de plantes mères. En particulier, on s’intéresse à estimer la courbe de dispersion <span class="math inline">\(f(r)\)</span> qui correspond à la probabilité qu’une graine tombe à une distance <span class="math inline">\(r\)</span> de son point d’origine.</p>
+<p>Supposons que <span class="math inline">\(y\)</span> représente le nombre de graines dans un des pièges et peut être représenté par une distribution binomiale négative.</p>
+<p><span class="math display">\[y_i \sim \textrm{NB}(\mu_i, \theta)\]</span></p>
+<p>Le nombre de graines moyen dans le piège <span class="math inline">\(i\)</span>, <span class="math inline">\(\mu_i\)</span>, correspond à la somme des contributions de chaque plante mère <span class="math inline">\(j\)</span> située à proximité; cette contribution est égale au nombre de graines produites par une plante mère (<span class="math inline">\(b\)</span>, que nous supposons fixe) multiplié par la courbe de dispersion évaluée pour la distance <span class="math inline">\(r_{ij}\)</span> entre le piège <span class="math inline">\(i\)</span> et la plante <span class="math inline">\(j\)</span>.</p>
+<p><span class="math display">\[y_i \sim \textrm{NB}(\sum_j b\times f(r_{ij}), \theta)\]</span></p>
+<p>Puisque <span class="math inline">\(f\)</span> est une fonction non-linéaire avec ses propres paramètres à ajuster, puis que la moyenne de <span class="math inline">\(y\)</span> contient la somme de valeurs de <span class="math inline">\(f\)</span> évaluées à différentes distances, il est nécessaire de créer sa propre fonction de vraisemblance et la maximiser avec un outil comme <code>mle2</code>.</p>
+<p><strong>Estimation de la fonction de compétition du voisinage</strong> (ex.: Canham et al. 2004)</p>
+<p>La croissance d’arbres dans une forêt peut être réduite par la compétition provenant de leurs voisins. Si on suppose que la compétition exercée sur un arbre <span class="math inline">\(i\)</span> par un voisin <span class="math inline">\(j\)</span> augmente avec le diamètre <span class="math inline">\(D_j\)</span> de ce voisin et diminue avec la distance <span class="math inline">\(r_{ij}\)</span> entre les deux arbres, nous pouvons définir un indice de compétition (<em>CI</em>) faisant la somme des effets de chaque voisin sur <span class="math inline">\(i\)</span>:</p>
+<p><span class="math display">\[CI_i = \sum_j \frac{D_j^{\delta}}{r_{ij}^{\gamma}}\]</span></p>
+<p>Nous souhaitons estimer les puissances <span class="math inline">\(\delta\)</span> et <span class="math inline">\(\gamma\)</span> apparaissant dans l’indice à partir des données. Supposons que nous avons un modèle linéaire de la croissance <span class="math inline">\(y_i\)</span> de l’arbre <span class="math inline">\(i\)</span> auquel nous ajoutons un terme dépendant de cet indice:</p>
+<p><span class="math display">\[y_i = \beta_0 + ... + \beta_{CI} \sum_j \frac{D_j^{\delta}}{r_{ij}^{\gamma}}\]</span></p>
+<p>Il n’y a pas moyen de simplifier ce dernier terme, donc le maximum de vraisemblance peut être utile pour estimer les coefficients (tous les <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\gamma\)</span> et <span class="math inline">\(\delta\)</span>) de ce modèle maintenant non-linéaire.</p>
+</div>
+<div id="limites-du-maximum-de-vraisemblance" class="section level2">
+<h2>Limites du maximum de vraisemblance</h2>
+<p>La plupart des propriétés avantageuses des estimés du maximum de vraisemblance, dont l’absence de biais, sont valides dans la limite où la taille de l’échantillon est grand. Ce qui constitue un échantillon assez grand dépend du modèle et en particulier du nombre de paramètres à estimer.</p>
+<p>En pratique, le maximum de vraisemblance est obtenu par un algorithme numérique recherchant le maximum par un processus itératif. Une fonction de vraisemblance complexe pourrait avoir plusieurs maximums locaux (des points où la fonction est maximisée par rapport aux valeurs proches des paramètres), dans lequel cas il n’est pas garanti que l’algorithme trouve le maximum global (celui avec la vraisemblance la plus élevée).</p>
+</div>
+</div>
+<div id="test-du-rapport-de-vraisemblance" class="section level1">
+<h1>Test du rapport de vraisemblance</h1>
+<div id="test-sur-la-valeur-dun-parametre" class="section level2">
+<h2>Test sur la valeur d’un paramètre</h2>
+<p>Il est possible d’utiliser la fonction de vraisemblance pour tester une hypothèse sur la valeur d’un paramètre.</p>
+<p>Par exemple, considérons la fonction de vraisemblance calculée au début du cours pour estimer la probabilité de germination d’un lot de semences, si 6 semences ont germé sur 20 essais.</p>
+<pre class="r"><code>ggplot(NULL, aes(x = 0:1)) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = &quot;density&quot;) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Dans ce cas, l’estimé du maximum de vraisemblance est <span class="math inline">\(\hat{p} = 0.3\)</span>. Supposons que le fournisseur des semences affirme que leur taux de germination est de 50%. Est-ce que le résultat de l’expérience est compatible avec cette valeur?</p>
+<p>La vraisemblance correspondant à l’hypothèse nulle (<span class="math inline">\(p_0 = 0.5\)</span>) est d’environ <span class="math inline">\(L(p_0) = 0.037\)</span>, comparativement à un maximum de <span class="math inline">\(L(\hat{p}) = 0.192\)</span>.</p>
+<pre class="r"><code>l_0 &lt;- dbinom(6, 20, prob = 0.5)
+l_max &lt;- dbinom(6, 20, prob = 0.3)
+c(l_0, l_max)</code></pre>
+<pre><code>## [1] 0.03696442 0.19163898</code></pre>
+<p>Le rapport entre ces deux valeurs de <span class="math inline">\(L\)</span> sert à définir une statistique pour le test du rapport de vraisemblance (<em>likelihood-ratio test</em>). Cette statistique correspond à -2 fois le logarithme du rapport entre la vraisemblance du paramètre sous l’hypothèse nulle et le maximum de vraisemblance estimé.</p>
+<p><span class="math display">\[- 2 \log \left( \frac{L(\theta_0)}{L(\hat{\theta})} \right)\]</span></p>
+<p>De façon équivalente, on peut remplacer le rapport par la différence des log-vraisemblances:</p>
+<p><span class="math display">\[- 2 \left( l(\theta_0) - l(\hat{\theta}) \right)\]</span></p>
+<p>Le facteur -2 a été choisi pour que, si l’hypothèse nulle est vraie et que l’échantillon est assez grand, la distribution de cette statistique s’approche de la distribution du <span class="math inline">\(\chi^2\)</span> avec 1 degré de liberté.</p>
+<p>Dans notre exemple, la statistique du rapport de vraisemblance est égale à 3.29.</p>
+<pre class="r"><code>rv &lt;- -2*log(l_0 / l_max)
+rv</code></pre>
+<pre><code>## [1] 3.291315</code></pre>
+<p>La probabilité d’obtenir un rapport plus grand ou égal à celui-ci, si l’hypothèse nulle <span class="math inline">\(p = 0.5\)</span> est vraie, peut être approximée avec la distribution cumulative du <span class="math inline">\(\chi^2\)</span>.</p>
+<pre class="r"><code>1 - pchisq(rv, df = 1)</code></pre>
+<pre><code>## [1] 0.06964722</code></pre>
+<p><em>Note</em>: Le test du rapport de vraisemblance ne s’applique pas si l’hypothèse nulle se trouve à la limite des valeurs possibles pour un paramètre. Par exemple, pour le paramètre <span class="math inline">\(p\)</span> d’une distribution binomiale, nous ne pouvons pas utiliser ce test pour l’hypothèse nulle <span class="math inline">\(p_0 = 0\)</span> ou <span class="math inline">\(p_0 = 1\)</span>.</p>
+</div>
+<div id="comparaison-de-modeles" class="section level2">
+<h2>Comparaison de modèles</h2>
+<p>Le test du rapport de vraisemblance est aussi utilisé pour comparer deux modèles. Dans ce cas, il faut que les modèles soient nichés, c’est-à-dire que le modèle plus simple contienne un sous-ensemble des paramètres du modèle plus complexe. Par exemple, supposons un modèle de régression linéaire avec 1 prédicteur et un deuxième avec 3 prédicteurs.</p>
+<ul>
+<li>M1: <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \epsilon\)</span></li>
+<li>M2: <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon\)</span></li>
+</ul>
+<p>Dans ce cas, M1 peut être vu comme une version de M2 où <span class="math inline">\(\beta_2\)</span> et <span class="math inline">\(\beta_3\)</span> sont fixés à 0. Si M1 est le vrai modèle pour les données, la statistique du rapport de vraisemblance entre les deux modèles suit approximativement une distribution du <span class="math inline">\(\chi^2\)</span>, avec un nombre de degrés de liberté égal à la différence du nombre de paramètres estimés entre les deux modèles (ici, 2).</p>
+<p><span class="math display">\[- 2 \left( l_{M1} - l_{M2} \right) \sim \chi^2(2)\]</span></p>
+<p>Dans le cours ECL7102, nous avons étudié la comparaison de modèles avec le critère d’information d’Akaike (AIC):</p>
+<p><span class="math display">\[AIC = - 2 \log L + 2K =  -2l + 2K\]</span></p>
+<p>Dans cette formule, <span class="math inline">\(K\)</span> est le nombre de paramètres ajustables du modèle. Nous avons aussi vu une correction à l’AIC (AICc) pour les “petits” échantillons (lorsque <span class="math inline">\(N/K\)</span> &lt; 30, où <span class="math inline">\(N\)</span> est la taille de l’échantillon).</p>
+<p>L’AIC a une portée plus large que le test du rapport de vraisemblance, car on peut comparer plus de deux modèles, qu’ils soient nichés ou non. Lorsque les deux méthodes s’appliquent, leurs objectifs sont différents:</p>
+<ul>
+<li><p>l’AIC vise à identifier le modèle qui prédirait le mieux la réponse pour un nouvel échantillon de la même population;</p></li>
+<li><p>le test du rapport de vraisemblance indique si l’écart observé entre l’ajustement du modèle le plus simple et le modèle le plus complexe est compatible avec l’hypothèse que le modèle le plus simple soit correct.</p></li>
+</ul>
+</div>
+</div>
+<div id="calcul-des-intervalles-de-confiance" class="section level1">
+<h1>Calcul des intervalles de confiance</h1>
+<p>Si <span class="math inline">\(\hat{\theta}\)</span> est l’estimé du maximum de vraisemblance pour un paramètre <span class="math inline">\(\theta\)</span>, nous pouvons obtenir un intervalle de confiance pour ce paramètre en utilisant la relation entre test d’hypothèse et intervalle de confiance:</p>
+<blockquote>
+<p>Si on ne peut pas rejeter l’hypothèse nulle <span class="math inline">\(\theta = \theta_0\)</span> avec un seuil de signification <span class="math inline">\(\alpha\)</span>, alors <span class="math inline">\(\theta_0\)</span> fait partie de l’intervalle de confiance à <span class="math inline">\(100(1-\alpha)\%\)</span> pour <span class="math inline">\(\theta\)</span>.</p>
+</blockquote>
+<p>Par exemple, les limites de l’intervalle de confiance sont les valeurs de <span class="math inline">\(\theta\)</span> où la statistique du rapport de vraisemblance est égale au 95e centile de la distribution du <span class="math inline">\(\chi^2\)</span>; il s’agit de la valeur maximale de la statistique qui n’est pas rejetée à un seuil <span class="math inline">\(\alpha = 0.05\)</span>.</p>
+<p><span class="math display">\[- 2 \left( l(\theta_0) - l(\hat{\theta}) \right) = \chi^2_{0.95}(1)\]</span></p>
+<p><em>Rappel</em>: Le test du <span class="math inline">\(\chi^2\)</span> est unilatéral, car seules les valeurs élevées de la statistique indiquent un écart significatif avec l’hypothèse nulle.</p>
+<p>En isolant <span class="math inline">\(\theta_0\)</span> dans l’équation, on obtient:</p>
+<p><span class="math display">\[l(\theta_0) = l(\hat{\theta}) - \frac{\chi^2_{0.95}(1)}{2}\]</span></p>
+<p>Il s’agit donc de déterminer les valeurs de <span class="math inline">\(\theta\)</span> pour lequelles la log-vraisemblance est environ 1.92 inférieure au maximum.</p>
+<pre class="r"><code>qchisq(0.95, df = 1) / 2</code></pre>
+<pre><code>## [1] 1.920729</code></pre>
+<div id="exemple" class="section level2">
+<h2>Exemple</h2>
+<p>Pour notre exemple de germination de semences (<span class="math inline">\(\hat{p} = 0.3\)</span>), les limites de l’intervalle à 95% correspondent à <span class="math inline">\(L = 0.0281\)</span>.</p>
+<pre class="r"><code>exp(dbinom(6, 20, 0.3, log = TRUE) - qchisq(0.95, df = 1)/2)</code></pre>
+<pre><code>## [1] 0.02807512</code></pre>
+<p>Ce seuil est représenté par la ligne pointillée sur le graphique ci-dessous et correspond à un intervalle approximatif de (0.132, 0.516) pour <span class="math inline">\(p\)</span>.</p>
+<pre class="r"><code>ggplot(NULL, aes(x = 0:1)) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(geom = &quot;area&quot;, fill = &quot;#d3492a&quot;, n = 1000,
+        fun = function(x) ifelse(x &gt; 0.132 &amp; x &lt; 0.516,
+                                 dbinom(6, 20, prob = x), NA)) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x), 
+                  geom = &quot;density&quot;) +
+    geom_hline(yintercept = 0.0279, linetype = &quot;dashed&quot;) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Pour une expérience avec le même estimé de <span class="math inline">\(\hat{p}\)</span>, mais un plus grand échantillon <span class="math inline">\((n = 50, y = 15)\)</span>, la limite de <span class="math inline">\(L\)</span> pour l’intervalle à 95% est de 0.0179.</p>
+<pre class="r"><code>exp(dbinom(15, 50, 0.3, log = TRUE) - qchisq(0.95, df = 1)/2)</code></pre>
+<pre><code>## [1] 0.01792382</code></pre>
+<p>Comme on le voit ci-dessus, la fonction de vraisemblance et donc l’intervalle de confiance sont plus étroits.</p>
+<pre class="r"><code>ggplot(NULL, aes(x = 0:1)) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(geom = &quot;area&quot;, fill = &quot;#d3492a&quot;, n = 1000,
+        fun = function(x) ifelse(x &gt; 0.185 &amp; x &lt; 0.435,
+                                 dbinom(15, 50, prob = x), NA)) +
+    stat_function(fun = function(x) dbinom(15, 50, prob = x), 
+                  geom = &quot;density&quot;) +
+    geom_hline(yintercept = 0.0179, linetype = &quot;dashed&quot;) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(breaks = seq(0, 0.12, 0.03), 
+                       limits = c(0, 0.13), expand = c(0, 0))</code></pre>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+</div>
+<div id="vraisemblance-profilee" class="section level2">
+<h2>Vraisemblance profilée</h2>
+<p>Si <span class="math inline">\(m\)</span> paramètres sont estimés en même temps, la fonction de vraisemblance n’est pas une courbe, mais plutôt une surface en <span class="math inline">\(m\)</span> dimensions. Lorsqu’on calcule le rapport de vraisemblance <span class="math inline">\(- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right)\)</span> pour différentes valeurs <span class="math inline">\(\theta_{0}\)</span> d’un des paramètres, il faut donc choisir quelle valeur donner aux autres <span class="math inline">\(m - 1\)</span> paramètres. Une solution simple serait de fixer tous les autres paramètres à leur valeur estimée au maximum de vraisemblance, mais cela suppose que ces estimés sont indépendants. En général, si on fixe <span class="math inline">\(\theta_0\)</span> à une valeur autre que <span class="math inline">\(\hat{\theta}\)</span>, l’estimé maximisant la vraisemblance peut changer.</p>
+<p>Par exemple, dans le modèle de régression linéaire illustré ci-dessous, le meilleur estimé de la pente change si on fixe l’ordonnée à l’origine à 0 (ligne pointillée).</p>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>Afin de construire la courbe de <span class="math inline">\(l(\theta_0)\)</span> pour différentes valeurs du paramètre, il faut donc pour chaque valeur fixe de <span class="math inline">\(\theta_0\)</span> trouver la maximum de vraisemblance pour le reste des paramètres. La courbe résultante se nomme la vraisemblance profilée (<em>profile likelihood</em>).</p>
+<p>La fonction <code>profile</code> du package <em>bbmle</em> évalue la vraisemblance profilée de chaque paramètre à partir du résultat de <code>mle2</code>. Voici le résultat obtenu pour le modèle ajusté plus tôt (régression binomiale négative du nombre d’espèces de plantes des îles Galapagos).</p>
+<pre class="r"><code>galap_pro &lt;- profile(mle_galap)
+plot(galap_pro)</code></pre>
+<p><img src="03-Maximum_vraisemblance_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>Pour chaque paramètre, le graphique montre la racine carrée du rapport de vraisemblance <span class="math inline">\(\sqrt{- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right)}\)</span> pour la vraisemblance profilée. La transformation racine carrée permet de voir rapidement si la log-vraisemblance profilée est approximativement quadratique (voir section suivante), ce qui résulterait en un “V” symétrique après transformation.</p>
+<p>Différents intervalles de confiance sont superposés au graphique; on peut aussi obtenir directement ces intervalles avec la fonction <code>confint</code>.</p>
+<pre class="r"><code>confint(galap_pro, level = 0.95)</code></pre>
+<pre><code>##             2.5 %     97.5 %
+## b_0     3.0259619 3.66809720
+## b_area  0.2837173 0.42822254
+## b_near -0.2600032 0.05105544
+## theta   1.5113578 4.69693757</code></pre>
+</div>
+<div id="approximation-quadratique" class="section level2">
+<h2>Approximation quadratique</h2>
+<p>Puisque le calcul de la vraisemblance profilée d’un paramètre requiert un ajustement répété des autres paramètres du modèle, cette méthode prend beaucoup de temps pour un modèle complexe.</p>
+<p>Une méthode plus approximative, mais beaucoup plus rapide, est de supposer que la log-vraisemblance suit une forme quadratique. Avec un seul paramètre, cette forme quadratique est une parabole centrée sur le maximum de vraisemblance: <span class="math inline">\(- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right) = a (\theta_{0} - \hat{\theta})^2\)</span>. Ici, le coefficient <span class="math inline">\(a\)</span> mesure la courbure de la parabole. Comme nous avons vu dans l’exemple binomial ci-dessus, plus cette courbure est prononcée, plus l’estimation du paramètre est précise.</p>
+<p>En fait, si l’approximation quadratique est bonne, la variance de <span class="math inline">\(\hat{\theta}\)</span> (donc le carré de son erreur-type) est l’inverse de la dérivée seconde de <span class="math inline">\(-l\)</span>, qui mesure la courbure au maximum.</p>
+<p><span class="math display">\[\frac{\textrm{d}^2(-l)}{\textrm{d}\theta^2} = \frac{1}{\sigma_{\hat{\theta}}^2}\]</span></p>
+<p>Avec <span class="math inline">\(m\)</span> paramètres, la courbure en <span class="math inline">\(m\)</span> dimensions autour du maximum est représentée par une matrice <span class="math inline">\(m \times m\)</span> des dérivées partielles secondes de <span class="math inline">\(-l\)</span>, qu’on appelle la matrice d’information de Fisher. En inversant cette matrice, on obtient les variances et covariances des estimés. En supposant que l’approximation quadratique est juste, ces variances et covariances sont suffisantes pour obtenir les intervalles de confiance voulus de chaque paramètre.</p>
+<p>Dans le package <em>bbmle</em>, on peut calculer les intervalles de confiance selon l’approximation quadratique en spécifiant <code>method = "quad"</code> dans la fonction <code>confint</code>:</p>
+<pre class="r"><code>confint(mle_galap, level = 0.95, method = &quot;quad&quot;)</code></pre>
+<pre><code>##             2.5 %    97.5 %
+## b_0     3.0246480 3.6457823
+## b_area  0.2847479 0.4241100
+## b_near -0.2536734 0.0451341
+## theta   1.1781122 4.2508322</code></pre>
+<p>On remarque ici que les estimés s’approchent de ceux de la vraisemblance profilée, sauf pour <span class="math inline">\(\theta\)</span>. En inspectant les profils obtenus plus haut, il est apparent que celui de <span class="math inline">\(\theta\)</span> suit moins la forme quadratique.</p>
+</div>
+</div>
+<div id="resume" class="section level1">
+<h1>Résumé</h1>
+<ul>
+<li><p>Pour un modèle statistique, la vraisemblance est une fonction qui associe à chaque valeur des paramètres la probabilité des données observées, conditionnelle à cette paramétrisation. Selon le principe du maximum de vraisemblance, le meilleur estimé des paramètres est celui qui maximise la vraisemblance.</p></li>
+<li><p>Afin de déterminer le maximum de vraisemblance pour un modèle personnalisé dans R, il faut créer une fonction qui calcule la log-vraisemblance en fonction des paramètres, puis faire appel à un algorithme d’optimisation pour trouver le maximum.</p></li>
+<li><p>Le test du rapport de vraisemblance permet de tester une hypothèse sur la valeur d’un paramètre estimé au moyen du maximum de vraisemblance, d’obtenir un intervalle de confiance pour ce paramètre, ou de comparer deux modèles nichés.</p></li>
+<li><p>Pour estimer l’incertitude d’un estimé dans un modèle avec plusieurs paramètres ajustables, nous pouvons soit calculer la vraisemblance profilée pour ce paramètre, soit avoir recours à l’approximation quadratique.</p></li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<ul>
+<li><p>Bolker, B.M. (2008) Ecological models and data in R. Princeton University Press, Princeton, New Jersey. (Chapitre 6 sur le maximum de vraisemblance)</p></li>
+<li><p>Canham, C.D., LePage, P.T. et Coates, K.D. (2004) A neighborhood analysis of canopy tree competition: effects of shading versus crowding. Canadian Journal of Forest Research 34: 778–787.</p></li>
+<li><p>Clark, J.S., Silman, M., Kern, R., Macklin, E. et HilleRisLambers, J. (1999) Seed dispersal near and far: Patterns across temperate and tropical forests. Ecology 80: 1475–1494.</p></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

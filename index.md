@@ -6,6 +6,7 @@
 
 2. [Tests de randomisation](notes_cours/02-Tests_randomisation.html) ([PDF](notes_cours/02-Tests_randomisation.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv), [environment.csv](donnees/environment.csv)
 
+3. [Maximum de vraisemblance](notes_cours/03-Maximum_vraisemblance.html) ([PDF](notes_cours/03-Maximum_vraisemblance.pdf)) - Données: [galapagos.csv](donnees/galapagos.csv)
 
 ## Exercices
 

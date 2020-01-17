@@ -1,0 +1,698 @@
+---
+title: "Maximum de vraisemblance"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 16) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+```
+
+
+# Introduction
+
+- Maximum de vraisemblance (*maximum likelihood*): méthode générale pour estimer les paramètres d'un modèle statistique.
+
+--
+
+- Ex.: Modèle de régression où la réponse $y$ est séparée en une portion expliquée par différents prédicteurs et une portion non-expliquée, représentée par une distribution statistique.
+
+--
+
+- Le modèle contient différents paramètres inconnus, à être estimés à partir des observations.
+
+--
+
+- Selon le maximum de vraisemblance, les meilleurs estimés des paramètres sont ceux qui maximisent la probabilité des valeurs observées de la variable.
+
+---
+
+# Introduction
+
+Plusieurs méthodes vues dans le cours préalable (ECL7102) sont basées sur un calcul de la vraisemblance:
+
+- Sélection de modèles avec l'AIC.
+
+- Estimation des paramètres d'un modèle linéaire généralisé.
+
+- Estimation des paramètres d'un modèle linéaire mixte (maximum de vraisemblance restreint).
+
+---
+
+# Contenu du cours
+
+- Principe du maximum de vraisemblance
+
+- Application du maximum de vraisemblance dans R
+
+- Test du rapport de vraisemblance
+
+- Calcul des intervalles de confiance d'un paramètre
+
+- Estimation de plusieurs paramètres: profil de vraisemblance et approximation quadratique
+
+---
+
+class: inverse, center, middle
+
+# Principe du maximum de vraisemblance
+
+---
+
+# Exemple
+
+- Estimer le taux de germination d'un lot de semences en faisant germer $n = 20$ semences dans des conditions similaires.
+
+- Réponse $y$: nombre de semences ayant germé avec succès.
+
+--
+
+- $y$ suit une distribution binomiale, où $p$ est la probabilité de germination dans la population:
+
+$$f(y \vert p) = {n \choose y} p^y (1-p)^{n-y}$$
+
+--
+
+- $f(y \vert p)$: Distribution de $y$, conditionnelle à une valeur donnée de $p$.
+
+---
+
+# Distribution conditionnelle de $y$
+
+Exemple: Distribution de $y$ si $p = 0.2$.
+
+```{r}
+ggplot(NULL, aes(x = 0:20)) +
+    labs(x = "y", y = "f(y|p=0.2)") +
+    stat_function(fun = dbinom, n = 21, args = list(size = 20, prob = 0.2),
+                  geom = "bar", color = "black", fill = "white") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+---
+
+# Distribution conditionnelle de $y$
+
+Exemple: Distribution de $y$ si $p = 0.2$.
+
+```{r}
+ggplot(NULL, aes(x = 0:20)) +
+    labs(x = "y", y = "f(y|p=0.2)") +
+    stat_function(fun = dbinom, n = 21, args = list(size = 20, prob = 0.2),
+                  geom = "bar", color = "black", fill = "white") +
+    geom_segment(aes(x = 0, xend = 6, y = dbinom(6, 20, 0.2),
+                     yend = dbinom(6, 20, 0.2)), 
+                 color = "#b3452c", linetype = "dashed", size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+---
+
+# Fonction de vraisemblance
+
+- Vue comme une fonction de $p$ plutôt que de $y$, la probabilité d'avoir observé les données $y$ pour une valeur donnée du paramètre $p$ est la vraisemblance $L$ de $p$.
+
+--
+
+- Ex.: $L(p)$ pour $y = 6$ et $n = 20$.
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+    labs(x = "p", y = "L(p)") +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = "density") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
+```
+
+---
+
+# Fonction de vraisemblance
+
+- Vu comme une fonction de $p$ plutôt que de $y$, la probabilité d'avoir observé les données $y$ pour un valeur donnée du paramètre $p$ est la vraisemblance $L$ de $p$.
+
+- Ex.: $L(p)$ pour $y = 6$ et $n = 20$.
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+    labs(x = "p", y = "L(p)") +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = "density") +
+    geom_segment(aes(x = 0, xend = 0.2, y = dbinom(6, 20, 0.2),
+                     yend = dbinom(6, 20, 0.2)), 
+                 color = "#b3452c", linetype = "dashed", size = 1) +
+    geom_segment(aes(x = 0.2, xend = 0.2, y = 0, yend = dbinom(6, 20, 0.2)), 
+                 color = "#b3452c", linetype = "dashed", size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
+```
+
+---
+
+# Fonction de vraisemblance
+
+- $y = (y_1, y_2, ..., y_n)$ est le vecteur d'observations et $\theta = (\theta_1, ..., \theta_m)$ le vecteur des paramètres du modèle statistique pour $y$.
+
+--
+
+- La vraisemblance pour un vecteur $\theta$ donné est la probabilité conjointe des observations $y$, conditionnellement à ces valeurs de $\theta$.
+
+$$L(\theta) = p(y | \theta)$$
+
+--
+
+- Attention: La fonction de vraisemblance *n'est pas* une distribution de probabilité pour $\theta$.
+
+---
+
+# Maximum de vraisemblance
+
+Selon le principe du maximum de vraisemblance, le meilleur estimé des paramètres du modèle selon nos observations $y$ est le vecteur de valeurs $\theta$ qui maximise la valeur de $L(\theta)$.
+
+---
+
+# Exemple: Distribution binomiale
+
+.pull-left[
+
+- L'estimé du maximum de vraisemblance pour $p$ correspond à:
+
+$$\hat{p} = \frac{y}{n}$$
+
+- Dans notre exemple, avec $y = 6$ et $n = 20$, $\hat{p} = 0.3$.
+
+]
+
+.pull-right[
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+    labs(x = "p", y = "L(p)") +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = "density") +
+    geom_segment(aes(x = 0, xend = 0.3, y = dbinom(6, 20, 0.3),
+                     yend = dbinom(6, 20, 0.3)), 
+                 color = "#b3452c", linetype = "dashed", size = 1) +
+    geom_segment(aes(x = 0.3, xend = 0.3, y = 0, yend = dbinom(6, 20, 0.3)), 
+                 color = "#b3452c", linetype = "dashed", size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
+```
+
+]
+
+---
+
+# Exemple: Modèle linéaire
+
+$$y \sim N(\beta_0 + \beta_1 x, \sigma)$$
+
+--
+
+- Probabilité d'une observation de $y$:
+
+
+$$f(y \vert \beta_0, \beta_1, \sigma) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y - \beta_0 - \beta_1 x}{\sigma} \right)^2}$$
+
+--
+
+- Pour $n$ observations indépendantes:
+
+$$f(y_1, ..., y_n \vert \beta_0, \beta_1, \sigma) = \prod_{i=1}^n \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2}$$
+
+---
+
+# Log-vraisemblance
+
+$$L(\beta_0, \beta_1, \sigma) = \prod_{i=1}^n \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2}$$
+
+--
+
+- En pratique, plus facile de travailler avec $l = \log L$.
+
+- Les paramètres maximisant $l$ maximisent aussi $L$.
+
+---
+
+# Log-vraisemblance
+
+$$L(\beta_0, \beta_1, \sigma) = \prod_{i=1}^n \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2}$$
+
+$$l(\beta_0, \beta_1, \sigma) = \sum_{i=1}^n \left( \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2 \right)$$
+
+--
+
+$$l(\beta_0, \beta_1, \sigma) = n \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2 \sigma^2}  \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2$$
+
+---
+
+# Modèle linéaire
+
+$$l(\beta_0, \beta_1, \sigma) = n \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2 \sigma^2}  \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2$$
+
+- Pour un modèle linéaire, les estimés des $\beta$ selon la méthode des moindre carrés concordent avec ceux du maximum de vraisemblance.
+
+---
+
+# Estimé de la variance
+
+$$l(\beta_0, \beta_1, \sigma) = n \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2 \sigma^2}  \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2$$
+
+- La valeur de $\sigma^2$ maximisant $l$ est égale à:
+
+$$\hat{\sigma^2} = \frac{1}{n} \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2$$
+
+--
+
+- On sait que cet estimé est biaisé.
+
+--
+
+- En général, les estimés du maximum de vraisemblance ont un biais négligeable si $n$ est assez grand.
+
+---
+
+class: inverse, center, middle
+
+# Application du maximum de vraisemblance dans R
+
+---
+
+# Trouver le maximum de vraisemblance
+
+- Excepté pour quelques modèles simples, il est difficile de déterminer le maximum d'une fonction de vraisemblance analytiquement.
+
+--
+
+- Algorithmes numériques permettent de trouver le maximum d'une fonction par itération, jusqu'à l'obtention d'une précision voulue.
+
+--
+
+- Dans R, `optim` est une fonction générale pour obtenir un minimum ou maximum.
+
+- Le package *bbmle* offre des fonctions spécialisées au problème du calcul du maximum de vraisemblance.
+
+---
+
+# Exemple
+
+- Richesse spécifique des plantes de 30 îles de l'archipel des Galapagos.
+
+```{r}
+galap <- read.csv("../donnees/galapagos.csv")
+head(galap)
+```
+
+--
+
+- Modélisons le nombre d'espèces (*Species*) en fonction de la superficie de l'île (*Area*) et de la distance vers l'île la plus proche (*Nearest*).
+
+---
+
+# Distribution binomiale négative
+
+- Distribution appropriée pour les données de comptage dont la variance est supérieure à celle prévue par la distribution de Poisson.
+
+--
+
+.pull-left[
+
+**Poisson**
+
+$$y \sim \textrm{Pois}(\lambda)$$
+
+- La moyenne et la variance de $y$ sont toutes deux égales à $\lambda$.
+
+]
+
+--
+
+.pull-right[
+
+**Binomiale négative**
+
+$$y \sim \textrm{NB}(\mu, \theta)$$
+
+- $y$ a une moyenne $\mu$ et une variance $\mu + \frac{\mu^2}{\theta}$
+
+- Pour $\theta$ élevé, on s'approche du modèle de Poisson.
+
+]
+
+---
+
+# Modèle binomial négatif
+
+$$y \sim \textrm{NB}(\mu, \theta)$$
+
+--
+
+- Comme pour la régression de Poisson, c'est le logarithme de la moyenne de $y$ qui dépend linéairement des prédicteurs.
+
+$$\log\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ...$$
+
+--
+
+$$\mu = e^{\beta_0 + \beta_1 x_1 + \beta_2 x_2 + ...}$$
+
+--
+
+- Pour notre modèle du nombre d'espèces, nous appliquerons aussi une transformation logarithmique aux prédicteurs (superficie et distance à l'île la plus près).
+
+---
+
+# Fonction de vraisemblance
+
+- Nous créons une fonction dans R avec comme arguments les quatre paramètres à ajuster: $\beta_0$, $\beta_{Area}$, $\beta_{Near}$ et $\theta$.
+
+```{r, echo = TRUE}
+nll_galap <- function(b_0, b_area, b_near, theta) {
+    mu_sp <- exp(b_0 + b_area * log(galap$Area) + b_near * log(galap$Nearest))
+    -sum(dnbinom(galap$Species, mu = mu_sp, size = theta, log = TRUE))
+}
+```
+
+- Puisque les outils d'optimisation dans R recherchent un minimum plutôt qu'un maximum, la fonction calculera $-l = - \log L$.
+
+---
+
+# Fonction de vraisemblance
+
+```{r, echo = TRUE}
+nll_galap <- function(b_0, b_area, b_near, theta) {
+    mu_sp <- exp(b_0 + b_area * log(galap$Area) + b_near * log(galap$Nearest)) #<<
+    -sum(dnbinom(galap$Species, mu = mu_sp, size = theta, log = TRUE))
+}
+```
+
+- `mu_sp`est la moyenne prédite du nombre d'espèces (vecteur de 30 valeurs)
+
+---
+
+# Fonction de vraisemblance
+
+```{r, echo = TRUE}
+nll_galap <- function(b_0, b_area, b_near, theta) {
+    mu_sp <- exp(b_0 + b_area * log(galap$Area) + b_near * log(galap$Nearest)) 
+    -sum(dnbinom(galap$Species, mu = mu_sp, size = theta, log = TRUE)) #<<
+}
+```
+
+
+- `mu_sp`est la moyenne prédite du nombre d'espèces (vecteur de 30 valeurs)
+
+- `dnbinom` donne un vecteur avec le logarithme de la probabilité (`log = TRUE`) pour chaque observation.
+
+---
+
+# Trouver le maximum
+
+- La fonction `mle2` du package *bbmle* détermine le maximum de vraisemblance pour un modèle donné.
+
+- La fonction requiert au minimum deux arguments: la fonction $-l$ à minimiser, puis une liste de valeurs initiales pour chaque paramètre.
+
+```{r, warning = FALSE, echo  = TRUE}
+library(bbmle)
+
+mle_galap <- mle2(nll_galap, 
+        start = list(b_0 = 0, b_area = 0, b_near = 0, theta = 1))
+```
+
+---
+
+# Trouver le maximum
+
+```{r, warning = FALSE, echo = TRUE}
+mle_galap
+```
+
+---
+
+# Valeur de la vraisemblance
+
+- La log-vraisemblance obtenue dans cet exemple (-137.98) correspond à une valeur infime de $L$.
+
+```{r, echo = TRUE}
+exp(-137.98)
+```
+
+--
+
+- $L$ est la probabilité d'avoir observé *exactement* ces données. Elle diminue avec plus de données, car il y a plus de combinaisons de valeurs possible.
+
+--
+
+- On n'interprète pas la valeur absolue de $L$ (ou $l$), mais plutôt sa valeur relative pour différentes valeurs des paramètres en fonction du même jeu de données.
+
+---
+
+# Modèle binomial négatif
+
+- Pour notre exemple, le package *MASS* contient une fonction `glm.nb` qui permet d'estimer directement les paramètres d'une régression binomiale négative.
+
+--
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+library(MASS)
+glm.nb(Species ~ log(Area) + log(Nearest), galap)
+```
+
+---
+
+# Quelle méthode utiliser?
+
+- Il est préférable d'utiliser une fonction spécialisée si elle existe.
+
+--
+
+- Certains modèles non-linéaires peuvent être transformés en modèle linéaire.
+
+- Exemple: loi de puissance entre le nombre d'espèces $S$ et la superficie $A$.
+
+$$S = cA^z$$
+
+--
+
+$$\log(S) = \log(c) + z \log(A)$$
+
+--
+
+- Dans d'autres cas, le modèle présumé ne peut pas être ramené à une format standard, donc il faut écrire sa propre fonction de vraisemblance.
+
+---
+
+# Exemple: Courbe de dispersion
+
+- Estimer la dispersion d'une espèce à partir de graines recueillies dans des pièges.
+
+--
+
+- $y_i$: Nombre de graines dans un piège $i$
+
+$$y_i \sim \textrm{NB}(\mu_i, \theta)$$
+
+--
+
+- Courbe de dispersion $f(r_{ij})$: probabilité qu'une graine d'un arbre $j$ tombe dans un piège $i$ situé à distance $r_{ij}$.
+
+--
+
+$$y_i \sim \textrm{NB}(\sum_j b\times f(r_{ij}), \theta)$$
+
+---
+
+# Exemple: Indice de compétition
+
+- Indice de compétition (CI): compétition exercée par chaque voisin $j$ d'un arbre $i$ augmente avec le diamètre du voisin $D$ et diminue avec la distance $r$ entre les deux.
+
+$$CI_i = \sum_j \frac{D_j^{\delta}}{r_{ij}^{\gamma}}$$
+
+--
+
+- On souhaite estimer $\gamma$ et $\delta$.
+
+--
+
+- Intégration du *CI* dans un modèle prédisant la croissance $y$:
+
+$$y_i = \beta_0 + ... + \beta_{CI} \sum_j \frac{D_j^{\delta}}{r_{ij}^{\gamma}}$$
+
+---
+
+# Limites du maximum de vraisemblance
+
+- Les propriétés avantageuses du maximum de vraisemblance, notamment l'absence de biais, sont valides seulement dans la limite où $n$ (nombre d'observations) est grand.
+
+--
+
+- Le maximum de vraisemblance s'applique à tous les problèmes d'estimation de paramètres de modèles statistiques, mais il peut exister des meilleures méthodes pour un problème donné, surtout si $n$ est faible.
+
+--
+
+- Pour des fonctions de vraisemblance complexes, il peut y avoir plusieurs maximums locaux. Dans ce cas, il n'est pas garanti que les algorithmes trouvent le maximum global.
+
+---
+
+class: inverse, center, middle
+
+# Test du rapport de vraisemblance
+
+---
+
+# Exemple
+
+Vraisemblance de la probabilité $p$ de germination des semences si 6 semences ont germé sur 20.
+
+.pull-left[
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+    labs(x = "p", y = "L(p)") +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = "density") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
+```
+
+]
+
+--
+
+.pull-right[
+
+- Ici, $\hat{p} = 0.3$ selon le maximum de vraisemblance.
+
+- Si le fournisseur affirme que $p = 0.5$, est-ce que cette valeur est compatible avec nos résultats?
+
+]
+
+---
+
+# Exemple
+
+- Vraisemblance selon l'hypothèse nulle $p_0 = 0.5$, comparée à celle de l'estimé $\hat{p}$.
+
+```{r, echo = TRUE}
+l_0 <- dbinom(6, 20, prob = 0.5)
+l_0
+```
+
+```{r, echo = TRUE}
+l_max <- dbinom(6, 20, prob = 0.3)
+l_max
+```
+
+---
+
+# Rapport de vraisemblance
+
+- Le test du rapport de vraisemblance (*likelihood-ratio test*) utilise la statistique:
+
+$$- 2 \log \left( \frac{L(\theta_0)}{L(\hat{\theta})} \right)$$
+
+--
+
+- Exprimée en fonction de la log-vraisemblance:
+
+$$- 2 \left( l(\theta_0) - l(\hat{\theta}) \right)$$
+
+--
+
+- Si l'hypothèse nulle est vraie et l'échantillon est grand, cette statistique suit approximativement une distribution $\chi^2$ avec 1 degré de liberté.
+
+---
+
+# Exemple
+
+- Rapport de vraisemblance
+
+```{r, echo = TRUE}
+rv <- -2*log(l_0 / l_max)
+rv
+```
+
+--
+
+- Valeur $p$ sous l'approximation du $\chi^2$
+
+```{r, echo = TRUE}
+1 - pchisq(rv, df = 1)
+```
+
+--
+
+- *Note*: Le test du rapport de vraisemblance ne s'applique pas si l'hypothèse nulle est à la limite des valeurs possibles du paramètre (ex.: $p = 0$ ou $p = 1$ pour une distribution binomiale).
+
+---
+
+# Comparaison entre modèles
+
+- Comparaison de deux modèles nichés:
+
+M1: $y = \beta_0 + \beta_1 x_1 + \epsilon$
+
+M2: $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon$ 
+
+--
+
+- M1 est équivalent à M2 avec $\beta_2 = \beta_3 = 0$.
+
+--
+
+- Si M1 est le vrai modèle, la statistique du rapport de vraisemblance comparant les modèles ajustés M1 et M2 suit une distribution $\chi^2$ avec 2 degrés de liberté (nombre de paramètres additionnels de M2).
+
+$$- 2 \left( l_{M1} - l_{M2} \right) \sim \chi^2(2)$$
+
+---
+
+# Comparaison avec l'AIC
+
+Critère d'information d'Akaike (AIC):
+
+$$AIC = - 2 \log L + 2K =  -2l + 2K$$
+
+- $K$: nombre de paramètres du modèle.
+
+--
+
+- Contrairement au test du rapport de vraisemblance, l'AIC permet de comparer plus de deux modèles à la fois, nichés ou non.
+
+--
+
+*Question différente*
+
+- AIC: Quel modèle prédirait le mieux la réponse pour un nouvel échantillon?
+
+- Test du rapport de vraisemblance: Est-ce probable que le modèle le plus simple soit correct, considérant l'écart entre sa vraisemblance et celle du modèle complexe?
+
+---
+
+class: inverse, center, middle
+
+# Calcul des intervalles de confiance
+
+---
+
+
+
+
+
+
