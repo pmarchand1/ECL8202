@@ -691,8 +691,237 @@ class: inverse, center, middle
 
 ---
 
+# Test d'hypothèse et intervalle
+
+- Si on ne peut pas rejeter l'hypothèse nulle $\theta = \theta_0$ avec un seuil de signification $\alpha$, alors $\theta_0$ fait partie de l'intervalle de confiance à $100(1-\alpha)\%$ pour $\theta$.
+
+--
+
+- Pour un test du rapport de vraisemblance, la valeur maximale de la statistique qui n'est pas rejetée avec $\alpha = 0.05$ correspond au 95e centile de la distribution du $\chi^2$.
+
+$$- 2 \left( l(\theta_0) - l(\hat{\theta}) \right) = \chi^2_{0.95}(1)$$
+
+--
+
+- Donc les limites de l'intervalle à 95% sont les valeurs de $\theta_0$ où:
+
+$$l(\theta_0) = l(\hat{\theta}) - \frac{\chi^2_{0.95}(1)}{2}$$
+
+---
+
+# Exemple
+
+Germination des semences avec un modèle binomial: $y = 6$ et $n = 20$, donc $\hat{p} = 0.3$.
+
+--
+
+- Limite de $L$ pour l'intervalle à 95%:
+
+```{r, echo = TRUE}
+exp(dbinom(6, 20, 0.3, log = TRUE) - qchisq(0.95, df = 1)/2)
+```
+
+---
+
+# Exemple
+
+Germination des semences avec un modèle binomial: $y = 6$ et $n = 20$, donc $\hat{p} = 0.3$.
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+    labs(x = "p", y = "L(p)") +
+    stat_function(geom = "area", fill = "#d3492a", n = 1000,
+        fun = function(x) ifelse(x > 0.132 & x < 0.516,
+                                 dbinom(6, 20, prob = x), NA)) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x), 
+                  geom = "density") +
+    geom_hline(yintercept = 0.0279, linetype = "dashed") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
+```
+
+---
+
+# Exemple
+
+Échantillon plus grand avec le même taux observé: $y = 15$, $n = 50$.
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+    labs(x = "p", y = "L(p)") +
+    stat_function(geom = "area", fill = "#d3492a", n = 1000,
+        fun = function(x) ifelse(x > 0.185 & x < 0.435,
+                                 dbinom(15, 50, prob = x), NA)) +
+    stat_function(fun = function(x) dbinom(15, 50, prob = x), 
+                  geom = "density") +
+    geom_hline(yintercept = 0.0179, linetype = "dashed") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(breaks = seq(0, 0.12, 0.03), 
+                       limits = c(0, 0.13), expand = c(0, 0))
+```
+
+---
+
+# Modèle avec plusieurs paramètres
+
+- Test du rapport de vraisemblance pour un paramètre $\theta$:
+
+$$- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right)$$
+
+--
+
+- Quelle valeur choisir pour les autres paramètres si on fixe $\theta = \theta_0$?
+
+--
+
+- On ne peut pas fixer les autres paramètres à leur valeur au maximum de vraisemblance si les estimés sont corrélés.
+
+---
+
+# Corrélation entre les estimés
+
+Le meilleur estimé de la pente change si on fixe l'ordonnée à l'origine à 0.
+
+```{r, echo = FALSE}
+set.seed(82)
+rand_df <- data.frame(x = seq(0, 5, 0.2), y = 5 + 2*seq(0, 5, 0.2) + rnorm(26, 0, 5))
+ggplot(rand_df, aes(x = x, y = y)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", formula = y ~ x - 1, se = FALSE, linetype = "dashed")
+```
+
+---
+
+# Vraisemblance profilée
+
+- Pour construire la courbe de $l(\theta_0)$, on fixe successivement le paramètre à différentes valeurs, puis on ré-estime le maximum de vraisemblance pour les autres paramètres.
+
+- La fonction résultante est la vraisemblance profilée (*profile likelihood*) de $\theta$.
+
+- Dans le package *bbmle*, elle est obtenue avec la fonction `profile` appliquée au résultat de `mle2`.
+
+---
+
+# Vraisemblance profilée
+
+Le graphique montre la courbe $\sqrt{- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right)}$.
+
+```{r, warning = FALSE, echo = TRUE}
+galap_pro <- profile(mle_galap)
+plot(galap_pro)
+```
+
+---
+
+# Intervalle de confiance profilés
+
+```{r, echo = TRUE}
+confint(galap_pro, level = 0.95)
+```
+
+---
+
+# Approximation quadratique
+
+- Vraisemblance profilée prend beaucoup de temps pour un modèle complexe.
+
+--
+
+- Méthode plus approximative, mais beaucoup plus rapide: supposer que la log-vraisemblance suit une forme quadratique.
+
+- Pour un paramètre, la forme quadratique est une parabole centrée sur le maximum de $l$.
+
+--
+
+- L'approximation est meilleure lorsque la taille de l'échantillon augmente.
+
+---
+
+# Approximation quadratique
+
+Modèle binomial avec $y = 6$, $n = 20$
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+  labs(x = "p", y = "l(p)") +
+  stat_function(fun = function(x) dbinom(6, 20, prob = x, log = TRUE), geom = "line") +
+  stat_function(fun = function(x) -1.652-(x-0.3)^2/0.021, geom = "line", linetype = "dashed") +
+  coord_cartesian(ylim = c(-4.5, -1.5))
+```
+
+---
+
+# Approximation quadratique
+
+Modèle binomial avec $y = 15$, $n = 50$
+
+```{r}
+ggplot(NULL, aes(x = 0:1)) +
+  labs(x = "p", y = "l(p)") +
+  stat_function(fun = function(x) dbinom(15, 50, prob = x, log = TRUE), geom = "line") +
+  stat_function(fun = function(x) -2.1-(x-0.3)^2/0.0084, geom = "line", linetype = "dashed") +
+  coord_cartesian(ylim = c(-5, -2))
+```
+
+---
+
+# Approximation quadratique
+
+Pour un paramètre:
+
+$$- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right) = a (\theta_{0} - \hat{\theta})^2$$
+
+--
+
+- $a$ mesure la courbure de la parabole. Plus la courbure (ou dérivée seconde) est prononcée, plus l'estimé de $\theta$ est précis.
+
+--
+
+- Si l'approximation quadratique est bonne:
+
+$$\frac{\textrm{d}^2(-l)}{\textrm{d}\theta^2} = \frac{1}{\sigma_{\hat{\theta}}^2}$$
+
+- $\sigma_{\hat{\theta}}$ est l'erreur-type de $\hat{\theta}$.
 
 
+---
 
+# Approximation quadratique
 
+- Pour $m$ paramètres, la courbure en $m$ dimensions est représentée par une matrice $m \times m$ des dérivées partielles secondes de $-l$ (matrice d'information de Fisher).
+
+- En inversant cette matrice, on obtient les variances et covariances des estimés.
+
+--
+
+- Dans le package *bbmle*, `method = "quad"` de la fonction `confint`.
+
+```{r}
+confint(mle_galap, level = 0.95, method = "quad")
+```
+
+---
+
+# Résumé
+
+- Pour un modèle statistique, la vraisemblance est une fonction qui associe à chaque valeur des paramètres la probabilité des données observées, conditionnelle à cette paramétrisation.
+
+--
+
+- Selon le principe du maximum de vraisemblance, le meilleur estimé des paramètres est celui qui maximise la vraisemblance.
+
+--
+
+- Afin de déterminer le maximum de vraisemblance pour un modèle personnalisé dans R, il faut créer une fonction qui calcule la log-vraisemblance en fonction des paramètres, puis faire appel à un algorithme d'optimisation pour trouver le maximum.
+
+---
+
+# Résumé
+
+- Le test du rapport de vraisemblance permet de tester une hypothèse sur la valeur d'un paramètre estimé au moyen du maximum de vraisemblance, d'obtenir un intervalle de confiance pour ce paramètre, ou de comparer deux modèles nichés.
+
+--
+
+- Pour estimer l'incertitude d'un estimé dans un modèle avec plusieurs paramètres ajustables, nous pouvons soit calculer la vraisemblance profilée pour ce paramètre, soit avoir recours à l'approximation quadratique.
 
