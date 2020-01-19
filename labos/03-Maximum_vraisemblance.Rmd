@@ -1,6 +1,7 @@
 ---
 title: "Maximum de vraisemblance"
 output:
+    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -62,13 +63,13 @@ f) Comparons maintenant les prédictions du modèle aux données.
 
 - Ajoutez une colonne au jeu de données pour les prédictions moyennes du modèle (les $\lambda$ du modèle de Poisson pour chaque observation), obtenues en remplaçant les estimés du maximum de vraisemblance dans l'équation de $N$ ci-dessus.
 
-- Simulez 1000 jeux de données à partir de la distribution de Poisson avec les valeurs de $\lambda$ estimées. Pour générer un jeu de données, utiliser `rpois(n, lambda)` où $n$ est le nombre d'observations (le nombre de rangées du jeu de données original) et $\lambda$ est la colonne des prédictions moyennes. Pour générez 1000 jeux de données, utilisez `replicate`. Le résultat de `replicate` devrait être une matrice de $n$ rangées et 1000 colonnes (1 colonne par simulation).
+- Simulez 1000 jeux de données à partir de la distribution de Poisson avec les valeurs de $\lambda$ estimées. Pour générer un jeu de données, utiliser `rpois(n, lambda)` où $n$ est le nombre d'observations (le nombre de rangées du jeu de données original) et $\lambda$ est la colonne des prédictions moyennes. Pour générer 1000 jeux de données, utilisez `replicate`. Le résultat de `replicate` devrait être une matrice de $n$ rangées et 1000 colonnes (1 colonne par simulation).
 
-- Pour obtenir un intervalle de prédiction à 95% pour chaque observation, calculez les quantiles appropriés pour chaque rangée de la matrice des simulations avec `apply`. Par exemple, `apply(sim_mat, 1, quantile, prob = 0.025)` applique la fonction `quantile` à chaque rangée de `sim_mat`, avec l'argument `prob` de `quantile` fixé à 0.025. Faites de même pour le quantile 0.975 et vous obtiendrez deux vecteurs pour les bornes inférieures et supérieures de l'intervalle, que vous pouvez ajouter au jeu de données.
+- Pour obtenir un intervalle de prédiction à 95% pour chaque observation, calculez les quantiles appropriés pour chaque rangée de la matrice des simulations avec `apply`. Par exemple, `apply(sim_mat, 1, quantile, prob = 0.025)` applique la fonction `quantile` à chaque rangée de `sim_mat`, avec l'argument `prob` de `quantile` fixé à 0.025. Faites de même pour le quantile à $p = 0.975$ et vous obtiendrez deux vecteurs pour les bornes inférieures et supérieures de l'intervalle, que vous pouvez ajouter au jeu de données.
 
 *Note*: Ces intervalles de prédiction supposent que les estimés des paramètres sont exacts et ignorent donc leur incertitude.
 
-- À ce point-ci, en plus de `temp` et `num_eggs`, votre jeu de données contient trois colonnes représentant respectivement les prédictions moyennes, ainsi que les bornes inférieures et supérieures de l'intervalle de prédiction à 95% pour chaque observation. Ajoutez la prédiction moyenne et l'intervalle au graphique de *num_eggs* vs. *temp*. Ex.: Avec `ggplot`, vous pouvez ajouter `geom_line(aes(y = moy))` au graphique pour ajouter nue ligne représentant la colonne `moy` des prédictions moyennes, même chose pour les deux lignes de l'intervalle.
+- À ce point-ci, en plus de `temp` et `num_eggs`, votre jeu de données contient trois colonnes représentant respectivement les prédictions moyennes, ainsi que les bornes inférieures et supérieures de l'intervalle de prédiction à 95% pour chaque observation. Ajoutez la prédiction moyenne et l'intervalle au graphique de *num_eggs* vs. *temp*. Ex.: Avec `ggplot`, vous pouvez ajouter `geom_line(aes(y = moy))` au graphique pour ajouter une ligne représentant la colonne `moy` des prédictions moyennes, même chose pour les deux lignes de l'intervalle.
 
 À partir des résultats, pouvez-vous dire que le modèle représente bien la tendance générale des données ainsi que leur variation aléatoire autour de cette tendance?
 
@@ -81,7 +82,7 @@ a) Répétez les parties (c) à (f) du numéro précédent en utilisant une dist
 
 Voici les principaux changements à apporter pour remplacer le modèle de Poisson par le modèle binomiale négatif:
 
-- Ajoutez le paramètre $k$ à la fonction de log-vraisemblance. Remplacez `dnbinom(y, mu, size = 1/k, log = TRUE)` où `mu` est la prédiction moyenne, donc équivalente au `lambda` de `dpois`.
+- Ajoutez le paramètre $k$ à la fonction de log-vraisemblance. Remplacez l'appel à `dpois` par `dnbinom(y, mu, size = 1/k, log = TRUE)` où `mu` est la prédiction moyenne, donc équivalente au `lambda` de `dpois`.
 
 - Utilisez une borne inférieure de 0 pour le paramètre `k` dans `mle2`; la borne supérieure devrait être inférieure à 100.
 
