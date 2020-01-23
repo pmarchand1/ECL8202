@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Régression robuste aux valeurs extrêmes</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Régression robuste aux valeurs extrêmes</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Les modèles linéaires classiques – test <span class="math inline">\(t\)</span>, ANOVA et régression linéaire – sont basés sur la comparaison des moyennes entre différents groupes ou différentes valeurs d’un prédicteur, avec une incertitude basée sur le calcul de la variance résiduelle. Les coefficients d’un modèle linéaire sont estimés par la méthode des moindres carrés, qui vise à minimiser cette variance résiduelle.</p>
+<p>Ces méthodes sont conçues pour être optimales lorsque la variation résiduelle suit une distribution normale, qui prévoit relativement peu de valeurs extrêmes. La présence de quelques valeurs extrêmes exerce une forte influence sur les estimés produits par ces méthodes et rend difficile la détection des effets représentés par la plus grande partie des données. Dans ce cours, nous verrons plusieurs alternatives à la régression linéaire classique qui sont plus résistantes, ou <em>robustes</em>, à la présence de valeurs extrêmes.</p>
+<div id="contenu-du-cours" class="section level2">
+<h2>Contenu du cours</h2>
+<ul>
+<li><p>Sensibilité aux valeurs extrêmes</p></li>
+<li><p>Régression robuste avec les M-estimateurs</p></li>
+<li><p>Régression <span class="math inline">\(t\)</span></p></li>
+<li><p>Régression quantile</p></li>
+</ul>
+</div>
+</div>
+<div id="sensibilite-aux-valeurs-extremes" class="section level1">
+<h1>Sensibilité aux valeurs extrêmes</h1>
+<div id="mesures-de-tendance-centrale" class="section level2">
+<h2>Mesures de tendance centrale</h2>
+<p>Une mesure de tendance centrale vise à identifier le centre d’une distribution; la moyenne et la médiane en sont deux exemples bien connus. Le centre défini par la moyenne équilibre la <em>somme des écarts</em> de part et d’autre de la valeur moyenne, tandis que celui défini par la médiane équilibre le <em>nombre d’observations</em> de part et d’autre. Pour cette raison, l’ajout d’une valeur extrême à un échantillon peut affecter fortement sa moyenne, mais très peu sa médiane.</p>
+<p>Par exemple, prenons les 10 valeurs suivantes sont la moyenne (44) et la médiane (43.5) sont approximativement égales:</p>
+<p><code>18 29 30 40 43 44 48 49 56 83</code></p>
+<p>Si on ajoutait la valeur 580 à cet échantillon, la nouvelle médiane serait de 44, tandis que la moyenne serait d’environ 93 et ne représenterait plus une valeur “typique” de l’échantillon.</p>
+</div>
+<div id="point-de-rupture" class="section level2">
+<h2>Point de rupture</h2>
+<p>Le point de rupture (<em>breakdown point</em>) d’un estimateur est défini par la question suivante: combien de valeurs extrêmes, si elles sont assez extrêmes, peuvent affecter sans limite la valeur de l’estimé? On l’exprime généralement comme une fraction du nombre d’observations.</p>
+<p>Avec <span class="math inline">\(n\)</span> observations, la moyenne a un point de rupture de <span class="math inline">\(1/n\)</span>, car une seule observation extrême suffit à l’entraîner vers des valeurs extrêmes. Dans l’exemple précédent, si on augmentait la valeur extrême ajoutée, la moyenne pourrait augmenter sans limite.</p>
+<p>Dans le cas de la médiane, elle réagirait de la même façon à toute valeur extrême ajoutée d’un côté de la distribution, peu importe la magnitude de cette valeur extrême (la nouvelle médiane serait de 44 peu importe si la donnée ajoutée était de 100 ou 300 ou 1000). Pour faire augmenter la médiane sans limite, c’est toute la moitié supérieure du jeu de données qu’il faudrait faire augmenter; la médiane a donc un point de rupture de 0.5.</p>
+</div>
+<div id="precision-des-estimes-et-valeurs-extremes" class="section level2">
+<h2>Précision des estimés et valeurs extrêmes</h2>
+<p>Nous avons vu que la valeur de la moyenne est sensible à l’ajout de valeurs extrêmes d’un côté de la distribution (cas asymétrique). Si les valeurs extrêmes apparaissent de façon symétrique de part et d’autre de la moyenne, sa valeur reste inchangée. Cependant, puisque l’écart-type de la distribution est aussi sensible aux valeurs extrêmes, la précision avec laquelle on peut estimer de la moyenne est affectée.</p>
+<p>Dans le graphique ci-dessous, la courbe verte représente une distribution normale centrée réduite, <span class="math inline">\(y \sim N(0, 1)\)</span>. La courbe orange représente le mélange de deux distributions: 95% des observations proviennent de la distribution <span class="math inline">\(N(0, 1)\)</span> et 5% proviennent d’une distribution avec un écart-type plus grand: <span class="math inline">\(N(0, 5)\)</span>. Ce mélange représente le cas où la plupart des observations suivent une distribution normale, sauf une petite fraction dont les valeurs sont plus extrêmes qu’attendu. Sur une échelle linéaire de la densité de probabilité <span class="math inline">\(f(y)\)</span> (à gauche), les deux distributions apparaissent très semblables. Sur une échelle logarithmique (à droite), on voit clairement que les valeurs extrêmes sont beaucoup plus probables pour la distribution de mélange (ex.: environ 30 fois plus probable d’obtenir <span class="math inline">\(y = -4\)</span> ou <span class="math inline">\(y = 4\)</span>).</p>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>Comparons maintenant les erreurs-types pour la moyenne et la médiane de ces distributions. Pour ce faire, nous simulons 1000 échantillons de 100 observations de chacune des deux distributions; dans le cas de la distribution de mélange, l’écart-type est de 1 pour les 95 premières observations et de 5 pour les 5 dernières.</p>
+<pre class="r"><code>set.seed(82)
+norm_samp &lt;- replicate(1000, rnorm(100)) # par défaut, mean = 0, sd = 1
+mix_samp &lt;- replicate(1000, rnorm(100, mean = 0, sd = c(rep(1, 95), rep(5, 5))))</code></pre>
+<p>Pour la distribution normale, l’erreur-type de la moyenne obtenue par simulation est d’environ 0.10, tel que prévu par la formule <span class="math inline">\(\sigma / \sqrt{n} = 1 / \sqrt{100}\)</span>. Pour la distribution de mélange, l’erreur-type est environ 50% plus élevée (0.15).</p>
+<pre class="r"><code>sd(apply(norm_samp, 2, mean))</code></pre>
+<pre><code>## [1] 0.1012396</code></pre>
+<pre class="r"><code>sd(apply(mix_samp, 2, mean))</code></pre>
+<pre><code>## [1] 0.1524184</code></pre>
+<p>Quant à la médiane, son erreur-type est supérieure à celle de la moyenne pour la distribution normale, mais étant moins sensible (plus robuste) aux valeurs extrêmes, elle est estimée plus précisément pour la distribution de mélange.</p>
+<pre class="r"><code>sd(apply(norm_samp, 2, median))</code></pre>
+<pre><code>## [1] 0.122032</code></pre>
+<pre class="r"><code>sd(apply(mix_samp, 2, median))</code></pre>
+<pre><code>## [1] 0.1311463</code></pre>
+<p>Qu’est-ce que ces résultats signifient? Supposons que nous comparons deux groupes entre lesquels la moyenne et la médiane d’une variable réponse diffèrent; si la distribution de la variable est symétrique, alors la moyenne est identique à la médiane pour chaque groupe. Si la variable suit une distribution normale, il est plus facile de détecter une différence entre les moyennes qu’entre les médianes; un test basé sur les moyennes, comme le test <span class="math inline">\(t\)</span>, a une plus grande puissance. En présence de valeurs extrêmes, l’erreur-type de la moyenne augmente et un test basé sur la différence entre médianes pourrait être plus puissant.</p>
+<p>Les M-estimateurs, que nous verrons plus loin dans un contexte de régression, sont des mesures de tendance centrale qui font un compromis entre l’efficacité de la moyenne pour une distribution normale et la robustesse aux valeurs extrêmes de la médiane. Lorsque la distribution est normale, la précision de ces estimateurs s’approche de celle de la moyenne, mais ils ont un point de rupture plus élevé et peuvent donc mieux conserver leur précision en présence de plusieurs valeurs extrêmes.</p>
+</div>
+<div id="valeurs-extremes-et-regression" class="section level2">
+<h2>Valeurs extrêmes et régression</h2>
+<p>Dans une régression linéaire simple, la moyenne de la réponse <span class="math inline">\(y\)</span> correspond à une fonction linéaire du prédicteur <span class="math inline">\(x\)</span>, tandis que la variation aléatoire autour de cette moyenne est représentée par un résidu <span class="math inline">\(\epsilon\)</span> qui suit une distribution normale.</p>
+<p><span class="math display">\[y = \beta_0 + \beta_1 x + \epsilon\]</span></p>
+<p><span class="math display">\[\epsilon \sim N(0, \sigma)\]</span></p>
+<p><em>Note</em>: Les concepts présentés ici s’appliquent autant à une régression linéaire multiple, mais le cas d’un prédicteur unique est plus simple à illustrer.</p>
+<p>Les coefficients <span class="math inline">\(\beta_0\)</span> et <span class="math inline">\(\beta_1\)</span> sont estimés par la méthode des moindres carrés, c’est-à-dire qu’on vise à minimiser la somme des résidus au carré pour les <span class="math inline">\(n\)</span> observations:</p>
+<p><span class="math display">\[\sum_{i=1}^n \hat{\epsilon_i}^2 = \sum_i^n \left( y_i - \hat{\beta_0} - \hat{\beta_1} x \right)^2\]</span></p>
+<p>Ici <span class="math inline">\(\hat{\epsilon_i}\)</span> est l’estimé de la valeur du résidu <span class="math inline">\(i\)</span> en fonction de la valeur estimée des coefficients.</p>
+<p>Pour une régression linéaire, l’influence d’une observation sur l’estimé des coefficients dépend de deux facteurs: la taille du résidu de cette observation, <span class="math inline">\(\hat{\epsilon_i}\)</span>, ainsi que le positionnement de <span class="math inline">\(x_i\)</span>. Pour un même <span class="math inline">\(x_i\)</span>, les résidus <span class="math inline">\(\hat{\epsilon_i}\)</span> plus extrêmes ont une plus grande influence; pour une même taille de résidu, ceux correspondant à une valeur de <span class="math inline">\(x_i\)</span> plus extrême ont aussi une plus grande influence, comme le montre le graphique ci-dessous.</p>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Dans les deux cas, le point en orange possède le même résidu, soit <span class="math inline">\(\epsilon = -20\)</span>. Cependant, celui placé près de la limite supérieure de <span class="math inline">\(x\)</span> (panneau droit) affecte davantage l’estimé de la pente <span class="math inline">\(\hat{\beta_1}\)</span> (ligne orange = avec ce point; ligne grise pointillée = sans ce point).</p>
+<p>Les résidus situés près des extrêmes de <span class="math inline">\(x\)</span> exercent un grand effet de levier (<em>leverage</em>) sur la droite de régression. Puisque la droite de régression passe toujours par le centre de gravité du nuage de points, <span class="math inline">\((\bar{x}, \bar{y})\)</span>, un résidu situé plus loin du centre fait davantage “pivoter” la droite dans sa direction.</p>
+<p>La <strong>distance de Cook</strong> mesure l’influence d’un point sur l’ajustement du modèle de régression; elle tient compte à la fois de la magnitude de <span class="math inline">\(\hat{\epsilon_i}\)</span> et de son effet de levier en fonction de la position en <span class="math inline">\(x\)</span>. Généralement, une distance de Cook supérieure à 1 indique une observation ayant une grande influence.</p>
+</div>
+<div id="exemple" class="section level2">
+<h2>Exemple</h2>
+<p>Le jeu de données <code>Animals2</code> inclus avec le package <em>robustbase</em> contient des mesures de la masse corporelle (<em>body</em>, en kg) et de la masse du cerveau (<em>brain</em>, en g) pour 65 espèces animales.</p>
+<pre class="r"><code>library(robustbase)
+data(Animals2)
+str(Animals2)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    65 obs. of  2 variables:
+##  $ body : num  1.35 465 36.33 27.66 1.04 ...
+##  $ brain: num  8.1 423 119.5 115 5.5 ...</code></pre>
+<p>La relation allométrique entre ces deux grandeurs est visible sur un graphique log-log.</p>
+<pre class="r"><code>ggplot(Animals2, aes(x = body, y = brain)) +
+    geom_point() +
+    scale_x_log10() +
+    scale_y_log10()</code></pre>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Tous les animaux dans ce jeu de données sont des mammifères, excepté trois qui sont des dinosaures. Il s’agit des trois observations avec la masse corporelle la plus grande, mais donc la masse du cerveau se retrouve sous la tendance générale.</p>
+<p>Dans une analyse statistique, les valeurs aberrantes (<em>outliers</em>) peuvent être exclues si nous avons des informations indépendantes indiquant que les mesures sont incorrectes, ou qu’elles proviennent d’une population différente du reste des observations. Puisqu’il est raisonnable de croire que la relation allométrique diffère entre les mammifères et les dinosaures, il serait justifié d’exclure ces derniers avant d’effectuer la régression. Pour les besoins du cours, nous supposerons qu’il n’y a pas de raison <em>a priori</em> d’exclure ces valeurs.</p>
+<p>Une régression linéaire basée sur l’ensemble des données donne une pente de 0.59 pour <em>log(brain)</em> en fonction de <em>log(body)</em>.</p>
+<pre class="r"><code>lm_ani &lt;- lm(log(brain) ~ log(body), Animals2)
+summary(lm_ani)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log(brain) ~ log(body), data = Animals2)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.8592 -0.5075  0.1550  0.6410  2.5724 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.17169    0.16203   13.40   &lt;2e-16 ***
+## log(body)    0.59152    0.04117   14.37   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.172 on 63 degrees of freedom
+## Multiple R-squared:  0.7662, Adjusted R-squared:  0.7625 
+## F-statistic: 206.4 on 1 and 63 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Dans les graphiques de diagnostic d’une régression, R indique automatiquement les numéros ou noms des rangées correspondant aux valeurs extrêmes. Dans ce cas-ci, chaque rangée du jeu de données est identifiée du nom de l’animal.</p>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Le 4e graphique, <em>Residuals vs. Leverage</em>, permet d’identifier les points avec une forte influence. Les lignes pointillées démarquent les seuils de 0.5 et 1 pour la distance de Cook. Ici, aucun des trois points extrêmes ne dépasse 1, mais leur influence est supérieure de beaucoup à celle du reste des points.</p>
+<p>En comparaison, la régression ignorant les trois données extrêmes donne une pente de 0.75.</p>
+<pre class="r"><code>summary(lm(log(brain) ~ log(body), Animals2[-c(6,16,26),]))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log(brain) ~ log(body), data = Animals2[-c(6, 16, 
+##     26), ])
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.71550 -0.49228 -0.06162  0.43597  1.94829 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.13479    0.09604   22.23   &lt;2e-16 ***
+## log(body)    0.75169    0.02846   26.41   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.6943 on 60 degrees of freedom
+## Multiple R-squared:  0.9208, Adjusted R-squared:  0.9195 
+## F-statistic: 697.4 on 1 and 60 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Le résultat des deux régressions est illustré dans le graphique suivant (courbe orange: avec dinosaures, courbe grise pointillée: sans dinosaures, région ombragée: intervalle de confiance).</p>
+<pre class="r"><code>ggplot(Animals2, aes(x = body, y = brain)) +
+    geom_smooth(data = Animals2[-c(6,16,26),], method = &quot;lm&quot;, 
+                alpha = 0.1, color = &quot;grey30&quot;, linetype = &quot;dashed&quot;) +
+    geom_smooth(method = &quot;lm&quot;, color = &quot;#b3452c&quot;, fill = &quot;#b3452c&quot;) +
+    geom_point() +
+    geom_point(data = Animals2[c(6,16,26),], color = &quot;#b3452c&quot;, size = 2) +
+    scale_x_log10() +
+    scale_y_log10()</code></pre>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Dans les prochaines sections, nous verrons comment réduire l’influence des valeurs extrêmes sans les exclure complètement de l’analyse.</p>
+</div>
+</div>
+<div id="regression-robuste-avec-les-m-estimateurs" class="section level1">
+<h1>Régression robuste avec les M-estimateurs</h1>
+<p>Les M-estimateurs sont des mesures de la tendance centrale conçues en fonction de deux objectifs:</p>
+<ul>
+<li><p>Offrir une meilleure robustesse aux valeurs extrêmes que la moyenne: point de rupture plus élevé et une erreur-type plus faible en présence de valeurs extrêmes.</p></li>
+<li><p>Avoir une erreur-type qui s’approche de celle de la moyenne lorsque la distribution est normale.</p></li>
+</ul>
+<p>Puisqu’un modèle de régression vise à estimer la moyenne d’une variable réponse en fonction de prédicteurs, les M-estimateurs peuvent s’appliquer à ce type de modèle.</p>
+<p>Dans le contexte d’une régression, le calcul d’un M-estimateur procède en assignant des poids à chaque résidu lors de l’application de la méthode des moindres carrés, afin de réduire le poids des résidus plus extrêmes.</p>
+<p>Dans la méthode des moindres carrés pondérés, chaque observation a un poids <span class="math inline">\(w_i\)</span> et on cherche à minimiser:</p>
+<p><span class="math display">\[\sum_{i=1}^n w_i^2 \hat{\epsilon_i}^2\]</span></p>
+<p>Si tous les poids sont égaux à 1, on retrouve la méthode des moindres carrés.</p>
+<p>Un des premiers M-estimateurs proposés a été celui de Huber, qui correspond aux poids <span class="math inline">\(w_i = 1\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert \le k\)</span> et <span class="math inline">\(w_i = k/\vert \hat{\epsilon_i} \vert\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert &gt; k\)</span>. Avec cette méthode, tous les résidus inférieurs à <span class="math inline">\(-k\)</span> ou supérieurs à <span class="math inline">\(k\)</span> comptent comme des résidus égaux à <span class="math inline">\(-k\)</span> ou <span class="math inline">\(k\)</span>, respectivement, pour le calcul des coefficients de la régression.</p>
+<p>Le bipoids de Tukey (<em>Tukey’s biweight</em>) est un autre M-estimateur, qui correspond aux poids <span class="math inline">\(w_i = (1 - (\hat{\epsilon_i}/k)^2)^2\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert \le k\)</span> et <span class="math inline">\(w_i = 0\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert &gt; k\)</span>. Cet estimateur donne donc un poids inférieur à 1 à tous les résidus; ce poids diminue avec la magnitude du résidu pour atteindre 0 si le résidu est inférieur à <span class="math inline">\(-k\)</span> ou supérieur à <span class="math inline">\(k\)</span>, ce qui équivaut à exclure complètement les résidus de cette magnitude.</p>
+<p>Les valeurs de <span class="math inline">\(k\)</span> utilisées le plus couramment sont <span class="math inline">\(k = 1.345\hat{\sigma}\)</span> pour la méthode de Huber et <span class="math inline">\(k = 4.685\hat{\sigma}\)</span> pour le bipoids de Tukey. Ici, <span class="math inline">\(\hat{\sigma}\)</span> est un estimé robuste de l’écart-type des données, dont nous ne discuterons pas dans ce cours. Ces valeurs de <span class="math inline">\(k\)</span> sont choisies afin que l’erreur-type des estimés soit au plus 5% au-dessus de celle obtenue par le modèle classique si la distribution des résidus est normale.</p>
+<p>Le graphique ci-dessous montre le poids accordé pour chacune des deux méthodes en fonction du résidu normalisé par <span class="math inline">\(\sigma\)</span>.</p>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Pour estimer les coefficients d’une régression robuste avec les M-estimateurs, il faut minimiser la somme des carrés des résidus en fonction de poids qui dépendent eux-mêmes des résidus. Afin de résoudre ce problème, l’algorithme utilisé procède par itération (<em>iterative reweighted least squares</em> ou IRLS):</p>
+<ul>
+<li><p>On commence avec une première valeur proposée pour chaque coefficient, puis on calcule les résidus et les poids.</p></li>
+<li><p>On ré-estime les coefficients en minimisant la somme des carrés des résidus pondérés, puis on révise la valeur des résidus et des poids selon ces nouveaux coefficients.</p></li>
+<li><p>On répète l’étape précédente jusqu’à ce que les poids demeurent stables d’une itération à l’autre selon la précision voulue.</p></li>
+</ul>
+<p>Parmi les deux méthodes mentionnées, le bipoids de Tukey tolère mieux les valeurs extrêmes avec grand effet de levier. Cependant, son résultat peut dépendre des valeurs initiales proposées par l’algorithme. La méthode d’estimation “MM” est une variation du M-estimateur qui utilise une autre technique robuste afin de fournir des valeurs initiales au M-estimateur avec bipoids de Tukey. La fonction de régression linéaire robuste <code>lmrob</code> du package <em>robustbase</em> utilise la méthode MM comme choix par défaut.</p>
+<p>Voici le résultat de <code>lmrob</code> appliquée au jeu de données <em>Animals2</em> vu précédemment. La première partie du sommaire des résultats ressemble au tableau obtenu avec <code>lm</code> (estimé des coefficients, erreur-type et test de signification). Ensuite, on obtient un sommaire des poids calculées, puis la liste des paramètres de l’algorithme.</p>
+<pre class="r"><code>lmrob_ani &lt;- lmrob(log(brain) ~ log(body), Animals2)
+summary(lmrob_ani)</code></pre>
+<pre><code>## 
+## Call:
+## lmrob(formula = log(brain) ~ log(body), data = Animals2)
+##  \--&gt; method = &quot;MM&quot;
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -5.56235 -0.52597 -0.04378  0.46510  1.98894 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.11749    0.09146   23.15   &lt;2e-16 ***
+## log(body)    0.74603    0.02065   36.12   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Robust residual standard error: 0.721 
+## Multiple R-squared:  0.9229, Adjusted R-squared:  0.9217 
+## Convergence in 8 IRWLS iterations
+## 
+## Robustness weights: 
+##  3 observations c(6,16,26) are outliers with |weight| = 0 ( &lt; 0.0015); 
+##  10 weights are ~= 1. The remaining 52 ones are summarized as
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.4269  0.8956  0.9512  0.9092  0.9829  0.9986 
+## Algorithmic parameters: 
+##        tuning.chi                bb        tuning.psi        refine.tol 
+##         1.548e+00         5.000e-01         4.685e+00         1.000e-07 
+##           rel.tol         scale.tol         solve.tol       eps.outlier 
+##         1.000e-07         1.000e-10         1.000e-07         1.538e-03 
+##             eps.x warn.limit.reject warn.limit.meanrw 
+##         2.069e-11         5.000e-01         5.000e-01 
+##      nResample         max.it       best.r.s       k.fast.s          k.max 
+##            500             50              2              1            200 
+##    maxit.scale      trace.lev            mts     compute.rd fast.s.large.n 
+##            200              0           1000              0           2000 
+##                   psi           subsampling                   cov 
+##            &quot;bisquare&quot;         &quot;nonsingular&quot;         &quot;.vcov.avar1&quot; 
+## compute.outlier.stats 
+##                  &quot;SM&quot; 
+## seed : int(0)</code></pre>
+<p>La fonction <code>weights</code> permet de consulter les poids associés à chaque observation.</p>
+<pre class="r"><code>ggplot(data = NULL, aes(x = rownames(Animals2), 
+                        y = weights(lmrob_ani, type = &quot;robustness&quot;))) +
+    geom_point() +
+    coord_flip() + # inverse la position des axes x et y
+    theme_bw()</code></pre>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Notez que les trois espèces de dinosaures ont reçu un poids nul, avec pour résultat que la droite de régression est à peu près identique à celle obtenue avec <code>lm</code> en excluant ces trois espèces.</p>
+<pre class="r"><code>ggplot(Animals2, aes(x = body, y = brain)) +
+    geom_smooth(data = Animals2[-c(6,16,26),], method = &quot;lm&quot;, 
+                alpha = 0.1, color = &quot;grey30&quot;, linetype = &quot;dashed&quot;) +
+    geom_smooth(method = &quot;lmrob&quot;, color = &quot;#b3452c&quot;, fill = &quot;#b3452c&quot;) +
+    geom_point() +
+    geom_point(data = Animals2[c(6,16,26),], color = &quot;#b3452c&quot;, size = 2) +
+    scale_x_log10() +
+    scale_y_log10()</code></pre>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<div id="extension-aux-modeles-lineaires-generalises" class="section level2">
+<h2>Extension aux modèles linéaires généralisés</h2>
+<p>Le package <em>robustbase</em> contient aussi une fonction <code>glmrob</code>. Celles-ci applique différentes méthodes semblables aux M-estimateurs pour produire des estimés robustes des coefficients de modèles linéaires généralisés (GLM).</p>
+</div>
+</div>
+<div id="regression-t" class="section level1">
+<h1>Régression <span class="math inline">\(t\)</span></h1>
+<p>Les méthodes présentées dans la section précédente ne sont pas basées sur une forme spécifique de la distribution des résidus autour de la moyenne de <span class="math inline">\(y\)</span>, ce qui contribue à leur généralité.</p>
+<p>Toutefois, certaines approches de modélisation, comme le maximum de vraisemblance vu au dernier cours et les méthodes bayésiennes présentées plus tard cette session, requièrent de spécifier une distribution pour toutes les variables aléatoires du modèle. Dans ce cas, si on souhaite assigner à une variable une distribution semblable à la normale, mais qui permet davantage de valeurs extrêmes, nous pouvons avoir recours à la distribution <span class="math inline">\(t\)</span>.</p>
+<p><em>Rappel</em>: Dans les cours de statistiques, la distribution <span class="math inline">\(t\)</span> de Student est d’abord présentée comme une façon d’estimer la distribution de la moyenne d’un échantillon <span class="math inline">\(\bar{x}\)</span> lorsque la variance de la population est inconnue. Pour un échantillon de <span class="math inline">\(n\)</span> observations, si <span class="math inline">\(\sqrt{n}(\bar{x} - \mu)/\sigma\)</span> suit une distribution normale centrée réduite et qu’on remplace <span class="math inline">\(\sigma\)</span> par son estimé <span class="math inline">\(s\)</span> à partir de l’échantillon, alors <span class="math inline">\(\sqrt{n}(\bar{x} - \mu)/s\)</span> suit une distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n-1\)</span> degrés de liberté.</p>
+<p>Même à variance égale, la distribution <span class="math inline">\(t\)</span> contient plus de valeurs extrêmes que la distribution normale. Cet effet est plus prononcé lorsque le nombre de degrés de liberté est faible: si <span class="math inline">\(df \le 2\)</span>, il y a tant de valeurs extrêmes que la variance ne peut pas être définie. À l’opposé, la distribution <span class="math inline">\(t\)</span> s’approche d’une distribution normale si le nombre de degrés de liberté est élevé.</p>
+<p>Voici par exemple le graphique des distributions <span class="math inline">\(t\)</span> à 3 et 6 degrés de liberté, comparées à une distribution normale centrée réduite. Sur l’échelle logarithmique, on voit que les résidus à <span class="math inline">\(\pm 4\)</span> sont environ 100 fois plus probables pour la distribution <span class="math inline">\(t\)</span> à 3 degrés de liberté que pour la distribution normale.</p>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>De façon plus générale, la distribution <span class="math inline">\(t\)</span> peut servir à modéliser la variation résiduelle dans tout modèle où on veut prévoir davantage de valeurs extrêmes que prévues par la distribution normale.</p>
+<p>La fonction <code>tlm</code> du package <em>hett</em> ajuste un modèle de régression linéaire où les résidus suivent une distribution <span class="math inline">\(t\)</span>, estimant à la fois les coefficients de la régression et le nombre de degrés de liberté de la distribution <span class="math inline">\(t\)</span>. En l’appliquant au jeu de données <em>Animals2</em>, nous obtenons des résultats comparables (en tenant compte de la marge d’erreur) à ceux obtenus dans la section précédente avec <code>lmrob</code>.</p>
+<pre class="r"><code>library(hett)
+treg &lt;- tlm(log(brain) ~ log(body), data = Animals2)
+summary(treg)</code></pre>
+<pre><code>## Location model :
+## 
+## Call:
+## tlm(lform = log(brain) ~ log(body), data = Animals2)
+## 
+## Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -5.37427  -0.53891  -0.01727   0.50930   2.07189  
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.09442    0.10174   20.59   &lt;2e-16 ***
+## log(body)    0.73152    0.02585   28.30   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Scale parameter(s) as estimated below)
+## 
+## 
+## Scale Model :
+## 
+## Call:
+## tlm(lform = log(brain) ~ log(body), data = Animals2)
+## 
+## Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.9991  -1.6948  -0.4031   0.8272   5.7108  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -1.0180     0.2481  -4.104 4.07e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Scale parameter taken to be  2 )
+## 
+## 
+## Est. degrees of freedom parameter:  3
+## Standard error for d.o.f:  NA
+## No. of iterations of model : 7 in 0
+## Heteroscedastic t Likelihood : -87.07231</code></pre>
+<p>L’estimé du nombre de degrés de liberté est de 3. Cependant, notez que le nombre de degrés de liberté est difficile à estimer précisément et la fonction <code>tlm</code> n’offre pas d’intervalle de confiance pour cette valeur.</p>
+</div>
+<div id="regression-quantile" class="section level1">
+<h1>Régression quantile</h1>
+<p>Au début du cours, nous avions présenté la médiane comme un exemple de statistique robuste aux valeurs extrêmes. Par définition, la probabilité qu’une variable <span class="math inline">\(y\)</span> soit inférieure ou égale à sa médiane est de 50%; la médiane est donc un <em>quantile</em> associé à une probabilité cumulative de 0.5. Les quantiles autres que la médiane sont aussi des statistiques robustes, bien que leur point de rupture soit moins élevé. Par exemple, un quantile associé à une probabilité de 0.1 ou 0.9 a un point de rupture correspondant à 10% de valeurs extrêmes.</p>
+<p>Plutôt que de modéliser la moyenne d’une variable réponse en fonction de prédicteurs, la régression quantile modélise un ou plusieurs quantiles de la réponse en fonction des mêmes prédicteurs. Il peut donc s’agir d’une méthode de régression robuste si on remplace la moyenne par la médiane, mais la régression quantile a d’autres utilités:</p>
+<ul>
+<li>Modéliser une variable réponse dont la variance n’est pas homogène; dans ce cas, la distance entre les quantiles varie en fonction de la valeur des prédicteurs. Un exemple bien connu de régression quantile est la courbe de croissance des enfants qui représente différents quantiles de la distribution de taille ou de poids en fonction de l’âge.</li>
+</ul>
+<p><img src="../images/courbe_croissance.jpg" /></p>
+<ul>
+<li>Représenter un cas où un prédicteur influence les extrêmes de la distribution davantage que son centre. Comme l’explique l’article de Cade et Noon (2003) cité dans les références, cette dernière application est utile dans le cas de systèmes complexes où la réponse est parfois limitée par les facteurs mesurés, parfois par d’autres facteurs non-mesurés. Dans ce cas, le prédicteur limite le “plafond” de la réponse, mais exerce moins de contrôle sur son “plancher” si d’autres facteurs sont alors limitants, tel qu’illustré dans le graphique ci-dessous.</li>
+</ul>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>Nous utiliserons la fonction <code>rq</code> du package <em>quantreg</em> pour effectuer une régression quantile.</p>
+<p>Le jeu de données <code>Mammals</code> inclus avec ce package montre la vitesse maximale connue (en km/h) de mammifères en fonction de leur poids. Puisque l’échelle de poids varie sur plusieurs ordres de grandeur, il est plus utile de représenter son logarithme.</p>
+<pre class="r"><code>library(quantreg)
+data(Mammals)
+ggplot(Mammals, aes(x = log(weight), y = speed)) +
+    geom_point()</code></pre>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>D’après ce graphique, il semble que le poids pourrait agir comme facteur limitant pour la vitesse des mammifères, donc son effet devrait être davantage ressenti sur les quantiles élevés de la distribution.</p>
+<p>Pour exécuter une régression quantile <code>rq</code>, on spécifie la formule du modèle et le jeu de données source <code>data</code> comme dans une régression linéaire. Entre ces deux arguments, nous devons aussi spécifier dans l’argument <code>tau</code> quels quantiles seront modélisés. Ici, nous modéliserons les 1er et 9e déciles (0.1 et 0.9), les 1er et 3e quartiles (0.25 et 0.75) ainsi que la médiane.</p>
+<pre class="r"><code>qreg &lt;- rq(speed ~ log(weight), tau = c(0.10, 0.25, 0.5, 0.75, 0.9), 
+           data = Mammals)</code></pre>
+<p>Le sommaire du résultat présente les coefficients de la régression et leur intervalle de confiance pour chaque quantile.</p>
+<pre class="r"><code>summary(qreg)</code></pre>
+<pre><code>## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.1
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 13.30752      8.74691 14.56745
+## log(weight)  2.34755      1.62337  3.26536
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.25
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 20.81692     18.62656 23.71090
+## log(weight)  3.84176      3.32131  5.06629
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.5
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 31.19403     28.66333 33.18496
+## log(weight)  5.54939      4.68512  5.95244
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.75
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 41.69078     38.59558 59.42984
+## log(weight)  6.93824      2.56935  7.93761
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.9
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 55.82662     49.74724 83.80662
+## log(weight)  7.10732     -3.05803 11.32294</code></pre>
+<p>En appliquant la fonction <code>plot</code> à ce sommaire, nous pouvons voir la tendance de chaque coefficient du modèle en fonction des quantiles. À titre de comparaison, l’estimé du coefficient pour la moyenne (modèle linéaire <code>lm</code>) est représenté par une ligne rouge, avec un intervalle de confiance en pointillé.</p>
+<pre class="r"><code>plot(summary(qreg))</code></pre>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>La fonction <code>predict</code> appliquée au résultat produit une matrice, où chaque rangée correspond à la rangée correspondante des données originales et chaque colonne représente la prédiction des quantiles de la réponse (dans l’ordre) pour une rangée donnée.</p>
+<pre class="r"><code>qpred &lt;- predict(qreg)
+head(qpred)</code></pre>
+<pre><code>##          [,1]     [,2]     [,3]      [,4]      [,5]
+## [1,] 33.73009 54.23840 79.47103 102.05010 117.65681
+## [2,] 32.77824 52.68070 77.22095  99.23689 114.77505
+## [3,] 32.10289 51.57549 75.62449  97.24088 112.73040
+## [4,] 30.31373 48.64753 71.39507  91.95297 107.31363
+## [5,] 27.37280 43.83471 64.44300  83.26100  98.40985
+## [6,] 27.05933 43.32171 63.70199  82.33453  97.46080</code></pre>
+<p>Pour visualiser rapidement le résultat d’une régression quantile avec un prédicteur, nous pouvons faire appel à la fonction <code>geom_quantile</code> de <em>ggplot2</em>.</p>
+<pre class="r"><code>ggplot(Mammals, aes(x = weight, y = speed)) +
+    geom_point() +
+    geom_quantile(quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9), color = &quot;#b3452c&quot;) +
+    scale_x_log10()</code></pre>
+<pre><code>## Smoothing formula not specified. Using: y ~ x</code></pre>
+<p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+</div>
+<div id="resume" class="section level1">
+<h1>Résumé</h1>
+<ul>
+<li><p>La moyenne et la variance sont des statistiques sensibles aux valeurs extrêmes.</p></li>
+<li><p>Pour une régression linéaire, l’influence d’une observation augmente si son résidu est grand (valeur extrême de <span class="math inline">\(y\)</span>) ou si elle a un grand effet de levier (valeur extrême de <span class="math inline">\(x\)</span>). La distance de Cook mesure l’effet combiné de ces deux facteurs.</p></li>
+<li><p>La régression robuste basée sur les M-estimateurs (fonction <code>lmrob</code> du package <em>robustbase</em>) produit des estimés presque aussi précis que la régression linéaire si les suppositions de celle-ci sont respectées, tout en étant beaucoup moins sensibles à la présence de quelques valeurs extrêmes.</p></li>
+<li><p>La distribution <span class="math inline">\(t\)</span> offre une méthode paramétrique pour représenter une variable comportant davantage de valeurs extrêmes que la distribution normale. La fonction <code>tlm</code> du package <em>hett</em> ajuste un modèle de régression linéaire où la réponse suit une distribution <span class="math inline">\(t\)</span> plutôt que normale autour de sa valeur moyenne.</p></li>
+<li><p>La régression quantile modélise l’effet d’un prédicteur sur différents quantiles de la distribution de la réponse.</p></li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<ul>
+<li><p>Cade, B.S. et Noon, B.R. (2003) A gentle introduction to quantile regression for ecologists. <em>Frontiers in Ecology and the Environment</em> 1: 412–420.</p></li>
+<li><p>Fox, J. (2002) Robust Regression. Appendix to <em>An R and S-PLUS Companion to Applied Regression</em>. Sage Publications, Thousands Oaks, USA.</p></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
