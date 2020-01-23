@@ -8,6 +8,8 @@
 
 3. [Maximum de vraisemblance](notes_cours/03-Maximum_vraisemblance.html) ([PDF](notes_cours/03-Maximum_vraisemblance.pdf)) - Données: [galapagos.csv](donnees/galapagos.csv)
 
+4. [Régression robuste aux valeurs extrêmes](notes_cours/04-Regression_robuste.html) ([PDF](notes_cours/04-Regression_robuste.pdf))
+
 ## Exercices
 
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01R-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
