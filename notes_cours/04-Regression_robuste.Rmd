@@ -286,7 +286,7 @@ Le package *robustbase* contient aussi une fonction `glmrob`. Celles-ci applique
 
 # Régression $t$
 
-Les méthodes présentées dans la section précédente ne sont pas basées sur une forme spécifique de la distribution des résidus autour de la moyenne de $y$, ce qui contribue à leur généralité. 
+Les méthodes présentées dans la section précédente ne sont pas basées sur une forme spécifique de la distribution des résidus autour de la valeur attendue de $y$, ce qui contribue à leur généralité. 
 
 Toutefois, certaines approches de modélisation, comme le maximum de vraisemblance vu au dernier cours et les méthodes bayésiennes présentées plus tard cette session, requièrent de spécifier une distribution pour toutes les variables aléatoires du modèle. Dans ce cas, si on souhaite assigner à une variable une distribution semblable à la normale, mais qui permet davantage de valeurs extrêmes, nous pouvons avoir recours à la distribution $t$.
 
@@ -299,29 +299,41 @@ Voici par exemple le graphique des distributions $t$ à 3 et 6 degrés de libert
 ```{r, echo = FALSE}
 p_t_norm <- ggplot(data = NULL, aes(x = c(-4, 4))) +
     labs(x = "y", y = "f(y)") +
-    stat_function(fun = dnorm, geom = "line", aes(color = "Normal"), size = 1) +
+    stat_function(fun = dnorm, geom = "line", aes(color = "Normale"), size = 1) +
     stat_function(fun = dt, args = list(df = 3), geom = "line", aes(color = "t(df=3)"), size = 1) +
     stat_function(fun = dt, args = list(df = 6), geom = "line", aes(color = "t(df=6)"), size = 1) +
     scale_color_manual(name = "Distribution", 
-                       values =c("Normal"="#1b9e77","t(df=6)"="#d95f02",
+                       values =c("Normale"="#1b9e77","t(df=6)"="#d95f02",
                                  "t(df=3)"="#7570b3"),
-                       breaks = c("Normal", "t(df=6)", "t(df=3)"))
+                       breaks = c("Normale", "t(df=6)", "t(df=3)"))
 plot_grid(p_t_norm + scale_y_continuous(expand = c(0, 0), limits = c(0, 0.4)) + labs(x = "y", y = "f(y)") + theme(legend.position = "none"),
           p_t_norm + scale_y_log10() + labs(x = "y", y = "log f(y)"), rel_widths = c(4, 6))
 ```
 
 De façon plus générale, la distribution $t$ peut servir à modéliser la variation résiduelle dans tout modèle où on veut prévoir davantage de valeurs extrêmes que prévues par la distribution normale. 
 
-La fonction `tlm` du package *hett* ajuste un modèle de régression linéaire où les résidus suivent une distribution $t$, estimant à la fois les coefficients de la régression et le nombre de degrés de liberté de la distribution $t$. En l'appliquant au jeu de données *Animals2*, nous obtenons des résultats comparables (en tenant compte de la marge d'erreur) à ceux obtenus dans la section précédente avec `lmrob`.
+La fonction `tlm` du package *hett* ajuste un modèle de régression linéaire:
+
+$$y = \beta_0 + \beta_1 x + ... + \epsilon$$
+
+où les résidus normalisés par un paramètre $\sigma$ suivent une distribution $t$ avec $\nu$ degrés de liberté.
+
+$$\epsilon/\sigma \sim t(\nu)$$
+
+Notez qu'ici $\sigma$ n'est pas égale à l'écart-type des résidus, car la variance de la distribution $t$ est plus grande que celle d'une distribution normale centrée réduite.
+
+En appliquant ce modèle au jeu de données *Animals2*, nous obtenons des coefficients de régression comparables (en tenant compte de la marge d'erreur) à ceux obtenus dans la section précédente avec `lmrob`. Ces résultats de retrouvent dans la section `Location model` du sommaire de `tlm`.
 
 ```{r, warning = FALSE, message = FALSE}
 library(hett)
-treg <- tlm(log(brain) ~ log(body), data = Animals2)
+treg <- tlm(log(brain) ~ log(body), data = Animals2,
+            estDof = TRUE)
 summary(treg)
 ```
 
-L'estimé du nombre de degrés de liberté est de 3. Cependant, notez que le nombre de degrés de liberté est difficile à estimer précisément et la fonction `tlm` n'offre pas d'intervalle de confiance pour cette valeur.
+Il est important de spécifier `estDof = TRUE` pour estimer le nombre de degrés de liberté, plutôt que de supposer une valeur fixe. Cependant, cet estimé risque d'être peu précis sauf si on a beaucoup de données. Ici, le nombre de degrés de liberté est de 2.08, avec une erreur-type de 0.67.
 
+La fonction `tlm` permet aussi à $\sigma$ de varier en fonction des prédicteurs, une option que nous n'utilisons pas ici. Notez que l'`Intercept` sous `Scale model` est un estimé de $\log \sigma^2$.
 
 # Régression quantile
 

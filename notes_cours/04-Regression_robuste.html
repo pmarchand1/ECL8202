@@ -524,30 +524,36 @@ summary(lmrob_ani)</code></pre>
 </div>
 <div id="regression-t" class="section level1">
 <h1>Régression <span class="math inline">\(t\)</span></h1>
-<p>Les méthodes présentées dans la section précédente ne sont pas basées sur une forme spécifique de la distribution des résidus autour de la moyenne de <span class="math inline">\(y\)</span>, ce qui contribue à leur généralité.</p>
+<p>Les méthodes présentées dans la section précédente ne sont pas basées sur une forme spécifique de la distribution des résidus autour de la valeur attendue de <span class="math inline">\(y\)</span>, ce qui contribue à leur généralité.</p>
 <p>Toutefois, certaines approches de modélisation, comme le maximum de vraisemblance vu au dernier cours et les méthodes bayésiennes présentées plus tard cette session, requièrent de spécifier une distribution pour toutes les variables aléatoires du modèle. Dans ce cas, si on souhaite assigner à une variable une distribution semblable à la normale, mais qui permet davantage de valeurs extrêmes, nous pouvons avoir recours à la distribution <span class="math inline">\(t\)</span>.</p>
 <p><em>Rappel</em>: Dans les cours de statistiques, la distribution <span class="math inline">\(t\)</span> de Student est d’abord présentée comme une façon d’estimer la distribution de la moyenne d’un échantillon <span class="math inline">\(\bar{x}\)</span> lorsque la variance de la population est inconnue. Pour un échantillon de <span class="math inline">\(n\)</span> observations, si <span class="math inline">\(\sqrt{n}(\bar{x} - \mu)/\sigma\)</span> suit une distribution normale centrée réduite et qu’on remplace <span class="math inline">\(\sigma\)</span> par son estimé <span class="math inline">\(s\)</span> à partir de l’échantillon, alors <span class="math inline">\(\sqrt{n}(\bar{x} - \mu)/s\)</span> suit une distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n-1\)</span> degrés de liberté.</p>
 <p>Même à variance égale, la distribution <span class="math inline">\(t\)</span> contient plus de valeurs extrêmes que la distribution normale. Cet effet est plus prononcé lorsque le nombre de degrés de liberté est faible: si <span class="math inline">\(df \le 2\)</span>, il y a tant de valeurs extrêmes que la variance ne peut pas être définie. À l’opposé, la distribution <span class="math inline">\(t\)</span> s’approche d’une distribution normale si le nombre de degrés de liberté est élevé.</p>
 <p>Voici par exemple le graphique des distributions <span class="math inline">\(t\)</span> à 3 et 6 degrés de liberté, comparées à une distribution normale centrée réduite. Sur l’échelle logarithmique, on voit que les résidus à <span class="math inline">\(\pm 4\)</span> sont environ 100 fois plus probables pour la distribution <span class="math inline">\(t\)</span> à 3 degrés de liberté que pour la distribution normale.</p>
 <p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <p>De façon plus générale, la distribution <span class="math inline">\(t\)</span> peut servir à modéliser la variation résiduelle dans tout modèle où on veut prévoir davantage de valeurs extrêmes que prévues par la distribution normale.</p>
-<p>La fonction <code>tlm</code> du package <em>hett</em> ajuste un modèle de régression linéaire où les résidus suivent une distribution <span class="math inline">\(t\)</span>, estimant à la fois les coefficients de la régression et le nombre de degrés de liberté de la distribution <span class="math inline">\(t\)</span>. En l’appliquant au jeu de données <em>Animals2</em>, nous obtenons des résultats comparables (en tenant compte de la marge d’erreur) à ceux obtenus dans la section précédente avec <code>lmrob</code>.</p>
+<p>La fonction <code>tlm</code> du package <em>hett</em> ajuste un modèle de régression linéaire:</p>
+<p><span class="math display">\[y = \beta_0 + \beta_1 x + ... + \epsilon\]</span></p>
+<p>où les résidus normalisés par un paramètre <span class="math inline">\(\sigma\)</span> suivent une distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(\nu\)</span> degrés de liberté.</p>
+<p><span class="math display">\[\epsilon/\sigma \sim t(\nu)\]</span></p>
+<p>Notez qu’ici <span class="math inline">\(\sigma\)</span> n’est pas égale à l’écart-type des résidus, car la variance de la distribution <span class="math inline">\(t\)</span> est plus grande que celle d’une distribution normale centrée réduite.</p>
+<p>En appliquant ce modèle au jeu de données <em>Animals2</em>, nous obtenons des coefficients de régression comparables (en tenant compte de la marge d’erreur) à ceux obtenus dans la section précédente avec <code>lmrob</code>. Ces résultats de retrouvent dans la section <code>Location model</code> du sommaire de <code>tlm</code>.</p>
 <pre class="r"><code>library(hett)
-treg &lt;- tlm(log(brain) ~ log(body), data = Animals2)
+treg &lt;- tlm(log(brain) ~ log(body), data = Animals2,
+            estDof = TRUE)
 summary(treg)</code></pre>
 <pre><code>## Location model :
 ## 
 ## Call:
-## tlm(lform = log(brain) ~ log(body), data = Animals2)
+## tlm(lform = log(brain) ~ log(body), data = Animals2, estDof = TRUE)
 ## 
 ## Residuals: 
-##      Min        1Q    Median        3Q       Max  
-## -5.37427  -0.53891  -0.01727   0.50930   2.07189  
+##        Min          1Q      Median          3Q         Max  
+## -5.415e+00  -5.039e-01  -8.369e-07   5.181e-01   2.067e+00  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  2.09442    0.10174   20.59   &lt;2e-16 ***
-## log(body)    0.73152    0.02585   28.30   &lt;2e-16 ***
+## (Intercept)  2.07829    0.09628   21.59   &lt;2e-16 ***
+## log(body)    0.73653    0.02447   30.11   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -557,26 +563,27 @@ summary(treg)</code></pre>
 ## Scale Model :
 ## 
 ## Call:
-## tlm(lform = log(brain) ~ log(body), data = Animals2)
+## tlm(lform = log(brain) ~ log(body), data = Animals2, estDof = TRUE)
 ## 
 ## Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.9991  -1.6948  -0.4031   0.8272   5.7108  
+## -2.4484  -1.9795  -0.1566   1.2246   4.9181  
 ## 
 ## Coefficients:
 ##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  -1.0180     0.2481  -4.104 4.07e-05 ***
+## (Intercept)  -1.2244     0.2745  -4.461 8.17e-06 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Scale parameter taken to be  2 )
 ## 
 ## 
-## Est. degrees of freedom parameter:  3
-## Standard error for d.o.f:  NA
-## No. of iterations of model : 7 in 0
-## Heteroscedastic t Likelihood : -87.07231</code></pre>
-<p>L’estimé du nombre de degrés de liberté est de 3. Cependant, notez que le nombre de degrés de liberté est difficile à estimer précisément et la fonction <code>tlm</code> n’offre pas d’intervalle de confiance pour cette valeur.</p>
+## Est. degrees of freedom parameter:  2.071194
+## Standard error for d.o.f:  0.6678805
+## No. of iterations of model : 8 in 0.03
+## Heteroscedastic t Likelihood : -86.3654</code></pre>
+<p>Il est important de spécifier <code>estDof = TRUE</code> pour estimer le nombre de degrés de liberté, plutôt que de supposer une valeur fixe. Cependant, cet estimé risque d’être peu précis sauf si on a beaucoup de données. Ici, le nombre de degrés de liberté est de 2.08, avec une erreur-type de 0.67.</p>
+<p>La fonction <code>tlm</code> permet aussi à <span class="math inline">\(\sigma\)</span> de varier en fonction des prédicteurs, une option que nous n’utilisons pas ici. Notez que l’<code>Intercept</code> sous <code>Scale model</code> est un estimé de <span class="math inline">\(\log \sigma^2\)</span>.</p>
 </div>
 <div id="regression-quantile" class="section level1">
 <h1>Régression quantile</h1>

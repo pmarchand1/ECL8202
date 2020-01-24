@@ -1,0 +1,737 @@
+---
+title: "Régression robuste aux valeurs extrêmes"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 16) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+```
+
+
+# Introduction
+
+- Modèles linéaires classiques: effets estimés en comparant des moyennes, incertitude basée sur la variance résiduelle.
+
+--
+
+- Ces méthodes sont optimales lorsque la variation aléatoire est normalement distribuée, mais elles réagissent fortement à la présence de valeurs extrêmes.
+
+--
+
+- Dans ce cours: différentes méthodes de régression linéaire plus robustes aux valeurs extrêmes.
+
+---
+
+# Contenu du cours
+
+- Sensibilité aux valeurs extrêmes
+
+- Régression robuste avec les M-estimateurs
+
+- Régression $t$
+
+- Régression quantile
+
+---
+
+class: inverse, center, middle
+
+# Sensibilité aux valeurs extrêmes
+
+---
+
+# Mesures de tendance centrale
+
+- Moyenne: équilibre la somme des écarts positifs et négatifs.
+
+- Médiane: équilibre le nombre d'observations de part et d'autre.
+
+--
+
+- Conséquence: La moyenne est plus sensible à l'ajout d'une valeur extrême.
+
+---
+
+# Exemple
+
+Échantillon de 10 valeurs:
+
+`18 29 30 40 43 44 48 49 56 83`
+
+- Médiane = 43.5, Moyenne = 44.
+
+--
+
+On ajoute une valeur de 580:
+
+- Médiane = 44, Moyenne = 93.
+
+---
+
+# Point de rupture
+
+Combien de valeurs extrêmes, si elles sont assez extrêmes, peuvent affecter sans limite la valeur de l'estimé?
+
+--
+
+- Généralement exprimé comme une fraction du nombre d'observations.
+
+- Point de rupture de $1/n$ pour la moyenne (une observation extrême), 0.5 pour la médiane.
+
+---
+
+# Précision et valeurs extrêmes
+
+### Exemple
+
+.pull-left[
+
+```{r, echo = FALSE}
+p1 <- ggplot(NULL, aes(x = c(-4, 4))) +
+    stat_function(fun = dnorm, geom = "line", color = "#1b9e77", size = 1) +
+    stat_function(fun = function(x) 0.95*dnorm(x, 0 ,1) + 0.05*dnorm(x, 0, 5), geom = "line", color = "#d95f02", size = 1)
+    
+
+plot_grid(p1 + scale_y_continuous(expand = c(0, 0), limits = c(0, 0.4)) +
+              labs(x = "y", y = "f(y)"),
+          p1 + scale_y_log10() + labs(x = "y", y = "log f(y)"))
+```
+
+]
+
+.pull-right[
+
+- Courbe verte: $N(0, 1)$
+
+- Courbe orange: mélange de 95% suivant $N(0, 1)$, 5% suivant $N(0, 5)$
+
+]
+
+---
+
+# Précision et valeurs extrêmes
+
+- Simulons 1000 échantillons avec $n = 100$ pour chaque distribution.
+
+```{r, echo = TRUE}
+set.seed(82)
+norm_samp <- replicate(1000, rnorm(100)) # par défaut, mean = 0, sd = 1
+mix_samp <- replicate(1000, rnorm(100, mean = 0, sd = c(rep(1, 95), rep(5, 5))))
+```
+
+--
+
+.pull-left[
+
+*Moyenne*
+
+```{r, echo = TRUE}
+sd(apply(norm_samp, 2, mean))
+sd(apply(mix_samp, 2, mean))
+```
+
+]
+
+.pull-right[
+
+*Médiane*
+
+```{r, echo = TRUE}
+sd(apply(norm_samp, 2, median))
+sd(apply(mix_samp, 2, median))
+```
+
+]
+
+---
+
+# Précision et valeurs extrêmes
+
+- Supposons qu'on compare deux groupes qui diffèrent par leur moyenne et leur médiane et que moyenne = médiane pour chacun (distribution symétrique).
+
+--
+
+- Distribution normale: plus facile de détecter une différence significative entre moyennes (test $t$). 
+
+- En présence de valeurs extrêmes: plus facile de détecter une différence entre médianes.
+
+--
+
+- M-estimateurs: approchent l'efficacité de la moyenne pour la distribution normale tout en étant plus robustes aux valeurs extrêmes.
+
+---
+
+# Valeurs extrêmes et régression
+
+Modèle de régression linéaire simple
+
+$$y = \beta_0 + \beta_1 x + \epsilon$$
+
+$$\epsilon \sim N(0, \sigma)$$
+
+--
+
+Méthode des moindres carrés
+
+$$\sum_{i=1}^n \hat{\epsilon_i}^2 = \sum_i^n \left( y_i - \hat{\beta_0} - \hat{\beta_1} x \right)^2$$
+
+- $\hat{\epsilon_i}$: Estimé du résidu de l'observation $i$. 
+
+---
+
+# Valeurs extrêmes et régression
+
+- Observations ont plus d'influence sur la droite de régression si $\hat{\epsilon_i}$ est élevé ou si $x_i$ est élevé.
+
+- Exemple: $\epsilon = -20$ pour le point orangé:
+
+```{r, echo = FALSE}
+df_rand <- data.frame(x = runif(20, 0, 10)) %>%
+    mutate(y = 2*x + 5*rnorm(20) + 14)
+
+df2 <- rbind(df_rand, data.frame(x = 6, y = 6))
+p_df2 <- ggplot(df2, aes(x = x, y = y)) +
+    geom_smooth(data = df_rand, method = "lm", se = FALSE, alpha = 0.1, color = "grey30", linetype = "dashed") +
+    geom_smooth(method = "lm", se = FALSE, color = "#b3452c") +
+    geom_point() +
+    geom_point(aes(x = 6, y = 6), color = "#b3452c", size = 2) +
+    scale_y_continuous(limits = c(0, 40))
+
+df3 <- rbind(df_rand, data.frame(x = 12, y = 18))
+p_df3 <- ggplot(df3, aes(x = x, y = y)) +
+    geom_smooth(data = df_rand, method = "lm", se = FALSE, alpha = 0.1, color = "grey30", linetype = "dashed") +
+    geom_smooth(method = "lm", se = FALSE, color = "#b3452c") +
+    geom_point() +
+    geom_point(aes(x = 12, y = 18), color = "#b3452c", size = 2) +
+    scale_y_continuous(limits = c(0, 40))
+plot_grid(p_df2, p_df3)
+```
+
+---
+
+# Valeurs extrêmes et régression
+
+- Effet de levier (*leverage*): observations près des extrêmes de $x$ exercent une plus grande influence sur la droite de régression.
+
+--
+
+- Distance de Cook: mesure l'influence d'une observation en tenant compte à la fois de la magnitude du résidu et de l'extrémité des prédicteurs. Une distance >1 indique une observation très influente.
+
+---
+
+# Exemple
+
+Jeu de données `Animals2` inclus avec le package *robustbase*: masse du cerveau d'espèces animales (*brain*, en g) en fonction de leur masse corporelle (*body*, en kg).
+
+.pull-left[
+
+```{r}
+library(robustbase)
+data(Animals2)
+
+ggplot(Animals2, aes(x = body, y = brain)) +
+    geom_point() +
+    scale_x_log10() +
+    scale_y_log10()
+```
+
+]
+
+--
+
+.pull-right[
+
+- Tous des mammifères sauf 3 dinosaures (points les plus à droite).
+
+]
+
+---
+
+# Régression linéaire
+
+- Pente de 0.59 avec l'ensemble des données.
+
+.code50[
+```{r, echo = TRUE}
+lm_ani <- lm(log(brain) ~ log(body), Animals2)
+summary(lm_ani)
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+```{r, echo = FALSE, fig.dim = c(9, 6)}
+par(mfrow = c(2,2))
+plot(lm_ani)
+par(mfrow = c(1,1))
+```
+
+---
+
+# Ignorer les valeurs extrêmes
+
+- Pente de 0.75 si on ignore les 3 valeurs extrêmes.
+
+.code50[
+```{r, echo  = TRUE}
+summary(lm(log(brain) ~ log(body), Animals2[-c(6,16,26),]))
+```
+]
+
+---
+
+# Comparaison
+
+```{r}
+ggplot(Animals2, aes(x = body, y = brain)) +
+    geom_smooth(data = Animals2[-c(6,16,26),], method = "lm", 
+                alpha = 0.1, color = "grey30", linetype = "dashed") +
+    geom_smooth(method = "lm", color = "#b3452c", fill = "#b3452c") +
+    geom_point() +
+    geom_point(data = Animals2[c(6,16,26),], color = "#b3452c", size = 2) +
+    scale_x_log10() +
+    scale_y_log10()
+```
+
+---
+
+class: inverse, center, middle
+
+# Régression robuste avec les M-estimateurs
+
+---
+
+# M-estimateurs
+
+Les M-estimateurs sont des mesures de la tendance centrale qui:
+
+- offrent une meilleure robustesse aux valeurs extrêmes que la moyenne;
+
+- ont une erreur-type qui s'approche de celle de la moyenne lorsque la distribution est normale.
+
+--
+
+On peut les utiliser en remplacement à la moyenne dans le cadre d'un modèle de régression.
+
+---
+
+# Méthode des moindres carrés pondérés
+
+- Dans une régression, le calcul des M-estimateurs est équivalent à donner un poids à chaque observation en fonction de son résidu, pour réduire le poids des résidus plus extrêmes.
+
+--
+
+- Méthode des moindres carrés pondérés: 
+
+$$\sum_{i=1}^n w_i^2 \hat{\epsilon_i}^2$$
+
+- $w_i$ est le poids de l'observation $i$.
+
+---
+
+# M-estimateurs
+
+.pull-left[
+
+### Méthode de Huber
+
+- $w_i = 1$, si $\vert \hat{\epsilon_i} \vert \le k$
+
+- $w_i = k/\vert \hat{\epsilon_i} \vert$, si $\vert \hat{\epsilon_i} \vert > k$
+
+- Choix habituel: $k = 1.345\hat{\sigma}$
+
+]
+
+--
+
+.pull-right[
+
+### Bipoids de Tukey
+
+- $w_i = (1 - (\hat{\epsilon_i}/k)^2)^2$, si $\vert \hat{\epsilon_i} \vert \le k$ 
+
+- $w_i = 0$, si $\vert \hat{\epsilon_i} \vert > k$
+
+- Choix habituel: $k = 4.685\hat{\sigma}$
+
+]
+
+---
+
+# Poids en fonction des résidus
+
+```{r, echo = FALSE}
+ggplot(data = NULL, aes(x = c(-6, 6))) +
+    labs(x = expression(epsilon[i]/sigma), y = expression(w[i])) +
+    stat_function(fun = function(x) ifelse(x >= -1.345 & x <= 1.345, 1, 1.345/abs(x)), geom = "line", aes(color = "Huber"), size = 1) +
+    stat_function(fun = function(x) ifelse(x>= -4.685 & x <= 4.685, (1 - (x/4.685)^2)^2, 0), geom = "line", aes(color = "Tukey"), size = 1) +
+    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_color_manual(name = "Méthode", 
+         values = c("Huber"="#1b9e77","Tukey"="#d95f02"))
+```
+
+---
+
+# Régression avec les M-estimateurs
+
+Algorithme itératif (*iterative reweighted least squares*)
+
+- À partir d'une valeur initiale pour chaque coefficient, calculer les résidus et les poids. 
+
+--
+
+- Ré-estimer les coefficients en minimisant la somme des carrés des résidus pondérés, puis réviser la valeur des résidus et des poids selon ces nouveaux coefficients.
+
+--
+
+- Répéter l'étape précédente jusqu'à ce que les poids demeurent stables.
+
+---
+
+# Régression avec les M-estimateurs
+
+- Le bipoids de Tukey est plus résistant aux valeurs extrêmes avec grand effet de levier, mais son résultat dépend des valeurs initiales choisies.
+
+--
+
+- Méthode MM: régression avec un M-estimateur, où les valeurs initiales sont basées sur une autre méthode robuste.
+
+- Méthode MM avec bipoids de Tukey: choix par défaut de la fonction `lmrob` du package *robustbase*.
+
+---
+
+# Application dans R
+
+.code50[
+```{r, echo = TRUE, eval = FALSE}
+lmrob_ani <- lmrob(log(brain) ~ log(body), Animals2)
+summary(lmrob_ani)
+```
+
+```{r}
+lmrob_ani <- lmrob(log(brain) ~ log(body), Animals2)
+print(summary(lmrob_ani), showAlgo = FALSE)
+```
+
+]
+
+---
+
+# Visualiser les poids
+
+.code50[
+```{r, echo = TRUE, fig.dim = c(9, 6)}
+ggplot(data = NULL, aes(x = rownames(Animals2), 
+                        y = weights(lmrob_ani, type = "robustness"))) +
+    geom_point() +
+    coord_flip() + # inverse la position des axes x et y
+    theme_bw()
+```
+]
+
+---
+
+# Comparaison
+
+```{r}
+ggplot(Animals2, aes(x = body, y = brain)) +
+    geom_smooth(data = Animals2[-c(6,16,26),], method = "lm", 
+                alpha = 0.1, color = "grey30", linetype = "dashed") +
+    geom_smooth(method = "lmrob", color = "#b3452c", fill = "#b3452c") +
+    geom_point() +
+    geom_point(data = Animals2[c(6,16,26),], color = "#b3452c", size = 2) +
+    scale_x_log10() +
+    scale_y_log10()
+```
+
+---
+
+# Extension aux modèles généralisés
+
+- Fonction `glmrob` dans *robustbase*: méthodes semblables aux M-estimateurs pour produire des estimés robustes des coefficients de modèles linéaires généralisés (GLM).
+
+---
+
+class: inverse, center, middle
+
+# Régression $t$
+
+---
+
+# Régression robuste paramétrique
+
+- La régression robuste basée sur les M-estimateurs ne suppose pas une distribution spécifique des résidus autour de la valeur attendue de $y$.
+
+--
+
+- Certaines approches de modélisation (ex.: maximum de vraisemblance, modèles bayésiens) requièrent de spécifier la distribution de chaque variable aléatoire.
+
+--
+
+- La distribution $t$ de Student est semblable à la normale, mais prévoit davantage de valeurs extrêmes.
+
+---
+
+# Distribution $t$
+
+- Plus souvent utilisée pour représenter la distribution de la moyenne d'un échantillon, $\bar{x}$, si l'écart-type de la population est inconnue.
+
+--
+
+$$t = \frac{\bar{x} - \mu}{s/\sqrt{n}}$$
+
+- La statistique $t$ suit une distribution $t$ avec $n-1$ degrés de liberté.
+
+--
+
+- Même à variance égale, la distribution $t$ assigne une probabilité plus grande aux valeurs extrêmes que la distribution normale.
+
+---
+
+# Distribution $t$
+
+```{r, echo = FALSE, fig.dim = c(10, 6)}
+p_t_norm <- ggplot(data = NULL, aes(x = c(-4, 4))) +
+    labs(x = "y", y = "f(y)") +
+    stat_function(fun = dnorm, geom = "line", aes(color = "Normale"), size = 1) +
+    stat_function(fun = dt, args = list(df = 3), geom = "line", aes(color = "t(df=3)"), size = 1) +
+    stat_function(fun = dt, args = list(df = 6), geom = "line", aes(color = "t(df=6)"), size = 1) +
+    scale_color_manual(name = "Distribution", 
+                       values =c("Normale"="#1b9e77","t(df=6)"="#d95f02",
+                                 "t(df=3)"="#7570b3"),
+                       breaks = c("Normale", "t(df=6)", "t(df=3)"))
+plot_grid(p_t_norm + scale_y_continuous(expand = c(0, 0), limits = c(0, 0.4)) + labs(x = "y", y = "f(y)") + theme(legend.position = "none"),
+          p_t_norm + scale_y_log10() + labs(x = "y", y = "log f(y)"), rel_widths = c(4, 6))
+```
+
+---
+
+# Régression $t$
+
+- La distribution $t$ peut aussi représenter la variation résiduelle d'un modèle où on veut prévoir davantage de valeurs extrêmes qu'une distribution normale.
+
+--
+
+- Modèle de régression $t$:
+
+$$y = \beta_0 + \beta_1 x + ... + \epsilon$$
+
+$$\epsilon/\sigma \sim t(\nu)$$
+
+--
+
+- Fonction `tlm` du package *hett* dans R.
+
+---
+
+# Régression $t$
+
+.code50[
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+library(hett)
+treg <- tlm(log(brain) ~ log(body), data = Animals2, estDof = TRUE)
+summary(treg)
+```
+]
+
+---
+
+class: inverse, center, middle
+
+# Régression quantile
+
+---
+
+# Quantiles d'une distribution
+
+- $q_p$, le quantile associé à une probabilité $p$, est défini par l'équation:
+
+$$P(y \le q_p)= p$$
+
+--
+
+- Par exemple, $q_{0.5}$ est la médiane, $q_{0.25}$ est le premier quartile, $q_{0.3}$ est le troisème décile, etc.
+
+--
+
+- Comme la médiane, les quantiles sont robustes aux valeurs extrêmes, mais leur point de rupture diminue à mesure que $p$ s'approche de 0 ou 1.
+
+---
+
+# Régression quantile
+
+Plutôt que de modéliser la moyenne de $y$ en fonction de prédicteurs, la régression quantile modélise un ou plusieurs quantiles de $y$ en fonction des mêmes prédicteurs.
+
+---
+
+# Applications de la régression quantile
+
+- Régression robuste aux valeurs extrêmes
+
+--
+
+- Modéliser une variable réponse dont la variance n'est pas homogène
+
+---
+
+# Exemple: Courbes de croissance d'enfants
+
+![](../images/courbe_croissance.jpg)
+
+---
+
+# Applications de la régression quantile
+
+- Régression robuste aux valeurs extrêmes
+
+- Modéliser une variable réponse dont la variance n'est pas homogène
+
+- Représenter un cas où un prédicteur influence les extrêmes de la distribution davantage que son centre (ex.: facteur limitant)
+
+---
+
+# Exemple: Facteur limitant
+
+```{r, echo = FALSE}
+df_limit <- data.frame(x = runif(100, 0, 10), y = runif(100, 0, 20))
+df_limit <- filter(df_limit, y < 3*x)
+
+ggplot(df_limit, aes(x = x, y = y)) +
+    geom_point()
+```
+
+---
+
+# Exemple: Vitesse de course de mammifères
+
+- Jeu de données `Mammals` inclus avec le package *quantreg*. Vitesse maximale connue d'espèces de mammifères (*speed*, en km/h) en fonction du poids (*weight*).
+
+.code60[
+
+```{r, warning = FALSE, message = FALSE, echo = TRUE, fig.dim = c(7, 4)}
+library(quantreg)
+data(Mammals)
+ggplot(Mammals, aes(x = log(weight), y = speed)) + geom_point()
+```
+
+]
+
+---
+
+# Régression quantile avec *quantreg*
+
+- Fonction `rq`: régression linéaire par quantile.
+
+--
+
+- Formule spécifiée comme dans `lm`.
+
+--
+
+- Ajout d'un argument `tau` décrivant quels quantiles modéliser.
+
+```{r, echo = TRUE}
+qreg <- rq(speed ~ log(weight), tau = c(0.10, 0.25, 0.5, 0.75, 0.9), data = Mammals)
+```
+
+---
+
+# Régression quantile avec *quantreg*
+
+.code50[
+```{r, echo = TRUE}
+summary(qreg)
+```
+]
+
+---
+
+# Visualisation des estimés par quantile
+
+.code60[
+```{r, echo = TRUE, fig.dim = c(10, 6)}
+plot(summary(qreg), mfrow = c(1, 2))
+```
+]
+
+---
+
+# Prédictions des quantiles
+
+```{r, echo = TRUE}
+qpred <- predict(qreg)
+head(qpred)
+```
+
+
+---
+
+# Visualiser les droites de régression
+
+.code60[
+```{r, echo = TRUE}
+ggplot(Mammals, aes(x = weight, y = speed)) +
+    geom_point() +
+    geom_quantile(quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9), color = "#b3452c") +
+    scale_x_log10()
+```
+]
+
+---
+
+# Résumé
+
+- La moyenne et la variance sont sensibles aux valeurs extrêmes. 
+
+--
+
+- Pour une régression linéaire, l'influence d'une observation augmente si son résidu est grand (valeur extrême de $y$) ou si elle a un grand effet de levier (valeur extrême de $x$). La distance de Cook mesure l'effet combiné de ces deux facteurs.
+
+--
+
+- La régression robuste basée sur les M-estimateurs (fonction `lmrob` du package *robustbase*) produit des estimés presque aussi précis que la régression linéaire si les suppositions de celle-ci sont respectées, tout en étant beaucoup moins sensibles à la présence de quelques valeurs extrêmes.
+
+---
+
+# Résumé
+
+- La distribution $t$ offre une méthode paramétrique pour représenter une variable comportant davantage de valeurs extrêmes que la distribution normale. 
+
+--
+
+- La fonction `tlm` du package *hett* ajuste un modèle de régression linéaire où la réponse suit une distribution $t$ plutôt que normale autour de sa valeur moyenne.
+
+--
+
+- La régression quantile modélise l'effet d'un prédicteur sur différents quantiles de la distribution de la réponse. 
+
+---
+
+# Références
+
+- Fox, J. (2002) Robust Regression. Appendix to *An R and S-PLUS Companion to Applied Regression*. Sage Publications, Thousands Oaks, USA.
+
+- Cade, B.S. et Noon, B.R. (2003) A gentle introduction to quantile regression for ecologists. *Frontiers in Ecology and the Environment* 1: 412--420.
+
+
+

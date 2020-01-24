@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Régression robuste aux valeurs extrêmes</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Régression robuste aux valeurs extrêmes
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+
+# Introduction
+
+- Modèles linéaires classiques: effets estimés en comparant des moyennes, incertitude basée sur la variance résiduelle.
+
+--
+
+- Ces méthodes sont optimales lorsque la variation aléatoire est normalement distribuée, mais elles réagissent fortement à la présence de valeurs extrêmes.
+
+--
+
+- Dans ce cours: différentes méthodes de régression linéaire plus robustes aux valeurs extrêmes.
+
+---
+
+# Contenu du cours
+
+- Sensibilité aux valeurs extrêmes
+
+- Régression robuste avec les M-estimateurs
+
+- Régression `\(t\)`
+
+- Régression quantile
+
+---
+
+class: inverse, center, middle
+
+# Sensibilité aux valeurs extrêmes
+
+---
+
+# Mesures de tendance centrale
+
+- Moyenne: équilibre la somme des écarts positifs et négatifs.
+
+- Médiane: équilibre le nombre d'observations de part et d'autre.
+
+--
+
+- Conséquence: La moyenne est plus sensible à l'ajout d'une valeur extrême.
+
+---
+
+# Exemple
+
+Échantillon de 10 valeurs:
+
+`18 29 30 40 43 44 48 49 56 83`
+
+- Médiane = 43.5, Moyenne = 44.
+
+--
+
+On ajoute une valeur de 580:
+
+- Médiane = 44, Moyenne = 93.
+
+---
+
+# Point de rupture
+
+Combien de valeurs extrêmes, si elles sont assez extrêmes, peuvent affecter sans limite la valeur de l'estimé?
+
+--
+
+- Généralement exprimé comme une fraction du nombre d'observations.
+
+- Point de rupture de `\(1/n\)` pour la moyenne (une observation extrême), 0.5 pour la médiane.
+
+---
+
+# Précision et valeurs extrêmes
+
+### Exemple
+
+.pull-left[
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+
+]
+
+.pull-right[
+
+- Courbe verte: `\(N(0, 1)\)`
+
+- Courbe orange: mélange de 95% suivant `\(N(0, 1)\)`, 5% suivant `\(N(0, 5)\)`
+
+]
+
+---
+
+# Précision et valeurs extrêmes
+
+- Simulons 1000 échantillons avec `\(n = 100\)` pour chaque distribution.
+
+
+```r
+set.seed(82)
+norm_samp &lt;- replicate(1000, rnorm(100)) # par défaut, mean = 0, sd = 1
+mix_samp &lt;- replicate(1000, rnorm(100, mean = 0, sd = c(rep(1, 95), rep(5, 5))))
+```
+
+--
+
+.pull-left[
+
+*Moyenne*
+
+
+```r
+sd(apply(norm_samp, 2, mean))
+```
+
+```
+## [1] 0.1012396
+```
+
+```r
+sd(apply(mix_samp, 2, mean))
+```
+
+```
+## [1] 0.1524184
+```
+
+]
+
+.pull-right[
+
+*Médiane*
+
+
+```r
+sd(apply(norm_samp, 2, median))
+```
+
+```
+## [1] 0.122032
+```
+
+```r
+sd(apply(mix_samp, 2, median))
+```
+
+```
+## [1] 0.1311463
+```
+
+]
+
+---
+
+# Précision et valeurs extrêmes
+
+- Supposons qu'on compare deux groupes qui diffèrent par leur moyenne et leur médiane et que moyenne = médiane pour chacun (distribution symétrique).
+
+--
+
+- Distribution normale: plus facile de détecter une différence significative entre moyennes (test `\(t\)`). 
+
+- En présence de valeurs extrêmes: plus facile de détecter une différence entre médianes.
+
+--
+
+- M-estimateurs: approchent l'efficacité de la moyenne pour la distribution normale tout en étant plus robustes aux valeurs extrêmes.
+
+---
+
+# Valeurs extrêmes et régression
+
+Modèle de régression linéaire simple
+
+`$$y = \beta_0 + \beta_1 x + \epsilon$$`
+
+`$$\epsilon \sim N(0, \sigma)$$`
+
+--
+
+Méthode des moindres carrés
+
+`$$\sum_{i=1}^n \hat{\epsilon_i}^2 = \sum_i^n \left( y_i - \hat{\beta_0} - \hat{\beta_1} x \right)^2$$`
+
+- `\(\hat{\epsilon_i}\)`: Estimé du résidu de l'observation `\(i\)`. 
+
+---
+
+# Valeurs extrêmes et régression
+
+- Observations ont plus d'influence sur la droite de régression si `\(\hat{\epsilon_i}\)` est élevé ou si `\(x_i\)` est élevé.
+
+- Exemple: `\(\epsilon = -20\)` pour le point orangé:
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+---
+
+# Valeurs extrêmes et régression
+
+- Effet de levier (*leverage*): observations près des extrêmes de `\(x\)` exercent une plus grande influence sur la droite de régression.
+
+--
+
+- Distance de Cook: mesure l'influence d'une observation en tenant compte à la fois de la magnitude du résidu et de l'extrémité des prédicteurs. Une distance &gt;1 indique une observation très influente.
+
+---
+
+# Exemple
+
+Jeu de données `Animals2` inclus avec le package *robustbase*: masse du cerveau d'espèces animales (*brain*, en g) en fonction de leur masse corporelle (*body*, en kg).
+
+.pull-left[
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+]
+
+--
+
+.pull-right[
+
+- Tous des mammifères sauf 3 dinosaures (points les plus à droite).
+
+]
+
+---
+
+# Régression linéaire
+
+- Pente de 0.59 avec l'ensemble des données.
+
+.code50[
+
+```r
+lm_ani &lt;- lm(log(brain) ~ log(body), Animals2)
+summary(lm_ani)
+```
+
+```
+## 
+## Call:
+## lm(formula = log(brain) ~ log(body), data = Animals2)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3.8592 -0.5075  0.1550  0.6410  2.5724 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.17169    0.16203   13.40   &lt;2e-16 ***
+## log(body)    0.59152    0.04117   14.37   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.172 on 63 degrees of freedom
+## Multiple R-squared:  0.7662,	Adjusted R-squared:  0.7625 
+## F-statistic: 206.4 on 1 and 63 DF,  p-value: &lt; 2.2e-16
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+---
+
+# Ignorer les valeurs extrêmes
+
+- Pente de 0.75 si on ignore les 3 valeurs extrêmes.
+
+.code50[
+
+```r
+summary(lm(log(brain) ~ log(body), Animals2[-c(6,16,26),]))
+```
+
+```
+## 
+## Call:
+## lm(formula = log(brain) ~ log(body), data = Animals2[-c(6, 16, 
+##     26), ])
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.71550 -0.49228 -0.06162  0.43597  1.94829 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.13479    0.09604   22.23   &lt;2e-16 ***
+## log(body)    0.75169    0.02846   26.41   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.6943 on 60 degrees of freedom
+## Multiple R-squared:  0.9208,	Adjusted R-squared:  0.9195 
+## F-statistic: 697.4 on 1 and 60 DF,  p-value: &lt; 2.2e-16
+```
+]
+
+---
+
+# Comparaison
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+---
+
+class: inverse, center, middle
+
+# Régression robuste avec les M-estimateurs
+
+---
+
+# M-estimateurs
+
+Les M-estimateurs sont des mesures de la tendance centrale qui:
+
+- offrent une meilleure robustesse aux valeurs extrêmes que la moyenne;
+
+- ont une erreur-type qui s'approche de celle de la moyenne lorsque la distribution est normale.
+
+--
+
+On peut les utiliser en remplacement à la moyenne dans le cadre d'un modèle de régression.
+
+---
+
+# Méthode des moindres carrés pondérés
+
+- Dans une régression, le calcul des M-estimateurs est équivalent à donner un poids à chaque observation en fonction de son résidu, pour réduire le poids des résidus plus extrêmes.
+
+--
+
+- Méthode des moindres carrés pondérés: 
+
+`$$\sum_{i=1}^n w_i^2 \hat{\epsilon_i}^2$$`
+
+- `\(w_i\)` est le poids de l'observation `\(i\)`.
+
+---
+
+# M-estimateurs
+
+.pull-left[
+
+### Méthode de Huber
+
+- `\(w_i = 1\)`, si `\(\vert \hat{\epsilon_i} \vert \le k\)`
+
+- `\(w_i = k/\vert \hat{\epsilon_i} \vert\)`, si `\(\vert \hat{\epsilon_i} \vert &gt; k\)`
+
+- Choix habituel: `\(k = 1.345\hat{\sigma}\)`
+
+]
+
+--
+
+.pull-right[
+
+### Bipoids de Tukey
+
+- `\(w_i = (1 - (\hat{\epsilon_i}/k)^2)^2\)`, si `\(\vert \hat{\epsilon_i} \vert \le k\)` 
+
+- `\(w_i = 0\)`, si `\(\vert \hat{\epsilon_i} \vert &gt; k\)`
+
+- Choix habituel: `\(k = 4.685\hat{\sigma}\)`
+
+]
+
+---
+
+# Poids en fonction des résidus
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+---
+
+# Régression avec les M-estimateurs
+
+Algorithme itératif (*iterative reweighted least squares*)
+
+- À partir d'une valeur initiale pour chaque coefficient, calculer les résidus et les poids. 
+
+--
+
+- Ré-estimer les coefficients en minimisant la somme des carrés des résidus pondérés, puis réviser la valeur des résidus et des poids selon ces nouveaux coefficients.
+
+--
+
+- Répéter l'étape précédente jusqu'à ce que les poids demeurent stables.
+
+---
+
+# Régression avec les M-estimateurs
+
+- Le bipoids de Tukey est plus résistant aux valeurs extrêmes avec grand effet de levier, mais son résultat dépend des valeurs initiales choisies.
+
+--
+
+- Méthode MM: régression avec un M-estimateur, où les valeurs initiales sont basées sur une autre méthode robuste.
+
+- Méthode MM avec bipoids de Tukey: choix par défaut de la fonction `lmrob` du package *robustbase*.
+
+---
+
+# Application dans R
+
+.code50[
+
+```r
+lmrob_ani &lt;- lmrob(log(brain) ~ log(body), Animals2)
+summary(lmrob_ani)
+```
+
+
+```
+## 
+## Call:
+## lmrob(formula = log(brain) ~ log(body), data = Animals2)
+##  \--&gt; method = "MM"
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -5.56235 -0.52597 -0.04378  0.46510  1.98894 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.11749    0.09146   23.15   &lt;2e-16 ***
+## log(body)    0.74603    0.02065   36.12   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Robust residual standard error: 0.721 
+## Multiple R-squared:  0.9229,	Adjusted R-squared:  0.9217 
+## Convergence in 8 IRWLS iterations
+## 
+## Robustness weights: 
+##  3 observations c(6,16,26) are outliers with |weight| = 0 ( &lt; 0.0015); 
+##  10 weights are ~= 1. The remaining 52 ones are summarized as
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.4269  0.8956  0.9512  0.9092  0.9829  0.9986
+```
+
+]
+
+---
+
+# Visualiser les poids
+
+.code50[
+
+```r
+ggplot(data = NULL, aes(x = rownames(Animals2), 
+                        y = weights(lmrob_ani, type = "robustness"))) +
+    geom_point() +
+    coord_flip() + # inverse la position des axes x et y
+    theme_bw()
+```
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Comparaison
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+
+---
+
+# Extension aux modèles généralisés
+
+- Fonction `glmrob` dans *robustbase*: méthodes semblables aux M-estimateurs pour produire des estimés robustes des coefficients de modèles linéaires généralisés (GLM).
+
+---
+
+class: inverse, center, middle
+
+# Régression `\(t\)`
+
+---
+
+# Régression robuste paramétrique
+
+- La régression robuste basée sur les M-estimateurs ne suppose pas une distribution spécifique des résidus autour de la valeur attendue de `\(y\)`.
+
+--
+
+- Certaines approches de modélisation (ex.: maximum de vraisemblance, modèles bayésiens) requièrent de spécifier la distribution de chaque variable aléatoire.
+
+--
+
+- La distribution `\(t\)` de Student est semblable à la normale, mais prévoit davantage de valeurs extrêmes.
+
+---
+
+# Distribution `\(t\)`
+
+- Plus souvent utilisée pour représenter la distribution de la moyenne d'un échantillon, `\(\bar{x}\)`, si l'écart-type de la population est inconnue.
+
+--
+
+`$$t = \frac{\bar{x} - \mu}{s/\sqrt{n}}$$`
+
+- La statistique `\(t\)` suit une distribution `\(t\)` avec `\(n-1\)` degrés de liberté.
+
+--
+
+- Même à variance égale, la distribution `\(t\)` assigne une probabilité plus grande aux valeurs extrêmes que la distribution normale.
+
+---
+
+# Distribution `\(t\)`
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+
+---
+
+# Régression `\(t\)`
+
+- La distribution `\(t\)` peut aussi représenter la variation résiduelle d'un modèle où on veut prévoir davantage de valeurs extrêmes qu'une distribution normale.
+
+--
+
+- Modèle de régression `\(t\)`:
+
+`$$y = \beta_0 + \beta_1 x + ... + \epsilon$$`
+
+`$$\epsilon/\sigma \sim t(\nu)$$`
+
+--
+
+- Fonction `tlm` du package *hett* dans R.
+
+---
+
+# Régression `\(t\)`
+
+.code50[
+
+```r
+library(hett)
+treg &lt;- tlm(log(brain) ~ log(body), data = Animals2, estDof = TRUE)
+summary(treg)
+```
+
+```
+## Location model :
+## 
+## Call:
+## tlm(lform = log(brain) ~ log(body), data = Animals2, estDof = TRUE)
+## 
+## Residuals: 
+##        Min          1Q      Median          3Q         Max  
+## -5.415e+00  -5.039e-01  -8.369e-07   5.181e-01   2.067e+00  
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.07829    0.09628   21.59   &lt;2e-16 ***
+## log(body)    0.73653    0.02447   30.11   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Scale parameter(s) as estimated below)
+## 
+## 
+## Scale Model :
+## 
+## Call:
+## tlm(lform = log(brain) ~ log(body), data = Animals2, estDof = TRUE)
+## 
+## Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.4484  -1.9795  -0.1566   1.2246   4.9181  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -1.2244     0.2745  -4.461 8.17e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Scale parameter taken to be  2 )
+## 
+## 
+## Est. degrees of freedom parameter:  2.071194
+## Standard error for d.o.f:  0.6678805
+## No. of iterations of model : 8 in 0.02
+## Heteroscedastic t Likelihood : -86.3654
+```
+]
+
+---
+
+class: inverse, center, middle
+
+# Régression quantile
+
+---
+
+# Quantiles d'une distribution
+
+- `\(q_p\)`, le quantile associé à une probabilité `\(p\)`, est défini par l'équation:
+
+`$$P(y \le q_p)= p$$`
+
+--
+
+- Par exemple, `\(q_{0.5}\)` est la médiane, `\(q_{0.25}\)` est le premier quartile, `\(q_{0.3}\)` est le troisème décile, etc.
+
+--
+
+- Comme la médiane, les quantiles sont robustes aux valeurs extrêmes, mais leur point de rupture diminue à mesure que `\(p\)` s'approche de 0 ou 1.
+
+---
+
+# Régression quantile
+
+Plutôt que de modéliser la moyenne de `\(y\)` en fonction de prédicteurs, la régression quantile modélise un ou plusieurs quantiles de `\(y\)` en fonction des mêmes prédicteurs.
+
+---
+
+# Applications de la régression quantile
+
+- Régression robuste aux valeurs extrêmes
+
+--
+
+- Modéliser une variable réponse dont la variance n'est pas homogène
+
+---
+
+# Exemple: Courbes de croissance d'enfants
+
+![](../images/courbe_croissance.jpg)
+
+---
+
+# Applications de la régression quantile
+
+- Régression robuste aux valeurs extrêmes
+
+- Modéliser une variable réponse dont la variance n'est pas homogène
+
+- Représenter un cas où un prédicteur influence les extrêmes de la distribution davantage que son centre (ex.: facteur limitant)
+
+---
+
+# Exemple: Facteur limitant
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+
+---
+
+# Exemple: Vitesse de course de mammifères
+
+- Jeu de données `Mammals` inclus avec le package *quantreg*. Vitesse maximale connue d'espèces de mammifères (*speed*, en km/h) en fonction du poids (*weight*).
+
+.code60[
+
+
+```r
+library(quantreg)
+data(Mammals)
+ggplot(Mammals, aes(x = log(weight), y = speed)) + geom_point()
+```
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+]
+
+---
+
+# Régression quantile avec *quantreg*
+
+- Fonction `rq`: régression linéaire par quantile.
+
+--
+
+- Formule spécifiée comme dans `lm`.
+
+--
+
+- Ajout d'un argument `tau` décrivant quels quantiles modéliser.
+
+
+```r
+qreg &lt;- rq(speed ~ log(weight), tau = c(0.10, 0.25, 0.5, 0.75, 0.9), data = Mammals)
+```
+
+---
+
+# Régression quantile avec *quantreg*
+
+.code50[
+
+```r
+summary(qreg)
+```
+
+```
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.1
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 13.30752      8.74691 14.56745
+## log(weight)  2.34755      1.62337  3.26536
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.25
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 20.81692     18.62656 23.71090
+## log(weight)  3.84176      3.32131  5.06629
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.5
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 31.19403     28.66333 33.18496
+## log(weight)  5.54939      4.68512  5.95244
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.75
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 41.69078     38.59558 59.42984
+## log(weight)  6.93824      2.56935  7.93761
+## 
+## Call: rq(formula = speed ~ log(weight), tau = c(0.1, 0.25, 0.5, 0.75, 
+##     0.9), data = Mammals)
+## 
+## tau: [1] 0.9
+## 
+## Coefficients:
+##             coefficients lower bd upper bd
+## (Intercept) 55.82662     49.74724 83.80662
+## log(weight)  7.10732     -3.05803 11.32294
+```
+]
+
+---
+
+# Visualisation des estimés par quantile
+
+.code60[
+
+```r
+plot(summary(qreg), mfrow = c(1, 2))
+```
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Prédictions des quantiles
+
+
+```r
+qpred &lt;- predict(qreg)
+head(qpred)
+```
+
+```
+##          [,1]     [,2]     [,3]      [,4]      [,5]
+## [1,] 33.73009 54.23840 79.47103 102.05010 117.65681
+## [2,] 32.77824 52.68070 77.22095  99.23689 114.77505
+## [3,] 32.10289 51.57549 75.62449  97.24088 112.73040
+## [4,] 30.31373 48.64753 71.39507  91.95297 107.31363
+## [5,] 27.37280 43.83471 64.44300  83.26100  98.40985
+## [6,] 27.05933 43.32171 63.70199  82.33453  97.46080
+```
+
+
+---
+
+# Visualiser les droites de régression
+
+.code60[
+
+```r
+ggplot(Mammals, aes(x = weight, y = speed)) +
+    geom_point() +
+    geom_quantile(quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9), color = "#b3452c") +
+    scale_x_log10()
+```
+
+![](04-Regression_robuste_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Résumé
+
+- La moyenne et la variance sont sensibles aux valeurs extrêmes. 
+
+--
+
+- Pour une régression linéaire, l'influence d'une observation augmente si son résidu est grand (valeur extrême de `\(y\)`) ou si elle a un grand effet de levier (valeur extrême de `\(x\)`). La distance de Cook mesure l'effet combiné de ces deux facteurs.
+
+--
+
+- La régression robuste basée sur les M-estimateurs (fonction `lmrob` du package *robustbase*) produit des estimés presque aussi précis que la régression linéaire si les suppositions de celle-ci sont respectées, tout en étant beaucoup moins sensibles à la présence de quelques valeurs extrêmes.
+
+---
+
+# Résumé
+
+- La distribution `\(t\)` offre une méthode paramétrique pour représenter une variable comportant davantage de valeurs extrêmes que la distribution normale. 
+
+--
+
+- La fonction `tlm` du package *hett* ajuste un modèle de régression linéaire où la réponse suit une distribution `\(t\)` plutôt que normale autour de sa valeur moyenne.
+
+--
+
+- La régression quantile modélise l'effet d'un prédicteur sur différents quantiles de la distribution de la réponse. 
+
+---
+
+# Références
+
+- Fox, J. (2002) Robust Regression. Appendix to *An R and S-PLUS Companion to Applied Regression*. Sage Publications, Thousands Oaks, USA.
+
+- Cade, B.S. et Noon, B.R. (2003) A gentle introduction to quantile regression for ecologists. *Frontiers in Ecology and the Environment* 1: 412--420.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
