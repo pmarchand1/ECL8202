@@ -18,3 +18,4 @@
 
 3. [Maximum de vraisemblance](labos/03-Maximum_vraisemblance.html) ([PDF](labos/03-Maximum_vraisemblance.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
 
+4. [Régression robuste aux valeurs extrêmes](labos/04-Regression_robuste.html) ([PDF](labos/04-Regression_robuste.pdf))

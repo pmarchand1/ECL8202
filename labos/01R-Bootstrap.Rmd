@@ -1,5 +1,5 @@
 ---
-title: "La méthode du bootstrap"
+title: "La méthode du bootstrap - Solutions"
 output:
     html_document:
         self_contained: false
