@@ -18,18 +18,17 @@ library(cowplot)
 
 # Introduction
 
+Les modèles linéaires généralisés à effets mixtes combinent les caractéristiques des modèles linéaires généralisés (modéliser des variables non-normalement distribuées, spécialement des données binaires et de comptage) et des modèles à effets mixtes (modéliser des données groupées). Dans ce cours, nous réviserons d'abord des concepts vus dans le cours préalable, avant de discuter des particularités des GLMM au niveau de l'estimation de paramètres, de l'évaluation et de la comparaison de modèles.
 
 ## Contenu du cours
 
 - Révision: modèles linéaires généralisés et modèles linéaires mixtes
 
-- Modèles linéaires mixtes généralisés (GLMM): forme mathématique et techniques d'estimation
+- Modèles linéaires généralisés à effets mixtes (GLMM): forme mathématique et techniques d'estimation
 
 - Évaluer l'ajustement d'un GLMM
 
-- Sélection de modèles
-
-- Simuler à partir d'un modèle 
+- Comparer différentes versions d'un GLMM
 
 
 # Modèles linéaires généralisés
@@ -40,7 +39,7 @@ En utilisant un modèle de régression linéaire pour expliquer une variable al�
 
 - $y$ suit une distribution normale d'écart-type constant autour de cette moyenne: $y \sim N(\mu, \sigma)$.
 
-Plusieurs variables mesurées en sciences environnementales sont mal représentées par ce modèle, notamment les données binaires (ex.: présence/absence, mortalité/survie) ou de comptage (ex.: nombre d'individus, nombre d'espèces). D'une part, un modèle linéaire de la moyenne n'inclut pas les contraintes de ces données: la probabilité moyenne de présence doit être entre 0; le nombre moyen d'individus ne peut être négatif. D'autre part, la variance de ces données n'est pas constante: la présence d'une espèce est plus variable si la présence moyenne est de 50% que si elle s'approche de 0 ou 1; la variance des données de comptage tend à augmenter avec leur moyenne. Il n'est pas non plus toujours possible de transformer les données pour approcher suffisamment la normalité et l'homogénéité des variances.
+Plusieurs variables mesurées en sciences environnementales sont mal représentées par ce modèle, notamment les données binaires (ex.: présence/absence, mortalité/survie) ou de comptage (ex.: nombre d'individus, nombre d'espèces). D'une part, un modèle linéaire de la moyenne n'inclut pas les contraintes de ces données: la probabilité moyenne de présence doit être entre 0 et 1; le nombre moyen d'individus ne peut être négatif. D'autre part, la variance de ces données n'est pas constante: la présence d'une espèce est plus variable si la présence moyenne est de 50% que si elle s'approche de 0 ou 1; la variance des données de comptage tend à augmenter avec leur moyenne. Il n'est pas non plus toujours possible de transformer les données pour approcher suffisamment la normalité et l'homogénéité des variances.
 
 Les modèles linéaires généralisés (GLM) aident à résoudre ces problèmes. Dans un GLM, le prédicteur linéaire $\eta$ (combinaison linéaire des prédicteurs) est relié à la moyenne de la réponse par une fonction de lien $g$:
 
@@ -86,7 +85,7 @@ La régression de Poisson utilise le plus souvent un lien logarithmique:
 
 $$\log{\lambda} = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$
 
-En inversant ce lien, on constate que $\lambda$ est l'exponentielle du prédicteur linéaire. Cela assure que $\lambda$ soit toujours positif. Puisque $e^0 = 1$. une valeur négative du prédicteur linéaire correspond à $\lambda < 1$ et une valeur positive à $\lambda > 1$.
+En inversant ce lien, on constate que $\lambda$ est l'exponentielle du prédicteur linéaire. Cela assure que $\lambda$ soit toujours positif. Puisque $e^0 = 1$, une valeur négative du prédicteur linéaire correspond à $\lambda < 1$ et une valeur positive à $\lambda > 1$.
 
 $$\lambda = e^{\beta_0 + \sum_{i = 1}^m \beta_i x_i}$$
 
@@ -184,7 +183,7 @@ glm(cbind(pos, neg) ~ x1 + x2 + ..., data = ..., family = binomial)
 
 ## Surdispersion
 
-Dans une régression linéaire où la variance résiduelle $\sigma^2$ est la même pour toutes les observations et est estimée indépendamment de la tendance moyenne. Pour les modèles linéaires généralisés avec distribution de Poisson ou binomiale, la variance dépend de la valeur moyenne (donc des prédicteurs pour chaque observation) et cette relation est fixée par la distribution. Ainsi, la variance est toujours égale à $\lambda$ (Poisson) ou $np(1-p)$ (binomiale).
+Dans une régression linéaire, la variance résiduelle $\sigma^2$ est la même pour toutes les observations et est estimée indépendamment de la tendance moyenne. Pour les modèles linéaires généralisés avec distribution de Poisson ou binomiale, la variance dépend de la valeur moyenne (donc des prédicteurs pour chaque observation) et cette relation est fixée par la distribution. Ainsi, la variance est toujours égale à $\lambda$ (Poisson) ou $np(1-p)$ (binomiale).
 
 En ajustant un modèle linéaire généralisé, il est donc possible que la tendance moyenne soit bien représentée par le modèle, mais que la variance résiduelle dépasse celle prévue par la distribution théorique. Dans le graphique ci-dessous, les histogrammes en vert représentent une distribution de Poisson avec $\lambda = 5$ (à gauche) et une distribution binomiale avec $n = 15$ et $p = 0.3$ (à droite). Les histogrammes en orange représentent des distributions avec la même moyenne, mais présentant une surdispersion.
 
@@ -211,7 +210,7 @@ Nous discuterons plus tard dans le cours des méthodes pour identifier la surdis
 
 # Modèles linéaires mixtes
 
-Considérons la régression linéaire simple pour $n$ observations d'une variable réponse $y$ et d'un prédicteur $x$. Selon de modèle, l'observation $y_k$ (pour $k = 1, 2, ..., n$) suit une distribution normale $N(\mu_k, \sigma_y)$ avec une moyenne $\mu_k = \beta_0 + \beta_1 x_k$.
+Considérons la régression linéaire simple pour $n$ observations d'une variable réponse $y$ et d'un prédicteur $x$. Selon ce modèle, l'observation $y_k$ (pour $k = 1, 2, ..., n$) suit une distribution normale $N(\mu_k, \sigma_y)$ avec une moyenne $\mu_k = \beta_0 + \beta_1 x_k$.
 
 Supposons maintenant que les $n$ observations soient groupées. Par exemple, il pourrait s'agir de points d'échantillonnage répartis sur quelques sites distincts; d'un sondage réalisé auprès de membres de différentes communautés; où de mesures répétées effectuées sur les mêmes individus à différents moments. Dans tous ces cas, nous nous attendons à ce que la variation résiduelle de la réponse (non-expliquée par les prédicteur) ne soit pas indépendante d'une observation à l'autre. En particulier, les observations d'un même groupe tendent à être plus similaires que les observations de groupes différents, en raison de facteurs non-mesurés qui varient au niveau du groupe plutôt que de l'observation individuelle.
 
@@ -229,9 +228,9 @@ $$\beta_{0j} \sim N(\mu_{\beta_0}, \sigma_{\beta_0})$$
 
 Les modèles mixtes tirent leur nom du fait qu'ils combinent des effets fixes spécifiés par les prédicteurs comme $x$ et des effets aléatoires représentant la variation entre groupes. L'ajustement d'un modèle linéaire mixte nous permettrait d'estimer la moyenne des coefficients $\beta_0$ et $\beta_1$, l'écart-type de ces coefficients d'un groupe à l'autre, ainsi que $\sigma_y$, l'écart-type des observations individuelles par rapport aux moyennes de groupes. 
 
-En outre, le modèle mixte produit des estimés des coefficients pour chaque groupe, ici $\beta_{0j}$ et $\beta_{1j}$. Un modèle avec un effet fixe de groupe qui interagit avec $x$ produit aussi des estimés de l'ordonnée à l'origine et de la pente de $y$ vs. $x$ pour chaque groupe. Cependant, ces effets *fixes* sont estimés indépendamment avec les données de chaque groupe, tandis que les effets *aléatoires* du modèle mixte proviennent d'une distribution centrée sur la valeur moyenne de l'ensemble des groupes. 
+En outre, le modèle mixte produit des estimés des coefficients pour chaque groupe, ici $\beta_{0j}$ et $\beta_{1j}$. Un modèle avec un effet fixe de groupe qui interagit avec $x$ produit aussi des estimés de l'ordonnée à l'origine et de la pente de $y$ vs. $x$ pour chaque groupe. Cependant, ces effets *fixes* sont estimés indépendamment à partir des données de chaque groupe, tandis que les effets *aléatoires* du modèle mixte proviennent d'une distribution centrée sur la valeur moyenne de l'ensemble des groupes. 
 
-Concrètement, le modèle mixte "contracte" les effets de chaque groupe en direction de l'effet moyen, comme nous pouvons le constater sur le graphique ci-dessous, où chaque couleur représente un groupe différent et les droites de régression sont estimées pour des effets aléatoire (traits pleins) ou fixes (tirets) au niveau du groupe. 
+Concrètement, le modèle mixte "contracte" les effets de chaque groupe en direction de l'effet moyen, comme nous pouvons le constater sur le graphique ci-dessous, où chaque couleur représente un groupe différent et les droites de régression sont estimées pour des effets aléatoires (traits pleins) ou fixes (tirets) au niveau du groupe. Les pentes des droites pleines sont plus semblables l'une de l'autre que les pentes des droites en tirets, car on suppose qu'elle proviennent d'une distribution commune.
 
 ```{r, echo = FALSE, fig.dim = c(7, 4), message = FALSE, warning = FALSE}
 library(lme4)
@@ -345,7 +344,7 @@ ggplot(rikz, aes(x = NAP, y = Richness, color = Beach)) +
 
 Pour un modèle mixte, la probabilité d'avoir observé une valeur donnée de la réponse dépend non seulement des paramètres (fixes, mais inconnus), mais aussi de la valeur des effets aléatoires pour le groupe contenant cette observation. Ainsi, pour calculer la fonction de vraisemblance en fonction des paramètres à estimer, il faut faire la moyenne de la probabilité des données observées pour l'ensemble des valeurs possibles des effets aléatoires de groupe (mathématiquement, il s'agit d'une intégrale). 
 
-Dans le cas d'un modèle linéaire mixte, l'équation se simplifie et permet d'estimer séparément d'une part les effets fixes, d'autre part les variances associées aux effets de groupes et à la variation résiduelle entre individus. La méthode qui s'applique dans ce cas est une version modifiée du maximum de vraisemblance appelée maximum de vraisemblance restreint (*restricted maximum likelihood* ou REML). Sans entrer dans les détails, le REML estime les paramètres de variance sur la base des résidus indépendants du modèle après estimation des effets fixes. En pratique, cela assure que les variances sont basés sur le bon nombre de degrés de liberté résiduels et corrige le biais lié à l'estimation des variances par maximum de vraisemblance. 
+Dans le cas d'un modèle linéaire mixte, l'équation se simplifie et permet d'estimer séparément d'une part les effets fixes, d'autre part les variances associées aux effets de groupes et à la variation résiduelle entre individus. La méthode qui s'applique dans ce cas est une version modifiée du maximum de vraisemblance appelée maximum de vraisemblance restreint (*restricted maximum likelihood* ou REML). Sans entrer dans les détails, le REML estime les paramètres de variance sur la base des résidus indépendants du modèle après estimation des effets fixes. En pratique, cela assure que les variances sont basées sur le bon nombre de degrés de liberté résiduels et corrige le biais lié à l'estimation des variances par maximum de vraisemblance. 
 
 Pour un GLMM, il n'existe pas de simplification correspondante et plusieurs méthodes ont été proposées pour approximer numériquement l'intégrale contenue dans la fonction de vraisemblance. La méthode que `glmer` utilise par défaut est l'approximation de Laplace, qui est basée sur une approximation quadratique de la fonction de vraisemblance. Pour les modèles avec un seul effet aléatoire (ex.: l'effet d'une variable de groupe sur l'ordonnée à l'origine seulement), `glmer` offre une méthode d'approximation plus précise, soit la quadrature de Gauss-Hermite. Pour appliquer cette méthode, il faut spécifier une valeur supérieure à 1 à l'argument `nAGQ` de `glmer`. Cet argument correspond au nombre de points utilisés pour approximer l'intégrale. Une valeur plus élevée est plus précise, mais demande plus de calculs; les auteurs du package suggèrent une valeur maximale de 25.
 
@@ -368,7 +367,7 @@ Dans cette section, nous verrons comment évaluer la qualité de l'ajustement d'
 
 ## Distribution des résidus
 
-Dans une régression linéaire, les graphiques de diagnostic nous permettaient de vérifier si les résidus étaient normalement distribués avec une variance homogène. Ces propriétés des résidus ne s'appliquent pas à un GLMM avec une distribution binomiale ou de Poisson. Cependant, nous pouvons tester s'il y a une surdispersion des résidus, qui serait indicatrice d'un mauvais ajustement du modèle théorique aux données.
+Pour une régression linéaire, les graphiques de diagnostic nous permettaient de vérifier si les résidus étaient normalement distribués avec une variance homogène. Ces propriétés des résidus ne s'appliquent pas à un GLMM avec une distribution binomiale ou de Poisson. Cependant, nous pouvons tester s'il y a une surdispersion des résidus, qui serait indicatrice d'un mauvais ajustement du modèle théorique aux données.
 
 Si $\hat{y_k}$ représente la valeur attendue de l'observation $k$ selon le modèle, le *résidu de Pearson* pour cette observation est obtenu en divisant le résidu brut par l'écart-type attendu de cette observation.
 
@@ -451,7 +450,7 @@ Cet ordre est motivé par une volonté de conserver autant d'effets fixes que po
 
 Pour des modèles linéaires mixtes, la première étape est basée sur l'ajustement des modèles par REML, tandis que la deuxième étape requiert un ajustement par le maximum de vraisemblance, car le REML ne peut que comparer des modèles avec les mêmes effets fixes. Dans le cas de GLMM, le REML ne s'applique pas.
 
-*Note*: Comme nous le montrerons ci-dessous, la première étape peut servir à choisir à quels coefficients appliquer des effets aléatoires: seule l'ordonnée à l'origine, ou l'ordonnée à l'origine et les coefficients des prédicteur? Cependant, le choix des groupes doit être basé sur la structure des données et non sur la sélection de modèles; autrement dit, si les données sont groupées, il faut au minimum inclure un effet aléatoire sur l'ordonnée à l'origine, afin de tenir compte de la non-indépendance des observations du même groupe.
+*Note*: Comme nous le montrerons ci-dessous, la première étape peut servir à choisir à quels coefficients appliquer des effets aléatoires: seule l'ordonnée à l'origine, ou l'ordonnée à l'origine et les coefficients des prédicteurs? Cependant, le choix des groupes doit être basé sur la structure des données et non sur la sélection de modèles; autrement dit, si les données sont groupées, il faut au minimum inclure un effet aléatoire sur l'ordonnée à l'origine, afin de tenir compte de la non-indépendance des observations du même groupe.
 
 Pour le jeu de données *rikz*, nous définissons d'abord un modèle complet (`glmm1`) qui inclut l'effet d'une variable définie au niveau de la plage (`Exposure`) et l'effet du NAP, en plus d'effets aléatoires de la plage sur l'ordonnée à l'origine et le coefficient du NAP. Nous comparons ce modèle à un autre qui n'inclut qu'un effet aléatoire sur l'ordonnée à l'origine.
 
