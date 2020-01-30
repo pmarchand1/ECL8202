@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Modèles linéaires généralisés à effets mixtes</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Modèles linéaires généralisés à effets mixtes</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<div id="contenu-du-cours" class="section level2">
+<h2>Contenu du cours</h2>
+<ul>
+<li><p>Révision: modèles linéaires généralisés et modèles linéaires mixtes</p></li>
+<li><p>Modèles linéaires mixtes généralisés (GLMM): forme mathématique et techniques d’estimation</p></li>
+<li><p>Évaluer l’ajustement d’un GLMM</p></li>
+<li><p>Sélection de modèles</p></li>
+<li><p>Simuler à partir d’un modèle</p></li>
+</ul>
+</div>
+</div>
+<div id="modeles-lineaires-generalises" class="section level1">
+<h1>Modèles linéaires généralisés</h1>
+<p>En utilisant un modèle de régression linéaire pour expliquer une variable aléatoire <span class="math inline">\(y\)</span> en fonction de prédicteurs <span class="math inline">\(x_1, ..., x_m\)</span>, nous supposons à la fois une relation spécifique entre la réponse moyenne et les prédicteurs, ainsi qu’une distribution spécifique de la variation de <span class="math inline">\(y\)</span> autour de sa moyenne. Plus précisément:</p>
+<ul>
+<li><p>la moyenne de <span class="math inline">\(y\)</span> est une fonction linéaire des <span class="math inline">\(x_i\)</span>: <span class="math inline">\(\mu = \beta_0 + \sum_{i = 1}^m \beta_i x_i\)</span>; et</p></li>
+<li><p><span class="math inline">\(y\)</span> suit une distribution normale d’écart-type constant autour de cette moyenne: <span class="math inline">\(y \sim N(\mu, \sigma)\)</span>.</p></li>
+</ul>
+<p>Plusieurs variables mesurées en sciences environnementales sont mal représentées par ce modèle, notamment les données binaires (ex.: présence/absence, mortalité/survie) ou de comptage (ex.: nombre d’individus, nombre d’espèces). D’une part, un modèle linéaire de la moyenne n’inclut pas les contraintes de ces données: la probabilité moyenne de présence doit être entre 0; le nombre moyen d’individus ne peut être négatif. D’autre part, la variance de ces données n’est pas constante: la présence d’une espèce est plus variable si la présence moyenne est de 50% que si elle s’approche de 0 ou 1; la variance des données de comptage tend à augmenter avec leur moyenne. Il n’est pas non plus toujours possible de transformer les données pour approcher suffisamment la normalité et l’homogénéité des variances.</p>
+<p>Les modèles linéaires généralisés (GLM) aident à résoudre ces problèmes. Dans un GLM, le prédicteur linéaire <span class="math inline">\(\eta\)</span> (combinaison linéaire des prédicteurs) est relié à la moyenne de la réponse par une fonction de lien <span class="math inline">\(g\)</span>:</p>
+<p><span class="math display">\[g(\mu) = \eta = \beta_0 + \sum_{i = 1}^m \beta_i x_i\]</span></p>
+<p>et différentes distributions peuvent être utilisées pour représenter la variation de <span class="math inline">\(y\)</span> relativement à <span class="math inline">\(\mu\)</span>.</p>
+<p>La régression linéaire est donc un exemple de GLM où <span class="math inline">\(\mu = \eta\)</span> (lien identité) et <span class="math inline">\(y\)</span> suit une distribution normale. La régression logistique, avec un lien logit et une distribution binomiale de la réponse, convient aux données binaires; tandis que la régression de Poisson, avec un lien log et une distribution de Poisson, convient aux données de comptage. Voici un tableau comparatif de ces trois modèles:</p>
+<table>
+<colgroup>
+<col width="12%" />
+<col width="25%" />
+<col width="30%" />
+<col width="30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Modèle</th>
+<th>Distribution</th>
+<th>Lien par défaut</th>
+<th>Inverse du lien</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Régression linéaire</td>
+<td>Normale: <span class="math inline">\(y \sim N(\mu, \sigma)\)</span></td>
+<td>Identité: <span class="math inline">\(\mu = \eta\)</span></td>
+<td><span class="math inline">\(\mu = \eta\)</span></td>
+</tr>
+<tr class="even">
+<td>Régression logistique</td>
+<td>Binomiale: <span class="math inline">\(y \sim B(n, p)\)</span></td>
+<td>Logit: <span class="math inline">\(\log(p/(1-p)) = \eta\)</span></td>
+<td><span class="math inline">\(p = 1/(1+e^{-\eta})\)</span></td>
+</tr>
+<tr class="odd">
+<td>Régression de Poisson</td>
+<td>Poisson: <span class="math inline">\(y \sim Pois(\lambda)\)</span></td>
+<td>Log: <span class="math inline">\(\log(\lambda) = \eta\)</span></td>
+<td><span class="math inline">\(\lambda = e^{\eta}\)</span></td>
+</tr>
+</tbody>
+</table>
+<div id="regression-de-poisson" class="section level2">
+<h2>Régression de Poisson</h2>
+<p>La distribution de Poisson peut être utilisée pour représenter une réponse <span class="math inline">\(y\)</span> qui prend des valeurs entières supérieures ou égales à 0. Théoriquement, cette distribution représente le nombre d’événements observés dans un intervalle (temporel ou spatial) donné, lorsque les événements sont indépendants les uns des autres.</p>
+<p>Par exemple, si <span class="math inline">\(y\)</span> est le nombre de clients entrant dans une boutique durant une période d’une heure donnée à chaque jour, en supposant que chaque personne agit indépendamment, alors <span class="math inline">\(y\)</span> pourrait suivre une distribution de Poisson.</p>
+<p>Cette distribution contient un seul paramètre ajustable, <span class="math inline">\(\lambda\)</span>, qui correspond à la fois à la moyenne et la variance de <span class="math inline">\(y\)</span>.</p>
+<p><span class="math display">\[P(y | \lambda) = \frac{\lambda^y}{y!} e^{-\lambda}\]</span></p>
+<p>Comme nous pouvons voir sur le graphique ci-dessous, pour un petit <span class="math inline">\(\lambda\)</span>, la distribution est davantage asymétrique (puisque <span class="math inline">\(y\)</span> ne peut pas être inférieur à zéro); plus <span class="math inline">\(\lambda\)</span> augmente, la distribution s’approche de la symétrie et d’une forme normale.</p>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>La régression de Poisson utilise le plus souvent un lien logarithmique:</p>
+<p><span class="math display">\[\log{\lambda} = \beta_0 + \sum_{i = 1}^m \beta_i x_i\]</span></p>
+<p>En inversant ce lien, on constate que <span class="math inline">\(\lambda\)</span> est l’exponentielle du prédicteur linéaire. Cela assure que <span class="math inline">\(\lambda\)</span> soit toujours positif. Puisque <span class="math inline">\(e^0 = 1\)</span>. une valeur négative du prédicteur linéaire correspond à <span class="math inline">\(\lambda &lt; 1\)</span> et une valeur positive à <span class="math inline">\(\lambda &gt; 1\)</span>.</p>
+<p><span class="math display">\[\lambda = e^{\beta_0 + \sum_{i = 1}^m \beta_i x_i}\]</span></p>
+<p>Aussi, puisque l’exponentielle transforme les effets additifs en effets multiplicatifs:</p>
+<p><span class="math display">\[\lambda = e^{\beta_0} e^{\beta_1 x_1} e^{\beta_2 x_2} \ldots\]</span></p>
+<p>nous pouvons interpréter séparément l’effet de chaque prédicteur. Par exemple, si <span class="math inline">\(x_1\)</span> augmente de 1, alors la moyenne de la réponse est multipliée par <span class="math inline">\(e^{\beta_1}\)</span>.</p>
+</div>
+<div id="regression-logistique" class="section level2">
+<h2>Régression logistique</h2>
+<p>Supposons qu’une réponse binaire soit codée 0/1 (ex.: absence/présence, échec/succès). Si <span class="math inline">\(y\)</span> est le nombre de réponses positives (1) parmi <span class="math inline">\(n\)</span> réplicats indépendants qui partagent la même probabilité <span class="math inline">\(p\)</span> d’obtenir une réponse positive, alors <span class="math inline">\(y\)</span> suit une distribution binomiale <span class="math inline">\(Bin(n, p)\)</span>.</p>
+<p><span class="math display">\[P(y \vert n, p) = \binom{n}{y} p^y(1-p)^{n-y}\]</span></p>
+<p>La moyenne de <span class="math inline">\(y\)</span> est égale à <span class="math inline">\(np\)</span> et la variance à <span class="math inline">\(np(1-p)\)</span>. En pratique, cela signifie que la variance est maximale pour <span class="math inline">\(p = 0.5\)</span> et diminue à mesure que <span class="math inline">\(p\)</span> s’approche de 0 ou 1.</p>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Dans un contexte de régression, <span class="math inline">\(n\)</span> est connu et nous cherchons à estimer comment <span class="math inline">\(p\)</span> varie en fonction des prédicteurs.</p>
+<p>Souvent, <span class="math inline">\(n = 1\)</span>, c’est-à-dire que nous modélisons les observations individuelles du résultat binaire en fonction des conditions environnementales. Les cas où <span class="math inline">\(n &gt; 1\)</span> sont souvent des expériences contrôlées. Par exemple, si nous voulons déterminer la probabilité de germination de semences en fonction de l’humidité du sol, nous pourrions planter un groupes de <span class="math inline">\(n = 20\)</span> semences pour chaque valeur de l’humidité; la réponse <span class="math inline">\(y\)</span> serait le nombre de germinations observées sur une possibilité de 20.</p>
+<p>La régression logistique tient son nom du fait qu’une fonction logistique est utilisée pour transformer le prédicteur linéaire <span class="math inline">\(\eta\)</span> en une probabilité <span class="math inline">\(p\)</span> entre 0 et 1.</p>
+<p><span class="math display">\[p = \frac{1}{1 + e^{-\eta}}\]</span></p>
+<p>Cette fonction prend une valeur de 0.5 si <span class="math inline">\(\eta = 0\)</span> et s’approche de 0 et 1 (sans jamais les atteindre) pour des valeurs très négatives et positives de <span class="math inline">\(\eta\)</span>, respectivement.</p>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-3-1.png" width="384" /></p>
+<p>L’inverse de la fonction logistique est le lien logit:</p>
+<p><span class="math display">\[\eta = \text{logit}(p) = \log \left( \frac{p}{1-p} \right)\]</span></p>
+<p>En raison de la forme non-linéaire de la fonction logistique, l’effet de chaque prédicteur sur la probabilité <span class="math inline">\(p\)</span> n’est pas constant. Cet effet est maximal autour de <span class="math inline">\(p = 0.5\)</span>. Autrement dit, plus près nous sommes des conditions où les probabilités de réponses positives et négatives sont égales, plus cette probabilité est sensible à une variation des prédicteurs.</p>
+<p><span class="math display">\[p = \frac{1}{1 + e^{-(\beta_0 + \sum_{i = 1}^m \beta_i x_i)}}\]</span></p>
+<p>On peut démontrer que la pente maximale de <span class="math inline">\(p\)</span> en fonction d’un prédicteur <span class="math inline">\(x_i\)</span>, lorsque <span class="math inline">\(p = 0.5\)</span>, est égale à <span class="math inline">\(\beta_i / 4\)</span>.</p>
+<p>Par exemple, le graphique ci-dessous présente <span class="math inline">\(p\)</span> vs. <span class="math inline">\(x\)</span> pour un modèle logistique où <span class="math inline">\(\text{logit}(p) = -1 + 0.4x\)</span>.</p>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-4-1.png" width="384" /></p>
+<p>La valeur de <span class="math inline">\(x\)</span> pour laquelle <span class="math inline">\(p = 0.5\)</span> est la solution de l’équation <span class="math inline">\(-1 + 0.4x = 0\)</span>, donc <span class="math inline">\(x = 2.5\)</span>. La pente de <span class="math inline">\(p\)</span> vs. <span class="math inline">\(x\)</span> autour de ce point (illustrée en bleu) est de <span class="math inline">\(0.4/4 = 0.1\)</span>.</p>
+</div>
+<div id="modeles-lineaires-generalises-dans-r" class="section level2">
+<h2>Modèles linéaires généralisés dans R</h2>
+<p>Dans R, nous utilisons la fonction <code>glm</code> pour ajuster un modèle linéaire généralisé. Comme pour <code>lm</code>, nous spécifions une formule de la forme <code>reponse ~ predicteurs</code> et un jeu de données <code>data</code> d’où proviennent les variables; en plus, <code>glm</code> requiert de spécifier la famille de distributions utilisée (ex.: <code>binomial</code> ou <code>poisson</code>).</p>
+<pre class="r"><code>glm(y ~ x1 + x2 + ..., data = ..., family = binomial)</code></pre>
+<p>On pourrait aussi spécifier la fonction de lien: <code>family = binomial(link = "logit")</code>, mais ce n’est pas nécessaire si on utilise le lien par défaut (logit pour binomial, log pour Poisson).</p>
+<p>Le code ci-dessus s’applique pour une régression logistique si la variable réponse <code>y</code> contient des valeurs binaires (0 ou 1). Si chaque rangée résume plusieurs résultats binaires, alors il faut spécifier les variables comptant le nombre de résultats positifs et négatifs, ex.: <code>pos</code> et <code>neg</code>, comme suit:</p>
+<pre class="r"><code>glm(cbind(pos, neg) ~ x1 + x2 + ..., data = ..., family = binomial)</code></pre>
+</div>
+<div id="surdispersion" class="section level2">
+<h2>Surdispersion</h2>
+<p>Dans une régression linéaire où la variance résiduelle <span class="math inline">\(\sigma^2\)</span> est la même pour toutes les observations et est estimée indépendamment de la tendance moyenne. Pour les modèles linéaires généralisés avec distribution de Poisson ou binomiale, la variance dépend de la valeur moyenne (donc des prédicteurs pour chaque observation) et cette relation est fixée par la distribution. Ainsi, la variance est toujours égale à <span class="math inline">\(\lambda\)</span> (Poisson) ou <span class="math inline">\(np(1-p)\)</span> (binomiale).</p>
+<p>En ajustant un modèle linéaire généralisé, il est donc possible que la tendance moyenne soit bien représentée par le modèle, mais que la variance résiduelle dépasse celle prévue par la distribution théorique. Dans le graphique ci-dessous, les histogrammes en vert représentent une distribution de Poisson avec <span class="math inline">\(\lambda = 5\)</span> (à gauche) et une distribution binomiale avec <span class="math inline">\(n = 15\)</span> et <span class="math inline">\(p = 0.3\)</span> (à droite). Les histogrammes en orange représentent des distributions avec la même moyenne, mais présentant une surdispersion.</p>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Nous discuterons plus tard dans le cours des méthodes pour identifier la surdispersion et de modèles alternatifs pour les données surdispersées.</p>
+</div>
+</div>
+<div id="modeles-lineaires-mixtes" class="section level1">
+<h1>Modèles linéaires mixtes</h1>
+<p>Considérons la régression linéaire simple pour <span class="math inline">\(n\)</span> observations d’une variable réponse <span class="math inline">\(y\)</span> et d’un prédicteur <span class="math inline">\(x\)</span>. Selon de modèle, l’observation <span class="math inline">\(y_k\)</span> (pour <span class="math inline">\(k = 1, 2, ..., n\)</span>) suit une distribution normale <span class="math inline">\(N(\mu_k, \sigma_y)\)</span> avec une moyenne <span class="math inline">\(\mu_k = \beta_0 + \beta_1 x_k\)</span>.</p>
+<p>Supposons maintenant que les <span class="math inline">\(n\)</span> observations soient groupées. Par exemple, il pourrait s’agir de points d’échantillonnage répartis sur quelques sites distincts; d’un sondage réalisé auprès de membres de différentes communautés; où de mesures répétées effectuées sur les mêmes individus à différents moments. Dans tous ces cas, nous nous attendons à ce que la variation résiduelle de la réponse (non-expliquée par les prédicteur) ne soit pas indépendante d’une observation à l’autre. En particulier, les observations d’un même groupe tendent à être plus similaires que les observations de groupes différents, en raison de facteurs non-mesurés qui varient au niveau du groupe plutôt que de l’observation individuelle.</p>
+<p>Un modèle linéaire mixte représente cette situation en permettant aux coefficients du modèle linéaire de varier d’un groupe à l’autre, selon une distribution normale. Dans le modèle précédent, si <span class="math inline">\(\beta_0\)</span> et <span class="math inline">\(\beta_1\)</span> varient d’un groupe à l’autre et que <span class="math inline">\(j[k]\)</span> désigne le groupe <span class="math inline">\(j\)</span> contenant l’observation <span class="math inline">\(k\)</span>, alors la valeur moyenne de cette observation selon le modèle mixte est égale à:</p>
+<p><span class="math display">\[\mu_k = \beta_{0j[k]} + \beta_{1j[k]} x_k\]</span></p>
+<p>Dans ce modèle, <span class="math inline">\(y_k\)</span> suit une distribution normale:</p>
+<p><span class="math display">\[y_k \sim N(\mu_k, \sigma_y)\]</span></p>
+<p>tout comme les paramètres <span class="math inline">\(\beta_0\)</span> et <span class="math inline">\(\beta_1\)</span>. Par exemple, pour l’ordonnée à l’origine:</p>
+<p><span class="math display">\[\beta_{0j} \sim N(\mu_{\beta_0}, \sigma_{\beta_0})\]</span></p>
+<p>Les modèles mixtes tirent leur nom du fait qu’ils combinent des effets fixes spécifiés par les prédicteurs comme <span class="math inline">\(x\)</span> et des effets aléatoires représentant la variation entre groupes. L’ajustement d’un modèle linéaire mixte nous permettrait d’estimer la moyenne des coefficients <span class="math inline">\(\beta_0\)</span> et <span class="math inline">\(\beta_1\)</span>, l’écart-type de ces coefficients d’un groupe à l’autre, ainsi que <span class="math inline">\(\sigma_y\)</span>, l’écart-type des observations individuelles par rapport aux moyennes de groupes.</p>
+<p>En outre, le modèle mixte produit des estimés des coefficients pour chaque groupe, ici <span class="math inline">\(\beta_{0j}\)</span> et <span class="math inline">\(\beta_{1j}\)</span>. Un modèle avec un effet fixe de groupe qui interagit avec <span class="math inline">\(x\)</span> produit aussi des estimés de l’ordonnée à l’origine et de la pente de <span class="math inline">\(y\)</span> vs. <span class="math inline">\(x\)</span> pour chaque groupe. Cependant, ces effets <em>fixes</em> sont estimés indépendamment avec les données de chaque groupe, tandis que les effets <em>aléatoires</em> du modèle mixte proviennent d’une distribution centrée sur la valeur moyenne de l’ensemble des groupes.</p>
+<p>Concrètement, le modèle mixte “contracte” les effets de chaque groupe en direction de l’effet moyen, comme nous pouvons le constater sur le graphique ci-dessous, où chaque couleur représente un groupe différent et les droites de régression sont estimées pour des effets aléatoire (traits pleins) ou fixes (tirets) au niveau du groupe.</p>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>L’effet de contraction est basé sur l’idée qu’une partie des différences observées entre groupes sont dues au hasard de l’échantillonnage plutôt qu’à des différences réelles entre les populations. Notamment, la contraction est plus prononcée lorsqu’il y a peu d’observations dans le groupe, conformément au fait qu’une plus grande portion de la différence est attribuable au hasard dans le cas d’un petit échantillon.</p>
+<p>Comme nous verrons plus tard, la modélisation d’effets aléatoires de groupe permet aussi de prédire la réponse moyenne et son incertitude pour un nouveau groupe qui était absent des données utilisées pour ajuster le modèle.</p>
+<p>Finalement, un autre avantage des modèles mixtes est que nous pouvons inclure à la fois un effet aléatoire de groupe et l’effet d’un prédicteur qui varie au niveau du groupe. Par exemple, la variation de l’ordonnée à l’origine <span class="math inline">\(\beta_0\)</span> entre les groupes peut dépendre de la valeur d’un prédicteur <span class="math inline">\(u\)</span>:</p>
+<p><span class="math display">\[\beta_{0j} \sim N(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})\]</span></p>
+<p>Puisque la variation de la réponse est modélisée à plusieurs niveaux (groupe et observation individuelle), les modèles mixtes sont aussi nommés “modèles hiérarchiques”.</p>
+<p>Par exemple, supposons que nous mesurons la biodiversité des plantes dans des quadrats situés sur différents sites ayant subi une perturbation. Ici, les quadrats sont donc groupés par site. Dans ce cas, un exemple de prédicteur <span class="math inline">\(u\)</span> défini au niveau du groupe serait l’intensité de la perturbation à un site, tandis que les prédicteurs <span class="math inline">\(x_1, x_2, ...\)</span> au niveau des observations individuelles représenteraient des mesures prises dans chaque quadrat.</p>
+<p>En résumé, les modèles mixtes sont particulièrement utiles si une ou plusieurs des conditions suivantes s’appliquent:</p>
+<ul>
+<li><p>les données sont groupées ou ont une structure hiérarchique à deux ou plusieurs niveaux (ex.: placettes regroupées par sites regroupés par région);</p></li>
+<li><p>les variables explicatives sont aussi définies à plusieurs niveaux;</p></li>
+<li><p>le nombre de groupes est trop grand, ou le nombre d’observations dans certains groupes est trop petit, pour estimer un effet séparé pour chaque groupe;</p></li>
+<li><p>on s’intéresse davantage à la variation entre les groupes qu’à l’effet de groupes particuliers;</p></li>
+<li><p>on souhaite appliquer le modèle à des groupes où aucune mesure n’a été prise.</p></li>
+</ul>
+<div id="modeles-lineaires-mixtes-dans-r" class="section level2">
+<h2>Modèles linéaires mixtes dans R</h2>
+<p>Nous utiliserons dans ce cours le package <em>lme4</em> pour ajuster des modèles mixtes. La fonction <code>lmer</code> de ce package estime les paramètres d’un modèle linéaire mixte. Les formules utilisées par <code>lmer</code> suivent la forme <code>reponse ~ predicteurs</code>, avec une syntaxe spécifique pour les effets aléatoires.</p>
+<p>Dans l’exemple suivant, <code>g</code> est la variable contenant les identifiants des groupes dans le jeu de données <code>df</code>. Le terme <code>(1 + x | g)</code> indique de modéliser un effet aléatoire du groupe <code>g</code> pour l’ordonnée à l’origine (codée “1”) et le coefficient de <code>x</code>. Si seule l’ordonnée à l’origine variait par groupe, donc si la pente de <span class="math inline">\(y\)</span> vs. <span class="math inline">\(x\)</span> était fixée à une seule valeur pour tous les groupes, on pourrait écrire <code>(1 | g)</code>.</p>
+<pre class="r"><code>library(lme4)
+
+lmer(y ~ x + u + (1 + x | g), data = df)</code></pre>
+<p>Notez que les prédicteurs définis au niveau du groupe (comme <code>u</code>) apparaissent dans la formule comme n’importe quel autre prédicteur.</p>
+</div>
+</div>
+<div id="modeles-lineaires-generalises-a-effets-mixtes" class="section level1">
+<h1>Modèles linéaires généralisés à effets mixtes</h1>
+<p>Les modèles linéaires généralisés à effets mixtes (abbréviés GLMM, pour <em>generalized linear mixed models</em>) combinent les caractéristiques des deux types de modèles vus précédemment.</p>
+<ul>
+<li>Comme pour les modèles linéaires généralisés, différentes distributions sont possibles pour la réponse <span class="math inline">\(y\)</span> et la moyenne de <span class="math inline">\(y\)</span> est reliée au prédicteur linéaire par une fonction de lien:</li>
+</ul>
+<p><span class="math display">\[g(\mu) = \eta = \beta_0 + \sum_{i = 1}^m \beta_i x_i\]</span></p>
+<ul>
+<li>Comme pour les modèles linéaires mixtes, les coefficients du prédicteur linéaire varient aléatoirement entre les groupes. Notez que cette variation suit toujours une distribution normale.</li>
+</ul>
+<div id="exemple" class="section level2">
+<h2>Exemple</h2>
+<p>Le jeu de données <a href="../donnees/rikz.csv">rikz.csv</a>, tiré du manuel de Zuur et al. (voir références en bas page), présente des données sur les communautés benthiques de 9 plages des Pays-Bas. La richesse spécifique (<code>Richness</code>) a été mesurée pour 5 sites sur chacune des 9 plages (<code>Beach</code>) pour un total de 45 observations. La variable <code>NAP</code> mesure la position verticale de chaque site par rapport au niveau moyen de la mer, tandis que l’indice d’exposition aux vagues (<code>Exposure</code>) est mesuré à l’échelle de la plage.</p>
+<pre class="r"><code>rikz &lt;- read.csv(&quot;../donnees/rikz.csv&quot;)
+# Exprimer Beach et Exposure comme des variables catégorielle (facteurs)
+rikz &lt;- mutate(rikz, Beach = as.factor(Beach), 
+               Exposure = as.factor(Exposure))
+head(rikz)</code></pre>
+<pre><code>##   Sample Richness Exposure    NAP Beach
+## 1      1       11       10  0.045     1
+## 2      2       10       10 -1.036     1
+## 3      3       13       10 -1.336     1
+## 4      4       11       10  0.616     1
+## 5      5       10       10 -0.684     1
+## 6      6        8        8  1.190     2</code></pre>
+<p>Puisque la richesse spécifique représente le compte des espèces à un site, nous pouvons modéliser cette réponse par une régression de Poisson, avec un effet fixe de la position verticale et un effet aléatoire de la plage sur les deux coefficients.</p>
+<p>Le package <em>lme4</em> contient une fonction <code>glmer</code> pour estimer les paramètres d’un GLMM. Celle-ci est semblable à <code>lmer</code>, excepté qu’on spécifie la distribution non-normale de la réponse par le biais du paramètre <code>family</code>.</p>
+<pre class="r"><code>glmm_res &lt;- glmer(Richness ~ NAP + (1 + NAP | Beach), data = rikz, family = poisson)
+summary(glmm_res)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: Richness ~ NAP + (1 + NAP | Beach)
+##    Data: rikz
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    218.7    227.8   -104.4    208.7       40 
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -1.35846 -0.51129 -0.21846  0.09802  2.45384 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev. Corr
+##  Beach  (Intercept) 0.2630   0.5128       
+##         NAP         0.0891   0.2985   0.18
+## Number of obs: 45, groups:  Beach, 9
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   1.6942     0.1868   9.071  &lt; 2e-16 ***
+## NAP          -0.6074     0.1374  -4.421 9.81e-06 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##     (Intr)
+## NAP 0.121</code></pre>
+<p>D’après la section <em>Fixed effects</em> du sommaire, l’ordonnée à l’origine moyenne est de 1.69 et l’effet moyen du NAP est de -0.61. Puisque la régression de Poisson utilise un lien log par défaut, ces coefficients signifient que la richesse moyenne est de <span class="math inline">\(e^{1.69} = 5.42\)</span> espèces si NAP = 0 et est multipliée par <span class="math inline">\(e^{-0.61} = 0.54\)</span> (i.e. diminue de 46%) pour chaque augmentation d’une unité du NAP. D’après la section <em>Random effects</em>, l’écart-type de l’ordonnée à l’origine entre les plages est de 0.51 et l’écart-type du coefficient du NAP est de 0.30. S’il s’agissait d’un modèle linéaire mixte, nous obtiendrions aussi un estimé de l’écart-type résiduel (intra-groupe), mais ce n’est pas le cas ici, car la variance résiduelle est fixée par la moyenne dans la distribution de Poisson.</p>
+<p>La fonction <code>ranef</code> produit les estimés de la différence entre la valeur d’un coefficient pour chaque groupe et sa valeur moyenne, tandis que <code>coef</code> retourne les valeurs des coefficients par groupe, donc la somme de <code>ranef</code> et des effets fixes.</p>
+<pre class="r"><code>ranef(glmm_res)</code></pre>
+<pre><code>## $Beach
+##   (Intercept)         NAP
+## 1   0.5579965  0.39325120
+## 2   0.8038562  0.26321427
+## 3  -0.4823311 -0.01681456
+## 4  -0.4922817 -0.00227238
+## 5   0.5590590 -0.40091320
+## 6  -0.2740162  0.09140229
+## 7  -0.3072758 -0.09381168
+## 8  -0.1895568  0.03540481
+## 9   0.0541533 -0.18368180
+## 
+## with conditional variances for &quot;Beach&quot;</code></pre>
+<pre class="r"><code>coef(glmm_res)</code></pre>
+<pre><code>## $Beach
+##   (Intercept)        NAP
+## 1    2.252151 -0.2141373
+## 2    2.498011 -0.3441742
+## 3    1.211824 -0.6242030
+## 4    1.201873 -0.6096609
+## 5    2.253214 -1.0083017
+## 6    1.420139 -0.5159862
+## 7    1.386879 -0.7012001
+## 8    1.504598 -0.5719837
+## 9    1.748308 -0.7910703
+## 
+## attr(,&quot;class&quot;)
+## [1] &quot;coef.mer&quot;</code></pre>
+<p>Comme pour les modèles linéaires généralisés, il est utile de représenter graphiquement la relation non-linéaire entre la réponse et les prédicteurs estimée par le modèle. Le graphique ci-dessous superpose les données observées (points) et les valeurs attendues du modèle (<code>fitted</code>, lignes) pour chaque plage.</p>
+<pre class="r"><code>ggplot(rikz, aes(x = NAP, y = Richness, color = Beach)) +
+    geom_point() +
+    geom_line(aes(y = fitted(glmm_res)))</code></pre>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+</div>
+<div id="estimation-des-coefficients-dun-glmm" class="section level2">
+<h2>Estimation des coefficients d’un GLMM</h2>
+<p>Pour un modèle mixte, la probabilité d’avoir observé une valeur donnée de la réponse dépend non seulement des paramètres (fixes, mais inconnus), mais aussi de la valeur des effets aléatoires pour le groupe contenant cette observation. Ainsi, pour calculer la fonction de vraisemblance en fonction des paramètres à estimer, il faut faire la moyenne de la probabilité des données observées pour l’ensemble des valeurs possibles des effets aléatoires de groupe (mathématiquement, il s’agit d’une intégrale).</p>
+<p>Dans le cas d’un modèle linéaire mixte, l’équation se simplifie et permet d’estimer séparément d’une part les effets fixes, d’autre part les variances associées aux effets de groupes et à la variation résiduelle entre individus. La méthode qui s’applique dans ce cas est une version modifiée du maximum de vraisemblance appelée maximum de vraisemblance restreint (<em>restricted maximum likelihood</em> ou REML). Sans entrer dans les détails, le REML estime les paramètres de variance sur la base des résidus indépendants du modèle après estimation des effets fixes. En pratique, cela assure que les variances sont basés sur le bon nombre de degrés de liberté résiduels et corrige le biais lié à l’estimation des variances par maximum de vraisemblance.</p>
+<p>Pour un GLMM, il n’existe pas de simplification correspondante et plusieurs méthodes ont été proposées pour approximer numériquement l’intégrale contenue dans la fonction de vraisemblance. La méthode que <code>glmer</code> utilise par défaut est l’approximation de Laplace, qui est basée sur une approximation quadratique de la fonction de vraisemblance. Pour les modèles avec un seul effet aléatoire (ex.: l’effet d’une variable de groupe sur l’ordonnée à l’origine seulement), <code>glmer</code> offre une méthode d’approximation plus précise, soit la quadrature de Gauss-Hermite. Pour appliquer cette méthode, il faut spécifier une valeur supérieure à 1 à l’argument <code>nAGQ</code> de <code>glmer</code>. Cet argument correspond au nombre de points utilisés pour approximer l’intégrale. Une valeur plus élevée est plus précise, mais demande plus de calculs; les auteurs du package suggèrent une valeur maximale de 25.</p>
+</div>
+<div id="intervalles-de-confiance" class="section level2">
+<h2>Intervalles de confiance</h2>
+<p>La fonction <code>confint</code> calcule les intervalles de confiance pour chacun des paramètres d’un modèle mixte, incluant les coefficients des effets fixes, les écarts-types et corrélations des effets aléatoires.</p>
+<pre class="r"><code>confint(glmm_res, oldNames = FALSE)</code></pre>
+<pre><code>## Computing profile confidence intervals ...</code></pre>
+<pre><code>##                                 2.5 %     97.5 %
+## sd_(Intercept)|Beach       0.30813882  0.9344068
+## cor_NAP.(Intercept)|Beach -0.63136889  0.9423103
+## sd_NAP|Beach               0.08444686  0.6394023
+## (Intercept)                1.27203026  2.0884038
+## NAP                       -0.93296597 -0.3318997</code></pre>
+<p>Notez qu’il est important de spécifier <code>oldNames = FALSE</code> pour obtenir les bons identifiants pour chaque intervalle. Ceux commençant par <code>sd</code> sont les écarts-types des effets aléatoires, celui commençant par <code>cor</code> correspond à la corrélation entre deux effets aléatoires, tandis que les deux dernières rangées correspondent aux effets fixes.</p>
+<p>Tel qu’indiqué dans le message, <code>confint</code> calcule les intervalles à partir de la vraisemblance profilée. Il est aussi possible de calculer les intervalles par la méthode du boostrap en spécifiant l’argument <code>method = "boot"</code> dans <code>confint</code>. Notez toutefois qu’il s’agit des intervalles des quantiles du bootstrap et que les méthodes plus précises (intervalles studentisés et BCa) ne sont pas disponibles en raison de leur coût de calcul.</p>
+</div>
+</div>
+<div id="evaluation-et-comparaison-de-modeles" class="section level1">
+<h1>Évaluation et comparaison de modèles</h1>
+<p>Dans cette section, nous verrons comment évaluer la qualité de l’ajustement d’un GLMM et comparer l’ajustement de différentes versions d’un modèle.</p>
+<div id="distribution-des-residus" class="section level2">
+<h2>Distribution des résidus</h2>
+<p>Dans une régression linéaire, les graphiques de diagnostic nous permettaient de vérifier si les résidus étaient normalement distribués avec une variance homogène. Ces propriétés des résidus ne s’appliquent pas à un GLMM avec une distribution binomiale ou de Poisson. Cependant, nous pouvons tester s’il y a une surdispersion des résidus, qui serait indicatrice d’un mauvais ajustement du modèle théorique aux données.</p>
+<p>Si <span class="math inline">\(\hat{y_k}\)</span> représente la valeur attendue de l’observation <span class="math inline">\(k\)</span> selon le modèle, le <em>résidu de Pearson</em> pour cette observation est obtenu en divisant le résidu brut par l’écart-type attendu de cette observation.</p>
+<p><span class="math display">\[r_{P(k)} = \frac{y_k - \hat{y_k}}{\hat{\sigma}_{k}}\]</span></p>
+<p>L’écart-type attendu est égal à <span class="math inline">\(\sqrt{\lambda}\)</span> dans un modèle de Poisson et à <span class="math inline">\(\sqrt{np(1-p)}\)</span> pour un modèle binomial. Si les données suivent le modèle supposé, la somme des carrés de ces résidus suit une distribution du <span class="math inline">\(\chi^2\)</span> avec un nombre de degrés de liberté égal au nombre de degrés de liberté résiduels du modèle. Ceci nous permet d’évaluer l’ajustement du modèle avec un test du <span class="math inline">\(\chi^2\)</span>.</p>
+<pre class="r"><code>chi2 &lt;- sum(residuals(glmm_res, type = &quot;pearson&quot;)^2)
+chi2</code></pre>
+<pre><code>## [1] 26.40239</code></pre>
+<pre class="r"><code>1 - pchisq(chi2, df = df.residual(glmm_res))</code></pre>
+<pre><code>## [1] 0.9516085</code></pre>
+<p>Une valeur <span class="math inline">\(p\)</span> faible pour ce test indiquerait une surdispersion des résidus par rapport au modèle.</p>
+<p>Nous pouvons aussi définir un coefficient de dispersion en divisant la valeur du <span class="math inline">\(\chi^2\)</span> par le nombre de degrés de liberté résiduels.</p>
+<pre class="r"><code>chi2 / df.residual(glmm_res)</code></pre>
+<pre><code>## [1] 0.6600598</code></pre>
+<p>Le test du <span class="math inline">\(\chi^2\)</span> est unilatéral, car nous ne nous soucions pas généralement de la sous-dispersion (coefficient de dispersion inférieur à 1). Cependant, un cas extrême de sous-dispersion (valeur <span class="math inline">\(p\)</span> très proche de 1) pourrait indiquer que le modèle est surajusté aux données.</p>
+</div>
+<div id="distribution-des-effets-aleatoires" class="section level2">
+<h2>Distribution des effets aléatoires</h2>
+<p>Il est aussi utile de vérifier que les effets aléatoires suivent une distribution approximativement normale. La fonction <code>ranef</code> produit une liste d’effets aléatoires pour chaque variable de groupe. Ici, nous choisissons la seule variable de groupe, soit <em>Beach</em>.</p>
+<pre class="r"><code>re &lt;- ranef(glmm_res)$Beach</code></pre>
+<p>La variable <code>re</code> est un tableau de données avec deux colonnes représentant les effets aléatoires des plages sur l’ordonnée à l’origine et le coefficient du NAP. Nous utilisons un diagramme quantile-quantile pour vérifier si les valeurs dans chaque colonne sont normalement distribuées.</p>
+<pre class="r"><code>qqnorm(re$`(Intercept)`)
+qqline(re$`(Intercept)`)</code></pre>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<pre class="r"><code>qqnorm(re$NAP)
+qqline(re$NAP)</code></pre>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-20-2.png" width="672" /></p>
+<p>Il est difficile d’évaluer la normalité avec seulement 9 effets de groupe, mais les valeurs extrêmes pour le coefficient du NAP semblent s’éloigner de la normale.</p>
+</div>
+<div id="coefficient-de-determination" class="section level2">
+<h2>Coefficient de détermination</h2>
+<p>Dans un modèle linéaire, le coefficient de détermination <span class="math inline">\(R^2\)</span> indique la fraction de la variance des données expliquée par le modèle:</p>
+<p><span class="math display">\[R^2 = 1 - \frac{\sigma_{\epsilon}^2}{\sigma_t^2}\]</span></p>
+<p>où <span class="math inline">\(\sigma_{\epsilon}^2\)</span> est la variance des résidus et <span class="math inline">\(\sigma_t^2\)</span> la variance totale de la réponse.</p>
+<p>La généralisation du <span class="math inline">\(R^2\)</span> à un GLMM pose deux problèmes:</p>
+<ul>
+<li>la variance des données dans un GLM dépend de la moyenne;</li>
+<li>pour un modèle mixte, la réponse varie à plusieurs niveaux (groupe et individu).</li>
+</ul>
+<p>La fonction <code>r.squaredGLMM</code> du package <em>MuMIn</em> calcule une version du coefficient de détermination appropriée pour les GLMM.</p>
+<pre class="r"><code>library(MuMIn)
+r.squaredGLMM(glmm_res)</code></pre>
+<pre><code>##                 R2m       R2c
+## delta     0.4206307 0.8577819
+## lognormal 0.4240694 0.8647945
+## trigamma  0.4168256 0.8500224</code></pre>
+<p>La valeur <code>R2m</code> représente le <span class="math inline">\(R^2\)</span> marginal, c’est-à-dire la variance expliquée en tenant seulement compte des effets fixes, tandis que <code>R2c</code> représente le <span class="math inline">\(R^2\)</span> conditionnel, soit la variance expliquée par les effets fixes et les effets de groupe. Pour un modèle linéaire mixte, ces <span class="math inline">\(R^2\)</span> s’interprètent directement en fonction de la variance de la réponse. Pour un GLMM, il s’agit de la variance sur l’échelle du prédicteur linéaire, autrement dit, la variance de la réponse transformée par la fonction de lien.</p>
+<p>Le résultat de la fonction <code>r.squaredGLMM</code> donnent plusieurs estimés qui sont assez semblables. Selon les auteurs, la méthode <code>trigamma</code> est la plus précise, mais elle n’est disponible que pour un GLMM avec lien log.</p>
+</div>
+<div id="comparaison-de-modeles" class="section level2">
+<h2>Comparaison de modèles</h2>
+<p>La comparaison des modèles avec l’AIC, ou l’AICc pour les petits échantillons, s’applique aussi aux GLMM. Pour les modèles mixtes, le manuel de Zuur et al. (2009) suggère la méthode suivante:</p>
+<ul>
+<li><p>D’abord, inclure tous les effets fixes qui nous intéressent et choisir, si nécessaire, entre différentes versions des effets aléatoires.</p></li>
+<li><p>Conserver les effets aléatoires choisis à l’étape précédente et comparer différentes versions des effets fixes.</p></li>
+</ul>
+<p>Cet ordre est motivé par une volonté de conserver autant d’effets fixes que possibles en fonction des données, donc en réduisant la complexité des effets aléatoires avant celle des effets fixes.</p>
+<p>Pour des modèles linéaires mixtes, la première étape est basée sur l’ajustement des modèles par REML, tandis que la deuxième étape requiert un ajustement par le maximum de vraisemblance, car le REML ne peut que comparer des modèles avec les mêmes effets fixes. Dans le cas de GLMM, le REML ne s’applique pas.</p>
+<p><em>Note</em>: Comme nous le montrerons ci-dessous, la première étape peut servir à choisir à quels coefficients appliquer des effets aléatoires: seule l’ordonnée à l’origine, ou l’ordonnée à l’origine et les coefficients des prédicteur? Cependant, le choix des groupes doit être basé sur la structure des données et non sur la sélection de modèles; autrement dit, si les données sont groupées, il faut au minimum inclure un effet aléatoire sur l’ordonnée à l’origine, afin de tenir compte de la non-indépendance des observations du même groupe.</p>
+<p>Pour le jeu de données <em>rikz</em>, nous définissons d’abord un modèle complet (<code>glmm1</code>) qui inclut l’effet d’une variable définie au niveau de la plage (<code>Exposure</code>) et l’effet du NAP, en plus d’effets aléatoires de la plage sur l’ordonnée à l’origine et le coefficient du NAP. Nous comparons ce modèle à un autre qui n’inclut qu’un effet aléatoire sur l’ordonnée à l’origine.</p>
+<p>La fonction <code>aictab</code> du packge <em>AICcmodavg</em> calcule l’AICc pour chaque modèle d’une liste et donne leurs poids relatifs déterminés par les différences d’AICc.</p>
+<pre class="r"><code>library(AICcmodavg)
+
+glmm1 &lt;- glmer(Richness ~ Exposure + NAP + (1 + NAP | Beach), data = rikz, 
+               family = poisson)
+glmm2 &lt;- glmer(Richness ~ Exposure + NAP + (1 | Beach), data = rikz, 
+               family = poisson)
+aictab(list(glmm1, glmm2))</code></pre>
+<pre><code>## 
+## Model selection based on AICc:
+## 
+##      K   AICc Delta_AICc AICcWt Cum.Wt      LL
+## Mod2 5 211.55       0.00   0.69   0.69 -100.00
+## Mod1 7 213.15       1.61   0.31   1.00  -98.06</code></pre>
+<p>Dans ce cas-ci, le modèle le plus simple obtient le meilleur AICc, donc il sera choisi par souci de parcimonie, même si le modèle complet a un AICc très proche.</p>
+<p>Ensuite, nous comparons le modèle <code>glmm2</code> a un modèle sans effet de la variable <code>Exposure</code>.</p>
+<pre class="r"><code>glmm3 &lt;- glmer(Richness ~ NAP + (1 | Beach), data = rikz, 
+               family = poisson)
+aictab(list(glmm2, glmm3))</code></pre>
+<pre><code>## 
+## Model selection based on AICc:
+## 
+##      K   AICc Delta_AICc AICcWt Cum.Wt      LL
+## Mod1 5 211.55       0.00   0.99   0.99 -100.00
+## Mod2 3 221.37       9.82   0.01   1.00 -107.39</code></pre>
+<p>Le modèle incluant <code>Exposure</code> produit un bien meilleur ajustement selon l’AICc.</p>
+<p>Même si un modèle est mieux ajusté que d’autres modèles candidats, cela ne signifie pas que ce modèle produit un bon ajustement des données. Pour répondre à cette question, nous devons vérifier l’ajustement du modèle choisi avec les méthodes vues plus haut.</p>
+<ul>
+<li>Le test du <span class="math inline">\(\chi^2\)</span> ne rejette pas l’hypothèse que les résidus soient conformes à une distribution de Poisson.</li>
+</ul>
+<pre class="r"><code>chi2 &lt;- sum(residuals(glmm2, type = &quot;pearson&quot;)^2)
+chi2</code></pre>
+<pre><code>## [1] 51.90547</code></pre>
+<pre class="r"><code>1 - pchisq(chi2, df = df.residual(glmm2))</code></pre>
+<pre><code>## [1] 0.09835205</code></pre>
+<ul>
+<li>Les effets aléatoires de la plage sur l’ordonnée à l’origine s’approchent assez bien d’une distribution normale, considérant le petit nombre de groupes.</li>
+</ul>
+<pre class="r"><code>qqnorm(ranef(glmm2)$Beach$`(Intercept)`)
+qqline(ranef(glmm2)$Beach$`(Intercept)`)</code></pre>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<ul>
+<li>Finalement, l’ajout de la variable <code>Exposure</code> explique une bonne partie de la différence entre les plages, car le <span class="math inline">\(R^2\)</span> marginal (effets fixes seulement) s’approche maintenant du <span class="math inline">\(R^2\)</span> incluant les effets aléatoires.</li>
+</ul>
+<pre class="r"><code>r.squaredGLMM(glmm2)</code></pre>
+<pre><code>## Warning: The null model is correct only if all variables used by the
+## original model remain unchanged.</code></pre>
+<pre><code>##                 R2m       R2c
+## delta     0.7270454 0.7435881
+## lognormal 0.7420813 0.7589661
+## trigamma  0.7100514 0.7262074</code></pre>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<ul>
+<li><p>Bolker, B. et al. (2009) Generalized linear mixed models: a practical guide for ecology and evolution. <em>Trends in Ecology and Evolution</em> 24: 127-135.</p></li>
+<li><p>Harrison, X.A. et al. (2018) A brief introduction to mixed effects modelling and multi-model inference in ecology. <em>PeerJ</em> 6: e4794.</p></li>
+<li><p>Zuur, A.F., Ieno, E.N., Walker, N.J., Saveliev, A.A., Smith, G.M. (2009) <em>Mixed Effects Models and Extensions in Ecology with R</em>. New York, Springer-Verlag.</p></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

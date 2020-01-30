@@ -10,6 +10,9 @@
 
 4. [Régression robuste aux valeurs extrêmes](notes_cours/04-Regression_robuste.html) ([PDF](notes_cours/04-Regression_robuste.pdf))
 
+5. [Modèles linéaires généralisés à effets mixtes](notes_cours/05-Modeles_generalises_mixtes.html) ([PDF](notes_cours/05-Modeles_generalises_mixtes.pdf))
+
+
 ## Exercices
 
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01R-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
