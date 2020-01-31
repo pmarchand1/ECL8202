@@ -1,0 +1,799 @@
+---
+title: "Modèles linéaires généralisés à effets mixtes"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 18) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+```
+
+# Contenu du cours
+
+- Révision: modèles linéaires généralisés et modèles linéaires mixtes
+
+- Modèles linéaires généralisés à effets mixtes (GLMM)
+
+- Évaluer l'ajustement d'un GLMM
+
+- Comparer différentes versions d'un GLMM
+
+---
+
+class: inverse, center, middle
+
+# Modèles linéaires généralisés
+
+---
+
+# Motivation
+
+Régression linéaire de $y$ en fonction de prédicteurs $x_1, ..., x_m$:
+
+--
+
+- Effets linéaires sur la moyenne de $y$
+
+$$\mu = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$
+
+--
+
+- Distribution normale
+
+$$y \sim N(\mu, \sigma)$$
+
+---
+
+# Motivation
+
+- Variables réponses binaires (0/1) ou de comptage (0, 1, 2, ...) mal représentées par ce modèle
+
+--
+
+- Respect des contraintes
+
+--
+
+- Relation entre moyenne et variance
+
+---
+
+# Modèles linéaires généralisés
+
+- Prédicteur linéaire $\eta$ relié à la moyenne de $y$ par une fonction de lien:
+
+$$g(\mu) = \eta = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$
+
+--
+
+- Différentes distributions peuvent être utilisées pour $y$.
+
+---
+
+# Modèles linéaires généralisés
+
+Modèle | Distribution | Lien par défaut | Inverse du lien |
+-------|--------------|-----------------|-----------------|
+Régression linéaire | Normale: $y \sim N(\mu, \sigma)$ | Identité: $\mu = \eta$ | $\mu = \eta$ |
+Régression logistique | Binomiale: $y \sim B(n, p)$ | Logit: $\log(p/(1-p)) = \eta$ | $p = 1/(1+e^{-\eta})$
+Régression de Poisson | Poisson: $y \sim Pois(\lambda)$ | Log: $\log(\lambda) = \eta$ | $\lambda = e^{\eta}$ | 
+
+---
+
+# Régression de Poisson
+
+- Distribution de Poisson: Représente le nombre d'événements observés dans un intervalle (temporel ou spatial), lorsque ces événements sont indépendants un de l'autre.
+
+--
+
+$$P(y | \lambda) = \frac{\lambda^y}{y!} e^{-\lambda}$$
+
+- Un paramètre ajustable $\lambda$, correspond à la moyenne et variance de $y$.
+
+---
+
+# Distribution de Poisson
+
+```{r, echo = FALSE}
+ggplot(NULL, aes(x = 0:15)) +
+    labs(x = "y", y = "P(y)") +
+    stat_function(geom = "bar", fun = dpois, args = list(lambda = 6), n = 16, 
+                  aes(fill = "6"), alpha = 0.7) +
+    stat_function(geom = "bar", fun = dpois, args = list(lambda = 2), n = 16,
+                  aes(fill = "2"), alpha = 0.7) +
+    scale_fill_manual(name = expression(lambda), 
+                      values = c("2"="#1b9e77","6"="#d95f02")) +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+---
+
+# Lien logarithmique
+
+$$\log{\lambda} = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$
+
+--
+
+- Inverse du lien:
+
+$$\lambda = e^{\beta_0 + \sum_{i = 1}^m \beta_i x_i}$$
+
+--
+
+- L'exponentielle transforme les effets additifs en effets multiplicatifs.
+
+$$\lambda = e^{\beta_0} e^{\beta_1 x_1} e^{\beta_2 x_2} \ldots$$
+
+---
+
+# Régression logistique
+
+- Distribution binomiale: Pour une réponse binaire codée 0/1, représente le nombre $y$ de réponses positives (1) parmi $n$ réplicats indépendants, si $p$ est la probabilité d'obtenir 1.
+
+$$P(y \vert n, p) = \binom{n}{y} p^y(1-p)^{n-y}$$
+
+--
+
+- Moyenne de $y$ est $np$, variance est $np(1-p)$.
+
+--
+
+- $n$ est connu et $p$ varie en fonction des prédicteurs.
+
+- Souvent $n = 1$ (réponses individuelles), mais $n > 1$ possible dans une expérience contrôlée.
+
+---
+
+# Distribution binomiale
+
+```{r, echo = FALSE}
+ggplot(NULL, aes(x = 0:15)) +
+    labs(x = "y", y = "P(y|n=15, p)") +
+    stat_function(geom = "bar", fun = dbinom, args = list(size = 15, p = 0.2), 
+                  n = 16, aes(fill = "0.2"), alpha = 0.7) +
+    stat_function(geom = "bar", fun = dbinom, args = list(size = 15, p = 0.5), 
+                  n = 16, aes(fill = "0.5"), alpha = 0.7) +
+    stat_function(geom = "bar", fun = dbinom, args = list(size = 15, p = 0.9), 
+                  n = 16, aes(fill = "0.9"), alpha = 0.7) +
+    scale_fill_manual(name = "p", 
+                      values = c("0.2"="#1b9e77","0.5"="#d95f02", "0.9"="#7570b3")) +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+---
+
+# Régression logistique
+
+$$p = \frac{1}{1 + e^{-\eta}}$$
+
+.center[
+
+```{r, echo = FALSE, fig.dim = c(7, 6)}
+ggplot(data.frame(x = seq(-5,5,0.1)), aes(x = x)) +
+    labs(x = expression(eta), y = "p") +
+    stat_function(fun = function(x) 1/(1+exp(-x))) +
+    geom_segment(x = -5, xend = 0, y = 0.5, yend = 0.5, linetype = "dotted") +
+    geom_segment(x = 0, xend = 0, y = 0, yend = 0.5, linetype = "dotted") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 1, 0.25), limits = c(0, 1))
+```
+
+]
+
+---
+
+# Régression logistique
+
+$$p = \frac{1}{1 + e^{-\eta}}$$
+
+- Inverse: lien logit
+
+$$\eta = \text{logit}(p) = \log \left( \frac{p}{1-p} \right)$$
+
+--
+
+$$p = \frac{1}{1 + e^{-(\beta_0 + \sum_{i = 1}^m \beta_i x_i)}}$$
+
+- Pente maximale de $p$ vs. $x_i$: $\beta_i / 4$ lorsque $p = 0.5$.
+
+---
+
+# Régression logistique
+
+- Exemple: $\text{logit}(p) = -1 + 0.4 x$
+
+.center[
+
+```{r, echo = FALSE, fig.dim = c(7, 6)}
+ggplot(data.frame(x = seq(-10,10,0.1)), aes(x = x)) +
+    labs(y = "p") +
+    stat_function(fun = function(x) 1/(1+exp(1-0.4*x))) +
+    geom_segment(x = -10, xend = 2.5, y = 0.5, yend = 0.5, linetype = "dotted") +
+    geom_segment(x = 2.5, xend = 2.5, y = 0, yend = 0.5, linetype = "dotted") +
+    geom_segment(x = 0.5, xend = 4.5, y = 0.3, yend = 0.7, color = "blue", size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0), breaks = seq(0, 1, 0.25), limits = c(0, 1))
+```
+
+]
+
+---
+
+# Fonction `glm` dans R
+
+```{r, echo = TRUE, eval = FALSE}
+glm(y ~ x1 + x2 + ..., data = ..., family = binomial)
+```
+
+- Ici, $y$ serait une colonne avec des données binaires (codées 0/1 ou TRUE/FALSE).
+
+--
+
+- Spécification du lien: `family = binomial(link = "logit")` optionnelle si on utilise le lien par défaut (logit pour binomial, log pour Poisson).
+
+--
+
+- Avec $n > 1$ dans le cas binomial, nous devons spécifier la colonne donnant le nombre de cas positifs et négatifs.
+
+```{r, echo = TRUE, eval = FALSE}
+glm(cbind(pos, neg) ~ x1 + x2 + ..., data = ..., family = binomial)
+```
+
+---
+
+# Surdispersion
+
+- Régression linéaire: même variance pour chaque observation, $\sigma^2$ estimée indépendamment de la moyenne.
+
+--
+
+- GLM avec distribution de Poisson ou binomiale: variance varie selon la réponse moyenne prédite, relation fixée par la distribution, soit $\lambda$ ou $np(1-p)$.
+
+--
+
+- Surdispersion: variance résiduelle dépasse celle prévue par la distribution théorique
+
+--
+
+- Pas de surdispersion possible pour une réponse binaire (binomiale avec $n = 1$).
+
+---
+
+# Surdispersion
+
+```{r, echo = FALSE, fig.dim = c(9, 5)}
+p1 <- ggplot(NULL, aes(x = 0:25)) +
+    labs(x = "y", y = "P(y)") +
+    stat_function(fun = dnbinom, args = list(mu = 5, size = 1), geom = "bar", n = 26,
+                  fill = "#d95f02", alpha = 0.7) +
+    stat_function(fun = dpois, args = list(lambda = 5), geom = "bar", n = 26,
+                  fill = "#1b9e77", alpha = 0.7) +
+    scale_y_continuous(expand = c(0, 0))
+p2 <- ggplot(NULL, aes(x = 0:15)) +
+    labs(x = "y", y = "P(y)") +
+    stat_function(fun = emdbook::dbetabinom, args = list(size = 15, prob = 0.3, theta = 1), 
+                  geom = "bar", n = 16, fill = "#d95f02", alpha = 0.7) +
+    stat_function(fun = dbinom, args = list(size = 15, prob = 0.3), geom = "bar", n = 16,
+                  fill = "#1b9e77", alpha = 0.7) +
+    scale_y_continuous(expand = c(0, 0))
+plot_grid(p1, p2, labels = c("Pois(5)", "Bin(15, 0.3)"),
+          label_x = 0.5)
+```
+
+---
+
+class: inverse, center, middle
+
+# Modèles linéaires mixtes
+
+---
+
+# Motivation
+
+- Régression linéaire simple pour $n$ observations de $(x, y)$. Pour $k = 1, ..., n$:
+
+$$y_k \sim N(\mu_k, \sigma_y)$$
+
+$$\mu_k = \beta_0 + \beta_1 x_k$$
+
+--
+
+- Supposons maintenant que les observations soient groupées.
+
+--
+
+- La variation résiduelle de $y$ n'est pas indépendante d'une observation à l'autre.
+
+---
+
+# Modèle linéaire mixte
+
+- Permet aux coefficients du modèle linéaire de varier d'un groupe à l'autre selon une distribution normale. Ex.: si $j[k]$ est le groupe $j$ contenant l'observation $k$:
+
+--
+
+
+$$y_k \sim N(\mu_k, \sigma_y)$$
+
+$$\mu_k = \beta_{0j[k]} + \beta_{1j[k]} x_k$$
+
+--
+
+$$\beta_{0j} \sim N(\mu_{\beta_0}, \sigma_{\beta_0})$$
+
+---
+
+# Modèles linéaires mixtes
+
+- Combinent effets fixes (ex.: effet du prédicteur $x$) et effets aléatoires (variation entre groupes).
+
+--
+
+- Estiment la moyenne de chaque coefficient, ici $\beta_0$ et $\beta_1$, l'écart-type de ces coefficients entre les groupes, ainsi que l'écart-type des résidus $\sigma_y$. 
+
+--
+
+- Produisent aussi des estimés des coefficients ex.: $\beta_{0j}$, $\beta_{1j}$ pour chaque groupe $j$.
+
+- Contrairement au cas où on assignerait un effet fixe à la variable de groupe, ces coefficients sont *contractés* vers leur valeur moyenne.
+
+---
+
+# Contraction des effets de groupes
+
+```{r, echo = FALSE, fig.dim = c(9, 6), message = FALSE, warning = FALSE}
+library(lme4)
+rikz <- read.csv("../donnees/rikz.csv")
+rikz <- mutate(rikz, Beach = as.factor(Beach), srich = sqrt(Richness))
+lm_rikz <- lm(srich ~ NAP * Beach, rikz)
+mm_rikz <- lmer(srich ~ NAP + (1 + NAP | Beach), rikz)
+
+ggplot(rikz, aes(x = NAP, y = srich, color = Beach)) +
+    labs(x = "x", y = "y") +
+    geom_point() + 
+    geom_line(aes(y = fitted(lm_rikz)), linetype = "dashed") +
+    geom_line(aes(y = fitted(mm_rikz))) +
+    theme(legend.position = "none")
+```
+
+---
+
+# Avantages des modèles mixtes
+
+- Contraction des estimés tient compte du fait qu'une partie des différences observées est due au hasard; plus importante si l'échantillon est petit dans un groupe.
+
+--
+
+- Peuvent produire des prédictions de la réponse pour un groupe non-présent dans les données initiales.
+
+--
+
+- Peuvent estimer à la fois des effets aléatoires de groupes et l'effet d'un prédicteur qui varie à l'échelle du groupe (modèle hiérarchique).
+
+
+$$\beta_{0j} \sim N(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})$$
+
+---
+
+# Quand utiliser les modèles mixtes?
+
+
+- Les données sont groupées ou ont une structure hiérarchique à deux ou plusieurs niveaux.
+
+- Les variables explicatives sont aussi définies à plusieurs niveaux.
+
+- Le nombre de groupes est trop grand, ou le nombre d'observations dans certains groupes est trop petit, pour estimer un effet séparé pour chaque groupe.
+
+- On s'intéresse davantage à la variation entre les groupes qu'à l'effet de groupes particuliers.
+
+- On souhaite appliquer le modèle à des groupes où aucune mesure n'a été prise.
+
+---
+
+# Modèles linéaires mixtes dans R
+
+- Fonction `lmer` du package *lme4*
+
+```{r, eval = FALSE, echo = TRUE}
+library(lme4)
+
+lmer(y ~ x + u + (1 + x | g), data = df)
+```
+
+--
+
+- Prédicteur au niveau du groupe `u` apparait comme un autre prédicteur.
+
+--
+
+- `(1 + x | g)` signifie un effet aléatoire du groupe `g` sur l'ordonnée à l'origine (1) et sur le coefficient de `x`.
+
+---
+
+class: inverse, center, middle
+
+# Modèles linéaires généralisés à effets mixtes
+
+---
+
+# Modèles linéaires généralisés à effets mixtes
+
+- Combinent les caractéristiques des modèles linéaires généralisés et des modèles linéaires mixtes.
+
+--
+
+- Différentes distributions possibles pour $y$ et la moyenne de $y$ est reliée au prédicteur linéaire par une fonction de lien:
+
+$$g(\mu) = \eta = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$
+
+--
+
+- Coefficients du prédicteur linéaire varient aléatoirement entre les groupes. 
+
+- Les effets aléatoires suivent toujours une distribution normale.
+
+---
+
+# Exemple
+
+- Jeu de données `rikz` (tiré du manuel de Zuur et al.): richesse spécifique des communautés benthiques mesurée sur 9 plages des Pays-Bas, 5 sites par plage.
+
+```{r}
+rikz <- read.csv("../donnees/rikz.csv")
+# Exprimer Beach et Exposure comme des variables catégorielle (facteurs)
+rikz <- mutate(rikz, Beach = as.factor(Beach), 
+               Exposure = as.factor(Exposure))
+head(rikz)
+```
+
+--
+
+- *NAP*: position verticale du site
+
+- *Exposure*: indice d'exposition de la plage
+
+---
+
+# Fonction `glmer`
+
+```{r, echo = TRUE}
+glmm_res <- glmer(Richness ~ NAP + (1 + NAP | Beach), data = rikz, family = poisson)
+```
+
+- Fonction `glmer` du package *lme4*; semblable à `lmer`, avec l'ajout du paramètre `family`.
+
+---
+
+# Estimation des paramètres
+
+.code50[
+```{r, echo = TRUE}
+summary(glmm_res)
+```
+]
+
+---
+
+# Effets aléatoires
+
+.pull-left[
+```{r, echo = TRUE}
+ranef(glmm_res)
+```
+]
+
+--
+
+.pull-right[
+```{r, echo = TRUE}
+coef(glmm_res)
+```
+]
+
+---
+
+# Représentation graphique du modèle
+
+```{r, echo = TRUE}
+ggplot(rikz, aes(x = NAP, y = Richness, color = Beach)) +
+    geom_point() +
+    geom_line(aes(y = fitted(glmm_res)))
+```
+
+---
+
+# Méthodes d'estimation
+
+- Probabilité d'avoir observé une valeur donnée de $y$ dépend des paramètres, mais aussi de la valeur des effets aléatoires pour le groupe contenant l'observation.
+
+--
+
+- Pour calculer la fonction de vraisemblance, il faut faire la moyenne de la probabilité de chaque observation sur l'ensemble des valeurs possibles des effets aléatoires de groupe.
+
+---
+
+# Estimation pour un modèle linéaire mixte
+
+- Pour un modèle linéaire mixte, ce calcul se simplifie et on peut estimer séparément les effets fixes et les variances (variance des effets aléatoires, variance résiduelle). 
+
+--
+
+- Maximum de vraisemblance restreint (REML, pour *restricted maximum likelihood*): estime les pramètres de variance selon les résidus indépendants du modèle après estimation des effets fixes. 
+
+--
+
+- Cette méthode assure que chaque variance est basée sur le bon nombre de degrés de liberté; corrige le biais du maximum de vraisemblance. 
+
+---
+
+# Estimation pour un GLMM
+
+- Pas de simplification correspondante de l'équation de vraisemblance; le REML ne s'applique pas.
+
+--
+
+- Il faut approximer numériquement l'intégrale des effets aléatoires.
+
+--
+
+- Approximation de Laplace (par défaut dans `glmer`): approximation quadratique de la fonction de vraisemblance.
+
+--
+
+- Quadrature de Gauss-Hermine (paramètre `nAGQ`): plus précise mais plus longue; seulement disponible avec un seul effet aléatoire.
+
+---
+
+# Intervalles de confiance
+
+```{r echo = TRUE, warning = FALSE}
+confint(glmm_res, oldNames = FALSE)
+```
+
+--
+
+- Calculés à partir de la vraisemblance profilée
+
+--
+
+- Autre option: bootstrap (intervalle des quantiles)
+
+---
+
+class: inverse, center, middle
+
+# Évaluation et comparaison de modèles
+
+---
+
+# Distribution des résidus
+
+- Dans un GLM(M), les résidus $y - \hat{y}$ ne sont pas distribués normalement et leur variance n'est pas homogène.
+
+--
+
+- Résidu de Pearson $r_P$: diviser le résidu brut par l'écart-type attendu.
+
+$$r_{P(k)} = \frac{y_k - \hat{y_k}}{\hat{\sigma}_{k}}$$
+
+--
+
+- $\hat{\sigma}_{k}$ égal $\sqrt{\lambda}$ (Poisson) ou $\sqrt{np(1-p)}$ (binomial). 
+
+---
+
+# Test du $\chi^2$ pour l'ajustement
+
+- Pour des $y$ générés selon le modèle théorique, la somme des $r_P^2$ suit une distribution $\chi^2$, avec le nombre de degrés de liberté résiduels du modèle.
+
+--
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(glmm_res, type = "pearson")^2)
+chi2
+```
+
+--
+
+```{r, echo = TRUE}
+1 - pchisq(chi2, df = df.residual(glmm_res))
+```
+
+---
+
+# Coefficient de dispersion
+
+- Obtenu en divisant la somme des $r_P^2$ par le nombre de degrés de liberté résiduels.
+
+```{r, echo = TRUE}
+chi2 / df.residual(glmm_res)
+```
+
+--
+
+- On ne se soucie généralement pas de la sous-dispersion (coefficient inférieur à 1). Cependant une sous-dispersion extrême pourrait indiquer un surajustement du modèle.
+
+---
+
+# Distribution des effets aléatoires
+
+- Les effets aléatoires donnés par `ranef` devraient être normalement distribués.
+
+--
+
+```{r, echo = TRUE}
+re <- ranef(glmm_res)$Beach
+re
+```
+
+---
+
+# Distribution des effets aléatoires
+
+- Les effets aléatoires donnés par `ranef` devraient être normalement distribués.
+
+```{r, echo = TRUE}
+qqnorm(re$`(Intercept)`)
+qqline(re$`(Intercept)`)
+```
+
+---
+
+# Distribution des effets aléatoires
+
+- Les effets aléatoires donnés par `ranef` devraient être normalement distribués.
+
+```{r, echo = TRUE}
+qqnorm(re$NAP)
+qqline(re$NAP)
+```
+
+---
+
+# Coefficient de détermination
+
+- Modèle linéaire: $R^2$ indique la fraction de la variance expliquée par le modèle.
+
+$$R^2 = 1 - \frac{\sigma_{\epsilon}^2}{\sigma_t^2}$$
+
+--
+
+- $\sigma_{\epsilon}^2$: variance des résidus 
+- $\sigma_t^2$: variance totale de la réponse
+
+---
+
+# Coefficient de détermination
+
+- Fonction `r.squaredGLMM` du package *MuMIn* calcule une version du $R^2$ appropriée pour les modèles mixtes (incluant GLMM).
+
+```{r message=FALSE, warning=FALSE, echo = TRUE}
+library(MuMIn)
+r.squaredGLMM(glmm_res)
+```
+
+--
+
+- `R2m` est le $R^2$ marginal, en tenant seulement compte des effets fixes.
+
+- `R2c` est le $R^2$ conditionnel, soit la variance expliquée par les effets fixes et les effets de groupe.
+
+--
+
+- Pour un modèle linéaire mixte, ces valeurs s'interprètent directement en fonction de la variance de la réponse.
+
+---
+
+# Coefficient de détermination
+
+- Fonction `r.squaredGLMM` du package *MuMIn* calcule une version du $R^2$ appropriée pour les modèles mixtes (incluant GLMM).
+
+```{r message=FALSE, warning=FALSE, echo = TRUE}
+library(MuMIn)
+r.squaredGLMM(glmm_res)
+```
+
+- Pour un GLMM, le $R^2$ est basé sur la variance sur l'échelle du prédicteur linéaire (variance de la réponse transformée par la fonction de lien).
+
+--
+
+- Plusieurs méthodes d'estimation: `trigamma` est la plus précise, seulement disponible pour GLMM avec un lien log.
+
+---
+
+# Comparaison de modèles
+
+Comparaison de modèles avec l'AIC ou l'AICc (petits échantillons).
+
+--
+
+Méthode suggérée par Zuur et al.
+
+- D'abord, inclure tous les effets fixes qui nous intéressent et choisir, si nécessaire, entre différentes versions des effets aléatoires.
+
+--
+
+- Conserver les effets aléatoires choisis à l'étape précédente et comparer différentes versions des effets fixes.
+
+--
+
+*Note*: Pour des données groupées, conserver au moins un effet aléatoire du groupe sur l'ordonnée à l'origine.
+
+---
+
+# Exemple
+
+- Étape 1: Comparer le modèle avec effets aléatoires sur les deux coefficients vs. l'ordonnée à l'origine seulement.
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+library(AICcmodavg)
+
+glmm1 <- glmer(Richness ~ Exposure + NAP + (1 + NAP | Beach), data = rikz, family = poisson)
+glmm2 <- glmer(Richness ~ Exposure + NAP + (1 | Beach), data = rikz, family = poisson)
+aictab(list(glmm1, glmm2))
+```
+
+---
+
+# Exemple
+
+- Étape 2: Comparer le modèle avec ou sans effet de l'indice d'exposition.
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+glmm2 <- glmer(Richness ~ Exposure + NAP + (1 | Beach), data = rikz, family = poisson)
+glmm3 <- glmer(Richness ~ NAP + (1 | Beach), data = rikz, family = poisson)
+aictab(list(glmm2, glmm3))
+```
+
+---
+
+# Vérifier l'ajustement du modèle
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(glmm2, type = "pearson")^2)
+chi2
+1 - pchisq(chi2, df = df.residual(glmm2))
+```
+
+---
+
+# Vérifier l'ajustement du modèle
+
+```{r, echo = TRUE}
+qqnorm(ranef(glmm2)$Beach$`(Intercept)`)
+qqline(ranef(glmm2)$Beach$`(Intercept)`)
+```
+
+---
+
+# Coefficient de détermination
+
+```{r, echo = TRUE}
+r.squaredGLMM(glmm2)
+```
+
+---
+
+# Références
+
+- Bolker, B. et al. (2009) Generalized linear mixed models: a practical guide for ecology and evolution. *Trends in Ecology and Evolution* 24: 127-135.
+
+- Harrison, X.A. et al. (2018) A brief introduction to mixed effects modelling and multi-model inference in ecology. *PeerJ* 6: e4794.
+
+- Zuur, A.F., Ieno, E.N., Walker, N.J., Saveliev, A.A., Smith, G.M. (2009) *Mixed Effects Models and Extensions in Ecology with R*. New York, Springer-Verlag.

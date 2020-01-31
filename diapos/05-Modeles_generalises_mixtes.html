@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Modèles linéaires généralisés à effets mixtes</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modèles linéaires généralisés à effets mixtes
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+# Contenu du cours
+
+- Révision: modèles linéaires généralisés et modèles linéaires mixtes
+
+- Modèles linéaires généralisés à effets mixtes (GLMM)
+
+- Évaluer l'ajustement d'un GLMM
+
+- Comparer différentes versions d'un GLMM
+
+---
+
+class: inverse, center, middle
+
+# Modèles linéaires généralisés
+
+---
+
+# Motivation
+
+Régression linéaire de `\(y\)` en fonction de prédicteurs `\(x_1, ..., x_m\)`:
+
+--
+
+- Effets linéaires sur la moyenne de `\(y\)`
+
+`$$\mu = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$`
+
+--
+
+- Distribution normale
+
+`$$y \sim N(\mu, \sigma)$$`
+
+---
+
+# Motivation
+
+- Variables réponses binaires (0/1) ou de comptage (0, 1, 2, ...) mal représentées par ce modèle
+
+--
+
+- Respect des contraintes
+
+--
+
+- Relation entre moyenne et variance
+
+---
+
+# Modèles linéaires généralisés
+
+- Prédicteur linéaire `\(\eta\)` relié à la moyenne de `\(y\)` par une fonction de lien:
+
+`$$g(\mu) = \eta = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$`
+
+--
+
+- Différentes distributions peuvent être utilisées pour `\(y\)`.
+
+---
+
+# Modèles linéaires généralisés
+
+Modèle | Distribution | Lien par défaut | Inverse du lien |
+-------|--------------|-----------------|-----------------|
+Régression linéaire | Normale: `\(y \sim N(\mu, \sigma)\)` | Identité: `\(\mu = \eta\)` | `\(\mu = \eta\)` |
+Régression logistique | Binomiale: `\(y \sim B(n, p)\)` | Logit: `\(\log(p/(1-p)) = \eta\)` | `\(p = 1/(1+e^{-\eta})\)`
+Régression de Poisson | Poisson: `\(y \sim Pois(\lambda)\)` | Log: `\(\log(\lambda) = \eta\)` | `\(\lambda = e^{\eta}\)` | 
+
+---
+
+# Régression de Poisson
+
+- Distribution de Poisson: Représente le nombre d'événements observés dans un intervalle (temporel ou spatial), lorsque ces événements sont indépendants un de l'autre.
+
+--
+
+`$$P(y | \lambda) = \frac{\lambda^y}{y!} e^{-\lambda}$$`
+
+- Un paramètre ajustable `\(\lambda\)`, correspond à la moyenne et variance de `\(y\)`.
+
+---
+
+# Distribution de Poisson
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+
+---
+
+# Lien logarithmique
+
+`$$\log{\lambda} = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$`
+
+--
+
+- Inverse du lien:
+
+`$$\lambda = e^{\beta_0 + \sum_{i = 1}^m \beta_i x_i}$$`
+
+--
+
+- L'exponentielle transforme les effets additifs en effets multiplicatifs.
+
+`$$\lambda = e^{\beta_0} e^{\beta_1 x_1} e^{\beta_2 x_2} \ldots$$`
+
+---
+
+# Régression logistique
+
+- Distribution binomiale: Pour une réponse binaire codée 0/1, représente le nombre `\(y\)` de réponses positives (1) parmi `\(n\)` réplicats indépendants, si `\(p\)` est la probabilité d'obtenir 1.
+
+`$$P(y \vert n, p) = \binom{n}{y} p^y(1-p)^{n-y}$$`
+
+--
+
+- Moyenne de `\(y\)` est `\(np\)`, variance est `\(np(1-p)\)`.
+
+--
+
+- `\(n\)` est connu et `\(p\)` varie en fonction des prédicteurs.
+
+- Souvent `\(n = 1\)` (réponses individuelles), mais `\(n &gt; 1\)` possible dans une expérience contrôlée.
+
+---
+
+# Distribution binomiale
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+---
+
+# Régression logistique
+
+`$$p = \frac{1}{1 + e^{-\eta}}$$`
+
+.center[
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+]
+
+---
+
+# Régression logistique
+
+`$$p = \frac{1}{1 + e^{-\eta}}$$`
+
+- Inverse: lien logit
+
+`$$\eta = \text{logit}(p) = \log \left( \frac{p}{1-p} \right)$$`
+
+--
+
+`$$p = \frac{1}{1 + e^{-(\beta_0 + \sum_{i = 1}^m \beta_i x_i)}}$$`
+
+- Pente maximale de `\(p\)` vs. `\(x_i\)`: `\(\beta_i / 4\)` lorsque `\(p = 0.5\)`.
+
+---
+
+# Régression logistique
+
+- Exemple: `\(\text{logit}(p) = -1 + 0.4 x\)`
+
+.center[
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+]
+
+---
+
+# Fonction `glm` dans R
+
+
+```r
+glm(y ~ x1 + x2 + ..., data = ..., family = binomial)
+```
+
+- Ici, `\(y\)` serait une colonne avec des données binaires (codées 0/1 ou TRUE/FALSE).
+
+--
+
+- Spécification du lien: `family = binomial(link = "logit")` optionnelle si on utilise le lien par défaut (logit pour binomial, log pour Poisson).
+
+--
+
+- Avec `\(n &gt; 1\)` dans le cas binomial, nous devons spécifier la colonne donnant le nombre de cas positifs et négatifs.
+
+
+```r
+glm(cbind(pos, neg) ~ x1 + x2 + ..., data = ..., family = binomial)
+```
+
+---
+
+# Surdispersion
+
+- Régression linéaire: même variance pour chaque observation, `\(\sigma^2\)` estimée indépendamment de la moyenne.
+
+--
+
+- GLM avec distribution de Poisson ou binomiale: variance varie selon la réponse moyenne prédite, relation fixée par la distribution, soit `\(\lambda\)` ou `\(np(1-p)\)`.
+
+--
+
+- Surdispersion: variance résiduelle dépasse celle prévue par la distribution théorique
+
+--
+
+- Pas de surdispersion possible pour une réponse binaire (binomiale avec `\(n = 1\)`).
+
+---
+
+# Surdispersion
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+
+class: inverse, center, middle
+
+# Modèles linéaires mixtes
+
+---
+
+# Motivation
+
+- Régression linéaire simple pour `\(n\)` observations de `\((x, y)\)`. Pour `\(k = 1, ..., n\)`:
+
+`$$y_k \sim N(\mu_k, \sigma_y)$$`
+
+`$$\mu_k = \beta_0 + \beta_1 x_k$$`
+
+--
+
+- Supposons maintenant que les observations soient groupées.
+
+--
+
+- La variation résiduelle de `\(y\)` n'est pas indépendante d'une observation à l'autre.
+
+---
+
+# Modèle linéaire mixte
+
+- Permet aux coefficients du modèle linéaire de varier d'un groupe à l'autre selon une distribution normale. Ex.: si `\(j[k]\)` est le groupe `\(j\)` contenant l'observation `\(k\)`:
+
+--
+
+
+`$$y_k \sim N(\mu_k, \sigma_y)$$`
+
+`$$\mu_k = \beta_{0j[k]} + \beta_{1j[k]} x_k$$`
+
+--
+
+`$$\beta_{0j} \sim N(\mu_{\beta_0}, \sigma_{\beta_0})$$`
+
+---
+
+# Modèles linéaires mixtes
+
+- Combinent effets fixes (ex.: effet du prédicteur `\(x\)`) et effets aléatoires (variation entre groupes).
+
+--
+
+- Estiment la moyenne de chaque coefficient, ici `\(\beta_0\)` et `\(\beta_1\)`, l'écart-type de ces coefficients entre les groupes, ainsi que l'écart-type des résidus `\(\sigma_y\)`. 
+
+--
+
+- Produisent aussi des estimés des coefficients ex.: `\(\beta_{0j}\)`, `\(\beta_{1j}\)` pour chaque groupe `\(j\)`.
+
+- Contrairement au cas où on assignerait un effet fixe à la variable de groupe, ces coefficients sont *contractés* vers leur valeur moyenne.
+
+---
+
+# Contraction des effets de groupes
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+---
+
+# Avantages des modèles mixtes
+
+- Contraction des estimés tient compte du fait qu'une partie des différences observées est due au hasard; plus importante si l'échantillon est petit dans un groupe.
+
+--
+
+- Peuvent produire des prédictions de la réponse pour un groupe non-présent dans les données initiales.
+
+--
+
+- Peuvent estimer à la fois des effets aléatoires de groupes et l'effet d'un prédicteur qui varie à l'échelle du groupe (modèle hiérarchique).
+
+
+`$$\beta_{0j} \sim N(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})$$`
+
+---
+
+# Quand utiliser les modèles mixtes?
+
+
+- Les données sont groupées ou ont une structure hiérarchique à deux ou plusieurs niveaux.
+
+- Les variables explicatives sont aussi définies à plusieurs niveaux.
+
+- Le nombre de groupes est trop grand, ou le nombre d'observations dans certains groupes est trop petit, pour estimer un effet séparé pour chaque groupe.
+
+- On s'intéresse davantage à la variation entre les groupes qu'à l'effet de groupes particuliers.
+
+- On souhaite appliquer le modèle à des groupes où aucune mesure n'a été prise.
+
+---
+
+# Modèles linéaires mixtes dans R
+
+- Fonction `lmer` du package *lme4*
+
+
+```r
+library(lme4)
+
+lmer(y ~ x + u + (1 + x | g), data = df)
+```
+
+--
+
+- Prédicteur au niveau du groupe `u` apparait comme un autre prédicteur.
+
+--
+
+- `(1 + x | g)` signifie un effet aléatoire du groupe `g` sur l'ordonnée à l'origine (1) et sur le coefficient de `x`.
+
+---
+
+class: inverse, center, middle
+
+# Modèles linéaires généralisés à effets mixtes
+
+---
+
+# Modèles linéaires généralisés à effets mixtes
+
+- Combinent les caractéristiques des modèles linéaires généralisés et des modèles linéaires mixtes.
+
+--
+
+- Différentes distributions possibles pour `\(y\)` et la moyenne de `\(y\)` est reliée au prédicteur linéaire par une fonction de lien:
+
+`$$g(\mu) = \eta = \beta_0 + \sum_{i = 1}^m \beta_i x_i$$`
+
+--
+
+- Coefficients du prédicteur linéaire varient aléatoirement entre les groupes. 
+
+- Les effets aléatoires suivent toujours une distribution normale.
+
+---
+
+# Exemple
+
+- Jeu de données `rikz` (tiré du manuel de Zuur et al.): richesse spécifique des communautés benthiques mesurée sur 9 plages des Pays-Bas, 5 sites par plage.
+
+
+```
+##   Sample Richness Exposure    NAP Beach
+## 1      1       11       10  0.045     1
+## 2      2       10       10 -1.036     1
+## 3      3       13       10 -1.336     1
+## 4      4       11       10  0.616     1
+## 5      5       10       10 -0.684     1
+## 6      6        8        8  1.190     2
+```
+
+--
+
+- *NAP*: position verticale du site
+
+- *Exposure*: indice d'exposition de la plage
+
+---
+
+# Fonction `glmer`
+
+
+```r
+glmm_res &lt;- glmer(Richness ~ NAP + (1 + NAP | Beach), data = rikz, family = poisson)
+```
+
+- Fonction `glmer` du package *lme4*; semblable à `lmer`, avec l'ajout du paramètre `family`.
+
+---
+
+# Estimation des paramètres
+
+.code50[
+
+```r
+summary(glmm_res)
+```
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: Richness ~ NAP + (1 + NAP | Beach)
+##    Data: rikz
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    218.7    227.8   -104.4    208.7       40 
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -1.35846 -0.51129 -0.21846  0.09802  2.45384 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev. Corr
+##  Beach  (Intercept) 0.2630   0.5128       
+##         NAP         0.0891   0.2985   0.18
+## Number of obs: 45, groups:  Beach, 9
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   1.6942     0.1868   9.071  &lt; 2e-16 ***
+## NAP          -0.6074     0.1374  -4.421 9.81e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##     (Intr)
+## NAP 0.121
+```
+]
+
+---
+
+# Effets aléatoires
+
+.pull-left[
+
+```r
+ranef(glmm_res)
+```
+
+```
+## $Beach
+##   (Intercept)         NAP
+## 1   0.5579965  0.39325120
+## 2   0.8038562  0.26321427
+## 3  -0.4823311 -0.01681456
+## 4  -0.4922817 -0.00227238
+## 5   0.5590590 -0.40091320
+## 6  -0.2740162  0.09140229
+## 7  -0.3072758 -0.09381168
+## 8  -0.1895568  0.03540481
+## 9   0.0541533 -0.18368180
+## 
+## with conditional variances for "Beach"
+```
+]
+
+--
+
+.pull-right[
+
+```r
+coef(glmm_res)
+```
+
+```
+## $Beach
+##   (Intercept)        NAP
+## 1    2.252151 -0.2141373
+## 2    2.498011 -0.3441742
+## 3    1.211824 -0.6242030
+## 4    1.201873 -0.6096609
+## 5    2.253214 -1.0083017
+## 6    1.420139 -0.5159862
+## 7    1.386879 -0.7012001
+## 8    1.504598 -0.5719837
+## 9    1.748308 -0.7910703
+## 
+## attr(,"class")
+## [1] "coef.mer"
+```
+]
+
+---
+
+# Représentation graphique du modèle
+
+
+```r
+ggplot(rikz, aes(x = NAP, y = Richness, color = Beach)) +
+    geom_point() +
+    geom_line(aes(y = fitted(glmm_res)))
+```
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+
+---
+
+# Méthodes d'estimation
+
+- Probabilité d'avoir observé une valeur donnée de `\(y\)` dépend des paramètres, mais aussi de la valeur des effets aléatoires pour le groupe contenant l'observation.
+
+--
+
+- Pour calculer la fonction de vraisemblance, il faut faire la moyenne de la probabilité de chaque observation sur l'ensemble des valeurs possibles des effets aléatoires de groupe.
+
+---
+
+# Estimation pour un modèle linéaire mixte
+
+- Pour un modèle linéaire mixte, ce calcul se simplifie et on peut estimer séparément les effets fixes et les variances (variance des effets aléatoires, variance résiduelle). 
+
+--
+
+- Maximum de vraisemblance restreint (REML, pour *restricted maximum likelihood*): estime les pramètres de variance selon les résidus indépendants du modèle après estimation des effets fixes. 
+
+--
+
+- Cette méthode assure que chaque variance est basée sur le bon nombre de degrés de liberté; corrige le biais du maximum de vraisemblance. 
+
+---
+
+# Estimation pour un GLMM
+
+- Pas de simplification correspondante de l'équation de vraisemblance; le REML ne s'applique pas.
+
+--
+
+- Il faut approximer numériquement l'intégrale des effets aléatoires.
+
+--
+
+- Approximation de Laplace (par défaut dans `glmer`): approximation quadratique de la fonction de vraisemblance.
+
+--
+
+- Quadrature de Gauss-Hermine (paramètre `nAGQ`): plus précise mais plus longue; seulement disponible avec un seul effet aléatoire.
+
+---
+
+# Intervalles de confiance
+
+
+```r
+confint(glmm_res, oldNames = FALSE)
+```
+
+```
+##                                 2.5 %     97.5 %
+## sd_(Intercept)|Beach       0.30813882  0.9344068
+## cor_NAP.(Intercept)|Beach -0.63136889  0.9423103
+## sd_NAP|Beach               0.08444686  0.6394023
+## (Intercept)                1.27203026  2.0884038
+## NAP                       -0.93296597 -0.3318997
+```
+
+--
+
+- Calculés à partir de la vraisemblance profilée
+
+--
+
+- Autre option: bootstrap (intervalle des quantiles)
+
+---
+
+class: inverse, center, middle
+
+# Évaluation et comparaison de modèles
+
+---
+
+# Distribution des résidus
+
+- Dans un GLM(M), les résidus `\(y - \hat{y}\)` ne sont pas distribués normalement et leur variance n'est pas homogène.
+
+--
+
+- Résidu de Pearson `\(r_P\)`: diviser le résidu brut par l'écart-type attendu.
+
+`$$r_{P(k)} = \frac{y_k - \hat{y_k}}{\hat{\sigma}_{k}}$$`
+
+--
+
+- `\(\hat{\sigma}_{k}\)` égal `\(\sqrt{\lambda}\)` (Poisson) ou `\(\sqrt{np(1-p)}\)` (binomial). 
+
+---
+
+# Test du `\(\chi^2\)` pour l'ajustement
+
+- Pour des `\(y\)` générés selon le modèle théorique, la somme des `\(r_P^2\)` suit une distribution `\(\chi^2\)`, avec le nombre de degrés de liberté résiduels du modèle.
+
+--
+
+
+```r
+chi2 &lt;- sum(residuals(glmm_res, type = "pearson")^2)
+chi2
+```
+
+```
+## [1] 26.40239
+```
+
+--
+
+
+```r
+1 - pchisq(chi2, df = df.residual(glmm_res))
+```
+
+```
+## [1] 0.9516085
+```
+
+---
+
+# Coefficient de dispersion
+
+- Obtenu en divisant la somme des `\(r_P^2\)` par le nombre de degrés de liberté résiduels.
+
+
+```r
+chi2 / df.residual(glmm_res)
+```
+
+```
+## [1] 0.6600598
+```
+
+--
+
+- On ne se soucie généralement pas de la sous-dispersion (coefficient inférieur à 1). Cependant une sous-dispersion extrême pourrait indiquer un surajustement du modèle.
+
+---
+
+# Distribution des effets aléatoires
+
+- Les effets aléatoires donnés par `ranef` devraient être normalement distribués.
+
+--
+
+
+```r
+re &lt;- ranef(glmm_res)$Beach
+re
+```
+
+```
+##   (Intercept)         NAP
+## 1   0.5579965  0.39325120
+## 2   0.8038562  0.26321427
+## 3  -0.4823311 -0.01681456
+## 4  -0.4922817 -0.00227238
+## 5   0.5590590 -0.40091320
+## 6  -0.2740162  0.09140229
+## 7  -0.3072758 -0.09381168
+## 8  -0.1895568  0.03540481
+## 9   0.0541533 -0.18368180
+```
+
+---
+
+# Distribution des effets aléatoires
+
+- Les effets aléatoires donnés par `ranef` devraient être normalement distribués.
+
+
+```r
+qqnorm(re$`(Intercept)`)
+qqline(re$`(Intercept)`)
+```
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+---
+
+# Distribution des effets aléatoires
+
+- Les effets aléatoires donnés par `ranef` devraient être normalement distribués.
+
+
+```r
+qqnorm(re$NAP)
+qqline(re$NAP)
+```
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+
+---
+
+# Coefficient de détermination
+
+- Modèle linéaire: `\(R^2\)` indique la fraction de la variance expliquée par le modèle.
+
+`$$R^2 = 1 - \frac{\sigma_{\epsilon}^2}{\sigma_t^2}$$`
+
+--
+
+- `\(\sigma_{\epsilon}^2\)`: variance des résidus 
+- `\(\sigma_t^2\)`: variance totale de la réponse
+
+---
+
+# Coefficient de détermination
+
+- Fonction `r.squaredGLMM` du package *MuMIn* calcule une version du `\(R^2\)` appropriée pour les modèles mixtes (incluant GLMM).
+
+
+```r
+library(MuMIn)
+r.squaredGLMM(glmm_res)
+```
+
+```
+##                 R2m       R2c
+## delta     0.4206307 0.8577819
+## lognormal 0.4240694 0.8647945
+## trigamma  0.4168256 0.8500224
+```
+
+--
+
+- `R2m` est le `\(R^2\)` marginal, en tenant seulement compte des effets fixes.
+
+- `R2c` est le `\(R^2\)` conditionnel, soit la variance expliquée par les effets fixes et les effets de groupe.
+
+--
+
+- Pour un modèle linéaire mixte, ces valeurs s'interprètent directement en fonction de la variance de la réponse.
+
+---
+
+# Coefficient de détermination
+
+- Fonction `r.squaredGLMM` du package *MuMIn* calcule une version du `\(R^2\)` appropriée pour les modèles mixtes (incluant GLMM).
+
+
+```r
+library(MuMIn)
+r.squaredGLMM(glmm_res)
+```
+
+```
+##                 R2m       R2c
+## delta     0.4206307 0.8577819
+## lognormal 0.4240694 0.8647945
+## trigamma  0.4168256 0.8500224
+```
+
+- Pour un GLMM, le `\(R^2\)` est basé sur la variance sur l'échelle du prédicteur linéaire (variance de la réponse transformée par la fonction de lien).
+
+--
+
+- Plusieurs méthodes d'estimation: `trigamma` est la plus précise, seulement disponible pour GLMM avec un lien log.
+
+---
+
+# Comparaison de modèles
+
+Comparaison de modèles avec l'AIC ou l'AICc (petits échantillons).
+
+--
+
+Méthode suggérée par Zuur et al.
+
+- D'abord, inclure tous les effets fixes qui nous intéressent et choisir, si nécessaire, entre différentes versions des effets aléatoires.
+
+--
+
+- Conserver les effets aléatoires choisis à l'étape précédente et comparer différentes versions des effets fixes.
+
+--
+
+*Note*: Pour des données groupées, conserver au moins un effet aléatoire du groupe sur l'ordonnée à l'origine.
+
+---
+
+# Exemple
+
+- Étape 1: Comparer le modèle avec effets aléatoires sur les deux coefficients vs. l'ordonnée à l'origine seulement.
+
+
+```r
+library(AICcmodavg)
+
+glmm1 &lt;- glmer(Richness ~ Exposure + NAP + (1 + NAP | Beach), data = rikz, family = poisson)
+glmm2 &lt;- glmer(Richness ~ Exposure + NAP + (1 | Beach), data = rikz, family = poisson)
+aictab(list(glmm1, glmm2))
+```
+
+```
+## 
+## Model selection based on AICc:
+## 
+##      K   AICc Delta_AICc AICcWt Cum.Wt      LL
+## Mod2 5 211.55       0.00   0.69   0.69 -100.00
+## Mod1 7 213.15       1.61   0.31   1.00  -98.06
+```
+
+---
+
+# Exemple
+
+- Étape 2: Comparer le modèle avec ou sans effet de l'indice d'exposition.
+
+
+```r
+glmm2 &lt;- glmer(Richness ~ Exposure + NAP + (1 | Beach), data = rikz, family = poisson)
+glmm3 &lt;- glmer(Richness ~ NAP + (1 | Beach), data = rikz, family = poisson)
+aictab(list(glmm2, glmm3))
+```
+
+```
+## 
+## Model selection based on AICc:
+## 
+##      K   AICc Delta_AICc AICcWt Cum.Wt      LL
+## Mod1 5 211.55       0.00   0.99   0.99 -100.00
+## Mod2 3 221.37       9.82   0.01   1.00 -107.39
+```
+
+---
+
+# Vérifier l'ajustement du modèle
+
+
+```r
+chi2 &lt;- sum(residuals(glmm2, type = "pearson")^2)
+chi2
+```
+
+```
+## [1] 51.90547
+```
+
+```r
+1 - pchisq(chi2, df = df.residual(glmm2))
+```
+
+```
+## [1] 0.09835205
+```
+
+---
+
+# Vérifier l'ajustement du modèle
+
+
+```r
+qqnorm(ranef(glmm2)$Beach$`(Intercept)`)
+qqline(ranef(glmm2)$Beach$`(Intercept)`)
+```
+
+![](05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-28-1.png)&lt;!-- --&gt;
+
+---
+
+# Coefficient de détermination
+
+
+```r
+r.squaredGLMM(glmm2)
+```
+
+```
+## Warning: The null model is correct only if all variables used by the
+## original model remain unchanged.
+```
+
+```
+##                 R2m       R2c
+## delta     0.7270454 0.7435881
+## lognormal 0.7420813 0.7589661
+## trigamma  0.7100514 0.7262074
+```
+
+---
+
+# Références
+
+- Bolker, B. et al. (2009) Generalized linear mixed models: a practical guide for ecology and evolution. *Trends in Ecology and Evolution* 24: 127-135.
+
+- Harrison, X.A. et al. (2018) A brief introduction to mixed effects modelling and multi-model inference in ecology. *PeerJ* 6: e4794.
+
+- Zuur, A.F., Ieno, E.N., Walker, N.J., Saveliev, A.A., Smith, G.M. (2009) *Mixed Effects Models and Extensions in Ecology with R*. New York, Springer-Verlag.
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

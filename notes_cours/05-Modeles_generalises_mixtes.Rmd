@@ -205,6 +205,8 @@ p2 <- ggplot(NULL, aes(x = 0:15)) +
 plot_grid(p1, p2)
 ```
 
+*Note*: Dans le cas d'une régression logistique où la réponse est binaire (i.e. binomiale avec $n = 1$), il ne peut pas y avoir de surdispersion.
+
 Nous discuterons plus tard dans le cours des méthodes pour identifier la surdispersion et de modèles alternatifs pour les données surdispersées.
 
 
