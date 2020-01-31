@@ -556,7 +556,7 @@ ggplot(rikz, aes(x = NAP, y = Richness, color = Beach)) +
 
 --
 
-- Quadrature de Gauss-Hermine (paramètre `nAGQ`): plus précise mais plus longue; seulement disponible avec un seul effet aléatoire.
+- Quadrature de Gauss-Hermite (paramètre `nAGQ`): plus précise mais plus longue; seulement disponible avec un seul effet aléatoire.
 
 ---
 
