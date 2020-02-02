@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Régression robuste aux valeurs extrêmes - Solutions</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Régression robuste aux valeurs extrêmes - Solutions</h1>
+
+</div>
+
+
+<div id="donnees" class="section level2">
+<h2>Données</h2>
+<p>Cet exercice est basé sur le jeu de données <em>gapminder</em> du package du même nom.</p>
+<blockquote>
+<p>Jennifer Bryan (2017). gapminder: Data from Gapminder. R package version 0.3.0. <a href="https://CRAN.R-project.org/package=gapminder" class="uri">https://CRAN.R-project.org/package=gapminder</a></p>
+</blockquote>
+<p>Ce jeu de données inclut l’espérance de vie (<em>lifeExp</em>), la population (<em>pop)</em> et le PIB par habitant (<em>gdpPercap</em>) pour 142 pays et 12 années (aux 5 ans entre 1952 et 2007).</p>
+<pre class="r"><code>library(gapminder)
+str(gapminder)</code></pre>
+<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    1704 obs. of  6 variables:
+##  $ country  : Factor w/ 142 levels &quot;Afghanistan&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ continent: Factor w/ 5 levels &quot;Africa&quot;,&quot;Americas&quot;,..: 3 3 3 3 3 3 3 3 3 3 ...
+##  $ year     : int  1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+##  $ lifeExp  : num  28.8 30.3 32 34 36.1 ...
+##  $ pop      : int  8425333 9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 ...
+##  $ gdpPercap: num  779 821 853 836 740 ...</code></pre>
+</div>
+<div id="effet-du-pib-et-du-temps-sur-lesperance-de-vie" class="section level2">
+<h2>1. Effet du PIB et du temps sur l’espérance de vie</h2>
+<ol style="list-style-type: lower-alpha">
+<li>Visualisez d’abord les données d’espérance de vie en fonction du PIB par habitant et de l’année. Il est suggéré de représenter le logarithme de <em>gdpPercap</em> et de séparer les différentes années, par exemple avec des facettes dans <em>ggplot2</em>: <code>... + facet_wrap(~year)</code>.</li>
+</ol>
+<p>Quelles tendances générales observez-vous? Semble-t-il y avoir des valeurs extrêmes qui pourraient influencer fortement un modèle de régression? Si oui, essayez d’identifier ces données dans le tableau en vous basant sur la position des points dans le graphique.</p>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>library(ggplot2)
+
+ggplot(gapminder, aes(x = log(gdpPercap), y = lifeExp)) +
+    geom_point() +
+    facet_wrap(~year)</code></pre>
+<p><img src="04R-Regression_robuste_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<ul>
+<li><p>L’espérance de vie augmente avec <em>log(gdpPercap)</em> pour chaque année.</p></li>
+<li><p>Pour les premières années, une des valeurs avec un PIB très élevé s’éloigne de la tendance, donc cette valeur extrême pourrait influencer fortement une régression. En cherchant les valeurs extrêmes de <em>log(gdpPercap)</em>, on voit qu’il s’agit du Koweït entre 1952 et 1972.</p></li>
+</ul>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>filter(gapminder, log(gdpPercap) &gt; 11)</code></pre>
+<pre><code>## # A tibble: 5 x 6
+##   country continent  year lifeExp    pop gdpPercap
+##   &lt;fct&gt;   &lt;fct&gt;     &lt;int&gt;   &lt;dbl&gt;  &lt;int&gt;     &lt;dbl&gt;
+## 1 Kuwait  Asia       1952    55.6 160000   108382.
+## 2 Kuwait  Asia       1957    58.0 212846   113523.
+## 3 Kuwait  Asia       1962    60.5 358266    95458.
+## 4 Kuwait  Asia       1967    64.6 575003    80895.
+## 5 Kuwait  Asia       1972    67.7 841934   109348.</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Réalisez une régression linéaire (<code>lm</code>) pour déterminer l’effet du PIB par habitant, de l’année et de leur interaction sur l’espérance de vie. Pour faciliter l’inteprétation des coefficients, effectuez les transformations suivantes sur les prédicteurs:</li>
+</ol>
+<ul>
+<li><p>Prenez le logarithme de <em>gdpPercap</em> et normalisez-le avec la fonction <code>scale</code>. <em>Rappel</em>: <code>scale(x)</code> soustrait de chaque valeur de <code>x</code> leur moyenne et divise par leur écart-type, donc la variable résultante a une moyenne de 0 et un écart-type de 1; elle représente le nombre d’écarts-types au-dessus ou en-dessous de la moyenne.</p></li>
+<li><p>Remplacez <em>year</em> par le nombre d’années écoulées depuis 1952.</p></li>
+</ul>
+<p>Interprétez la signification de chacun des coefficients du modèle, puis consultez les graphiques de diagnostic. Les suppositions du modèle linéaire sont-elles respectées?</p>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>gapminder &lt;- mutate(gapminder, gdp_norm = scale(log(gdpPercap)), dyear = year - 1952)
+
+mod_lm &lt;- lm(lifeExp ~ gdp_norm * dyear, gapminder)
+summary(mod_lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = lifeExp ~ gdp_norm * dyear, data = gapminder)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -28.340  -3.496   0.802   4.557  18.172 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)    54.311695   0.324413 167.415  &lt; 2e-16 ***
+## gdp_norm       10.694128   0.340945  31.366  &lt; 2e-16 ***
+## dyear           0.192828   0.009923  19.433  &lt; 2e-16 ***
+## gdp_norm:dyear -0.034776   0.009774  -3.558 0.000384 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 6.854 on 1700 degrees of freedom
+## Multiple R-squared:  0.719,  Adjusted R-squared:  0.7185 
+## F-statistic:  1450 on 3 and 1700 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Interprétation des coefficients:</p>
+<ul>
+<li><p><code>(Intercept)</code>: Lorsque <code>gdp_norm</code> et <code>dyear</code> sont égaux à zéro, donc un pays dans la moyenne du <em>log(gdpPercap)</em> en 1952, l’espérance de vie est de 54.3 ans.</p></li>
+<li><p><code>gdp_norm</code>: Lorsque <code>dyear</code> = 0 (en 1952), chaque écart-type au-dessus de la moyenne du <em>log(gdpPercap)</em> augmente l’espérance de vie de 10.7 ans.</p></li>
+<li><p><code>dyear</code>: Pour un pays dans la moyenne du <em>log(gdpPercap)</em>, l’espérance de vie augmente de 0.19 ans par année.</p></li>
+<li><p><code>gdp_norm:dyear</code>: Pour chaque année, l’effet d’une augmentation unitaire de <code>gdp_norm</code> sur l’espérance de vie diminue de 0.034; <em>OU</em> pour chaque écart-type au-dessus de la moyenne du <em>log(gdpPercap)</em>, l’effet du temps sur l’espérance de vie diminue de 0.034.</p></li>
+</ul>
+<p>Autrement dit, les deux prédicteurs ont un effet positif sur la réponse, mais leur interaction est négative, donc quand un augmente, l’effet de l’autre devient moins important.</p>
+<pre class="r"><code>par(mfrow = c(2,2))
+plot(mod_lm)</code></pre>
+<p><img src="04R-Regression_robuste_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Sur le graphique des résidus vs. valeurs attendues, on voit que la variance diminue lorsque la valeur prédite est plus élevée (variance non homogène). Aussi, sur le graphique des effets de levier, on voit bien les points extrêmes, même si la distance de Cook ne dépasse pas le seuil de 0.5 ou 1 (avec beaucoup de points de données, cela prend des valeurs très extrêmes pour obtenir une distance de Cook aussi grande).</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Comparez le résultat du modèle en (b) avec deux alternatives plus robustes aux valeurs extrêmes: la régression robuste basée sur le bipoids de Tukey (fonction <code>lmrob</code> du package <em>robustbase</em>) et la régression de la médiane (fonction <code>rq</code> du package <em>quantreg</em>, en choisissant seulement le quantile médian). Expliquez comment les estimés des coefficients et leurs erreurs-types diffèrent entre les trois méthodes.</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>library(robustbase)
+mod_lmrob &lt;- lmrob(lifeExp ~ gdp_norm * dyear, gapminder)
+# print(summary) avec showAlgo = FALSE simplifie le sommaire
+print(summary(mod_lmrob), showAlgo = FALSE) </code></pre>
+<pre><code>## 
+## Call:
+## lmrob(formula = lifeExp ~ gdp_norm * dyear, data = gapminder)
+##  \--&gt; method = &quot;MM&quot;
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -34.838  -3.912   0.133   3.658  18.625 
+## 
+## Coefficients:
+##                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)    55.562627   0.352056 157.823   &lt;2e-16 ***
+## gdp_norm       12.590304   0.311367  40.436   &lt;2e-16 ***
+## dyear           0.178728   0.010456  17.094   &lt;2e-16 ***
+## gdp_norm:dyear -0.075843   0.008496  -8.927   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Robust residual standard error: 5.467 
+## Multiple R-squared:  0.797,  Adjusted R-squared:  0.7967 
+## Convergence in 9 IRWLS iterations
+## 
+## Robustness weights: 
+##  8 observations c(37,40,167,853,854,855,1293,1464)
+##   are outliers with |weight| = 0 ( &lt; 5.9e-05); 
+##  147 weights are ~= 1. The remaining 1549 ones are summarized as
+##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0004047 0.8444000 0.9451000 0.8735000 0.9859000 0.9990000</code></pre>
+<pre class="r"><code>library(quantreg)</code></pre>
+<pre><code>## Loading required package: SparseM</code></pre>
+<pre><code>## 
+## Attaching package: &#39;SparseM&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:base&#39;:
+## 
+##     backsolve</code></pre>
+<pre class="r"><code>mod_rq &lt;- rq(lifeExp ~ gdp_norm * dyear, tau = 0.5, data = gapminder)
+summary(mod_rq)</code></pre>
+<pre><code>## Warning in summary.rq(mod_rq): 3 non-positive fis</code></pre>
+<pre><code>## 
+## Call: rq(formula = lifeExp ~ gdp_norm * dyear, tau = 0.5, data = gapminder)
+## 
+## tau: [1] 0.5
+## 
+## Coefficients:
+##                Value     Std. Error t value   Pr(&gt;|t|) 
+## (Intercept)     55.57793   0.37879  146.72594   0.00000
+## gdp_norm        12.51016   0.36768   34.02426   0.00000
+## dyear            0.18736   0.01142   16.41102   0.00000
+## gdp_norm:dyear  -0.07982   0.00869   -9.18818   0.00000</code></pre>
+<p>Notez que l’avertissement (<code>3 non-positive fis</code>) pour la régression quantile peut être résolu en changeant la méthode d’estimation des intervalles de confiance dans <code>summary</code>. Par exemple: <code>summary(mod_rq, se = "boot")</code> pour remplacer la méthode par défaut par le bootstrap.</p>
+<p>Comparaison des résultats:</p>
+<ul>
+<li><p>Les coefficients obtenus par la régression robuste et la régression de la médiane sont similaires, mais la régression robuste a des erreurs-types plus faibles, ce qui confirme l’idée que cette méthode est plus efficace que la médiane tout en étant presque aussi robuste aux valeurs extrêmes.</p></li>
+<li><p>Pour ces deux méthodes, l’effet de <code>gdp_norm</code> est plus grand et l’interaction est plus négative contrairement au résultat obtenu par <code>lm</code>. On se souvient que le Koweït avait un PIB très élevé pour les premières années sans avoir une espérance de vie aussi élevée. Dans ce cas, cette valeur extrême menait à sous-estimer la tendance générale de l’effet du PIB et par conséquent aussi sous-estimer comment cette tendance changeait avec le temps (interaction).</p></li>
+</ul>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Superposez les droites de régression des trois modèles sur le graphique en (a). Avec <code>ggplot</code>, vous pouvez utiliser la fonction <code>geom_smooth</code> avec <code>method = "lm"</code> pour la régression linéaire et <code>method = "lmrob"</code> pour la régression robuste. Pour la régression de la médiane, vous pouvez utiliser <code>geom_quantile</code> tel que vu dans les notes.</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>ggplot(gapminder, aes(x = log(gdpPercap), y = lifeExp)) +
+    geom_point() +
+    geom_smooth(method = &quot;lm&quot;, color = &quot;black&quot;) +
+    geom_smooth(method = &quot;lmrob&quot;, color = &quot;darkred&quot;) +
+    geom_quantile(quantiles = 0.5, color = &quot;darkblue&quot;, size = 1) +
+    facet_wrap(~year)</code></pre>
+<p><img src="04R-Regression_robuste_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="variation-des-effets-par-quantile" class="section level2">
+<h2>2. Variation des effets par quantile</h2>
+<ol style="list-style-type: lower-alpha">
+<li>D’après votre observation des données en 1(a), serait-il utile de modéliser différents quantiles de l’espérance de vie en fonction des prédicteurs? Justifiez votre réponse.</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<p>Oui, car la variance n’est pas homogène, elle semble moins élevée lorsque le PIB est élevé, donc ce prédicteur aura un effet différent sur les différents quantiles de l’espérance de vie.</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Réalisez une régression quantile avec les mêmes prédicteurs qu’en 1(b), avec les quantiles suivants: <code>(0.1, 0.25, 0.5, 0.75, 0.9)</code>. Comparez visuellement l’effet des prédicteurs sur chaque quantile.</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>mod_quant &lt;- rq(lifeExp ~ gdp_norm * dyear, tau = c(0.1, 0.25, 0.5, 0.75, 0.9), data = gapminder)
+plot(summary(mod_quant))</code></pre>
+<p><img src="04R-Regression_robuste_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<ul>
+<li><p>L’effet du PIB sur l’espérance de vie est plus important pour les quantiles centraux de l’espérance de vie, le prédicteur a moins d’effet sur le quantiles à 10% et 90%.</p></li>
+<li><p>L’effet de l’année est plus important pour le quantile à 10% et diminue pour les quantiles plus élevés. Donc l’augmentation de l’espérance de vie depuis 1952 est davantage due à une augmentation des valeurs plus faibles de la distribution de l’espérance de vie, plutôt qu’à ne augmentation des valeurs les plus élevées.</p></li>
+<li><p>L’interaction est positive pour le quantile à 10% (l’effet du PIB est plus important pour les années plus récentes) et négatif pour les autres quantiles (l’effet du PIB devient moins important avec le temps).</p></li>
+</ul>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Superposez les droites de régression quantile au graphique des données. Les tendances pour chaque quantile semblent-elles affectées par des valeurs extrêmes?</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>ggplot(gapminder, aes(x = log(gdpPercap), y = lifeExp)) +
+    geom_point() +
+    geom_quantile(quantiles = c(0.1, 0.25, 0.5, 0.75, 0.9)) +
+    facet_wrap(~year)</code></pre>
+<p><img src="04R-Regression_robuste_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Oui, il semble que la valeur extrême entre 1952 et 1972 influence le quantile à 10%. Dans ce cas, les résultats du numéro précédent où le quantile à 10% diffère du reste des données (l’effet du PIB est moins prononcé, l’interaction est positive) peuvent être le résultat de cette valeur extrême.</p>
+</div>
+<div id="note-sur-les-comparaisons-internationales" class="section level2">
+<h2>Note sur les comparaisons internationales</h2>
+<p>Bien que ce jeu de données soit utile pour illustrer les concepts de régression robuste et de régression quantile, soulignons que ce type d’analyse statistique comparant des variables mesurées au niveau national comporte plusieurs limites:</p>
+<ul>
+<li><p>On ne peut pas supposer que les associations détectées s’appliquent à une échelle plus petite (ex.: le lien entre espérance de vie et revenu en comparant les moyennes nationales n’est pas nécessairement le même que le lien entre espérance de vie et revenu au niveau des individus habitant chaque pays).</p></li>
+<li><p>Les moyennes calculées dans différents pays ne sont pas des observations indépendantes, car les conditions environnementales, sociales et économiques sont corrélées entre pays proches.</p></li>
+<li><p>Il y a de nombreux facteurs qui différencient les pays, donc il est difficile d’interpréter une association comme un lien de cause à effet.</p></li>
+</ul>
+<p>Beaucoup d’articles, en particulier dans les domaines des sciences sociales, ont été publiés au sujet des méthodes à suivre pour réaliser ce type de comparaisons internationales (<em>cross-country comparisons</em>).</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
