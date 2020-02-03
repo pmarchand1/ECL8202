@@ -22,3 +22,5 @@
 3. [Maximum de vraisemblance](labos/03-Maximum_vraisemblance.html) ([PDF](labos/03-Maximum_vraisemblance.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
 
 4. [Régression robuste aux valeurs extrêmes (solutions)](labos/04R-Regression_robuste.html) ([PDF](labos/04R-Regression_robuste.pdf))
+
+5. [Modèles linéaires généralisés à effets mixtes](labos/05-Modeles_generalises_mixtes.html) ([PDF](labos/05-Modeles_generalises_mixtes.pdf)) - Données: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_species.csv](donnees/portal_species.csv), [portal_plots.csv](donnees/portal_plots.csv)

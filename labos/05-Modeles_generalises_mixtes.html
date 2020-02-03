@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Modèles linéaires généralisés à effets mixtes</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Modèles linéaires généralisés à effets mixtes</h1>
+
+</div>
+
+
+<div id="donnees" class="section level2">
+<h2>Données</h2>
+<p>Nous utiliserons pour ce laboratoire la base de données Portal, déjà présentée lors du laboratoire 2, qui contient des données de suivi à long terme de plusieurs espèces de rongeurs sur un site d’étude en Arizona.</p>
+<blockquote>
+<p>Ernest, M., Brown, J., Valone, T. and White, E.P. (2018) <em>Portal Project Teaching Database</em>. <a href="https://figshare.com/articles/Portal_Project_Teaching_Database/1314459">https://figshare.com/articles/Portal_Project_Teaching_Database/1314459</a>.</p>
+</blockquote>
+<p>Cette base de données est formée de trois tableaux de données:</p>
+<ul>
+<li><a href="../donnees/portal_surveys.csv">portal_surveys.csv</a> contient les informations sur chaque individu capturé.</li>
+</ul>
+<pre class="r"><code>surveys &lt;- read.csv(&quot;../donnees/portal_surveys.csv&quot;, stringsAsFactors = FALSE)
+str(surveys)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    35549 obs. of  9 variables:
+##  $ record_id      : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ month          : int  7 7 7 7 7 7 7 7 7 7 ...
+##  $ day            : int  16 16 16 16 16 16 16 16 16 16 ...
+##  $ year           : int  1977 1977 1977 1977 1977 1977 1977 1977 1977 1977 ...
+##  $ plot_id        : int  2 3 2 7 3 1 2 1 1 6 ...
+##  $ species_id     : chr  &quot;NL&quot; &quot;NL&quot; &quot;DM&quot; &quot;DM&quot; ...
+##  $ sex            : chr  &quot;M&quot; &quot;M&quot; &quot;F&quot; &quot;M&quot; ...
+##  $ hindfoot_length: int  32 33 37 36 35 14 NA 37 34 20 ...
+##  $ weight         : int  NA NA NA NA NA NA NA NA NA NA ...</code></pre>
+<ul>
+<li><a href="../donnees/portal_species.csv">portal_species.csv</a> indique le nom de genre, d’espèce et le groupe taxonomique correspondant à chaque code d’espèce.</li>
+</ul>
+<pre class="r"><code>species &lt;- read.csv(&quot;../donnees/portal_species.csv&quot;, stringsAsFactors = FALSE)
+str(species)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    54 obs. of  4 variables:
+##  $ species_id: chr  &quot;AB&quot; &quot;AH&quot; &quot;AS&quot; &quot;BA&quot; ...
+##  $ genus     : chr  &quot;Amphispiza&quot; &quot;Ammospermophilus&quot; &quot;Ammodramus&quot; &quot;Baiomys&quot; ...
+##  $ species   : chr  &quot;bilineata&quot; &quot;harrisi&quot; &quot;savannarum&quot; &quot;taylori&quot; ...
+##  $ taxa      : chr  &quot;Bird&quot; &quot;Rodent&quot; &quot;Bird&quot; &quot;Rodent&quot; ...</code></pre>
+<ul>
+<li><a href="../donnees/portal_plots.csv">portal_plots.csv</a> indique le type de traitement appliqué à chaque parcelle: “Control” = témoin; “Rodent Exclosure” = clôture pour exclure tous les rongeurs; “Long-term Krat Exclosure” ou “Short-term Krat Exclosure” = clôture avec porte pour exclure les rats-kangourous du genre <em>Dipodomys</em>. “Spectab exclosure” = clôture avec porte pour exclure seulement l’espèce <em>Dipodomys spectabilis</em>.</li>
+</ul>
+<pre class="r"><code>plots &lt;- read.csv(&quot;../donnees/portal_plots.csv&quot;, stringsAsFactors = FALSE)
+str(plots)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    24 obs. of  2 variables:
+##  $ plot_id  : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ plot_type: chr  &quot;Spectab exclosure&quot; &quot;Control&quot; &quot;Long-term Krat Exclosure&quot; &quot;Control&quot; ...</code></pre>
+</div>
+<div id="preparation-des-donnees" class="section level2">
+<h2>1. Préparation des données</h2>
+<ol style="list-style-type: lower-alpha">
+<li><p>À partir du tableau <code>surveys</code>, conservez les individus observés depuis 1988 qui correspondent à des rongeurs (<code>taxa == "Rodent"</code> dans le tableau <code>species</code>).</p></li>
+<li><p>Choisissez les 15 espèces les plus abondantes dans le tableau de données obtenu en (a), puis comptez le nombre d’individus pour chacune de ces espèces, par année et par placette. Incluez un compte de 0 pour les placette et années où l’espèce est absente.</p></li>
+<li><p>Recodez les deux traitements “Long-term Krat Exclosure” et “Short-term Krat Exclosure” en un seul traitement, “Krat Exclosure”, puis joignez le tableau de données <code>plots</code> au tableau obtenu en (b).</p></li>
+</ol>
+<pre class="r"><code>plots$plot_type[grepl(&quot;Krat&quot;, plots$plot_type)] &lt;- &quot;Krat Exclosure&quot;</code></pre>
+<p><em>Note</em>: La fonction <code>grepl(pattern, x)</code> retourne <code>TRUE</code> ou <code>FALSE</code> dépendamment si la variable <code>x</code> contient ou non le motif de texte <code>pattern</code>.</p>
+</div>
+<div id="modeliser-labondance-dune-espece" class="section level2">
+<h2>2. Modéliser l’abondance d’une espèce</h2>
+<p>Pour cette partie, nous nous limitons aux données de l’espèce <em>Dipodomys ordii</em> (DO).</p>
+<p><img src="../images/d_ordii.png" /></p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Visualisez la distribution du nombre d’individus de l’espèce DO en fonction du type de traitement. Quel type de modèle serait approprié pour modéliser cette relation? (Ignorez les effets des autres variables pour l’instant.) Estimez les paramètres du modèle et vérifiez si les coefficients obtenus correspondent qualitativement aux effets prévus de chaque traitement.</p></li>
+<li><p>Ajoutez maintenant au modèle en (a) des effets aléatoires de la parcelle et de l’année. Laquelle de ces deux variables de groupement a-t-elle le plus grand effet sur la réponse? Expliquez comment et pourquoi les erreurs-types des effets fixes changent entre ce modèle et celui de la question précédente.</p></li>
+<li><p>Vérifiez si les suppositions du modèle en (b) sont respectées. S’il y a surdispersion, estimez le coefficient de dispersion.</p></li>
+</ol>
+</div>
+<div id="modeliser-plusieurs-especes" class="section level2">
+<h2>3. Modéliser plusieurs espèces</h2>
+<p>Prenons maintenant le jeu de données complet produit dans la partie 1, soit les 15 espèces les plus abondantes.</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Utilisez un modèle sans effets aléatoires pour estimer l’abondance selon l’espèce, le type de traitement et leur interaction. Selon la description de l’expérience, pourquoi est-il important d’inclure l’interaction ici?</p></li>
+<li><p>Ajustez un modèle équivalent à celui en (a), sauf que l’espèce est un effet aléatoire plutôt que fixe. Nommez un avantage et un désavantage de ce choix.</p></li>
+</ol>
+<p><em>Note</em>: Si le GLMM a du mal à converger, nous pouvons spécifier l’argument <code>control</code> de <code>glmer</code> pour augmenter le nombre maximal d’itérations ou pour changer d’optimisateur. Dans ce cas-ci, changer l’optimisateur à <code>bobyqa</code> avec <code>control = glmerControl(optimizer = "bobyqa")</code> devrait régler le problème.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Créez un nouveau jeu de données contenant toutes les combinaisons de traitement et d’espèce, puis calculez pour chaque combinaison l’abondance de l’espèce DO prévue selon chacun des modèles en (a) et (b), à l’aide de la fonction <code>predict</code>. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?</li>
+</ol>
+<p><em>Note</em>: Par défaut, les prédictions d’un GLM(M) sont sur l’échelle du prédicteur linéaire. Pour des prédictions sur l’échelle de la réponse, spécifiez l’argument <code>type = "response"</code>.</p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li><p>Ajoutez les effets aléatoires de la placette et de l’année au modèle en (b) et vérifiez l’ajustement du modèle. En consultant les coefficients de ce modèle avec <code>coef</code>, pouvez-vous dire si les traitements (en particulier “Rodent Exclosure” et “Krat Exclosure”) fonctionnent tel que prévu?</p></li>
+<li><p>Finalement, utilisez une stratégie semblable à (c) pour obtenir des prédictions de l’abondance moyenne de chaque espèce dans les placettes témoin en fonction de l’année.</p></li>
+</ol>
+<p><em>Note</em>: Par défaut, <code>predict</code> tient compte de tous les effets aléatoires. Pour seulement considérer certains effets mais pas les autres, il faut spécifier l’argument <code>re.form</code> de <code>predict</code>. Par exemple, <code>re.form = ~(1 | year)</code> considère l’effet de l’année seulement. Pour ignorer tous les effets aléatoires dans les prédictions, écrivez <code>re.form = ~0</code>.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
