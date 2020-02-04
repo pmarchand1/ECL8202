@@ -366,7 +366,7 @@ str(plots)</code></pre>
 </ol>
 <p><em>Note</em>: Par défaut, les prédictions d’un GLM(M) sont sur l’échelle du prédicteur linéaire. Pour des prédictions sur l’échelle de la réponse, spécifiez l’argument <code>type = "response"</code>.</p>
 <ol start="4" style="list-style-type: lower-alpha">
-<li><p>Ajoutez les effets aléatoires de la placette et de l’année au modèle en (b) et vérifiez l’ajustement du modèle. En consultant les coefficients de ce modèle avec <code>coef</code>, pouvez-vous dire si les traitements (en particulier “Rodent Exclosure” et “Krat Exclosure”) fonctionnent tel que prévu?</p></li>
+<li><p>Ajoutez les effets aléatoires de la placette et de l’année au modèle en (b) et vérifiez l’ajustement du modèle.</p></li>
 <li><p>Finalement, utilisez une stratégie semblable à (c) pour obtenir des prédictions de l’abondance moyenne de chaque espèce dans les placettes témoin en fonction de l’année.</p></li>
 </ol>
 <p><em>Note</em>: Par défaut, <code>predict</code> tient compte de tous les effets aléatoires. Pour seulement considérer certains effets mais pas les autres, il faut spécifier l’argument <code>re.form</code> de <code>predict</code>. Par exemple, <code>re.form = ~(1 | year)</code> considère l’effet de l’année seulement. Pour ignorer tous les effets aléatoires dans les prédictions, écrivez <code>re.form = ~0</code>.</p>

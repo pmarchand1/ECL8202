@@ -85,7 +85,7 @@ c) Créez un nouveau jeu de données contenant toutes les combinaisons de traite
 
 *Note*: Par défaut, les prédictions d'un GLM(M) sont sur l'échelle du prédicteur linéaire. Pour des prédictions sur l'échelle de la réponse, spécifiez l'argument `type = "response"`.
 
-d) Ajoutez les effets aléatoires de la placette et de l'année au modèle en (b) et vérifiez l'ajustement du modèle. En consultant les coefficients de ce modèle avec `coef`, pouvez-vous dire si les traitements (en particulier "Rodent Exclosure" et "Krat Exclosure") fonctionnent tel que prévu?
+d) Ajoutez les effets aléatoires de la placette et de l'année au modèle en (b) et vérifiez l'ajustement du modèle.
 
 e) Finalement, utilisez une stratégie semblable à (c) pour obtenir des prédictions de l'abondance moyenne de chaque espèce dans les placettes témoin en fonction de l'année.
 
