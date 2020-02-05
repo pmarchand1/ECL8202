@@ -302,6 +302,7 @@ div.tocify {
 <li><p>Modèles linéaires généralisés à effets mixtes (GLMM): forme mathématique et techniques d’estimation</p></li>
 <li><p>Évaluer l’ajustement d’un GLMM</p></li>
 <li><p>Comparer différentes versions d’un GLMM</p></li>
+<li><p>Prédictions et simulations à partir d’un GLMM</p></li>
 </ul>
 </div>
 </div>
@@ -676,6 +677,93 @@ qqline(ranef(glmm2)$Beach$`(Intercept)`)</code></pre>
 ## delta     0.7270454 0.7435881
 ## lognormal 0.7420813 0.7589661
 ## trigamma  0.7100514 0.7262074</code></pre>
+</div>
+</div>
+<div id="predictions-et-simulations-a-partir-dun-glmm" class="section level1">
+<h1>Prédictions et simulations à partir d’un GLMM</h1>
+<div id="creation-dun-tableau-pour-les-predictions" class="section level2">
+<h2>Création d’un tableau pour les prédictions</h2>
+<p>Disponible pour plusieurs types de modèles dans R, la fonction <code>predict</code> retourne la valeur de la variable réponse prédite par un modèle pour des combinaisons données des variables prédictrices.</p>
+<p>Dans le contexte d’un GLMM, cette fonction est notamment utile pour illustrer l’effet non-linéaire de différentes combinaisons de prédicteurs sur la réponse.</p>
+<p>Comme exemple, considérons le meilleur modèle choisi dans la section précédente pour expliquer la variation de richesse spécifique dans le jeu de données <code>rikz</code>.</p>
+<pre class="r"><code>glmm2 &lt;- glmer(Richness ~ Exposure + NAP + (1 | Beach), data = rikz, 
+               family = poisson)</code></pre>
+<p>Pour illustrer l’effet des prédicteurs, nous créons un nouveau tableaux de données qui contient des valeurs régulièrement espacées du NAP (de -1.5 à 2.5, par pas de 0.2) pour chacune des plages. La fonction <code>expand.grid</code> est utile dans ce cas, car elle produit un tableau avec chaque combinaison des variables indiquées. Notez que la fonction <code>unique(rikz$Beach)</code> produit un vecteur des valeurs uniques présentes dans la colonne <code>Beach</code> de <code>rikz</code>.</p>
+<pre class="r"><code>pred_df &lt;- expand.grid(Beach = unique(rikz$Beach), 
+                       NAP = seq(-1.5, 2.5, 0.2))</code></pre>
+<p>Il nous reste à rattacher à chaque plage la bonne valeur d’<code>Exposure</code>. Pour cela, nous utilisons deux fonctions du package <em>dplyr</em>: <code>distinct</code> choisit les combinaisons uniques de <code>Beach</code> et <code>Exposure</code> présentes dans le tableau <code>rikz</code> (donc chacune des 9 plages associée au bon indice d’exposition), puis <code>inner_join</code> joint ces données à <code>pred_df</code> en associant les numéros de plage dans chaque rangée.</p>
+<pre class="r"><code>library(dplyr)
+plages &lt;- distinct(rikz, Beach, Exposure)
+pred_df &lt;- inner_join(pred_df, plages)</code></pre>
+<p>Le tableau <code>pred_df</code> contient maintenant tous les prédicteurs du modèle, ce qui permettra de prédire la richesse spécifique pour chaque cas.</p>
+</div>
+<div id="choix-dechelle-des-predictions" class="section level2">
+<h2>Choix d’échelle des prédictions</h2>
+<p>Voici la forme mathématique de notre GLMM de Poisson, avec un lien logarithmique et un effet aléatoire de groupe sur l’ordonnée à l’origine:</p>
+<p><span class="math display">\[y \sim \text{Pois}(\lambda) \]</span> <span class="math display">\[\log(\lambda) = \beta_0 + \beta_1 x\]</span> <span class="math display">\[\beta_{0} \sim N(\gamma_0 + \gamma_{1} u, \sigma_{\beta_0})\]</span></p>
+<p>Dans ce cas particulier, <span class="math inline">\(y\)</span> est la richesse spécifique du site, <span class="math inline">\(x\)</span> est le NAP et <span class="math inline">\(\beta_0\)</span> varie au niveau de la plage, avec une moyenne dépendant de l’indice d’exposition <span class="math inline">\(u\)</span> et un écart-type égal à <span class="math inline">\(\sigma_{\beta_0}\)</span>.</p>
+<p>Pour un GLM ou GLMM, la fonction <code>predict</code> peut donner une prédiction soit sur l’échelle de la fonction de lien, donc ici <span class="math inline">\(\log(\lambda)\)</span>, ou sur l’échelle de la réponse, donc <span class="math inline">\(\lambda\)</span>. Ce choix est donné par l’argument <code>type</code>; par défaut, <code>type = "link"</code>, donc si nous voulons la richesse moyenne plutôt que son logarithme, il faut spécifier <code>type = "response"</code>.</p>
+<pre class="r"><code>pred_df$rich_pred &lt;- predict(glmm2, newdata = pred_df, type = &quot;response&quot;)</code></pre>
+<p>Dans l’exemple ci-dessous, nous représentons ces prédictions par des lignes sur un graphique, puis nous superposons les points des observations originales. Notez que les argment <code>data</code> et <code>aes(...)</code> sont indiqués dans <code>geom_point</code> pour aller chercher les données d’une autre source que celle spécifiée au début de l’instruction <code>ggplot</code>.</p>
+<pre class="r"><code>ggplot(pred_df, aes(x = NAP, y = rich_pred, color = Exposure)) +
+    geom_point(data = rikz, aes(y = Richness)) +
+    geom_line() +
+    facet_wrap(~ Beach) +
+    scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p>Sur le graphique, nous voyons que les prédictions varient d’une plage à l’autre, mais sont plus semblables pour les plages avec le même indice d’exposition.</p>
+</div>
+<div id="predictions-et-effets-aleatoires" class="section level2">
+<h2>Prédictions et effets aléatoires</h2>
+<p>Nous avons vu plus tôt que pour un modèle mixte, nous obtenons non seulement un estimé de la variance des effets aléatoires (<span class="math inline">\(\sigma_{\beta_0}\)</span> dans le modèle ci-dessus), mais aussi un estimé du coefficient <span class="math inline">\(\beta_0\)</span> pour chaque groupe, que nous pouvons consulter avec <code>coef(glmm2)</code>.</p>
+<p>Par défaut, la fonction <code>predict</code> utilise les coefficients estimés pour chaque groupe pour produire les prédictions. Cette méthode ne permet toutefois pas de prédire la réponse pour un nouveau groupe qui ne faisait pas partie de l’échantillon original.</p>
+<p>Dans l’exemple suivant, nous ajoutons des rangées à <code>pred_df</code> avec <code>rbind</code> qui correspondent à une nouvelle plage inconnue, donc <code>Beach = NA</code>, mais avec des valeurs connues du NAP et de l’indice d’exposition. Nous spécifions <code>allow.new.levels = TRUE</code> dans la fonction <code>predict</code>. Dans ce cas, pour une plage inconnue du modèle, la fonction retourne la moyenne de <span class="math inline">\(\beta_0\)</span> donnée par les effets fixes (<span class="math inline">\(\gamma_0 + \gamma_1 u\)</span>).</p>
+<pre class="r"><code>pred_df &lt;- rbind(pred_df, 
+                 data.frame(Beach = NA, NAP = seq(-1.5, 2.5, 0.2),
+                            Exposure = &quot;10&quot;, rich_pred = NA))
+
+pred_df$rich_pred2 &lt;- predict(glmm2, newdata = pred_df, type = &quot;response&quot;,
+                              allow.new.levels = TRUE)
+
+ggplot(pred_df, aes(x = NAP, y = rich_pred2, color = Exposure)) +
+    geom_point(data = rikz, aes(y = Richness)) +
+    geom_line() +
+    facet_wrap(~ Beach) +
+    scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+<p>Finalement, un autre argument de <code>predict</code>, soit <code>re.form</code>, nous permet d’ignorer certains effets aléatoires. Dans ce cas-ci, en spécifiant <code>re.form = ~0</code> (aucun effet aléatoire), les prédictions seraient réalisés seulement avec les effets fixes même pour les plages connues: ainsi, ces prédictions seraient identiques pour toutes les plages partageant le même indice d’exposition.</p>
+<p>Pour un modèle avec plusieurs effets aléatoires, nous pouvons ignorer une partie des effets. Par exemple, supposons que nous avons des sites de suivi écologiques où les mêmes mesures sont prises à chaque année et qu’une certaine réponse est modélisée en fonction d’effets aléatoires du site de et l’année, i.e. <code>(1 | site) + (1 | annee)</code>. Si nous voulons faire des prédictions pour l’année suivante à un site connu, nous pouvons inclure l’effet du site seulement dans les prédictions avec <code>re.form = ~(1|site)</code>.</p>
+</div>
+<div id="simulations-a-partir-du-modele" class="section level2">
+<h2>Simulations à partir du modèle</h2>
+<p>Si la fonction <code>predict</code> donne pour chaque rangée d’un tableau de données la valeur moyenne de la réponse prédite par le modèle, <code>simulate</code> produit plusieurs jeux de données générés aléatoirement à partir du modèle estimé (donc dans le modèle plus haut, des valeurs de <span class="math inline">\(y\)</span> plutôt que <span class="math inline">\(\lambda\)</span>).</p>
+<p>Les arguments de <code>simulate</code> sont semblables à ceux de <code>predict</code>, excepté qu’il faut aussi spécifier le nombre de simulations avec <code>nsim</code>. Les deux fonctions traitent aussi les effets aléatoires différemment. Par défaut, <code>predict</code> tient compte des coefficients estimés pour chaque groupe, tandis que <code>simulate</code> ignore les effets aléatoires des groupes, comme si on avait spécifié <code>re.form = ~0</code>. Ainsi, même pour un groupe connu, <code>simulate</code> va simuler une valeur de <span class="math inline">\(\beta_0\)</span> à partir de la distribution des effets aléatoires <span class="math inline">\(\beta_{0} \sim N(\gamma_0 + \gamma_{1} u, \sigma_{\beta_0})\)</span>, plutôt que d’utiliser l’estimé de <span class="math inline">\(\beta_0\)</span> donné par le modèle pour ce groupe. Si nous voulons conserver le <span class="math inline">\(\beta_0\)</span> des groupes connus et seulement simuler la réponse aléatoire individuelle à partir de la distribution de Poisson, alors il faut spécifier <code>re.form = NULL</code>.</p>
+<pre class="r"><code>rich_sims &lt;- simulate(glmm2, nsim = 1000, newdata = pred_df, re.form = NULL,
+                      allow.new.levels = TRUE)</code></pre>
+<p>Le résultat de <code>simulate</code> est un jeu de données avec une rangée pour chaque rangée de <code>newdata</code> et une colonne pour chacune des <code>nsim</code> simulations. Ce résultat permet notamment de produire un intervalle de prédiction, c’est-à-dire un intervalle qui devrait contenir une certaine fraction des observations individuelles si le modèle est correct. Dans l’exemple ci-dessous, nous extrayons les quantiles à 2.5% et 97.5% de chaque rangée de <code>rich_sims</code> et les ajoutons à <code>pred_df</code> comme bornes d’un intervalle de prédiction à 95%. Cet intervalle est visualisé avec la fonction <code>geom_ribbon</code> de <em>ggplot2</em>.</p>
+<pre class="r"><code>pred_df$q025 &lt;- apply(rich_sims, 1, quantile, probs = 0.025)
+pred_df$q975 &lt;- apply(rich_sims, 1, quantile, probs = 0.975)
+
+ggplot(pred_df, aes(x = NAP, y = rich_pred2, color = Exposure, fill = Exposure)) +
+    geom_point(data = rikz, aes(y = Richness)) +
+    geom_ribbon(aes(ymin = q025, ymax = q975), alpha = 0.3, color = &quot;white&quot;) +
+    geom_line() +
+    facet_wrap(~ Beach) +
+    scale_color_brewer(palette = &quot;Dark2&quot;) +
+    scale_fill_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="05-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p>Notez que dans cet exemple, les simulations pour les plages connues utilisent le <span class="math inline">\(\beta_0\)</span> estimé, tandis que celles pour la plage inconnue <code>NA</code> génèrent une valeur de <span class="math inline">\(\beta_0\)</span> à partir de sa distribution. On s’attendrait donc à ce que l’intervalle soit plus large pour la plage inconnue. Cette différence est imperceptible ici car l’effet aléatoire des plages, après avoir tenu compte de l’indice d’exposition, est très minime. Donc l’incertitude représentée est presque exclusivement due à la variation des observations individuelles selon la distribution de Poisson.</p>
+</div>
+<div id="incertitude-des-parametres" class="section level2">
+<h2>Incertitude des paramètres</h2>
+<p>La fonction <code>simulate</code> tient compte de la variation des observations individuelles autour de leur moyenne et (optionnellement) de la variation des effets aléatoires, mais suppose que les paramètres du modèle (effets fixes et variances des effets aléatoires) sont exacts. Le bootstrap paramétrique, implémenté par la fonction <code>bootMer</code> de <em>lme4</em>, est une façon d’inclure l’incertitude sur les estimés des paramètres:</p>
+<ul>
+<li><p>D’abord, on simule à partir du modèle ajusté de nouvelles valeurs de la réponse pour le jeu de données original.</p></li>
+<li><p>Ensuite, on réajuste le modèle avec ces données simulées.</p></li>
+<li><p>Finalement, on appelle <code>predict</code> ou <code>simulate</code> à partir du modèle réajusté.</p></li>
+</ul>
+<p>En répétant ce processus un grand nombre de fois, on obtient soit un intervalle de confiance pour les prédictions moyennes (avec <code>predict</code>), soit des intervalles de prédiction qui incluent l’incertitude des paramètres (avec <code>simulate</code>).</p>
+<p>Nous ne ferons pas la démonstration de cette méthode dans le cours. Cependant, notez qu’un bootstrap avec <span class="math inline">\(N\)</span> réplicats requiert <span class="math inline">\(N\)</span> ajustements du GLMM, ce qui peut nécessiter un long temps de calcul pour un modèle complexe.</p>
 </div>
 </div>
 <div id="references" class="section level1">

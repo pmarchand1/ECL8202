@@ -790,6 +790,227 @@ r.squaredGLMM(glmm2)
 
 ---
 
+class: inverse, center, middle
+
+# Prédictions et simulations à partir d'un GLMM
+
+---
+
+# Fonction `predict`
+
+- Disponible pour plusieurs types de modèles dans R.
+
+- Retourne les valeurs de la variable réponse prédites pour un modèle et des prédicteurs donnés.
+
+--
+
+- Pour un GLMM, cette fonction aide à visualiser l'effet non-linéaire de différentes combinaisons des prédicteurs.
+
+---
+
+# Création d'un tableau pour les prédictions
+
+```{r, eval = FALSE, echo = TRUE}
+glmm2 <- glmer(Richness ~ Exposure + NAP + (1 | Beach), data = rikz, family = poisson)
+```
+
+--
+
+- Nouveau tableau avec différentes valeurs du NAP pour chaque plage.
+
+```{r, echo = TRUE}
+pred_df <- expand.grid(Beach = unique(rikz$Beach), NAP = seq(-1.5, 2.5, 0.2))
+```
+
+--
+
+- Ajouter l'indice d'exposition
+
+```{r, message = FALSE, warning = FALSE, echo = TRUE}
+library(dplyr)
+plages <- distinct(rikz, Beach, Exposure)
+pred_df <- inner_join(pred_df, plages)
+```
+
+---
+
+# Forme mathématique du modèle
+
+.pull-left[
+$$y \sim \text{Pois}(\lambda) $$ 
+
+$$\log(\lambda) = \beta_0 + \beta_1 x$$
+
+$$\beta_{0} \sim N(\gamma_0 + \gamma_{1} u, \sigma_{\beta_0})$$
+]
+
+.pull-right[
+- $y$: Richesse spécifique
+- $x$: NAP
+- $\beta_0$: Varie au niveau de la plage
+- $u$: Indice d'exposition
+]
+
+---
+ 
+# Échelle des prédictions
+
+- Pour un GLM ou GLMM, `predict` donne une prédiction sur l'échelle du lien (`type = "link"`) par défaut, donc $\log(\lambda)$ plutôt que $\lambda$.
+
+- Pour obtenir une prédiction sur l'échelle de la réponse, `type = "response"`.
+
+--
+
+```{r, echo = TRUE}
+pred_df$rich_pred <- predict(glmm2, newdata = pred_df, type = "response")
+```
+
+---
+
+# Visualiser les prédictions
+
+```{r, echo = TRUE}
+ggplot(pred_df, aes(x = NAP, y = rich_pred, color = Exposure)) +
+    geom_point(data = rikz, aes(y = Richness)) +
+    geom_line() +
+    facet_wrap(~ Beach) +
+    scale_color_brewer(palette = "Dark2")
+```
+
+---
+
+# Prédictions des effets aléatoires
+
+- Par défaut, `predict` utilise les coefficients estimés pour chacun des groupes, i.e. `coef(glmm2)`. 
+
+--
+
+- Nous ne connaissons pas ces coefficients pour de nouveaux groupes.
+
+```{r, echo = TRUE}
+pred_df <- rbind(pred_df, data.frame(Beach = NA, NAP = seq(-1.5, 2.5, 0.2),
+                                     Exposure = "10", rich_pred = NA))
+```
+
+--
+
+- Avec `allow.new.levels = TRUE`, `predict` utilise la valeur moyenne de $\beta_0$ donnée par les effets fixes, soit $\gamma_0 + \gamma_1 u$.
+
+```{r, echo = TRUE}
+pred_df$rich_pred2 <- predict(glmm2, newdata = pred_df, type = "response",
+                              allow.new.levels = TRUE)
+```
+
+---
+
+# Prédictions des effets aléatoires
+
+```{r, echo = TRUE}
+ggplot(pred_df, aes(x = NAP, y = rich_pred2, color = Exposure)) +
+    geom_point(data = rikz, aes(y = Richness)) +
+    geom_line() +
+    facet_wrap(~ Beach) +
+    scale_color_brewer(palette = "Dark2")
+```
+
+---
+
+# Prédictions des effets aléatoires
+
+- Pour ignorer les coefficients de groupe même pour les groupes connus: `re.form = ~0`.
+
+--
+
+- On peut aussi utiliser `re.form` pour utiliser seulement une partie des effets aléatoires estimés dans les prédictions.
+
+--
+
+- Ex.: Sites de suivi écologique avec données prises à chaque année. Si un modèle inclut les effets aléatoires `(1 | site) + (1 | annee)`, on peut prédire la valeur de l'année suivante pour un site connu avec `re.form = ~(1|site)`.
+
+---
+
+# Simuler à partir du modèle
+
+- `predict` donne pour chaque rangée d'un tableau la valeur moyenne de la réponse prédite par le modèle.
+
+--
+
+- `simulate` produit plusieurs jeux de données générés aléatoirement à partir du modèle.
+
+---
+
+# Simuler à partir du modèle
+
+- Même format que `predict`, sauf qu'on indique un nombre de simulations `nsim`.
+
+--
+
+- *Attention*: Par défaut, `simulate` simule une nouvelle valeur des coefficients aléatoires même pour les groupes connus (comme si `re.form = ~0`). Spécifier `re.form = NULL` pour fixer les coefficients des groupes.
+
+--
+
+```{r, echo = TRUE}
+rich_sims <- simulate(glmm2, nsim = 1000, newdata = pred_df, re.form = NULL,
+                      allow.new.levels = TRUE)
+```
+
+- Résultat de `simulate`: jeu de données avec une rangée par rangée de `newdata`, une colonne par simulation.
+
+---
+
+# Intervalle de prédiction
+
+- Intervalle contenant 95% des observations si le modèle est exact.
+
+```{r, echo = TRUE}
+pred_df$q025 <- apply(rich_sims, 1, quantile, probs = 0.025)
+pred_df$q975 <- apply(rich_sims, 1, quantile, probs = 0.975)
+```
+
+---
+
+# Intervalle de prédiction
+
+.code50[
+```{r, echo = TRUE}
+ggplot(pred_df, aes(x = NAP, y = rich_pred2, color = Exposure, fill = Exposure)) +
+    geom_point(data = rikz, aes(y = Richness)) +
+    geom_ribbon(aes(ymin = q025, ymax = q975), alpha = 0.3, color = "white") +
+    geom_line() +
+    facet_wrap(~ Beach) +
+    scale_color_brewer(palette = "Dark2") +
+    scale_fill_brewer(palette = "Dark2")
+```
+]
+
+---
+
+# Incertitude des paramètres
+
+- `simulate` tient compte de la variation des observations individuelles et (optionnellement) des effets aléatoires.
+
+- On suppose que les paramètres (effets fixes et variances des effets aléatoires) sont exacts.
+
+---
+
+# Incertitude des paramètres
+
+Méthode du bootstrap paramétrique (fonction `bootMer`). Pour chaque itération:
+
+--
+
+- Simuler de nouvelles valeurs de la réponse pour le jeu de données original. 
+
+--
+
+- Réajuster le modèle avec ces données simulées.
+
+--
+
+- Appeler `predict` ou `simulate` à partir du modèle réajusté. 
+
+---
+
 # Références
 
 - Bolker, B. et al. (2009) Generalized linear mixed models: a practical guide for ecology and evolution. *Trends in Ecology and Evolution* 24: 127-135.
