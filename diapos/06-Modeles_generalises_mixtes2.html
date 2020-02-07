@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Modèles linéaires généralisés à effets mixtes 2</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modèles linéaires généralisés à effets mixtes 2
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+# Contenu du cours
+
+- Modèle binomial négatif
+
+- Modèles pour les taux
+
+- Modèles avec excès de zéros
+
+---
+
+class: inverse, center, middle
+
+# Modèle binomial négatif
+
+---
+
+# Distribution binomiale négative
+
+- Comme la distribution de Poisson, permet de représenter des données de comptage, i.e. des entiers `\(\ge 0\)`.
+
+- Origine du nom: Dans une expérience binomiale, nombre d'échecs avant d'obtenir un certain nombre de succès.
+
+--
+
+- Version plus générale: Chaque observation suit une distribution de Poisson, mais `\(\lambda\)` varie aléatoirement d'une observation à l'autre selon une distribution Gamma.
+
+--
+
+- Utile pour les données de comptage surdispersées.
+
+---
+
+# Distribution binomiale négative
+
+- La distribution `\(\text{NB}(\mu, \theta)\)` a une moyenne de `\(\mu\)` et une variance de `\(\mu + \mu^2 / \theta\)`.
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+
+---
+
+# GLM avec distribution binomiale négative
+
+- Semblable au modèle de régression de Poisson (utilise aussi un lien log)
+
+`$$y \sim \text{NB}(\mu, \theta)$$`
+
+`$$\log \mu  = \beta_0 + \sum_{i=1}^m \beta_i x_i$$`
+
+--
+
+- Avec `\(\theta\)` connu, le modèle est un GLM.
+
+--
+
+- Pour estimer `\(\theta\)`, on procède par itération: estimer `\(\theta\)` en fonction du modèle ajusté, réajuster le modèle en fonction du nouveau `\(\theta\)`, etc. jusqu'à convergence.
+
+- Méthode implémentée dans les fonctions `glm.nb` du package *MASS* (sans effet aléatoires) et `glmer.nb` du package *lme4*.
+
+---
+
+# Exemple: Adaptation locale de l'érable
+
+.code60[
+
+```r
+acer &lt;- read.csv("../donnees/acer_transplant.csv")
+str(acer)
+```
+
+```
+## 'data.frame':	216 obs. of  6 variables:
+##  $ stand   : Factor w/ 3 levels "Boreal","Mixed",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ site    : Factor w/ 12 levels "Ashuapmushuan",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ origin  : Factor w/ 6 levels "C1","C2","N1",..: 3 5 2 6 1 3 4 5 6 1 ...
+##  $ first   : num  28 0 1 0 6 ...
+##  $ second  : num  18 0 0 0 2 ...
+##  $ survival: num  0.643 0 0 0 0.333 ...
+```
+]
+
+- Semences de 6 provenances différentes (*origin*) plantées dans 12 sites répartis dans 3 types de forêt (*stand*), 3 réplicats par site
+
+- Nombre de semis comptés la première année (*first*), nombre de survivants la deuxième année (*second*)
+
+*Source*: Solarik et al. (2018) "Local adaptation of trees at the range margins impacts range shifts in the face of climate change."
+
+---
+
+# Exemple: Adaptation locale de l'érable
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+---
+
+# Exemple: Adaptation locale de l'érable
+
+
+```r
+ggplot(data = acer, aes(x = origin, y = first, color = stand)) +
+    geom_point(position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.4)) +
+    scale_color_brewer(palette = "Dark2")
+```
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+
+# Régression de Poisson
+
+
+```r
+library(lme4)
+acer_p &lt;- glmer(first ~ stand * origin + (1 | site), data = acer, family = poisson,
+                control = glmerControl(optimizer = "bobyqa"))
+```
+
+--
+
+
+```r
+chi2 &lt;- sum(residuals(acer_p, "pearson")^2)
+chi2 / df.residual(acer_p)
+```
+
+```
+## [1] 11.0047
+```
+
+```r
+1 - pchisq(chi2, df = df.residual(acer_p))
+```
+
+```
+## [1] 0
+```
+
+---
+
+# Simulations à partir du modèle
+
+
+```r
+sim_acer_p &lt;- simulate(acer_p, nsim = 1000, re.form = NULL)
+acer_pred &lt;- mutate(acer, pred = predict(acer_p, type = "response"),
+                    q025 = apply(sim_acer_p, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_acer_p, 1, quantile, probs = 0.975)) %&gt;%
+    arrange(pred)
+```
+
+---
+
+# Simulations à partir du modèle
+
+.code50[
+
+```r
+ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = first))
+```
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Régression binomiale négative
+
+
+```r
+acer_nb &lt;- glmer.nb(first ~ stand * origin + (1 | site), acer,
+                    control = glmerControl(optimizer = "bobyqa"))
+```
+
+--
+
+
+```r
+chi2 &lt;- sum(residuals(acer_nb, "pearson")^2)
+chi2/df.residual(acer_nb)
+```
+
+```
+## [1] 1.108141
+```
+
+```r
+1-pchisq(chi2, df = df.residual(acer_nb))
+```
+
+```
+## [1] 0.1428505
+```
+
+---
+
+# Simulations à partir du modèle
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+---
+
+# Sommaire des résultats
+
+.pull-left[
+
+.code50[
+
+```r
+summary(acer_nb)
+```
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(0.9232)  ( log )
+## Formula: first ~ stand * origin + (1 | site)
+##    Data: acer
+## Control: glmerControl(optimizer = "bobyqa")
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   1370.5   1438.0   -665.2   1330.5      196 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.9296 -0.7008 -0.3281  0.3474  4.7128 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  site   (Intercept) 0.6169   0.7854  
+## Number of obs: 216, groups:  site, 12
+## 
+## Fixed effects:
+##                         Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)               1.7753     0.5130   3.461 0.000538 ***
+## standMixed               -1.1572     0.7461  -1.551 0.120921    
+## standTemperate            1.2487     0.7163   1.743 0.081291 .  
+## originC2                  0.2932     0.4661   0.629 0.529253    
+## originN1                 -0.2226     0.4671  -0.476 0.633740    
+## originN2                  0.4228     0.4594   0.920 0.357337    
+## originS1                 -2.8949     0.6301  -4.594 4.34e-06 ***
+## originS2                 -0.6121     0.5116  -1.196 0.231533    
+## standMixed:originC2       1.5574     0.6917   2.252 0.024354 *  
+## standTemperate:originC2  -0.6146     0.6403  -0.960 0.337133    
+## standMixed:originN1       1.4179     0.6862   2.066 0.038808 *  
+## standTemperate:originN1   0.2509     0.6469   0.388 0.698078    
+## standMixed:originN2       0.3708     0.6887   0.538 0.590266    
+## standTemperate:originN2  -0.1115     0.6334  -0.176 0.860280    
+## standMixed:originS1       3.0669     0.8132   3.771 0.000162 ***
+## standTemperate:originS1   2.6444     0.7677   3.444 0.000572 ***
+## standMixed:originS2       0.6308     0.7253   0.870 0.384462    
+## standTemperate:originS2   0.4570     0.6736   0.678 0.497458    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+
+]
+
+--
+
+.pull-right[
+.code50[
+
+```
+##                           Estimate Std. Error    z value     Pr(&gt;|z|)
+## (Intercept)              1.7753243  0.5129625  3.4609240 5.383248e-04
+## standMixed              -1.1571813  0.7461263 -1.5509189 1.209211e-01
+## standTemperate           1.2486695  0.7162916  1.7432420 8.129136e-02
+## originC2                 0.2932333  0.4660812  0.6291463 5.292533e-01
+## originN1                -0.2225520  0.4670863 -0.4764687 6.337405e-01
+## originN2                 0.4228284  0.4593710  0.9204507 3.573373e-01
+## originS1                -2.8949332  0.6301068 -4.5943534 4.340931e-06
+## originS2                -0.6121438  0.5116467 -1.1964189 2.315331e-01
+## standMixed:originC2      1.5573830  0.6917075  2.2515052 2.435356e-02
+## standTemperate:originC2 -0.6145614  0.6402717 -0.9598448 3.371333e-01
+## standMixed:originN1      1.4179217  0.6862407  2.0662163 3.880806e-02
+## standTemperate:originN1  0.2509442  0.6469019  0.3879169 6.980775e-01
+## standMixed:originN2      0.3708193  0.6886792  0.5384500 5.902664e-01
+## standTemperate:originN2 -0.1114903  0.6334052 -0.1760173 8.602804e-01
+## standMixed:originS1      3.0668710  0.8132320  3.7712128 1.624560e-04
+## standTemperate:originS1  2.6443689  0.7677469  3.4443238 5.724897e-04
+## standMixed:originS2      0.6307586  0.7252560  0.8697047 3.844618e-01
+## standTemperate:originS2  0.4570113  0.6735657  0.6784956 4.974575e-01
+```
+]
+]
+
+---
+
+# Comparaisons multiples avec emmeans
+
+
+```r
+library(emmeans)
+plot(emmeans(acer_nb, ~ origin | stand), comparisons = TRUE)
+```
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+---
+
+class: inverse, center, middle
+
+# Modèles pour les taux
+
+---
+
+# Motivation
+
+- Supposons que nous obtenons des données d'abondance (nombre d'individus) d'une espèce sur différentes placettes.
+
+- Cependant, la taille des placettes diffère. On s'attend à ce qu'à densité de population égale, l'abondance augmente proportionnellement à la taille des placettes.
+
+--
+
+- On pourrait modéliser directement la densité (individus / m&lt;sup&gt;2&lt;/sup&gt;), mais dans ce cas nous perdons l'information sur les comptages et nous ne pouvons pas utiliser une distribution de Poisson ou binomiale négative. 
+
+- D'un point de vue statistique, 3 observations sur 1 m&lt;sup&gt;2&lt;/sup&gt; ne sont pas équivalentes à 12 observations sur 4 m&lt;sup&gt;2&lt;/sup&gt;.
+
+---
+
+# Modéliser un taux
+
+- Dans l'exemple précédent, supposons que le nombre d'individus `\(y\)` dans une placette suit une distribution de Poisson de moyenne `\(\lambda = \rho A\)`, où `\(\rho\)` est la densité de population et `\(A\)` est la superficie de la placette.
+
+- Nous voulons modéliser `\(\log \rho\)` en fonction des prédicteurs `\(x_i\)`.
+
+--
+
+`$$\log \rho = \beta_0 + \beta_1 x_1 + ...$$`
+
+--
+
+$$\log \rho  = \log(\lambda / A) = \log \lambda - \log A $$
+
+--
+
+`$$\log \lambda  = \log A + \beta_0 + \beta_1 x_1 + ...$$`
+
+---
+
+# Modéliser un taux
+
+`$$y \sim \text{Pois}(\lambda)$$`
+
+`$$\log \lambda = \log A + \beta_0 + \beta_1 x_1 + ...$$`
+
+- Le modèle peut être représenté comme une régression de Poisson tant qu'on ajoute un terme `\(\log A\)`, appelé *offset*.
+
+- Analogue à l'ajout du prédicteur `\(\log A\)` avec un coefficient fixé à 1. 
+
+---
+
+# Exemple
+
+- Jeu de données *Owls* du package *glmmTMB*: Nombre de cris d'oisillons d'effraies des clochers (variable réponse *SiblingNegotiation*).
+
+.code50[
+
+```r
+library(glmmTMB)
+data(Owls)
+str(Owls)
+```
+
+```
+## 'data.frame':	599 obs. of  8 variables:
+##  $ Nest              : Factor w/ 27 levels "AutavauxTV","Bochet",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ FoodTreatment     : Factor w/ 2 levels "Deprived","Satiated": 1 2 1 1 1 1 1 2 1 2 ...
+##  $ SexParent         : Factor w/ 2 levels "Female","Male": 2 2 2 2 2 2 2 1 2 1 ...
+##  $ ArrivalTime       : num  22.2 22.4 22.5 22.6 22.6 ...
+##  $ SiblingNegotiation: int  4 0 2 2 2 2 18 4 18 0 ...
+##  $ BroodSize         : int  5 5 5 5 5 5 5 5 5 5 ...
+##  $ NegPerChick       : num  0.8 0 0.4 0.4 0.4 0.4 3.6 0.8 3.6 0 ...
+##  $ logBroodSize      : num  1.61 1.61 1.61 1.61 1.61 ...
+```
+]
+
+*Source*: Roulin et Bersier (2007) "Nestling barn owls beg more intensely in the presence of their mother than in the presence of their father."
+
+---
+
+# Exemple
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+
+
+---
+
+# Modèle de Poisson
+
+
+```r
+owls_p &lt;- glmer(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                    (1|Nest) + offset(logBroodSize), data = Owls, family = poisson)
+```
+
+--
+
+
+```r
+chi2 &lt;- sum(residuals(owls_p, type = "pearson")^2)
+chi2 / df.residual(owls_p)
+```
+
+```
+## [1] 5.447361
+```
+
+```r
+1 - pchisq(chi2, df = df.residual(owls_p))
+```
+
+```
+## [1] 0
+```
+
+
+---
+
+# Modèle binomial négatif
+
+
+```r
+owls_nb &lt;- glmer.nb(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                        (1|Nest) + offset(logBroodSize), data = Owls)
+```
+
+--
+
+
+```r
+chi2 &lt;- sum(residuals(owls_nb, type = "pearson")^2)
+chi2 / df.residual(owls_nb)
+```
+
+```
+## [1] 0.8518262
+```
+
+---
+
+# Modèle binomial négatif
+
+.code50[
+
+```
+## Warning in summary.merMod(owls_nb, echo = TRUE): additional arguments
+## ignored
+```
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(0.8847)  ( log )
+## Formula: SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +  
+##     (1 | Nest) + offset(logBroodSize)
+##    Data: Owls
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   3477.5   3508.3  -1731.8   3463.5      592 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.9069 -0.7794 -0.2060  0.4465  5.5441 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  Nest   (Intercept) 0.1095   0.3309  
+## Number of obs: 599, groups:  Nest, 27
+## 
+## Fixed effects:
+##                                     Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                          3.50710    0.63229   5.547 2.91e-08
+## FoodTreatmentSatiated               -0.76653    0.16109  -4.758 1.95e-06
+## SexParentMale                       -0.01044    0.14213  -0.073    0.941
+## ArrivalTime                         -0.11515    0.02513  -4.583 4.58e-06
+## FoodTreatmentSatiated:SexParentMale  0.17349    0.20099   0.863    0.388
+##                                        
+## (Intercept)                         ***
+## FoodTreatmentSatiated               ***
+## SexParentMale                          
+## ArrivalTime                         ***
+## FoodTreatmentSatiated:SexParentMale    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) FdTrtS SxPrnM ArrvlT
+## FdTrtmntStt -0.135                     
+## SexParentMl -0.120  0.550              
+## ArrivalTime -0.979  0.011 -0.021       
+## FdTrtmS:SPM  0.109 -0.743 -0.668 -0.017
+```
+]
+
+---
+
+# Simulations à partir du modèle
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+
+---
+
+# Excès de zéros
+
+
+```r
+sim_owls_nb &lt;- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+nb_zeros &lt;- apply(sim_owls_nb, 2, function(x) sum(x == 0))
+c(quantile(nb_zeros, probs = 0.025), quantile(nb_zeros, probs = 0.975))
+```
+
+```
+##    2.5%   97.5% 
+##  89.000 124.025
+```
+
+--
+
+
+```r
+sum(Owls$SiblingNegotiation == 0)
+```
+
+```
+## [1] 156
+```
+
+---
+
+class: inverse, center, middle
+
+# Modèles avec excès de zéros
+
+---
+
+# Surdispersion vs. excès de zéros
+
+- Surdispersion: plus de valeurs extrêmes (comptages faibles et élevés) que prévu selon la distribution.
+
+--
+
+- Excès de zéros: plus de zéros que prévu, en enlevant ces zéros supplémentaires on retrouverait la distribution supposée.
+
+---
+
+# Modèles avec excès de zéros (*zero-inflated*)
+
+La réponse `\(y\)` vient d'un modèle en deux parties:
+
+--
+
+- Avec une probabilité `\(p_0\)`: `\(y = 0\)` ("zéro structurel").
+
+--
+
+- Avec une probabilité `\(1 - p_0\)`: `\(y\)` suit une distribution régulière pour les données de comptage (Poisson ou binomiale négative).
+
+
+Exemple: Une espèce peut être complètement absente d'un site (zéro structurel). Si elle est présente, le nombre d'individus observé sur une placette donnée varie selon une distribution de Poisson (qui peut aussi produire des zéros).
+
+
+---
+
+# Modèles avec excès de zéros
+
+- Modèle de comptage suit généralement une distribution de Poisson ou binomiale négative avec lien logarithmique.
+
+Ex.: `\(\log \lambda = \beta_0 + \beta_1 x_1 + ...\)` (Poisson)
+
+--
+
+- `\(p_0\)` modélisée avec un lien logit, comme dans une régression logistique.
+
+Ex.: `\(\text{logit}(p_0) = \gamma_0 + \gamma_1 z_1 + ...\)`
+
+--
+
+- Le modèle pour `\(p_0\)` peut inclure l'ordonnée à l'origine seulement, les mêmes prédicteurs que le modèle de comptage, ou des prédicteurs différents.
+
+
+---
+
+# Exemple
+
+- Jeu de données `Owls` vu dans la section précédente.
+
+
+```r
+library(glmmTMB)
+data(Owls)
+str(Owls)
+```
+
+```
+## 'data.frame':	599 obs. of  8 variables:
+##  $ Nest              : Factor w/ 27 levels "AutavauxTV","Bochet",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ FoodTreatment     : Factor w/ 2 levels "Deprived","Satiated": 1 2 1 1 1 1 1 2 1 2 ...
+##  $ SexParent         : Factor w/ 2 levels "Female","Male": 2 2 2 2 2 2 2 1 2 1 ...
+##  $ ArrivalTime       : num  22.2 22.4 22.5 22.6 22.6 ...
+##  $ SiblingNegotiation: int  4 0 2 2 2 2 18 4 18 0 ...
+##  $ BroodSize         : int  5 5 5 5 5 5 5 5 5 5 ...
+##  $ NegPerChick       : num  0.8 0 0.4 0.4 0.4 0.4 3.6 0.8 3.6 0 ...
+##  $ logBroodSize      : num  1.61 1.61 1.61 1.61 1.61 ...
+```
+
+---
+
+# Modèle binomial négatif avec glmmTMB
+
+- *glmmTMB*: Autre package permettant d'ajuster des GLMM, certains modèles non inclus dans *lme4* (dont ceux avec excès de zéros).
+
+
+```r
+owls_nb &lt;- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime + 
+                       (1|Nest) + offset(logBroodSize), family = nbinom2, data=Owls)
+```
+
+*Note*: `family = nbinom2` correspond à la distribution binomiale négative usuelle.
+
+---
+
+# Modèle avec excès de zéros
+
+- Argument `ziformula` de `glmmTMB` spécifie la formule pour le modèle de `\(p_0\)`. 
+
+- `ziformula = ~1`: Ordonnée à l'origine seulement (probabilité constante)
+
+
+```r
+owls_zinb &lt;- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                         (1|Nest)+offset(logBroodSize), 
+                     family = nbinom2, ziformula = ~1, data=Owls)
+```
+
+---
+
+# Résultats
+
+.pull-left[
+.code50[
+
+```r
+summary(owls_zinb)
+```
+
+```
+##  Family: nbinom2  ( log )
+## Formula:          
+## SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +  
+##     (1 | Nest) + offset(logBroodSize)
+## Zero inflation:                      ~1
+## Data: Owls
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   3416.4   3451.5  -1700.2   3400.4      591 
+## 
+## Random effects:
+## 
+## Conditional model:
+##  Groups Name        Variance Std.Dev.
+##  Nest   (Intercept) 0.06092  0.2468  
+## Number of obs: 599, groups:  Nest, 27
+## 
+## Overdispersion parameter for nbinom2 family (): 2.31 
+## 
+## Conditional model:
+##                                     Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)                          2.87588    0.49394   5.822  5.8e-09
+## FoodTreatmentSatiated               -0.40500    0.13480  -3.004  0.00266
+## SexParentMale                       -0.07360    0.10255  -0.718  0.47290
+## ArrivalTime                         -0.08294    0.01980  -4.189  2.8e-05
+## FoodTreatmentSatiated:SexParentMale  0.15878    0.16235   0.978  0.32807
+##                                        
+## (Intercept)                         ***
+## FoodTreatmentSatiated               ** 
+## SexParentMale                          
+## ArrivalTime                         ***
+## FoodTreatmentSatiated:SexParentMale    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Zero-inflation model:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   -1.276      0.122  -10.46   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+]
+
+--
+
+.code50[
+.pull-right[
+
+```
+## $cond
+##                                        Estimate Std. Error    z value
+## (Intercept)                          2.87588361 0.49394117  5.8223201
+## FoodTreatmentSatiated               -0.40500256 0.13480324 -3.0043979
+## SexParentMale                       -0.07360475 0.10254676 -0.7177677
+## ArrivalTime                         -0.08294452 0.01979991 -4.1891354
+## FoodTreatmentSatiated:SexParentMale  0.15878115 0.16235175  0.9780070
+##                                         Pr(&gt;|z|)
+## (Intercept)                         5.803626e-09
+## FoodTreatmentSatiated               2.661070e-03
+## SexParentMale                       4.729006e-01
+## ArrivalTime                         2.800193e-05
+## FoodTreatmentSatiated:SexParentMale 3.280709e-01
+## 
+## $zi
+##              Estimate Std. Error   z value     Pr(&gt;|z|)
+## (Intercept) -1.276224  0.1219554 -10.46468 1.254989e-25
+## 
+## $disp
+## NULL
+```
+]
+]
+
+---
+
+# Résultats
+
+- D'après ce résultat, `\(\text{logit}(p_0) = -1.276\)`
+
+
+```r
+coef(summary(owls_zinb))$zi
+```
+
+```
+##              Estimate Std. Error   z value     Pr(&gt;|z|)
+## (Intercept) -1.276224  0.1219554 -10.46468 1.254989e-25
+```
+
+--
+
+- Inversion du logit avec `plogis` pour obtenir `\(p_0\)`:
+
+
+```r
+plogis(-1.276)
+```
+
+```
+## [1] 0.2182319
+```
+
+---
+
+# Comparaison des modèles
+
+
+```r
+AIC(owls_nb)
+```
+
+```
+## [1] 3477.534
+```
+
+```r
+AIC(owls_zinb)
+```
+
+```
+## [1] 3416.383
+```
+
+---
+
+# Comparaison des modèles
+
+![](06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

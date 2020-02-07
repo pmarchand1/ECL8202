@@ -1,0 +1,565 @@
+---
+title: "Modèles linéaires généralisés à effets mixtes 2"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 18) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+```
+
+# Contenu du cours
+
+- Modèle binomial négatif
+
+- Modèles pour les taux
+
+- Modèles avec excès de zéros
+
+---
+
+class: inverse, center, middle
+
+# Modèle binomial négatif
+
+---
+
+# Distribution binomiale négative
+
+- Comme la distribution de Poisson, permet de représenter des données de comptage, i.e. des entiers $\ge 0$.
+
+- Origine du nom: Dans une expérience binomiale, nombre d'échecs avant d'obtenir un certain nombre de succès.
+
+--
+
+- Version plus générale: Chaque observation suit une distribution de Poisson, mais $\lambda$ varie aléatoirement d'une observation à l'autre selon une distribution Gamma.
+
+--
+
+- Utile pour les données de comptage surdispersées.
+
+---
+
+# Distribution binomiale négative
+
+- La distribution $\text{NB}(\mu, \theta)$ a une moyenne de $\mu$ et une variance de $\mu + \mu^2 / \theta$.
+
+```{r}
+ggplot(NULL, aes(x = 0:35)) +
+    labs(x = "y", y = "P(y)") +
+    stat_function(fun = dnbinom, args = list(mu = 10, size = 1), geom = "bar", n = 36,
+                  aes(fill = "NB(10, 1)"), alpha = 0.7) +
+    stat_function(fun = dnbinom, args = list(mu = 10, size = 3), geom = "bar", n = 36,
+                  aes(fill = "NB(10, 3)"), alpha = 0.7) +
+    stat_function(fun = dpois, args = list(lambda = 10), geom = "bar", n = 36,
+                  aes(fill = "Pois(10)"), alpha = 0.7) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_manual(name = "", values = c("Pois(10)"="#1b9e77","NB(10, 3)"="#d95f02", "NB(10, 1)"="#7570b3"))
+```
+
+---
+
+# GLM avec distribution binomiale négative
+
+- Semblable au modèle de régression de Poisson (utilise aussi un lien log)
+
+$$y \sim \text{NB}(\mu, \theta)$$
+
+$$\log \mu  = \beta_0 + \sum_{i=1}^m \beta_i x_i$$
+
+--
+
+- Avec $\theta$ connu, le modèle est un GLM.
+
+--
+
+- Pour estimer $\theta$, on procède par itération: estimer $\theta$ en fonction du modèle ajusté, réajuster le modèle en fonction du nouveau $\theta$, etc. jusqu'à convergence.
+
+- Méthode implémentée dans les fonctions `glm.nb` du package *MASS* (sans effet aléatoires) et `glmer.nb` du package *lme4*.
+
+---
+
+# Exemple: Adaptation locale de l'érable
+
+.code60[
+```{r, echo = TRUE}
+acer <- read.csv("../donnees/acer_transplant.csv")
+str(acer)
+```
+]
+
+- Semences de 6 provenances différentes (*origin*) plantées dans 12 sites répartis dans 3 types de forêt (*stand*), 3 réplicats par site
+
+- Nombre de semis comptés la première année (*first*), nombre de survivants la deuxième année (*second*)
+
+*Source*: Solarik et al. (2018) "Local adaptation of trees at the range margins impacts range shifts in the face of climate change."
+
+---
+
+# Exemple: Adaptation locale de l'érable
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+ggplot(acer, aes(x = first)) +
+    geom_histogram(color = "white") +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+---
+
+# Exemple: Adaptation locale de l'érable
+
+```{r, echo = TRUE}
+ggplot(data = acer, aes(x = origin, y = first, color = stand)) +
+    geom_point(position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.4)) +
+    scale_color_brewer(palette = "Dark2")
+```
+
+---
+
+# Régression de Poisson
+
+```{r, warning = FALSE, message = FALSE, echo = TRUE}
+library(lme4)
+acer_p <- glmer(first ~ stand * origin + (1 | site), data = acer, family = poisson,
+                control = glmerControl(optimizer = "bobyqa"))
+```
+
+--
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(acer_p, "pearson")^2)
+chi2 / df.residual(acer_p)
+1 - pchisq(chi2, df = df.residual(acer_p))
+```
+
+---
+
+# Simulations à partir du modèle
+
+```{r, echo = TRUE}
+sim_acer_p <- simulate(acer_p, nsim = 1000, re.form = NULL)
+acer_pred <- mutate(acer, pred = predict(acer_p, type = "response"),
+                    q025 = apply(sim_acer_p, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_acer_p, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+```
+
+---
+
+# Simulations à partir du modèle
+
+.code50[
+```{r, echo = TRUE}
+ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = first))
+```
+]
+
+---
+
+# Régression binomiale négative
+
+```{r, echo = TRUE}
+acer_nb <- glmer.nb(first ~ stand * origin + (1 | site), acer,
+                    control = glmerControl(optimizer = "bobyqa"))
+
+```
+
+--
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(acer_nb, "pearson")^2)
+chi2/df.residual(acer_nb)
+1-pchisq(chi2, df = df.residual(acer_nb))
+```
+
+---
+
+# Simulations à partir du modèle
+
+```{r}
+sim_acer_nb <- simulate(acer_nb, nsim = 1000, re.form = NULL)
+acer_pred <- mutate(acer, pred = predict(acer_nb, type = "response"),
+                    q025 = apply(sim_acer_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_acer_nb, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+
+ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = first))
+```
+
+---
+
+# Sommaire des résultats
+
+.pull-left[
+
+.code50[
+```{r, echo = TRUE}
+summary(acer_nb)
+```
+]
+
+]
+
+--
+
+.pull-right[
+.code50[
+```{r}
+summary(acer_nb)$coefficients
+```
+]
+]
+
+---
+
+# Comparaisons multiples avec emmeans
+
+```{r, echo = TRUE, fig.dim = c(8, 6), warning = FALSE, message = FALSE}
+library(emmeans)
+plot(emmeans(acer_nb, ~ origin | stand), comparisons = TRUE)
+```
+
+---
+
+class: inverse, center, middle
+
+# Modèles pour les taux
+
+---
+
+# Motivation
+
+- Supposons que nous obtenons des données d'abondance (nombre d'individus) d'une espèce sur différentes placettes.
+
+- Cependant, la taille des placettes diffère. On s'attend à ce qu'à densité de population égale, l'abondance augmente proportionnellement à la taille des placettes.
+
+--
+
+- On pourrait modéliser directement la densité (individus / m<sup>2</sup>), mais dans ce cas nous perdons l'information sur les comptages et nous ne pouvons pas utiliser une distribution de Poisson ou binomiale négative. 
+
+- D'un point de vue statistique, 3 observations sur 1 m<sup>2</sup> ne sont pas équivalentes à 12 observations sur 4 m<sup>2</sup>.
+
+---
+
+# Modéliser un taux
+
+- Dans l'exemple précédent, supposons que le nombre d'individus $y$ dans une placette suit une distribution de Poisson de moyenne $\lambda = \rho A$, où $\rho$ est la densité de population et $A$ est la superficie de la placette.
+
+- Nous voulons modéliser $\log \rho$ en fonction des prédicteurs $x_i$.
+
+--
+
+$$\log \rho = \beta_0 + \beta_1 x_1 + ...$$
+
+--
+
+$$\log \rho  = \log(\lambda / A) = \log \lambda - \log A $$
+
+--
+
+$$\log \lambda  = \log A + \beta_0 + \beta_1 x_1 + ...$$
+
+---
+
+# Modéliser un taux
+
+$$y \sim \text{Pois}(\lambda)$$
+
+$$\log \lambda = \log A + \beta_0 + \beta_1 x_1 + ...$$
+
+- Le modèle peut être représenté comme une régression de Poisson tant qu'on ajoute un terme $\log A$, appelé *offset*.
+
+- Analogue à l'ajout du prédicteur $\log A$ avec un coefficient fixé à 1. 
+
+---
+
+# Exemple
+
+- Jeu de données *Owls* du package *glmmTMB*: Nombre de cris d'oisillons d'effraies des clochers (variable réponse *SiblingNegotiation*).
+
+.code50[
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+library(glmmTMB)
+data(Owls)
+str(Owls)
+```
+]
+
+*Source*: Roulin et Bersier (2007) "Nestling barn owls beg more intensely in the presence of their mother than in the presence of their father."
+
+---
+
+# Exemple
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+ggplot(Owls, aes(x = SiblingNegotiation)) +
+    geom_histogram(color = "white") +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+
+---
+
+# Modèle de Poisson
+
+```{r, echo = TRUE}
+owls_p <- glmer(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                    (1|Nest) + offset(logBroodSize), data = Owls, family = poisson)
+```
+
+--
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(owls_p, type = "pearson")^2)
+chi2 / df.residual(owls_p)
+1 - pchisq(chi2, df = df.residual(owls_p))
+```
+
+
+---
+
+# Modèle binomial négatif
+
+```{r, echo = TRUE}
+owls_nb <- glmer.nb(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                        (1|Nest) + offset(logBroodSize), data = Owls)
+```
+
+--
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(owls_nb, type = "pearson")^2)
+chi2 / df.residual(owls_nb)
+```
+
+---
+
+# Modèle binomial négatif
+
+.code50[
+```{r}
+summary(owls_nb, echo = TRUE)
+```
+]
+
+---
+
+# Simulations à partir du modèle
+
+```{r}
+sim_owls_nb <- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+owls_pred <- mutate(Owls, pred = predict(owls_nb, type = "response"),
+                    q025 = apply(sim_owls_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_owls_nb, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+
+ggplot(owls_pred, aes(x = 1:nrow(owls_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = SiblingNegotiation))
+```
+
+---
+
+# Excès de zéros
+
+```{r, echo = TRUE}
+sim_owls_nb <- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+nb_zeros <- apply(sim_owls_nb, 2, function(x) sum(x == 0))
+c(quantile(nb_zeros, probs = 0.025), quantile(nb_zeros, probs = 0.975))
+```
+
+--
+
+```{r, echo = TRUE}
+sum(Owls$SiblingNegotiation == 0)
+```
+
+---
+
+class: inverse, center, middle
+
+# Modèles avec excès de zéros
+
+---
+
+# Surdispersion vs. excès de zéros
+
+- Surdispersion: plus de valeurs extrêmes (comptages faibles et élevés) que prévu selon la distribution.
+
+--
+
+- Excès de zéros: plus de zéros que prévu, en enlevant ces zéros supplémentaires on retrouverait la distribution supposée.
+
+---
+
+# Modèles avec excès de zéros (*zero-inflated*)
+
+La réponse $y$ vient d'un modèle en deux parties:
+
+--
+
+- Avec une probabilité $p_0$: $y = 0$ ("zéro structurel").
+
+--
+
+- Avec une probabilité $1 - p_0$: $y$ suit une distribution régulière pour les données de comptage (Poisson ou binomiale négative).
+
+
+Exemple: Une espèce peut être complètement absente d'un site (zéro structurel). Si elle est présente, le nombre d'individus observé sur une placette donnée varie selon une distribution de Poisson (qui peut aussi produire des zéros).
+
+
+---
+
+# Modèles avec excès de zéros
+
+- Modèle de comptage suit généralement une distribution de Poisson ou binomiale négative avec lien logarithmique.
+
+Ex.: $\log \lambda = \beta_0 + \beta_1 x_1 + ...$ (Poisson)
+
+--
+
+- $p_0$ modélisée avec un lien logit, comme dans une régression logistique.
+
+Ex.: $\text{logit}(p_0) = \gamma_0 + \gamma_1 z_1 + ...$
+
+--
+
+- Le modèle pour $p_0$ peut inclure l'ordonnée à l'origine seulement, les mêmes prédicteurs que le modèle de comptage, ou des prédicteurs différents.
+
+
+---
+
+# Exemple
+
+- Jeu de données `Owls` vu dans la section précédente.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+library(glmmTMB)
+data(Owls)
+str(Owls)
+```
+
+---
+
+# Modèle binomial négatif avec glmmTMB
+
+- *glmmTMB*: Autre package permettant d'ajuster des GLMM, certains modèles non inclus dans *lme4* (dont ceux avec excès de zéros).
+
+```{r, echo = TRUE}
+owls_nb <- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime + 
+                       (1|Nest) + offset(logBroodSize), family = nbinom2, data=Owls)
+```
+
+*Note*: `family = nbinom2` correspond à la distribution binomiale négative usuelle.
+
+---
+
+# Modèle avec excès de zéros
+
+- Argument `ziformula` de `glmmTMB` spécifie la formule pour le modèle de $p_0$. 
+
+- `ziformula = ~1`: Ordonnée à l'origine seulement (probabilité constante)
+
+```{r, echo = TRUE}
+owls_zinb <- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                         (1|Nest)+offset(logBroodSize), 
+                     family = nbinom2, ziformula = ~1, data=Owls)
+```
+
+---
+
+# Résultats
+
+.pull-left[
+.code50[
+```{r, echo = TRUE}
+summary(owls_zinb)
+```
+]
+]
+
+--
+
+.code50[
+.pull-right[
+```{r}
+coef(summary(owls_zinb))
+```
+]
+]
+
+---
+
+# Résultats
+
+- D'après ce résultat, $\text{logit}(p_0) = -1.276$
+
+```{r, echo = TRUE}
+coef(summary(owls_zinb))$zi
+```
+
+--
+
+- Inversion du logit avec `plogis` pour obtenir $p_0$:
+
+```{r, echo = TRUE}
+plogis(-1.276)
+```
+
+---
+
+# Comparaison des modèles
+
+```{r, echo = TRUE}
+AIC(owls_nb)
+AIC(owls_zinb)
+```
+
+---
+
+# Comparaison des modèles
+
+```{r}
+sim_owls_nb <- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+sim_owls_zi <- simulate(owls_zinb, nsim = 1000, re.form = NULL, newdata = Owls)
+owls_pred <- mutate(Owls, pred = predict(owls_nb, type = "response"),
+                    q025 = apply(sim_owls_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_owls_nb, 1, quantile, probs = 0.975),
+                    pred_zi = predict(owls_zinb, type = "response"),
+                    q025_zi = apply(sim_owls_zi, 1, quantile, probs = 0.025),
+                    q975_zi = apply(sim_owls_zi, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+
+ggplot(owls_pred, aes(x = 1:nrow(owls_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.5, fill = "#1b9e77") +
+    geom_ribbon(aes(ymin = q025_zi, ymax = q975_zi), alpha = 0.3, fill = "#d95f02") +
+    geom_line(color = "#1b9e77", size = 1) +
+    geom_line(aes(y = pred_zi), color = "#d95f02", size = 1) +
+    geom_point(aes(y = SiblingNegotiation), alpha = 0.5)
+```
+
+
+

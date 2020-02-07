@@ -12,6 +12,8 @@
 
 5. [Modèles linéaires généralisés à effets mixtes](notes_cours/05-Modeles_generalises_mixtes.html) ([PDF](notes_cours/05-Modeles_generalises_mixtes.pdf)) - Données: [rikz.csv](donnees/rikz.csv)
 
+6. [Modèles linéaires généralisés à effets mixtes 2](notes_cours/06-Modeles_generalises_mixtes2.html) ([PDF](notes_cours/06-Modeles_generalises_mixtes2.pdf)) - Données: [acer_transplant.csv](donnees/acer_transplant.csv)
+
 
 ## Exercices
 

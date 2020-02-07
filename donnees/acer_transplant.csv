@@ -1,0 +1,217 @@
+stand,site,origin,first,second,survival
+Boreal,Ashuapmushuan,N1,28,18,0.642857143
+Boreal,Ashuapmushuan,S1,0,0,0
+Boreal,Ashuapmushuan,C2,1,0,0
+Boreal,Ashuapmushuan,S2,0,0,0
+Boreal,Ashuapmushuan,C1,6.000000001,1.999999999,0.333333333
+Boreal,Ashuapmushuan,N1,0,0,0
+Boreal,Ashuapmushuan,N2,4.999999998,0,0
+Boreal,Ashuapmushuan,S1,4.999999998,3.000000001,0.6
+Boreal,Ashuapmushuan,S2,4,1,0.25
+Boreal,Ashuapmushuan,C1,39,29,0.743589744
+Boreal,Ashuapmushuan,N2,26,14,0.538461538
+Boreal,Ashuapmushuan,C1,30,12,0.4
+Boreal,Ashuapmushuan,S2,8.000000001,0,0
+Boreal,Ashuapmushuan,C2,34,1,0.029411765
+Boreal,Ashuapmushuan,N2,57,31.99999999,0.561403509
+Boreal,Ashuapmushuan,C2,28,14,0.5
+Boreal,Ashuapmushuan,S1,0,0,0
+Boreal,Ashuapmushuan,N1,22,0,0
+Mixed,Auclair,C2,20,4.999999998,0.25
+Mixed,Auclair,C2,23,1.999999999,0.086956522
+Mixed,Auclair,C1,26,0,0
+Mixed,Auclair,S1,13,4,0.307692308
+Mixed,Auclair,N2,18,9,0.5
+Mixed,Auclair,N2,28,4,0.142857143
+Mixed,Auclair,C2,21,0,0
+Mixed,Auclair,S2,9,0,0
+Mixed,Auclair,N2,7,1,0.142857143
+Mixed,Auclair,S1,18,0,0
+Mixed,Auclair,N1,53,14,0.264150943
+Mixed,Auclair,S2,11,7,0.636363636
+Mixed,Auclair,N1,17,9,0.529411765
+Mixed,Auclair,S1,9.999999999,4,0.4
+Mixed,Auclair,N1,24,14,0.583333333
+Mixed,Auclair,C1,19,9,0.473684211
+Mixed,Auclair,S2,16,3.000000001,0.1875
+Mixed,Auclair,C1,17,4,0.235294118
+Temperate,Dorset,N2,6.000000001,3.000000001,0.5
+Temperate,Dorset,N2,53.99999999,7,0.12962963
+Temperate,Dorset,C1,84,22,0.261904762
+Temperate,Dorset,S2,71,15,0.211267606
+Temperate,Dorset,S1,40.99999999,16,0.390243903
+Temperate,Dorset,S1,21,6.000000001,0.285714286
+Temperate,Dorset,C1,44,1,0.022727273
+Temperate,Dorset,S2,40,21,0.525
+Temperate,Dorset,S2,9,1,0.111111111
+Temperate,Dorset,N1,18,4.999999998,0.277777778
+Temperate,Dorset,N1,18,3.000000001,0.166666667
+Temperate,Dorset,C2,41.99999999,18,0.428571429
+Temperate,Dorset,C2,18,6.000000001,0.333333333
+Temperate,Dorset,S1,49,14,0.285714286
+Temperate,Dorset,C1,9.999999999,3.000000001,0.3
+Temperate,Dorset,C2,4,1,0.25
+Temperate,Dorset,N2,37,25,0.675675676
+Temperate,Dorset,N1,18,4,0.222222222
+Temperate,Ferme Neuve,S2,3.000000001,1.999999999,0.666666666
+Temperate,Ferme Neuve,N1,18,1.999999999,0.111111111
+Temperate,Ferme Neuve,C2,11,3.000000001,0.272727273
+Temperate,Ferme Neuve,N2,13,0,0
+Temperate,Ferme Neuve,C1,39,1.999999999,0.051282051
+Temperate,Ferme Neuve,S2,17,0,0
+Temperate,Ferme Neuve,S1,7,3.000000001,0.428571429
+Temperate,Ferme Neuve,N2,68,17,0.25
+Temperate,Ferme Neuve,C2,24,9.999999999,0.416666667
+Temperate,Ferme Neuve,N1,48,15,0.3125
+Temperate,Ferme Neuve,S1,14,4,0.285714286
+Temperate,Ferme Neuve,C2,31,6.000000001,0.193548387
+Temperate,Ferme Neuve,S2,15,0,0
+Temperate,Ferme Neuve,S1,6.000000001,1.999999999,0.333333333
+Temperate,Ferme Neuve,N2,28,0,0
+Temperate,Ferme Neuve,N1,13,3.000000001,0.230769231
+Temperate,Ferme Neuve,C1,6.000000001,1,0.166666667
+Temperate,Ferme Neuve,C1,30,4.999999998,0.166666667
+Temperate,Knowlton,C2,4,0,0
+Temperate,Knowlton,C1,16,1,0.0625
+Temperate,Knowlton,S1,1,0,0
+Temperate,Knowlton,N1,93,17,0.182795699
+Temperate,Knowlton,S2,31,8.000000001,0.258064516
+Temperate,Knowlton,C2,26,24,0.923076923
+Temperate,Knowlton,S2,16,0,0
+Temperate,Knowlton,N2,6.000000001,1.999999999,0.333333333
+Temperate,Knowlton,N1,9,1.999999999,0.222222222
+Temperate,Knowlton,C1,4.999999998,0,0
+Temperate,Knowlton,S1,18,0,0
+Temperate,Knowlton,N2,46,26,0.565217391
+Temperate,Knowlton,C2,9.999999999,4.999999998,0.5
+Temperate,Knowlton,S2,7,1,0.142857143
+Temperate,Knowlton,C1,4.999999998,1.999999999,0.4
+Temperate,Knowlton,S1,1.999999999,0,0
+Temperate,Knowlton,N1,4,0,0
+Temperate,Knowlton,N2,1.999999999,1,0.5
+Boreal,LacLaFlamme,N2,1.999999999,0,0
+Boreal,LacLaFlamme,N1,0,0,0
+Boreal,LacLaFlamme,C1,0,0,0
+Boreal,LacLaFlamme,S1,0,0,0
+Boreal,LacLaFlamme,C2,0,0,0
+Boreal,LacLaFlamme,C1,0,0,0
+Boreal,LacLaFlamme,N1,0,0,0
+Boreal,LacLaFlamme,S2,0,0,0
+Boreal,LacLaFlamme,C2,0,0,0
+Boreal,LacLaFlamme,N1,0,0,0
+Boreal,LacLaFlamme,C2,0,0,0
+Boreal,LacLaFlamme,N2,0,0,0
+Boreal,LacLaFlamme,S1,0,0,0
+Boreal,LacLaFlamme,N2,0,0,0
+Boreal,LacLaFlamme,C1,6.000000001,0,0
+Boreal,LacLaFlamme,S2,8.000000001,0,0
+Boreal,LacLaFlamme,S1,0,0,0
+Boreal,LacLaFlamme,S2,3.000000001,0,0
+Boreal,Micoua,S2,0,0,0
+Boreal,Micoua,C2,19,1.999999999,0.105263158
+Boreal,Micoua,C2,0,0,0
+Boreal,Micoua,N1,0,0,0
+Boreal,Micoua,S2,0,0,0
+Boreal,Micoua,C1,4.999999998,1,0.2
+Boreal,Micoua,S2,3.000000001,1,0.333333333
+Boreal,Micoua,S1,0,0,0
+Boreal,Micoua,N1,0,0,0
+Boreal,Micoua,C1,9.999999999,1,0.1
+Boreal,Micoua,C2,40.99999999,8.000000001,0.195121951
+Boreal,Micoua,C1,0,0,0
+Boreal,Micoua,N1,15,12,0.8
+Boreal,Micoua,S1,0,0,0
+Boreal,Micoua,N2,39,4.999999998,0.128205128
+Boreal,Micoua,S1,0,0,0
+Boreal,Micoua,N2,6.000000001,1.999999999,0.333333333
+Boreal,Micoua,N2,8.000000001,1.999999999,0.25
+Mixed,Ouimet,S1,1,0,0
+Mixed,Ouimet,C1,0,0,0
+Mixed,Ouimet,N2,1,0,0
+Mixed,Ouimet,S1,3.000000001,0,0
+Mixed,Ouimet,C2,0,0,0
+Mixed,Ouimet,C1,0,0,0
+Mixed,Ouimet,N1,3.000000001,0,0
+Mixed,Ouimet,S2,0,0,0
+Mixed,Ouimet,N2,0,0,0
+Mixed,Ouimet,N2,0,0,0
+Mixed,Ouimet,N1,4,0,0
+Mixed,Ouimet,S1,0,0,0
+Mixed,Ouimet,S2,1.999999999,0,0
+Mixed,Ouimet,N1,24,8.000000001,0.333333333
+Mixed,Ouimet,C2,17,4.999999998,0.294117647
+Mixed,Ouimet,C2,1.999999999,0,0
+Mixed,Ouimet,C1,0,0,0
+Mixed,Ouimet,S2,7,1,0.142857143
+Boreal,Parent,S2,3.000000001,0,0
+Boreal,Parent,C1,8.000000001,1,0.125
+Boreal,Parent,N2,13,0,0
+Boreal,Parent,C1,4,1,0.25
+Boreal,Parent,N1,4.999999998,0,0
+Boreal,Parent,S2,1.999999999,0,0
+Boreal,Parent,C2,1,0,0
+Boreal,Parent,N2,0,0,0
+Boreal,Parent,S1,0,0,0
+Boreal,Parent,S2,1,0,0
+Boreal,Parent,C1,0,0,0
+Boreal,Parent,N2,9,0,0
+Boreal,Parent,S1,0,0,0
+Boreal,Parent,C2,3.000000001,0,0
+Boreal,Parent,N1,14,0,0
+Boreal,Parent,N1,1.999999999,1,0.5
+Boreal,Parent,S1,1,0,0
+Boreal,Parent,C2,14,1,0.071428571
+Mixed,Rivere-Eternite,C2,1.999999999,0,0
+Mixed,Rivere-Eternite,S1,0,0,0
+Mixed,Rivere-Eternite,N2,0,0,0
+Mixed,Rivere-Eternite,N1,0,0,0
+Mixed,Rivere-Eternite,C1,0,0,0
+Mixed,Rivere-Eternite,S2,1,1,1
+Mixed,Rivere-Eternite,N1,1,1,1
+Mixed,Rivere-Eternite,S1,0,0,0
+Mixed,Rivere-Eternite,C2,30,12,0.4
+Mixed,Rivere-Eternite,S2,0,0,0
+Mixed,Rivere-Eternite,N1,1,1,1
+Mixed,Rivere-Eternite,C1,1,0,0
+Mixed,Rivere-Eternite,C2,3.000000001,0,0
+Mixed,Rivere-Eternite,S2,0,0,0
+Mixed,Rivere-Eternite,C1,1,0,0
+Mixed,Rivere-Eternite,N2,16,1.999999999,0.125
+Mixed,Rivere-Eternite,S1,1.999999999,0,0
+Mixed,Rivere-Eternite,N2,6.000000001,1.999999999,0.333333333
+Temperate,Saint Faustine,C1,29,0,0
+Temperate,Saint Faustine,C2,8.000000001,0,0
+Temperate,Saint Faustine,N2,48,0,0
+Temperate,Saint Faustine,S1,36,0,0
+Temperate,Saint Faustine,S1,9.999999999,0,0
+Temperate,Saint Faustine,N2,7,0,0
+Temperate,Saint Faustine,S2,16,0,0
+Temperate,Saint Faustine,S1,4,1,0.25
+Temperate,Saint Faustine,N1,7,0,0
+Temperate,Saint Faustine,C2,9,1,0.111111111
+Temperate,Saint Faustine,S2,9.999999999,0,0
+Temperate,Saint Faustine,N2,21,1.999999999,0.095238095
+Temperate,Saint Faustine,C1,8.000000001,0,0
+Temperate,Saint Faustine,N1,3.000000001,0,0
+Temperate,Saint Faustine,S2,1.999999999,0,0
+Temperate,Saint Faustine,C1,4,1,0.25
+Temperate,Saint Faustine,C2,4,0,0
+Temperate,Saint Faustine,N1,6.000000001,0,0
+Mixed,Saint Marcellin,S2,0,0,0
+Mixed,Saint Marcellin,N2,0,0,0
+Mixed,Saint Marcellin,C2,0,0,0
+Mixed,Saint Marcellin,S1,4,1.999999999,0.5
+Mixed,Saint Marcellin,S1,0,0,0
+Mixed,Saint Marcellin,N1,0,0,0
+Mixed,Saint Marcellin,C1,0,0,0
+Mixed,Saint Marcellin,S2,0,0,0
+Mixed,Saint Marcellin,N1,0,0,0
+Mixed,Saint Marcellin,S2,0,0,0
+Mixed,Saint Marcellin,S1,0,0,0
+Mixed,Saint Marcellin,N2,0,0,0
+Mixed,Saint Marcellin,C2,3.000000001,0,0
+Mixed,Saint Marcellin,C2,19,3.000000001,0.157894737
+Mixed,Saint Marcellin,N1,4,0,0
+Mixed,Saint Marcellin,C1,1,0,0
+Mixed,Saint Marcellin,N2,1.999999999,0,0
+Mixed,Saint Marcellin,C1,0,0,0
