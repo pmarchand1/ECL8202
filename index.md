@@ -1,5 +1,7 @@
 # ECL8202 - Analyses des données complexes
 
+[Capsules vidéo du cours (YouTube)](https://www.youtube.com/channel/UCfU-xwzWWTo3G_sTkquzOQg/playlists?view=50&sort=dd&shelf_id=2&view_as=subscriber)
+
 ## Notes de cours
 
 1. [La méthode du bootstrap](notes_cours/01-Bootstrap.html) ([PDF](notes_cours/01-Bootstrap.pdf)) - Données: [pruche.csv](donnees/pruche.csv)
