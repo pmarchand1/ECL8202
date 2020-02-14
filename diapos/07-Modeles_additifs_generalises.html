@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Modèles additifs généralisés</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modèles additifs généralisés
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+# Contenu du cours
+
+- Splines de lissage
+
+- Ajustement des modèles additifs
+
+- Modéliser les interactions
+
+- Modèles additifs généralisés
+
+- Modèles additifs à effets mixtes
+
+---
+
+class: inverse, center, middle
+
+# Splines de lissage
+
+---
+
+# Exemple
+
+- Jeu de données `airquality` inclus avec R: concentration d'ozone de l'air à New York en fonction de la radiation solaire, de la vitesse du vent et de la température.
+
+
+```r
+data(airquality)
+str(airquality)
+```
+
+```
+## 'data.frame':	153 obs. of  6 variables:
+##  $ Ozone  : int  41 36 12 18 NA 28 23 19 8 NA ...
+##  $ Solar.R: int  190 118 149 313 NA NA 299 99 19 194 ...
+##  $ Wind   : num  7.4 8 12.6 11.5 14.3 14.9 8.6 13.8 20.1 8.6 ...
+##  $ Temp   : int  67 72 74 62 56 66 65 59 61 69 ...
+##  $ Month  : int  5 5 5 5 5 5 5 5 5 5 ...
+##  $ Day    : int  1 2 3 4 5 6 7 8 9 10 ...
+```
+
+---
+
+# Effet non-linéaire d'un prédicteur
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+---
+
+# Régression polynomiale
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+---
+
+# Modèle additif
+
+- Modèle linéaire
+
+`$$y \sim N(\mu, \sigma^2)$$`
+
+`$$\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ...$$`
+
+--
+
+- Modèle additif
+
+`$$\mu = \beta_0 + f(x_1) + f(x_2) + ...$$`
+
+
+--
+
+- Les `\(f(x_i)\)` sont des fonctions composites appelées splines de lissage (*smoothing splines*).
+
+---
+
+# Modèle additif à une variable
+
+- Fonction `gam` du package *mgcv*
+
+
+```r
+library(mgcv)
+o3_t &lt;- gam(Ozone ~ s(Temp), data = airquality)
+plot(o3_t, residuals = TRUE, pch = 1)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+
+# Fonctions de base
+
+- Une spline de lissage est une combinaison linéaire de fonctions de base `\(b\)` (*basis functions*) avec des poids `\(\beta\)` estimés en fonction des données. 
+
+- Ex.: Spline avec `\(k\)` fonctions de base
+
+`$$f(x_i) = \sum_{j=1}^k \beta_j b_j(x_i)$$`
+
+--
+
+- Par défaut, `gam` utilise des splines en plaque mince (*thin plate regression spline*) avec `\(k = 10\)`.
+
+---
+
+# Fonctions de base
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+---
+
+# Effet du nombre de fonctions de base
+
+
+```r
+par(mfrow = c(1, 3), cex = 1)
+plot(gam(Ozone ~ s(Temp, k = 3), data = airquality), residuals = TRUE, main = "k = 3")
+plot(gam(Ozone ~ s(Temp, k = 5), data = airquality), residuals = TRUE, main = "k = 5")
+plot(gam(Ozone ~ s(Temp, k = 7), data = airquality), residuals = TRUE, main = "k = 7")
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+---
+
+# Paramètre de lissage
+
+`$$\mu = \beta_0 + f(x_1) + f(x_2) + ...$$`
+
+--
+
+- Pour éviter le surajustement, les paramètres des splines `\(f(x_i)\)` sont estimés en maximisant une version modifiée de la log-vraisemblance `\(l\)`, en ajoutant une pénalité proportionnelle à la "rugosité" de la spline, mesurée par sa dérivée seconde.
+
+`$$2l - \sum_i \lambda_i \int f''(x_i)^2 dx_i$$`
+
+--
+
+- Le paramètre de lissage `\(\lambda_i\)` contrôle l'importance de la pénalité pour `\(f(x_i)\)`. Plus `\(\lambda\)` est élevée, plus la courbe résultante sera lisse.
+
+---
+
+# Paramètre de lissage
+
+.code60[
+
+```r
+par(mfrow = c(1, 3), cex = 1)
+plot(gam(Ozone ~ s(Temp, sp = 0.001), data = airquality), residuals = TRUE, main = "sp = 0.001")
+plot(gam(Ozone ~ s(Temp, sp = 0.1), data = airquality), residuals = TRUE, main = "sp = 0.1")
+plot(gam(Ozone ~ s(Temp, sp = 10), data = airquality), residuals = TRUE, main = "sp = 10")
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Paramètre de lissage
+
+En pratique:
+
+- on choisit un nombre de bases `\(k\)` élevé pour permettre la représentation de plusieurs formes fonctionnelles;
+
+- on utilise une algorithme qui choisit `\(\lambda\)` pour atteindre un compromis optimal entre sous-ajustement et surajustement.
+
+--
+
+Plusieurs algorithmes sont disponibles pour la fonction `gam`; le maximum de vraisemblance restreint (`method = "REML"`) est davantage recommandé aujourd'hui.
+
+
+```r
+o3_t &lt;- gam(Ozone ~ s(Temp), data = airquality, method = "REML")
+```
+
+---
+
+# Modèles additifs
+
+.pull-left[
+### Avantages
+
+- Représentation flexible d'une relation non-linéaire entre prédicteur et réponse.
+
+- Forme additive permet de considérer séparément l'effet de chaque prédicteur.
+
+]
+
+.pull-right[
+### Inconvénients
+
+- Pas de description simple de l'effet de `\(x\)` sur `\(y\)` (il faut visualiser).
+
+- Temps de calcul important pour des modèles complexes.
+]
+
+---
+
+class: inverse, center, middle
+
+# Ajustement des modèle additifs
+
+---
+
+# Prédicteurs multiples
+
+
+```r
+mod_o3 &lt;- gam(Ozone ~ s(Temp) + s(Wind) + s(Solar.R), 
+              data = airquality, method = "REML")
+```
+
+--
+
+- On peut combiner splines de lissage `s()` pour certains prédicteurs et effets linéaires pour d'autres.
+
+---
+
+# Visualiser les effets
+
+- Les splines ont une moyenne de zéro, donc l'effet est mesuré à partir de la valeur de la réponse lorsque chaque prédicteur est à sa valeur moyenne.
+
+
+```r
+par(mfrow = c(1, 3), cex = 1)
+plot(mod_o3, residuals = TRUE)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+---
+
+# Visualiser les effets
+
+- Inclure l'ordonnée à l'origine (`coef(mod_o3)[1]`) et son incertitude (`seWithMean = TRUE`).
+
+
+```r
+par(mfrow = c(1, 3), cex = 1)
+plot(mod_o3, shift = coef(mod_o3)[1], seWithMean = TRUE, residuals = TRUE)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+
+---
+
+# Coefficients du modèle
+
+- Ordonnée à l'origine et 9 coefficients pour chaque spline.
+
+.code60[
+
+```r
+coef(mod_o3)
+```
+
+```
+##  (Intercept)    s(Temp).1    s(Temp).2    s(Temp).3    s(Temp).4 
+##  42.09909910 -12.08591563   8.40378528  -0.43034237   0.63812808 
+##    s(Temp).5    s(Temp).6    s(Temp).7    s(Temp).8    s(Temp).9 
+##  -0.05397508  -0.64836948  -0.47596943  -3.94323347   2.55758901 
+##    s(Wind).1    s(Wind).2    s(Wind).3    s(Wind).4    s(Wind).5 
+##  -6.32106628  -5.34319449   2.43199369   5.31801099   1.28624165 
+##    s(Wind).6    s(Wind).7    s(Wind).8    s(Wind).9 s(Solar.R).1 
+##  -5.40270159  -0.55172226 -32.22412238 -13.15942337   1.93993397 
+## s(Solar.R).2 s(Solar.R).3 s(Solar.R).4 s(Solar.R).5 s(Solar.R).6 
+##  -0.74784376   0.28873326  -0.45574360   0.25027309   0.62997910 
+## s(Solar.R).7 s(Solar.R).8 s(Solar.R).9 
+##   0.01586162   2.86340308   4.00836972
+```
+]
+
+---
+
+# Paramètre de lissage
+
+
+```r
+mod_o3$sp
+```
+
+```
+##    s(Temp)    s(Wind) s(Solar.R) 
+##  0.2236120  0.2258963  4.5972792
+```
+
+---
+
+# Graphiques de diagnostic
+
+
+```r
+gam.check(mod_o3)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+
+---
+
+# Diagnostic pour `\(k\)`
+
+
+```r
+gam.check(mod_o3)
+```
+
+.code60[
+
+```
+## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 5 iterations.
+## Gradient range [-8.990922e-05,0.0003184666]
+## (score 473.6277 &amp; scale 312.3537).
+## Hessian positive definite, eigenvalue range [0.03296797,53.55641].
+## Model rank =  28 / 28 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k'.
+## 
+##              k'  edf k-index p-value   
+## s(Temp)    9.00 3.42    0.77   0.005 **
+## s(Wind)    9.00 3.38    1.04   0.610   
+## s(Solar.R) 9.00 1.67    0.94   0.260   
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+
+```r
+mod_lo3 &lt;- gam(log(Ozone) ~ s(Temp) + s(Wind) + s(Solar.R), 
+               data = airquality, method = "REML")
+gam.check(mod_lo3)
+```
+
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+---
+
+# Diagnostic pour `\(k\)`
+
+
+```r
+gam.check(mod_lo3)
+```
+
+.code60[
+
+```
+## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 5 iterations.
+## Gradient range [-4.834294e-06,3.917609e-05]
+## (score 86.02355 &amp; scale 0.2337533).
+## Hessian positive definite, eigenvalue range [0.05712074,53.52062].
+## Model rank =  28 / 28 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k'.
+## 
+##              k'  edf k-index p-value  
+## s(Temp)    9.00 1.95    0.96   0.270  
+## s(Wind)    9.00 2.46    0.86   0.085 .
+## s(Solar.R) 9.00 2.16    1.01   0.565  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+
+---
+
+# Effets sur log(Ozone)
+
+
+```r
+par(mfrow = c(1, 3))
+plot(mod_lo3, residuals = TRUE)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+
+---
+
+# Sommaire du modèle
+
+.code50[
+
+```r
+summary(mod_lo3)
+```
+
+```
+## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## log(Ozone) ~ s(Temp) + s(Wind) + s(Solar.R)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  3.41593    0.04589   74.44   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Approximate significance of smooth terms:
+##              edf Ref.df      F  p-value    
+## s(Temp)    1.953  2.450 21.106 1.88e-09 ***
+## s(Wind)    2.462  3.121  6.470 0.000407 ***
+## s(Solar.R) 2.158  2.719  9.679 2.69e-05 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## R-sq.(adj) =  0.688   Deviance explained = 70.7%
+## -REML = 86.024  Scale est. = 0.23375   n = 111
+```
+]
+
+---
+
+# Concurvité
+
+- Analogue à la collinéarité, pour les relations non-linéaires
+
+.pull-left[
+.code60[
+
+```r
+concurvity(mod_lo3)
+```
+
+```
+##                  para   s(Temp)   s(Wind) s(Solar.R)
+## worst    2.213704e-24 0.5929964 0.5600026  0.3969107
+## observed 2.213704e-24 0.4607831 0.3684667  0.2880898
+## estimate 2.213704e-24 0.4507423 0.2971714  0.2507011
+```
+]
+]
+
+--
+
+.pull-right[
+.code60[
+
+```r
+ggplot(airquality, aes(x = Temp, y = Wind)) + 
+  geom_point()
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+]
+
+]
+
+---
+
+# Résumé: diagnostics du modèle additif
+
+- Propriétés des résidus (répartition aléatoire, normale, variance homogène)
+
+- Nombre de fonctions de base `\(k\)`
+
+- Concurvité
+
+---
+
+class: inverse, center, middle
+
+# Modéliser les interactions
+
+---
+
+# Exemple
+
+- Jeu de données `CanWeather` du package *gamair*: température *T* à chaque jour (*time*) d'une année pour 35 villes canadiennes (*place*).
+
+
+```r
+library(gamair)
+data(canWeather)
+str(CanWeather)
+```
+
+```
+## 'data.frame':	12775 obs. of  5 variables:
+##  $ time    : num  1 2 3 4 5 6 7 8 9 10 ...
+##  $ T       : num  -3.6 -3.1 -3.4 -4.4 -2.9 -4.5 -5.5 -3.1 -4 -5 ...
+##  $ region  : Factor w/ 4 levels "Arctic","Atlantic",..: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ latitude: num  47.3 47.3 47.3 47.3 47.3 ...
+##  $ place   : Factor w/ 35 levels "Arvida","Bagottville",..: 24 24 24 24 24 24 24 24 24 24 ...
+```
+
+---
+
+# Visualiser les données
+
+
+```r
+ggplot(CanWeather, aes(x = time, y = T, color = latitude, group = place)) +
+    geom_line(alpha = 0.5)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+
+---
+
+# Effet additif du jour et de la région
+
+
+```r
+mod_t &lt;- gam(T ~ s(time, k = 20) + region, data = CanWeather, method = "REML")
+plot(mod_t, all.terms = TRUE, pages = 1, shift = coef(mod_t)[1])
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-28-1.png)&lt;!-- --&gt;
+
+- *Note*: Les variables catégorielles doivent être codées comme facteurs.
+
+---
+
+# Sommaire des résultats
+
+.code50[
+
+```r
+summary(mod_t)
+```
+
+```
+## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## T ~ s(time, k = 20) + region
+## 
+## Parametric coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       -11.8037     0.1389  -85.00   &lt;2e-16 ***
+## regionAtlantic     16.3814     0.1521  107.69   &lt;2e-16 ***
+## regionContinental  11.2448     0.1552   72.43   &lt;2e-16 ***
+## regionPacific      19.6375     0.1756  111.80   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Approximate significance of smooth terms:
+##           edf Ref.df    F p-value    
+## s(time) 15.45  17.55 4029  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## R-sq.(adj) =  0.871   Deviance explained = 87.2%
+## -REML =  37642  Scale est. = 21.114    n = 12775
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+
+```r
+gam.check(mod_t)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-31-1.png)&lt;!-- --&gt;
+
+---
+
+# Interaction entre spline et facteur
+
+- `bam`: Version de `gam` adaptée aux modèles plus complexes avec beaucoup de données, qui réduit l'utilisation de la mémoire et le temps de calcul.
+
+
+```r
+mod_t_by &lt;- bam(T ~ s(time, k = 20, by = region) + region, 
+                data = CanWeather, method = "REML")
+```
+
+--
+
+- Avec `by`, on spécifie qu'une spline différente doit être ajustée pour chacune des 4 régions.
+
+--
+
+- Chaque spline a une moyenne de 0, donc le terme séparé `+ region` représente les différences de température moyenne entre régions.
+
+---
+
+# Visualiser les effets
+
+
+```r
+plot(mod_t_by, pages = 1, all.terms = TRUE, shift = coef(mod_t_by)[1])
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+
+---
+
+# Sommaire des résultats
+
+.code50[
+
+```r
+summary(mod_t_by)
+```
+
+```
+## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## T ~ s(time, k = 20, by = region) + region
+## 
+## Parametric coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       -11.8353     0.1149  -103.0   &lt;2e-16 ***
+## regionAtlantic     16.3862     0.1258   130.2   &lt;2e-16 ***
+## regionContinental  11.2358     0.1284    87.5   &lt;2e-16 ***
+## regionPacific      19.6500     0.1453   135.3   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Approximate significance of smooth terms:
+##                             edf Ref.df      F p-value    
+## s(time):regionArctic      13.13  15.57  962.1  &lt;2e-16 ***
+## s(time):regionAtlantic    14.52  16.82 2264.6  &lt;2e-16 ***
+## s(time):regionContinental 15.62  17.67 2896.4  &lt;2e-16 ***
+## s(time):regionPacific      9.86  12.08  418.0  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## R-sq.(adj) =  0.912   Deviance explained = 91.2%
+## -REML =  35279  Scale est. = 14.441    n = 12775
+```
+]
+
+---
+
+# Interaction avec `\(\lambda\)` partagé
+
+- `bs = "fs"` pour *factor-smooth interaction*. 
+
+
+```r
+mod_t_fs &lt;- bam(T ~ s(time, region, bs = "fs"), data = CanWeather, method = "REML")
+plot(mod_t_fs)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+
+---
+
+# Interaction entre variables numériques
+
+- Température dépend de l'interaction entre le jour de l'année et la latitude.
+
+
+```r
+mod_t_lat &lt;- bam(T ~ te(time, latitude) + region, data = CanWeather, method = "REML")
+```
+
+--
+
+- `te` (pour *tensor product*) définit une spline en plusieurs dimensions, où le paramètre de lissage est choisi séparément pour chaque dimension.
+
+--
+
+- `s(x1, x2)` définit une spline en plusieurs dimensions avec un paramètre de lissage unique; utile pour le lissage de données spatiales.
+
+---
+
+# Visualisation des effets
+
+- Par défaut, `plot` représente des courbes de niveau avec marge d'erreur.
+
+
+```r
+plot(mod_t_lat)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
+
+---
+
+# Visualisation des effets
+
+- Différentes options de visualisation avec `scheme`.
+
+
+```r
+plot(mod_t_lat, scheme = 2)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+
+---
+
+# Diagnostics
+
+
+```r
+gam.check(mod_t_lat)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-40-1.png)&lt;!-- --&gt;
+
+---
+
+# Résumé
+
+- `y ~ s(x, by = z) + z`: ajustement indépendant d'une spline de `\(y\)` vs. `\(x\)` pour chaque niveau du facteur `\(z\)`. 
+
+--
+
+- `y ~ s(x, z, bs = "fs")`: ajustement d'une spline de `\(y\)` vs. `\(x\)` pour chaque niveau du facteur `\(z\)`, avec un paramètre de lissage commun.
+
+--
+
+- `y ~ s(x1, x2)`: spline en deux dimensions avec paramètre de lissage unique.
+
+--
+
+- `y ~ te(x1, x2)`: spline en deux dimensions avec paramètre de lissage différent dans chaque dimension.
+
+---
+
+class: inverse, center, middle
+
+# Modèles additifs généralisés
+
+---
+
+# Modèles additifs généralisés
+
+- Même principe que les modèles linéaires généralisés; la moyenne de la réponse est reliée au prédicteur additif par une fonction de lien `\(g\)`.
+
+`$$g(\mu) = \beta_0 + f(x_1) + f(x_2) + ...$$`
+
+- La distribution de la réponse peut être binomiale, Poisson, etc.
+
+---
+
+# Exemple
+
+- Jeu de données `Wells` du package *carData*: étude de puits contaminés au Bangladesh.
+
+
+```r
+library(carData)
+data(Wells)
+str(Wells)
+```
+
+```
+## 'data.frame':	3020 obs. of  5 variables:
+##  $ switch     : Factor w/ 2 levels "no","yes": 2 2 1 2 2 2 2 2 2 2 ...
+##  $ arsenic    : num  2.36 0.71 2.07 1.15 1.1 3.9 2.97 3.24 3.28 2.52 ...
+##  $ distance   : num  16.8 47.3 21 21.5 40.9 ...
+##  $ education  : int  0 0 10 12 14 9 4 10 0 0 ...
+##  $ association: Factor w/ 2 levels "no","yes": 1 1 1 1 2 2 2 1 2 2 ...
+```
+
+- `switch` représente la décision d'un ménage de changer de puits ou non, en fonction de la concentration d'arsenic, de la distance au puits le plus près et du nombre d'années de scolarité d'éducation du répondant.
+
+---
+
+# Modèle additif généralisé
+
+- Modèle logistique: Effets non-linéaires et additifs de la concentration d'arsenic et de la distance sur `\(\text{logit}(p) = \log \frac{p}{1-p}\)`, où `\(p\)` est la probabilité de changer de puits.
+
+
+```r
+mod_wells &lt;- gam(switch ~ s(arsenic) + s(distance), data = Wells, 
+                 family = binomial, method = "REML")
+```
+
+---
+
+# Sommaire des résultats
+
+.code50[
+
+```r
+summary(mod_wells)
+```
+
+```
+## 
+## Family: binomial 
+## Link function: logit 
+## 
+## Formula:
+## switch ~ s(arsenic) + s(distance)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  0.32521    0.03834   8.482   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Approximate significance of smooth terms:
+##               edf Ref.df Chi.sq p-value    
+## s(arsenic)  4.345  5.356 161.60  &lt;2e-16 ***
+## s(distance) 2.172  2.790  86.61  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## R-sq.(adj) =  0.0699   Deviance explained = 5.41%
+## -REML = 1961.4  Scale est. = 1         n = 3020
+```
+]
+
+---
+
+# Visualiser les effets
+
+- Effets sur l'échelle du logit.
+
+
+```r
+plot(mod_wells, pages = 1)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-44-1.png)&lt;!-- --&gt;
+
+---
+
+# Diagnostics
+
+
+```r
+gam.check(mod_wells)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-46-1.png)&lt;!-- --&gt;
+
+---
+
+# Diagnostics
+
+
+```r
+gam.check(mod_wells)
+```
+
+.code60[
+
+```
+## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 4 iterations.
+## Gradient range [-0.001839484,-5.380839e-05]
+## (score 1961.362 &amp; scale 1).
+## Hessian positive definite, eigenvalue range [0.03238313,1.045585].
+## Model rank =  19 / 19 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k'.
+## 
+##               k'  edf k-index p-value  
+## s(arsenic)  9.00 4.35    1.01    0.68  
+## s(distance) 9.00 2.17    0.97    0.03 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+
+---
+
+# Vérification des résidus
+
+- Fonction `binnedplot` du package *arm*: résidu moyen par groupes de points, ordonnés en fonction de la prédiction moyenne par groupe, avec intervalle de prédiction à 95%. 
+
+
+```r
+library(arm)
+binnedplot(fitted(mod_wells), residuals(mod_wells, type = "response"))
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-49-1.png)&lt;!-- --&gt;
+
+---
+
+# Visualiser les effets avec *predict*
+
+Pour visualiser les effets sur l'échelle de la réponse:
+
+- Créer un jeu de données pour les prédictions.
+
+--
+
+- Calculer les prédictions et leurs erreurs-types sur l'échelle du logit avec `predict`.
+
+--
+
+- Calculer l'intervalle de confiance à 95% sur l'échelle du logit, puis ramener les prédictions et intervalles sur l'échelle de la réponse avec `plogis`.
+
+--
+
+
+```r
+pred_df &lt;- expand.grid(arsenic = seq(0, 8, 0.5), distance = c(25, 50, 100, 200))
+pred_se &lt;- predict(mod_wells, pred_df, se = TRUE)
+pred_df$pred &lt;- plogis(pred_se$fit)
+pred_df$lo &lt;- plogis(pred_se$fit - 1.96 * pred_se$se.fit) 
+pred_df$hi &lt;- plogis(pred_se$fit + 1.96 * pred_se$se.fit)
+```
+
+---
+
+# Visualiser les effets avec *predict*
+
+.code60[
+
+```r
+ggplot(pred_df, aes(x = arsenic, y = pred, ymin = lo, ymax = hi)) +
+  geom_ribbon(aes(fill = as.factor(distance)), alpha = 0.3) +
+  geom_line(aes(color = as.factor(distance))) +
+  scale_color_brewer(palette = "Dark2") +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "p(switch)", color = "distance", fill = "distance")
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-51-1.png)&lt;!-- --&gt;
+]
+
+---
+
+class: inverse, center, middle
+
+# Modèles additifs à effets mixtes
+
+---
+
+# Exemple
+
+- Jeu de données CO2 inclus dans R: taux d'absorption du CO2 (*uptake*) par différentes plantes en fonction de la concentration de CO2 ambiante (*conc*).
+
+
+```r
+data(CO2)
+CO2$Plant &lt;- factor(CO2$Plant)
+head(CO2)
+```
+
+```
+## Grouped Data: uptake ~ conc | Plant
+##   Plant   Type  Treatment conc uptake
+## 1   Qn1 Quebec nonchilled   95   16.0
+## 2   Qn1 Quebec nonchilled  175   30.4
+## 3   Qn1 Quebec nonchilled  250   34.8
+## 4   Qn1 Quebec nonchilled  350   37.2
+## 5   Qn1 Quebec nonchilled  500   35.3
+## 6   Qn1 Quebec nonchilled  675   39.2
+```
+
+---
+
+# Modèle additif
+
+- Effet non-linéaire de la concentration plus une différence constante entre les traitements.
+
+- Pour l'instant, on ignore le fait que les mesures sont répétées sur les mêmes plantes.
+
+
+```r
+mod_co2 &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + Treatment, 
+               data = CO2, method = "REML")
+```
+
+--
+
+*Note*: Nous réduisons le nombre de fonctions de base à 5 car la variable *conc* a seulement 7 niveaux.
+
+---
+
+# Modèle additif
+
+
+```r
+plot(mod_co2, all.terms = TRUE, pages = 1, residuals = TRUE, pch = 1,
+     shift = coef(mod_co2)[1], seWithMean = TRUE)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-54-1.png)&lt;!-- --&gt;
+
+---
+
+# Modèle avec effets aléatoires
+
+
+```r
+mod_co2_re &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + s(Plant, bs = "re") + Treatment, 
+                  data = CO2, method = "REML")
+```
+
+- `s(Plant, bs = "re")` ajoute un effet aléatoire de la plante sur l'ordonnée à l'origine.
+
+---
+
+# Modèle avec effets aléatoires
+
+
+```r
+par(mfrow = c(1, 3))
+plot(mod_co2_re, all.terms = TRUE, residuals = TRUE, pch = 1, 
+     shift = coef(mod_co2_re)[1], seWithMean = TRUE)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-56-1.png)&lt;!-- --&gt;
+
+---
+
+# Effets aléatoires et interaction
+
+
+```r
+mod_co2_fs &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + 
+                    s(log(conc), Plant, k = 5, bs = "fs") + 
+                    Treatment, data = CO2, method = "REML")
+```
+
+- La première spline représente l'effet de *conc* sur la plante moyenne, tandis que la deuxième spline (avec `bs = "fs"`) représente les différences entre les plantes.
+
+--
+
+- Le deuxième terme est analogue à l'effet aléatoire du groupe sur la pente dans un modèle linéaire mixte.
+
+---
+
+# Effets aléatoires et interaction
+
+
+```r
+par(mfrow = c(1, 3))
+plot(mod_co2_fs, all.terms = TRUE, residuals = TRUE, pch = 1, 
+     shift = coef(mod_co2_re)[1], seWithMean = TRUE)
+```
+
+![](07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-58-1.png)&lt;!-- --&gt;
+
+---
+
+# Références
+
+- Pedersen, E.J. et al. (2019) Hierarchical generalized additive models in ecology: an introduction with mgcv. PeerJ 7:e6876.
+
+- Cours de Noam Ross "GAMs in R" (https://noamross.github.io/gams-in-r-course/)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

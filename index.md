@@ -16,6 +16,8 @@
 
 6. [Modèles linéaires généralisés à effets mixtes 2](notes_cours/06-Modeles_generalises_mixtes2.html) ([PDF](notes_cours/06-Modeles_generalises_mixtes2.pdf)) - Données: [acer_transplant.csv](donnees/acer_transplant.csv)
 
+7. [Modèles additifs généralisés](notes_cours/07-Modeles_additifs_generalises.html) ([PDF](notes_cours/07-Modeles_additifs_generalises.pdf))
+
 
 ## Exercices
 

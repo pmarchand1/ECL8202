@@ -1,0 +1,811 @@
+---
+title: "Modèles additifs généralisés"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 18) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+```
+
+# Contenu du cours
+
+- Splines de lissage
+
+- Ajustement des modèles additifs
+
+- Modéliser les interactions
+
+- Modèles additifs généralisés
+
+- Modèles additifs à effets mixtes
+
+---
+
+class: inverse, center, middle
+
+# Splines de lissage
+
+---
+
+# Exemple
+
+- Jeu de données `airquality` inclus avec R: concentration d'ozone de l'air à New York en fonction de la radiation solaire, de la vitesse du vent et de la température.
+
+```{r}
+data(airquality)
+str(airquality)
+```
+
+---
+
+# Effet non-linéaire d'un prédicteur
+
+```{r, echo = FALSE, warning = FALSE}
+aq_temp0 <- ggplot(airquality, aes(x = Temp, y = Ozone)) +
+    geom_point()
+aq_temp0
+```
+
+---
+
+# Régression polynomiale
+
+```{r, echo = FALSE, warning = FALSE, fig.dim = c(9, 7)}
+aq_temp1 <- aq_temp0 + geom_smooth(method = "lm") + labs(title = "y ~ x")
+aq_temp2 <- aq_temp0 + geom_smooth(method = "lm", formula = y ~ poly(x, 2)) +
+    labs(title = "y ~ poly(x, 2)")
+aq_temp3 <- aq_temp0 + geom_smooth(method = "lm", formula = y ~ poly(x, 3)) +
+    labs(title = "y ~ poly(x, 3)")
+aq_temp4 <- aq_temp0 + geom_smooth(method = "lm", formula = y ~ poly(x, 4)) +
+    labs(title = "y ~ poly(x, 4)")
+plot_grid(aq_temp1, aq_temp2, aq_temp3, aq_temp4)
+```
+
+---
+
+# Modèle additif
+
+- Modèle linéaire
+
+$$y \sim N(\mu, \sigma^2)$$
+
+$$\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ...$$
+
+--
+
+- Modèle additif
+
+$$\mu = \beta_0 + f(x_1) + f(x_2) + ...$$
+
+
+--
+
+- Les $f(x_i)$ sont des fonctions composites appelées splines de lissage (*smoothing splines*).
+
+---
+
+# Modèle additif à une variable
+
+- Fonction `gam` du package *mgcv*
+
+```{r}
+library(mgcv)
+o3_t <- gam(Ozone ~ s(Temp), data = airquality)
+plot(o3_t, residuals = TRUE, pch = 1)
+```
+
+---
+
+# Fonctions de base
+
+- Une spline de lissage est une combinaison linéaire de fonctions de base $b$ (*basis functions*) avec des poids $\beta$ estimés en fonction des données. 
+
+- Ex.: Spline avec $k$ fonctions de base
+
+$$f(x_i) = \sum_{j=1}^k \beta_j b_j(x_i)$$
+
+--
+
+- Par défaut, `gam` utilise des splines en plaque mince (*thin plate regression spline*) avec $k = 10$.
+
+---
+
+# Fonctions de base
+
+```{r, echo = FALSE, fig.dim = c(9, 7), warning = FALSE}
+library(gratia)
+b3 <- draw(basis(s(Temp, k = 3), data = airquality))
+b5 <- draw(basis(s(Temp, k = 5), data = airquality))
+b7 <- draw(basis(s(Temp, k = 7), data = airquality))
+b9 <- draw(basis(s(Temp, k = 9), data = airquality))
+plot_grid(b3, b5, b7, b9)
+```
+
+---
+
+# Effet du nombre de fonctions de base
+
+```{r, fig.dim = c(12, 4)}
+par(mfrow = c(1, 3), cex = 1)
+plot(gam(Ozone ~ s(Temp, k = 3), data = airquality), residuals = TRUE, main = "k = 3")
+plot(gam(Ozone ~ s(Temp, k = 5), data = airquality), residuals = TRUE, main = "k = 5")
+plot(gam(Ozone ~ s(Temp, k = 7), data = airquality), residuals = TRUE, main = "k = 7")
+```
+
+---
+
+# Paramètre de lissage
+
+$$\mu = \beta_0 + f(x_1) + f(x_2) + ...$$
+
+--
+
+- Pour éviter le surajustement, les paramètres des splines $f(x_i)$ sont estimés en maximisant une version modifiée de la log-vraisemblance $l$, en ajoutant une pénalité proportionnelle à la "rugosité" de la spline, mesurée par sa dérivée seconde.
+
+$$2l - \sum_i \lambda_i \int f''(x_i)^2 dx_i$$
+
+--
+
+- Le paramètre de lissage $\lambda_i$ contrôle l'importance de la pénalité pour $f(x_i)$. Plus $\lambda$ est élevée, plus la courbe résultante sera lisse.
+
+---
+
+# Paramètre de lissage
+
+.code60[
+```{r, fig.dim = c(12, 4)}
+par(mfrow = c(1, 3), cex = 1)
+plot(gam(Ozone ~ s(Temp, sp = 0.001), data = airquality), residuals = TRUE, main = "sp = 0.001")
+plot(gam(Ozone ~ s(Temp, sp = 0.1), data = airquality), residuals = TRUE, main = "sp = 0.1")
+plot(gam(Ozone ~ s(Temp, sp = 10), data = airquality), residuals = TRUE, main = "sp = 10")
+```
+]
+
+---
+
+# Paramètre de lissage
+
+En pratique:
+
+- on choisit un nombre de bases $k$ élevé pour permettre la représentation de plusieurs formes fonctionnelles;
+
+- on utilise une algorithme qui choisit $\lambda$ pour atteindre un compromis optimal entre sous-ajustement et surajustement.
+
+--
+
+Plusieurs algorithmes sont disponibles pour la fonction `gam`; le maximum de vraisemblance restreint (`method = "REML"`) est davantage recommandé aujourd'hui.
+
+```{r}
+o3_t <- gam(Ozone ~ s(Temp), data = airquality, method = "REML")
+```
+
+---
+
+# Modèles additifs
+
+.pull-left[
+### Avantages
+
+- Représentation flexible d'une relation non-linéaire entre prédicteur et réponse.
+
+- Forme additive permet de considérer séparément l'effet de chaque prédicteur.
+
+]
+
+.pull-right[
+### Inconvénients
+
+- Pas de description simple de l'effet de $x$ sur $y$ (il faut visualiser).
+
+- Temps de calcul important pour des modèles complexes.
+]
+
+---
+
+class: inverse, center, middle
+
+# Ajustement des modèle additifs
+
+---
+
+# Prédicteurs multiples
+
+```{r}
+mod_o3 <- gam(Ozone ~ s(Temp) + s(Wind) + s(Solar.R), 
+              data = airquality, method = "REML")
+```
+
+--
+
+- On peut combiner splines de lissage `s()` pour certains prédicteurs et effets linéaires pour d'autres.
+
+---
+
+# Visualiser les effets
+
+- Les splines ont une moyenne de zéro, donc l'effet est mesuré à partir de la valeur de la réponse lorsque chaque prédicteur est à sa valeur moyenne.
+
+```{r, fig.dim = c(12, 4)}
+par(mfrow = c(1, 3), cex = 1)
+plot(mod_o3, residuals = TRUE)
+```
+
+---
+
+# Visualiser les effets
+
+- Inclure l'ordonnée à l'origine (`coef(mod_o3)[1]`) et son incertitude (`seWithMean = TRUE`).
+
+```{r, fig.dim = c(12, 4)}
+par(mfrow = c(1, 3), cex = 1)
+plot(mod_o3, shift = coef(mod_o3)[1], seWithMean = TRUE, residuals = TRUE)
+```
+
+---
+
+# Coefficients du modèle
+
+- Ordonnée à l'origine et 9 coefficients pour chaque spline.
+
+.code60[
+```{r}
+coef(mod_o3)
+```
+]
+
+---
+
+# Paramètre de lissage
+
+```{r}
+mod_o3$sp
+```
+
+---
+
+# Graphiques de diagnostic
+
+```{r, eval = FALSE}
+gam.check(mod_o3)
+```
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 2))
+chk <- capture.output(gam.check(mod_o3))
+```
+
+---
+
+# Diagnostic pour $k$
+
+```{r, eval = FALSE}
+gam.check(mod_o3)
+```
+
+.code60[
+```{r, echo = FALSE}
+cat(paste(chk, collapse = "\n"))
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+```{r, eval = FALSE}
+mod_lo3 <- gam(log(Ozone) ~ s(Temp) + s(Wind) + s(Solar.R), 
+               data = airquality, method = "REML")
+gam.check(mod_lo3)
+```
+
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 2))
+mod_lo3 <- gam(log(Ozone) ~ s(Temp) + s(Wind) + s(Solar.R), 
+               data = airquality, method = "REML")
+chk <- capture.output(gam.check(mod_lo3))
+```
+
+---
+
+# Diagnostic pour $k$
+
+```{r, eval = FALSE}
+gam.check(mod_lo3)
+```
+
+.code60[
+```{r, echo = FALSE}
+cat(paste(chk, collapse = "\n"))
+```
+]
+
+---
+
+# Effets sur log(Ozone)
+
+```{r, fig.dim = c(12, 4)}
+par(mfrow = c(1, 3))
+plot(mod_lo3, residuals = TRUE)
+```
+
+---
+
+# Sommaire du modèle
+
+.code50[
+```{r}
+summary(mod_lo3)
+```
+]
+
+---
+
+# Concurvité
+
+- Analogue à la collinéarité, pour les relations non-linéaires
+
+.pull-left[
+.code60[
+```{r}
+concurvity(mod_lo3)
+```
+]
+]
+
+--
+
+.pull-right[
+.code60[
+```{r}
+ggplot(airquality, aes(x = Temp, y = Wind)) + 
+  geom_point()
+```
+]
+
+]
+
+---
+
+# Résumé: diagnostics du modèle additif
+
+- Propriétés des résidus (répartition aléatoire, normale, variance homogène)
+
+- Nombre de fonctions de base $k$
+
+- Concurvité
+
+---
+
+class: inverse, center, middle
+
+# Modéliser les interactions
+
+---
+
+# Exemple
+
+- Jeu de données `CanWeather` du package *gamair*: température *T* à chaque jour (*time*) d'une année pour 35 villes canadiennes (*place*).
+
+```{r, warning = FALSE}
+library(gamair)
+data(canWeather)
+str(CanWeather)
+```
+
+---
+
+# Visualiser les données
+
+```{r}
+ggplot(CanWeather, aes(x = time, y = T, color = latitude, group = place)) +
+    geom_line(alpha = 0.5)
+```
+
+---
+
+# Effet additif du jour et de la région
+
+```{r, fig.dim = c(12, 6)}
+mod_t <- gam(T ~ s(time, k = 20) + region, data = CanWeather, method = "REML")
+plot(mod_t, all.terms = TRUE, pages = 1, shift = coef(mod_t)[1])
+```
+
+- *Note*: Les variables catégorielles doivent être codées comme facteurs.
+
+---
+
+# Sommaire des résultats
+
+.code50[
+```{r}
+summary(mod_t)
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+```{r, eval = FALSE}
+gam.check(mod_t)
+```
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 2))
+chk <- capture.output(gam.check(mod_t))
+```
+
+---
+
+# Interaction entre spline et facteur
+
+- `bam`: Version de `gam` adaptée aux modèles plus complexes avec beaucoup de données, qui réduit l'utilisation de la mémoire et le temps de calcul.
+
+```{r}
+mod_t_by <- bam(T ~ s(time, k = 20, by = region) + region, 
+                data = CanWeather, method = "REML")
+```
+
+--
+
+- Avec `by`, on spécifie qu'une spline différente doit être ajustée pour chacune des 4 régions.
+
+--
+
+- Chaque spline a une moyenne de 0, donc le terme séparé `+ region` représente les différences de température moyenne entre régions.
+
+---
+
+# Visualiser les effets
+
+```{r, fig.dim = c(10, 6)}
+plot(mod_t_by, pages = 1, all.terms = TRUE, shift = coef(mod_t_by)[1])
+```
+
+---
+
+# Sommaire des résultats
+
+.code50[
+```{r}
+summary(mod_t_by)
+```
+]
+
+---
+
+# Interaction avec $\lambda$ partagé
+
+- `bs = "fs"` pour *factor-smooth interaction*. 
+
+```{r}
+mod_t_fs <- bam(T ~ s(time, region, bs = "fs"), data = CanWeather, method = "REML")
+plot(mod_t_fs)
+```
+
+---
+
+# Interaction entre variables numériques
+
+- Température dépend de l'interaction entre le jour de l'année et la latitude.
+
+```{r}
+mod_t_lat <- bam(T ~ te(time, latitude) + region, data = CanWeather, method = "REML")
+```
+
+--
+
+- `te` (pour *tensor product*) définit une spline en plusieurs dimensions, où le paramètre de lissage est choisi séparément pour chaque dimension.
+
+--
+
+- `s(x1, x2)` définit une spline en plusieurs dimensions avec un paramètre de lissage unique; utile pour le lissage de données spatiales.
+
+---
+
+# Visualisation des effets
+
+- Par défaut, `plot` représente des courbes de niveau avec marge d'erreur.
+
+```{r}
+plot(mod_t_lat)
+```
+
+---
+
+# Visualisation des effets
+
+- Différentes options de visualisation avec `scheme`.
+
+```{r}
+plot(mod_t_lat, scheme = 2)
+```
+
+---
+
+# Diagnostics
+
+```{r, eval = FALSE}
+gam.check(mod_t_lat)
+```
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 2))
+chk <- capture.output(gam.check(mod_t_lat))
+```
+
+---
+
+# Résumé
+
+- `y ~ s(x, by = z) + z`: ajustement indépendant d'une spline de $y$ vs. $x$ pour chaque niveau du facteur $z$. 
+
+--
+
+- `y ~ s(x, z, bs = "fs")`: ajustement d'une spline de $y$ vs. $x$ pour chaque niveau du facteur $z$, avec un paramètre de lissage commun.
+
+--
+
+- `y ~ s(x1, x2)`: spline en deux dimensions avec paramètre de lissage unique.
+
+--
+
+- `y ~ te(x1, x2)`: spline en deux dimensions avec paramètre de lissage différent dans chaque dimension.
+
+---
+
+class: inverse, center, middle
+
+# Modèles additifs généralisés
+
+---
+
+# Modèles additifs généralisés
+
+- Même principe que les modèles linéaires généralisés; la moyenne de la réponse est reliée au prédicteur additif par une fonction de lien $g$.
+
+$$g(\mu) = \beta_0 + f(x_1) + f(x_2) + ...$$
+
+- La distribution de la réponse peut être binomiale, Poisson, etc.
+
+---
+
+# Exemple
+
+- Jeu de données `Wells` du package *carData*: étude de puits contaminés au Bangladesh.
+
+```{r}
+library(carData)
+data(Wells)
+str(Wells)
+```
+
+- `switch` représente la décision d'un ménage de changer de puits ou non, en fonction de la concentration d'arsenic, de la distance au puits le plus près et du nombre d'années de scolarité d'éducation du répondant.
+
+---
+
+# Modèle additif généralisé
+
+- Modèle logistique: Effets non-linéaires et additifs de la concentration d'arsenic et de la distance sur $\text{logit}(p) = \log \frac{p}{1-p}$, où $p$ est la probabilité de changer de puits.
+
+```{r}
+mod_wells <- gam(switch ~ s(arsenic) + s(distance), data = Wells, 
+                 family = binomial, method = "REML")
+```
+
+---
+
+# Sommaire des résultats
+
+.code50[
+```{r}
+summary(mod_wells)
+```
+]
+
+---
+
+# Visualiser les effets
+
+- Effets sur l'échelle du logit.
+
+```{r}
+plot(mod_wells, pages = 1)
+```
+
+---
+
+# Diagnostics
+
+```{r, eval = FALSE}
+gam.check(mod_wells)
+```
+
+```{r, echo = FALSE}
+par(mfrow = c(2, 2))
+chk <- capture.output(gam.check(mod_wells))
+```
+
+---
+
+# Diagnostics
+
+```{r, eval = FALSE}
+gam.check(mod_wells)
+```
+
+.code60[
+```{r, echo = FALSE}
+cat(paste(chk, collapse = "\n"))
+```
+]
+
+---
+
+# Vérification des résidus
+
+- Fonction `binnedplot` du package *arm*: résidu moyen par groupes de points, ordonnés en fonction de la prédiction moyenne par groupe, avec intervalle de prédiction à 95%. 
+
+```{r}
+library(arm)
+binnedplot(fitted(mod_wells), residuals(mod_wells, type = "response"))
+```
+
+---
+
+# Visualiser les effets avec *predict*
+
+Pour visualiser les effets sur l'échelle de la réponse:
+
+- Créer un jeu de données pour les prédictions.
+
+--
+
+- Calculer les prédictions et leurs erreurs-types sur l'échelle du logit avec `predict`.
+
+--
+
+- Calculer l'intervalle de confiance à 95% sur l'échelle du logit, puis ramener les prédictions et intervalles sur l'échelle de la réponse avec `plogis`.
+
+--
+
+```{r}
+pred_df <- expand.grid(arsenic = seq(0, 8, 0.5), distance = c(25, 50, 100, 200))
+pred_se <- predict(mod_wells, pred_df, se = TRUE)
+pred_df$pred <- plogis(pred_se$fit)
+pred_df$lo <- plogis(pred_se$fit - 1.96 * pred_se$se.fit) 
+pred_df$hi <- plogis(pred_se$fit + 1.96 * pred_se$se.fit)
+```
+
+---
+
+# Visualiser les effets avec *predict*
+
+.code60[
+```{r}
+ggplot(pred_df, aes(x = arsenic, y = pred, ymin = lo, ymax = hi)) +
+  geom_ribbon(aes(fill = as.factor(distance)), alpha = 0.3) +
+  geom_line(aes(color = as.factor(distance))) +
+  scale_color_brewer(palette = "Dark2") +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "p(switch)", color = "distance", fill = "distance")
+```
+]
+
+---
+
+class: inverse, center, middle
+
+# Modèles additifs à effets mixtes
+
+---
+
+# Exemple
+
+- Jeu de données CO2 inclus dans R: taux d'absorption du CO2 (*uptake*) par différentes plantes en fonction de la concentration de CO2 ambiante (*conc*).
+
+```{r}
+data(CO2)
+CO2$Plant <- factor(CO2$Plant)
+head(CO2)
+```
+
+---
+
+# Modèle additif
+
+- Effet non-linéaire de la concentration plus une différence constante entre les traitements.
+
+- Pour l'instant, on ignore le fait que les mesures sont répétées sur les mêmes plantes.
+
+```{r}
+mod_co2 <- gam(log(uptake) ~ s(log(conc), k = 5) + Treatment, 
+               data = CO2, method = "REML")
+```
+
+--
+
+*Note*: Nous réduisons le nombre de fonctions de base à 5 car la variable *conc* a seulement 7 niveaux.
+
+---
+
+# Modèle additif
+
+```{r}
+plot(mod_co2, all.terms = TRUE, pages = 1, residuals = TRUE, pch = 1,
+     shift = coef(mod_co2)[1], seWithMean = TRUE)
+```
+
+---
+
+# Modèle avec effets aléatoires
+
+```{r}
+mod_co2_re <- gam(log(uptake) ~ s(log(conc), k = 5) + s(Plant, bs = "re") + Treatment, 
+                  data = CO2, method = "REML")
+```
+
+- `s(Plant, bs = "re")` ajoute un effet aléatoire de la plante sur l'ordonnée à l'origine.
+
+---
+
+# Modèle avec effets aléatoires
+
+```{r, fig.dim = c(12, 4)}
+par(mfrow = c(1, 3))
+plot(mod_co2_re, all.terms = TRUE, residuals = TRUE, pch = 1, 
+     shift = coef(mod_co2_re)[1], seWithMean = TRUE)
+```
+
+---
+
+# Effets aléatoires et interaction
+
+```{r, warning = FALSE}
+mod_co2_fs <- gam(log(uptake) ~ s(log(conc), k = 5) + 
+                    s(log(conc), Plant, k = 5, bs = "fs") + 
+                    Treatment, data = CO2, method = "REML")
+```
+
+- La première spline représente l'effet de *conc* sur la plante moyenne, tandis que la deuxième spline (avec `bs = "fs"`) représente les différences entre les plantes.
+
+--
+
+- Le deuxième terme est analogue à l'effet aléatoire du groupe sur la pente dans un modèle linéaire mixte.
+
+---
+
+# Effets aléatoires et interaction
+
+```{r, fig.dim = c(12, 4)}
+par(mfrow = c(1, 3))
+plot(mod_co2_fs, all.terms = TRUE, residuals = TRUE, pch = 1, 
+     shift = coef(mod_co2_re)[1], seWithMean = TRUE)
+```
+
+---
+
+# Références
+
+- Pedersen, E.J. et al. (2019) Hierarchical generalized additive models in ecology: an introduction with mgcv. PeerJ 7:e6876.
+
+- Cours de Noam Ross "GAMs in R" (https://noamross.github.io/gams-in-r-course/)
+
