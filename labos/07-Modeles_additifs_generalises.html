@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Modèles additifs généralisés</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Modèles additifs généralisés</h1>
+
+</div>
+
+
+<p>Ce laboratoire doit être remis le 26 février à 17h sur Moodle.</p>
+<div id="donnees" class="section level2">
+<h2>Données</h2>
+<p>Le fichier <a href="../donnees/portal_ot.csv">portal_ot.csv</a> est un sous-ensemble de la base de données Portal (utilisée pour les labos 2 et 5) qui contient le nombre d’individus (<em>n</em>) observés de l’espèce <em>Onychomys torridus</em> (souris sauterelle du sud) dans chaque parcelle pour les années 1988 à 2002. Chaque parcelle était soumise à un traitement (<em>plot_type</em>) visant à exclure une partie ou l’ensemble des rongeurs de la parcelle.</p>
+<pre class="r"><code>portal_ot &lt;- read.csv(&quot;../donnees/portal_ot.csv&quot;)
+head(portal_ot)</code></pre>
+<pre><code>##   species_id plot_id year n         plot_type
+## 1         OT       1 1988 0 Spectab exclosure
+## 2         OT       1 1989 9 Spectab exclosure
+## 3         OT       1 1990 2 Spectab exclosure
+## 4         OT       1 1991 3 Spectab exclosure
+## 5         OT       1 1992 3 Spectab exclosure
+## 6         OT       1 1993 1 Spectab exclosure</code></pre>
+</div>
+<div id="estimation-de-la-tendance-demographique-globale" class="section level2">
+<h2>1. Estimation de la tendance démographique globale</h2>
+<p>Pour toutes les questions de cette partie, vous devez ajuster un modèle additif généralisé pour estimer la tendance démographique de l’espèce en tenant compte de l’effet des traitements: <code>n ~ plot_type + s(year)</code>. Pour l’instant, nous ignorerons le groupement des mesures par placettes.</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Ajustez d’abord un GAM où les observations suivent une distribution de Poisson. De façon brève, décrivez comment le nombre d’individus varie en fonction de l’année et des traitements. En considérant la fonction de lien utilisée pour ce modèle, que signifie l’additivité des effets <code>plot_type</code> et <code>s(year)</code>?</p></li>
+<li><p>Est-ce que la valeur par défaut du nombre de fonctions de base <span class="math inline">\(k\)</span> est suffisante pour représenter <code>s(year)</code> dans le modèle en (a)? Si nécessaire, réajustez le modèle avec un <span class="math inline">\(k\)</span> plus élevé. Quelle est la valeur maximale de <span class="math inline">\(k\)</span> que vous pouvez utiliser ici?</p></li>
+<li><p>Les données sont-elles surdispersées par rapport à votre modèle?</p></li>
+<li><p>Ajustez un nouveau GAM avec la distribution binomiale négative, spécifiée comme <code>family = "nb"</code> dans la fonction <code>gam</code>. Quel est l’estimé du paramètre <span class="math inline">\(\theta\)</span> pour ce modèle? L’ajustement semble-t-il meilleur que pour le modèle de Poisson? Y a-t-il encore des problèmes d’ajustement?</p></li>
+</ol>
+</div>
+<div id="ajout-des-effets-aleatoires-de-placettes" class="section level2">
+<h2>2. Ajout des effets aléatoires de placettes</h2>
+<ol style="list-style-type: lower-alpha">
+<li><p>À partir du modèle binomial négatif en 1(d), incluez un effet aléatoire des placettes sur l’ordonnée à l’origine. Vérifiez l’ajustement du modèle, incluant la normalité des effets aléatoires et la présence ou l’absence de surdispersion.</p></li>
+<li><p>Ajustez maintenant un modèle avec un effet aléatoire des placettes sur la tendance démographique moyenne <code>s(year)</code>, en utilisant un terme de type <code>bs = "fs"</code> tel que vu dans le cours. Comparez ce modèle au modèle en (a) avec l’AIC. <em>Note</em>: Le package <em>AICcmodavg</em> n’est pas compatible avec les GAM, mais vous pouvez calculer l’AIC pour chaque modèle avec la fonction <code>AIC</code>.</p></li>
+<li><p>Quelle est la fraction de la déviance expliquée par le meilleur modèle déterminé en (b)?</p></li>
+<li><p>Finalement, illustrez la tendance démographique estimée pour cette espèce dans chaque placette. Pour ce faire, ajoutez au jeu de données <code>portal_ot</code> les valeurs prédites par le meilleur modèle en (b) ainsi qu’un intervalle de confiance à 95%, puis représentez dans un même graphique les données observées, les tendances temporelles estimées et leur intervalle de confiance pour chaque placette.</p></li>
+</ol>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

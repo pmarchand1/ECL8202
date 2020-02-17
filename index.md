@@ -32,3 +32,5 @@
 5. [Modèles linéaires généralisés à effets mixtes (solutions)](labos/05R-Modeles_generalises_mixtes.html) ([PDF](labos/05R-Modeles_generalises_mixtes.pdf)) - Données: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_species.csv](donnees/portal_species.csv), [portal_plots.csv](donnees/portal_plots.csv)
 
 6. [Modèles linéaires généralisés à effets mixtes 2](labos/06-Modeles_generalises_mixtes2.html) ([PDF](labos/06-Modeles_generalises_mixtes2.pdf)) - Données: [aiv_ducks.csv](donnees/aiv_ducks.csv)
+
+7. Modèles additifs généralisés - [Exercices en classe](labos/07A-Modeles_additifs_generalises.html) ([PDF](labos/07A-Modeles_additifs_generalises.pdf), Données: [dendro_wa082.csv](donnees/dendro_wa082.csv)) - [Travail à remettre](labos/07-Modeles_additifs_generalises.html) ([PDF](labos/07-Modeles_additifs_generalises.pdf), Données: [portal_ot.csv](donnees/portal_ot.csv))

@@ -1,0 +1,49 @@
+---
+title: "Modèles additifs généralisés"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Ce laboratoire doit être remis le 26 février à 17h sur Moodle.
+
+## Données
+
+Le fichier [portal_ot.csv](../donnees/portal_ot.csv) est un sous-ensemble de la base de données Portal (utilisée pour les labos 2 et 5) qui contient le nombre d'individus (*n*) observés de l'espèce *Onychomys torridus* (souris sauterelle du sud) dans chaque parcelle pour les années 1988 à 2002. Chaque parcelle était soumise à un traitement (*plot_type*) visant à exclure une partie ou l'ensemble des rongeurs de la parcelle.
+
+```{r}
+portal_ot <- read.csv("../donnees/portal_ot.csv")
+head(portal_ot)
+```
+
+
+## 1. Estimation de la tendance démographique globale
+
+Pour toutes les questions de cette partie, vous devez ajuster un modèle additif généralisé pour estimer la tendance démographique de l'espèce en tenant compte de l'effet des traitements: `n ~ plot_type + s(year)`. Pour l'instant, nous ignorerons le groupement des mesures par placettes.
+
+(a) Ajustez d'abord un GAM où les observations suivent une distribution de Poisson. De façon brève, décrivez comment le nombre d'individus varie en fonction de l'année et des traitements. En considérant la fonction de lien utilisée pour ce modèle, que signifie l'additivité des effets `plot_type` et `s(year)`?
+
+(b) Est-ce que la valeur par défaut du nombre de fonctions de base $k$ est suffisante pour représenter `s(year)` dans le modèle en (a)? Si nécessaire, réajustez le modèle avec un $k$ plus élevé. Quelle est la valeur maximale de $k$ que vous pouvez utiliser ici? 
+
+(c) Les données sont-elles surdispersées par rapport à votre modèle? 
+
+(d) Ajustez un nouveau GAM avec la distribution binomiale négative, spécifiée comme `family = "nb"` dans la fonction `gam`. Quel est l'estimé du paramètre $\theta$ pour ce modèle? L'ajustement semble-t-il meilleur que pour le modèle de Poisson? Y a-t-il encore des problèmes d'ajustement?
+
+
+## 2. Ajout des effets aléatoires de placettes
+
+(a) À partir du modèle binomial négatif en 1(d), incluez un effet aléatoire des placettes sur l'ordonnée à l'origine. Vérifiez l'ajustement du modèle, incluant la normalité des effets aléatoires et la présence ou l'absence de surdispersion.
+
+(b) Ajustez maintenant un modèle avec un effet aléatoire des placettes sur la tendance démographique moyenne `s(year)`, en utilisant un terme de type `bs = "fs"` tel que vu dans le cours. Comparez ce modèle au modèle en (a) avec l'AIC. *Note*: Le package *AICcmodavg* n'est pas compatible avec les GAM, mais vous pouvez calculer l'AIC pour chaque modèle avec la fonction `AIC`.
+
+(c) Quelle est la fraction de la déviance expliquée par le meilleur modèle déterminé en (b)? 
+
+(d) Finalement, illustrez la tendance démographique estimée pour cette espèce dans chaque placette. Pour ce faire, ajoutez au jeu de données `portal_ot` les valeurs prédites par le meilleur modèle en (b) ainsi qu'un intervalle de confiance à 95%, puis représentez dans un même graphique les données observées, les tendances temporelles estimées et leur intervalle de confiance pour chaque placette. 
