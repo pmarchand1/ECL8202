@@ -1,0 +1,1064 @@
+---
+title: "Introduction à l'analyse bayésienne"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 18) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+
+set.seed(8202)
+```
+
+# Contenu du cours
+
+- Probabilité conditionnelle
+
+- Inférence bayésienne
+
+- Exemple de régression bayésienne
+
+- Visualiser et vérifier l'ajustement
+
+---
+
+class: inverse, center, middle
+
+# Probabilité conditionnelle
+
+---
+
+# Exemple
+
+- Nouveau test de dépistage d'une maladie
+
+--
+
+- Sensibilité du test: 95% (résultat positif si maladie présente)
+
+--
+
+- Spécificité du test: 99% (résultat négatif si maladie absente)
+
+--
+
+- Quelle est la probabilité d'être atteint si on reçoit un résultat positif?
+
+--
+
+- Prévalence de la maladie: 0.2% de la population
+
+---
+
+# Exemple
+
+|    | Atteint: $M_1$ | Non-atteint: $M_0$ | Total |
+|----|-----:|----:|------:|
+| Test positif: $T_+$ | | | |
+| Test négatif: $T_-$ | | | |
+| Total | | | 10000 |
+
+---
+
+# Exemple
+
+|    | Atteint: $M_1$ | Non-atteint: $M_0$ | Total |
+|----|-----:|----:|------:|
+| Test positif: $T_+$ | | | |
+| Test négatif: $T_-$ | | | |
+| Total | 20 | 9980 | 10000 |
+
+- Sur 10 000 personnes testées, en moyenne 0.2% x 10 000 = 20 seront atteintes.
+
+---
+
+# Exemple
+
+|    | Atteint: $M_1$ | Non-atteint: $M_0$ | Total |
+|----|-----:|----:|------:|
+| Test positif: $T_+$ | 19 | | |
+| Test négatif: $T_-$ | 1  | | |
+| Total | 20 | 9980 | 10000 |
+
+- Sur 20 personnes atteintes, en moyenne 95% x 20 = 19 recevront un résultat positif.
+
+---
+
+# Exemple
+
+
+|    | Atteint: $M_1$ | Non-atteint: $M_0$ | Total |
+|----|-----:|----:|------:|
+| Test positif: $T_+$ | 19 | 100 | |
+| Test négatif: $T_-$ | 1  | 9880 | |
+| Total | 20 | 9980 | 10000 |
+
+- Sur 9980 personnes non-atteintes, en moyenne 1% x 9980 = 99.8 (arrondi à 100) recevront un résultat positif.
+
+---
+
+# Exemple
+
+|    | Atteint: $M_1$ | Non-atteint: $M_0$ | Total |
+|----|-----:|----:|------:|
+| Test positif: $T_+$ | 19 | 100 | 119 |
+| Test négatif: $T_-$ | 1  | 9880 | 9881 |
+| Total | 20 | 9980 | 10000 |
+
+- Conclusion: En moyenne, 19 / 119 = environ 16% des personnes recevant un résultat positif sont atteintes.
+
+--
+
+- 1 / 9881 = environ 0.01% des personnes recevant un résultat négatif sont atteintes.
+
+---
+
+# Probabilité conditionnelle
+
+- Si $x$ et $y$ sont deux variables aléatoires, la probabilité conditionnelle $p(y|x)$ est la probabilité d'une valeur de $y$, si on connaît la valeur de $x$. 
+
+--
+
+- Dans notre exemple, la sensibilité du test est $P(T_+ | M_1)$ = 0.95, la spécificité est $P(T_- | M_0)$ = 0.99.
+
+---
+
+# Probabilité conditionnelle
+
+- Deux façons de calculer la probabilité conjointe $p(x, y)$ d'une valeur de $x$ et d'une valeur de $y$:
+
+$$p(x, y) = p(x) p(y | x) = p(y) p(x | y)$$
+
+--
+
+- Dans notre exemple, pour la probabilité d'être atteint de la maladie *et* d'obtenir un test positif
+
+$$p(M_1, T_+) = p(M_1) p(T_+ | M_1) = p(T_+) p(M_1 | T_+)$$
+
+---
+
+# Probabilité marginale
+
+- La probabilité marginale d'une variable $y$, $p(y)$, est sa probabilité si on ignore la valeur des autres variables. 
+
+- Si on connaît $p(y, x)$ pour chaque valeur possible de $x$, alors:
+
+$$p(y) = \sum_x p(y, x) = \sum_x p(y|x) p(x)$$
+
+--
+
+- Si $x$ est une variable continue, la somme devient une intégrale:
+
+$$p(y) = \int p(y, x) \text{d}x = \int p(y|x) p(x) \text{d}x$$
+
+---
+
+# Tableau des probabilités
+
+|    | $M_1$ | $M_0$ | Total |
+|----|-----:|----:|------:|
+| $T_+$ | $p(M_1, T_+)$ | $p(M_0, T_+)$ | $p(T_+)$ |
+| $T_-$ | $p(M_1, T_-)$ | $p(M_0, T_-)$ | $p(T_-)$ |
+| Total | $p(M_1)$ | $p(M_0)$ | 1 |
+
+
+---
+
+# Probabilités marginales pour $M$
+
+|    | $M_1$ | $M_0$ | Total |
+|----|-----:|----:|------:|
+| $T_+$ | $p(M_1, T_+)$ | $p(M_0, T_+)$ | $p(T_+)$ |
+| $T_-$ | $p(M_1, T_-)$ | $p(M_0, T_-)$ | $p(T_-)$ |
+| Total | $p(M_1)$ = 0.002 | $p(M_0)$ = 0.998 | 1 |
+
+---
+
+# Probabilités conjointes
+
+|    | $M_1$ | $M_0$ | Total |
+|----|-----:|----:|------:|
+| $T_+$ | $p(M_1, T_+)$ = 0.0019 | $p(M_0, T_+)$ | $p(T_+)$ |
+| $T_-$ | $p(M_1, T_-)$ = 0.0001 | $p(M_0, T_-)$ | $p(T_-)$ |
+| Total | $p(M_1)$ = 0.002 | $p(M_0)$ = 0.998 | 1 |
+
+- $p(M_1, T_+) = p(M_1) p(T_+ | M_1) = 0.002 \times 0.95 = 0.0019$
+
+- $p(M_1, T_-) = p(M_1) p(T_- | M_1) = 0.002 \times 0.05 = 0.0001$
+
+---
+
+# Probabilités conjointes
+
+|    | $M_1$ | $M_0$ | Total |
+|----|-----:|----:|------:|
+| $T_+$ | $p(M_1, T_+)$ = 0.0019 | $p(M_0, T_+)$ = 0.01 | $p(T_+)$ |
+| $T_-$ | $p(M_1, T_-)$ = 0.0001 | $p(M_0, T_-)$ = 0.988 | $p(T_-)$ |
+| Total | $p(M_1)$ = 0.002 | $p(M_0)$ = 0.998 | 1 |
+
+- $p(M_0, T_+) = p(M_0) p(T_+ | M_0) = 0.998 \times 0.01 = 0.00998$
+
+- $p(M_0, T_-) = p(M_0) p(T_- | M_0) = 0.998 \times 0.99 = 0.98802$
+
+---
+
+# Probabilités marginales pour $T$
+
+|    | $M_1$ | $M_0$ | Total |
+|----|-----:|----:|------:|
+| $T_+$ | $p(M_1, T_+)$ = 0.0019 | $p(M_0, T_+)$ = 0.01 | $p(T_+)$ = 0.0119 |
+| $T_-$ | $p(M_1, T_-)$ = 0.0001 | $p(M_0, T_-)$ = 0.988 | $p(T_-)$ = 0.9881 |
+| Total | $p(M_1)$ = 0.002 | $p(M_0)$ = 0.998 | 1 |
+
+---
+
+# Théorème de Bayes
+
+- Deux façons de calculer la probabilité conjointe $p(x, y)$ d'une valeur de $x$ et d'une valeur de $y$:
+
+$$p(x, y) = p(x) p(y | x) = p(y) p(x | y)$$
+
+--
+
+- En réarrangeant les termes, on obtient le théorème de Bayes:
+
+$$p(x|y) = \frac{p(x) p(y | x)}{p(y)}$$
+
+--
+
+- Autrement dit, on peut calculer la distribution de probabilité de $x$ conditionnelle à $y$ si on connaît: (1) la distribution de probabilité de $y$ conditionnelle à $x$ et (2) la distribution de probabilité marginale de $x$.
+
+--
+
+- Le dénominateur $p(y)$ peut être obtenu en faisant la somme (ou l'intégrale) de $p(x) p(y|x)$ sur l'ensemble des valeurs possibles de $x$.
+
+---
+
+# Théorème de Bayes
+
+$$p(M_1 | T_+) = \frac{p(T_+ | M_1) p(M_1)}{p(T_+)}$$
+
+--
+
+$$p(M_1 | T_+) = \frac{p(T_+ | M_1) p(M_1)}{p(T_+ | M_1) p(M_1) + p(T_+ | M_0) p(M_0)}$$
+
+--
+
+$$p(M_1 | T_+) = \frac{0.95 \times 0.002}{0.95 \times 0.002 + 0.01 \times 0.998} = 0.16$$
+
+---
+
+# Théorème de Bayes
+
+- $p(M_1 | T_+)$ = 16%.
+
+--
+
+- Avec un résultat positif, la probabilité d'être atteint est multipliée par 80 (16% vs. 0.2%), mais il demeure plus probable de ne pas être atteint.
+
+--
+
+- De la même façon, on pourrait calculer $p(M_1 | T_-)$ = 0.01%.
+
+- Avec un résultat négatif, la probabilité d'être atteint est divisée par 20.
+
+---
+
+# Théorème de Bayes
+
+$$p(M_1 | T_+) = \frac{p(T_+ | M_1)}{p(T_+)}  p(M_1)$$
+
+--
+
+- Constitue une méthode pour réviser une probabilité en fonction d'une nouvelle information. 
+
+--
+
+- Cette idée est à la base de l'inférence bayésienne.
+
+---
+
+class: inverse, center, middle
+
+# Inférence bayésienne
+
+---
+
+# Exemple: test de dépistage d'une maladie
+
+- $M_0$ = non-atteint, $M_1$ = atteint
+
+--
+
+- $T_-$ = test négatif, $T_+$ = test positif
+
+--
+
+$$p(M_1 | T_+) = \frac{p(T_+ | M_1)}{p(T_+)}  p(M_1)$$
+---
+
+# Probabilité *a priori* et *a posteriori*
+
+$$p(M_1 | T_+) = \frac{p(T_+ | M_1)}{p(T_+)}  p(M_1)$$
+
+--
+
+$$p(M_1 | T_-) = \frac{p(T_- | M_1)}{p(T_-)}  p(M_1)$$
+
+--
+
+- Considérons $M_1$ (le patient est atteint de la maladie) comme une hypothèse. Avant le test, probabilité *a priori* de $p(M_1)$.
+
+--
+
+- Après le test, probabilité *a posteriori* de $p(M_1 | T_+)$ ou $p(M_1 | T_-)$, selon le résultat.
+
+---
+
+# Interprétation fréquentiste de la probabilité
+
+- Dans la section précédente, probabilité *a priori* $p(M_1)$ basée sur la fréquence de la maladie dans la population. 
+
+--
+
+- Selon l'interprétation *fréquentiste*, les probabilités représentent la fréquence d'événements après un grand nombre de répétitions.
+
+--
+
+- Interprétation fréquentiste à la base des tests d'hypothèse et du calcul des intervalles de confiance. 
+
+--
+
+- On peut associer une probabilité aux statistiques basées sur les données (ex.: moyenne d'un échantillon $\bar{x}$), mais pas aux paramètres d'un modèle (ex.: moyenne de la population $\mu$).
+
+---
+
+# Interprétation bayésienne
+
+- Selon l'interprétation bayésienne, les probabilités représentent notre incertitude sur la valeur d'une quantité. 
+
+--
+
+- On peut donc parler de distribution de probabilité même pour une valeur présumée fixe, ex.: un paramètre d'un modèle.
+
+---
+
+# Inférence bayésienne
+
+Estimation d'un paramètre $\theta$ à partir d'une série d'observations $y$:
+
+- $p(\theta)$ est la distribution de probabilité *a priori* de $\theta$.
+
+--
+
+- $p(y | \theta)$ est la probabilité des observations $y$ conditionnelle à une valeur de $\theta$, autrement dit la fonction de vraisemblance.
+
+--
+
+- $p(\theta | y)$ est la distribution *a posteriori* de $\theta$ après avoir observé $y$. 
+
+$$p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}$$
+
+--
+
+- Le dénominateur $p(y)$ est obtenu en faisant la somme (ou l'intégrale) de $p(y | \theta) p(\theta)$ sur l'ensemble des valeurs possibles de $\theta$.
+
+---
+
+# Exemple
+
+- Dix lancers d'une pièce: 0 = pile, 1 = face.
+
+--
+
+- Observations: 0,0,0,0,0,1,1,1,0,0.
+
+--
+
+- Estimer $p$, la probabilité d'obtenir face pour cette pièce.
+
+--
+
+- Vraisemblance donnée par la distribution binomiale: $y \sim \text{Bin}(n, p)$, où $y$ est le nombre de faces obtenues sur $n$ lancers.
+
+---
+
+# Distribution *a priori* diffuse
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, fig.dim = c(10, 7)}
+library(dplyr)
+bin_dat <- data.frame(y = c(0, 0, 0, 0, 0, 1, 1, 1, 0, 0), n = 1:10,
+                      res = c("0", "00", "000", "0000", "00000", "000001",
+                              "0000011", "00000111", "000001110", "0000011100")) %>% 
+    mutate(k = cumsum(y))
+theta <- expand.grid(n = 1:10, p = seq(0, 1, 0.01))
+bin_dat <- inner_join(bin_dat, theta)
+bin_dat <- mutate(bin_dat, like = dbinom(k, n, p),
+                  pr1 = dbeta(p, 1, 1), post1 = dbeta(p, k+1, n-k+1),  
+                  pr2 = dbeta(p, 20, 20), post2 = dbeta(p, k+20, n-k+20))
+bin_dat <- group_by(bin_dat, n) %>%
+    mutate(lnorm = like / sum(like) * 100)
+
+ggplot(bin_dat, aes(x = p, y = post1)) +
+    labs(y = "Densité de probabilité") +
+    geom_line() +
+    geom_line(aes(y = pr1), linetype = "dashed") +
+    facet_wrap(~ res) +
+    scale_x_continuous(breaks = seq(0, 1, 0.2))
+    
+```
+
+---
+
+# Distribution *a priori* concentrée
+
+```{r, echo = FALSE, fig.dim = c(10, 7)}
+ggplot(bin_dat, aes(x = p, y = post2)) +
+    labs(y = "Densité de probabilité") +
+    geom_line() +
+    geom_line(aes(y = pr2), linetype = "dashed") +
+    facet_wrap(~ res) +
+    scale_x_continuous(breaks = seq(0, 1, 0.2))
+```
+
+---
+
+# Effet de la distribution *a priori*
+
+.pull-left[
+```{r, echo = FALSE}
+p1 <- ggplot(filter(bin_dat, n == 10), aes(x = p, y = post1)) +
+    geom_line(size = 1, color = "#b3452c") +
+    geom_line(aes(y = lnorm)) +
+    geom_line(aes(y = pr1), linetype = "dashed") +
+    labs(y = "") +
+    scale_x_continuous(breaks = seq(0, 1, 0.2))
+p2 <- ggplot(filter(bin_dat, n == 10), aes(x = p, y = post2)) +
+    geom_line(size = 1, color = "#b3452c") +
+    geom_line(aes(y = lnorm)) +
+    geom_line(aes(y = pr2), linetype = "dashed") +
+    labs(y = "") +
+    scale_x_continuous(breaks = seq(0, 1, 0.2))
+plot_grid(p1, p2)
+```
+]
+
+.pull-right[
+- Ligne pointillée: distribution *a priori*
+
+- Ligne pleine: vraisemblance (normalisée)
+
+- Ligne coloriée: distribution *a posteriori*
+]
+
+---
+
+# Éléments requis pour l'inférence bayésienne
+
+$$p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}$$
+
+--
+
+- Un modèle proposé de la façon dont les observations des variables sont générées en fonction des paramètres (modèle génératif): $p(y | \theta)$. 
+
+--
+
+- Une distribution *a priori* des paramètres: $p(\theta)$.
+
+--
+
+- Calculer $p(y)$ ?
+
+--
+
+- En pratique, $p(y)$ est approximée par des méthodes de Monte-Carlo (voir prochain cours). 
+
+---
+
+# Résultats de l'inférence bayésienne
+
+- Distribution *a posteriori* _conjointe_ des paramètres du modèle
+
+--
+
+- Facile d'obtenir la distribution de n'importe quelle quantité dérivée du modèle (combinaison de paramètres, prédiction, etc.)
+
+---
+
+# Distribution *a priori*
+
+- Peut être basée sur des connaissances antérieures.
+
+--
+
+- Le plus souvent, assez diffuse pour pénaliser les valeurs très implausibles sans trop contraindre l'analyse (*weakly informative prior*).
+
+--
+
+- Il s'agit d'une supposition s'ajoutant aux autres suppositions du modèle (ex.: choix de la distribution des observations, choix des prédicteurs à inclure ou non).
+
+---
+
+# Approche bayésienne
+
+.pull-left[
+### Avantages
+
+- Applicable à un grand nombre de modèles.
+
+- Produit plus d'information que le maximum de vraisemblance.
+
+- Distribution *a priori* permet de stabiliser l'estimation de modèles complexes.
+]
+
+--
+
+.pull-right[
+### Désavantages
+
+- Demande plus de ressources de calcul.
+
+- Il faut spécifer une distribution *a priori* des paramètres.
+]
+
+---
+
+class: inverse, center, middle
+
+# Exemple de régression bayésienne
+
+---
+
+# Jeu de données
+
+- Richesse spécifique des plantes de 30 îles de l'archipel des Galapagos.
+
+```{r}
+galap <- read.csv("../donnees/galapagos.csv")
+head(galap)
+```
+
+---
+
+# Jeu de données
+
+- *Species*: Nombre d'espèces par île
+
+```{r}
+summary(galap$Species)
+```
+
+--
+
+- *Area*: Superficie de l'île en km<sup>2</sup>
+
+```{r}
+summary(galap$Area)
+```
+
+---
+
+# Modèle
+
+- Nombre d'espèces $S$ en fonction de la superficie $A$ de l'île
+
+--
+
+- Régression de Poisson avec lien log
+
+$$S \sim \text{Pois}(\lambda)$$
+
+
+$$\log \lambda = \beta_0 + \beta_1 \log A$$
+
+--
+
+- Équivalent à
+
+
+$$\lambda = e^{\beta_0} A^{\beta_1}$$
+
+---
+
+# Distributions *a priori*
+
+$$\lambda = e^{\beta_0} A^{\beta_1}$$
+
+## $\beta_1$
+
+- Exposant de la relation entre le nombre d'espèces et la superficie.
+
+--
+
+- On suppose que $\beta_1 \ge 0$ car le nombre d'espèces ne diminue pas avec la superficie.
+
+--
+
+- Il est plus plausible que $\beta_1 < 1$, car l'addition d'un km<sup>2</sup> supplémentaire a moins d'effet lorsque l'île est déjà grande.
+
+---
+
+# Distributions *a priori*
+
+$$\lambda = e^{\beta_0} A^{\beta_1}$$
+
+.pull-left[
+## $\beta_1$
+
+- Distribution exponentielle: $\beta_1 \sim \text{Exp}(4)$
+
+- Environ 2% de probabilité que $\beta_1 > 1$.
+]
+
+.pull-right[
+```{r, echo = FALSE}
+ggplot(NULL, aes(x = c(0, 2))) +
+    labs(x = expression(beta[1]), y = expression(p(beta[1]))) +
+    stat_function(fun = dexp, args = list(rate = 4), color = "#b3452c", size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0))
+```
+]
+
+---
+
+# Distributions *a priori*
+
+$$\lambda = e^{\beta_0} A^{\beta_1}$$
+
+## $\beta_0$
+
+- **Attention**: Le package *brms* que nous utiliserons transforme les prédicteurs pour les centrer sur leur valeur moyenne. 
+
+--
+
+- Dans ce cas, la distribution *a priori* à spécifier pour l'ordonnée à l'origine doit être basée sur la réponse pour les valeurs moyennes de chaque prédicteur. 
+
+--
+
+- Donc ici, nous voulons une distribution pour le logarithme du nombre d'espèces d'une île ayant une log-superficie moyenne.
+
+---
+
+# Distributions *a priori*
+
+$$\lambda = e^{\beta_0} A^{\beta_1}$$
+
+## $\beta_0$
+
+- Supposons que les valeurs plausibles sont entre 1 et 1000 espèces.
+
+--
+
+- $\log(1) = 0$ et $\log(1000) = 6.91$
+
+--
+
+- Distribution normale: $\beta_0 \sim \text{N}(3, 2)$.
+
+--
+
+- Environ 95% de la probabilité entre -1 et 7.
+
+---
+
+# Droites de régression possibles *a priori*
+
+```{r, eval = FALSE}
+library(dplyr)
+
+# 100 simulations des paramètres b0 et b1
+sim_df <- data.frame(i = 1:100, b0 = rnorm(100, 3, 2), b1 = rexp(100, 4))
+
+# Grille avec différentes valeurs de la superficie pour chaque simulation
+grille <- expand.grid(i = 1:100, area = c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 
+                                          100, 300, 1000, 3000, 10000))
+
+# Nombre moyen d'espèces pour chaque simulation 
+sim_df <- inner_join(sim_df, grille) %>%
+    mutate(lambda = exp(b0 + b1 * log(area)))
+```
+
+---
+
+# Droites de régression possibles *a priori*
+
+```{r, eval = FALSE}
+library(dplyr)
+
+# 100 simulations des paramètres b0 et b1
+sim_df <- data.frame(i = 1:100, b0 = rnorm(100, 3, 2), b1 = rexp(100, 4)) #<<
+
+# Grille avec différentes valeurs de la superficie pour chaque simulation
+grille <- expand.grid(i = 1:100, area = c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 
+                                          100, 300, 1000, 3000, 10000))
+
+# Nombre moyen d'espèces pour chaque simulation 
+sim_df <- inner_join(sim_df, grille) %>%
+    mutate(lambda = exp(b0 + b1 * log(area)))
+```
+
+---
+
+# Droites de régression possibles *a priori*
+
+```{r, eval = FALSE}
+library(dplyr)
+
+# 100 simulations des paramètres b0 et b1
+sim_df <- data.frame(i = 1:100, b0 = rnorm(100, 3, 2), b1 = rexp(100, 4))
+
+# Grille avec différentes valeurs de la superficie pour chaque simulation
+grille <- expand.grid(i = 1:100, area = c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, #<<
+                                          100, 300, 1000, 3000, 10000)) #<<
+
+# Nombre moyen d'espèces pour chaque simulation 
+sim_df <- inner_join(sim_df, grille) %>%
+    mutate(lambda = exp(b0 + b1 * log(area)))
+```
+
+---
+
+# Droites de régression possibles *a priori*
+
+```{r, eval = FALSE}
+library(dplyr)
+
+# 100 simulations des paramètres b0 et b1
+sim_df <- data.frame(i = 1:100, b0 = rnorm(100, 3, 2), b1 = rexp(100, 4))
+
+# Grille avec différentes valeurs de la superficie pour chaque simulation
+grille <- expand.grid(i = 1:100, area = c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 
+                                          100, 300, 1000, 3000, 10000))
+
+# Nombre moyen d'espèces pour chaque simulation 
+sim_df <- inner_join(sim_df, grille) %>%  #<<
+    mutate(lambda = exp(b0 + b1 * log(area)))
+```
+
+---
+
+# Droites de régression possibles *a priori*
+
+```{r, eval = FALSE}
+library(dplyr)
+
+# 100 simulations des paramètres b0 et b1
+sim_df <- data.frame(i = 1:100, b0 = rnorm(100, 3, 2), b1 = rexp(100, 4))
+
+# Grille avec différentes valeurs de la superficie pour chaque simulation
+grille <- expand.grid(i = 1:100, area = c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 
+                                          100, 300, 1000, 3000, 10000))
+
+# Nombre moyen d'espèces pour chaque simulation 
+sim_df <- inner_join(sim_df, grille) %>%
+    mutate(lambda = exp(b0 + b1 * log(area))) #<<
+```
+
+---
+
+# Droites de régression possibles *a priori*
+
+.code60[
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+
+# 100 simulations des paramètres b0 et b1
+sim_df <- data.frame(i = 1:100, b0 = rnorm(100, 3, 2), b1 = rexp(100, 4))
+
+# Grille avec différentes valeurs de la superficie pour chaque simulation
+grille <- expand.grid(i = 1:100, area = c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 
+                                          100, 300, 1000, 3000, 10000))
+
+# Nombre moyen d'espèces pour chaque simulation 
+sim_df <- inner_join(sim_df, grille) %>%
+    mutate(lambda = exp(b0 + b1 * log(area)))
+```
+]
+
+```{r, echo = FALSE}
+head(sim_df)
+```
+
+---
+
+# Droites de régression possibles *a priori*
+
+.code60[
+```{r}
+ggplot(sim_df, aes(x = area, y = lambda, group = i)) +
+    labs(x = "A", y = expression(lambda)) +
+    geom_line(alpha = 0.3) +
+    scale_x_log10(label = scales::number_format(accuracy = 0.1)) +
+    scale_y_log10(label = scales::number_format(accuracy = 0.1))
+```
+]
+
+---
+
+# Package *brms*
+
+- Acronyme de *Bayesian Regression Models using Stan*.
+
+--
+
+- Permet l'ajustement de divers modèles de régression par l'approche bayésienne.
+
+--
+
+- Traduit les modèles spécifiés en code pour le programme d'inférence bayésienne *Stan* (vu au prochain cours).
+
+---
+
+# Spécifier le modèle dans *brms*
+
+```{r, include = FALSE}
+library(brms)
+```
+
+```{r, cache = TRUE, include = FALSE}
+bmod <- brm(Species ~ log(Area), data = galap, family = poisson, 
+            prior = c(set_prior("normal(3, 2)", class = "Intercept"),
+                      set_prior("exponential(4)", class = "b", lb = 0)))
+
+```
+
+```{r, eval = FALSE}
+library(brms)
+bmod <- brm(Species ~ log(Area), data = galap, family = poisson, 
+            prior = c(set_prior("normal(3, 2)", class = "Intercept"),
+                      set_prior("exponential(4)", class = "b", lb = 0)))
+
+```
+
+---
+
+# Spécifier le modèle dans *brms*
+
+```{r, eval = FALSE}
+library(brms)
+bmod <- brm(Species ~ log(Area), data = galap, family = poisson, 
+            prior = c(set_prior("normal(3, 2)", class = "Intercept"), #<<
+                      set_prior("exponential(4)", class = "b", lb = 0)))
+
+```
+
+---
+
+# Spécifier le modèle dans *brms*
+
+```{r, eval = FALSE}
+library(brms)
+bmod <- brm(Species ~ log(Area), data = galap, family = poisson, 
+            prior = c(set_prior("normal(3, 2)", class = "Intercept"),
+                      set_prior("exponential(4)", class = "b", lb = 0))) #<<
+
+```
+
+---
+
+# Résultats du modèle
+
+.code60[
+```{r}
+summary(bmod)
+```
+]
+
+---
+
+# Comparaison avec `glm`
+
+.code60[
+```{r}
+gmod <- glm(Species ~ log(Area), data = galap, family = poisson)
+summary(gmod)
+```
+]
+
+---
+
+# Comparaison avec `glm`
+
+- Les estimés des paramètres et leur incertitude sont pratiquement identiques pour les deux méthodes.
+
+- Il s'agit d'un modèle simple avec suffisamment de données, donc l'influence de la distribution *a priori* devient négligeable.
+
+---
+
+class: inverse, center, middle
+
+# Visualiser et vérifier l'ajustement
+
+---
+
+# Rappel du modèle
+
+- Richesse spécifique de plantes en fonction de la superficie pour 30 îles de l'archipel des Galapagos.
+
+```{r, eval = FALSE}
+library(brms)
+bmod <- brm(Species ~ log(Area), data = galap, family = poisson, 
+            prior = c(set_prior("normal(3, 2)", class = "Intercept"),
+                      set_prior("exponential(4)", class = "b", lb = 0)))
+```
+
+---
+
+# Sommaire des résultats
+
+.code60[
+```{r}
+summary(bmod)
+```
+]
+
+---
+
+# Coefficients estimés
+
+- Par défaut, l'estimé est la moyenne *a posteriori* du paramètre et l'erreur est son écart-type.
+
+.code60[
+```{r}
+fixef(bmod)
+```
+]
+
+--
+
+- On peut choisir des estimés plus robustes aux valeurs extrêmes, soit la médiane et l'écart absolu médian.
+
+.code60[
+```{r}
+fixef(bmod, robust = TRUE)
+```
+]
+
+---
+
+# Intervalles de crédibilité
+
+.code60[
+```{r}
+fixef(bmod)
+```
+]
+
+- Les quantiles à 2.5% et 97.5% définissent un *intervalle de crédibilité* contenant 95% de la distribution de probabilité *a posteriori* du paramètre. 
+
+--
+
+- Ces intervalles sont les analogues bayésiens des intervalles de confiance.
+
+---
+
+# Visualiser les effets
+
+- `marginal_effects`: Effet de chaque prédicteur avec un intervalle de crédibilité à 95%.
+
+```{r}
+marginal_effects(bmod)
+```
+
+---
+
+# Visualiser la distribution *a posteriori*
+
+```{r}
+stanplot(bmod, pars = "b_logArea", "dens")
+```
+
+---
+
+# Vérification des prédictions *a posteriori*
+
+- Les réplicats du jeu de données simulés par le modèle ajusté reproduisent-ils bien les caractéristiques des observations?
+
+--
+
+- Plusieurs options de vérification disponibles avec la fonction `pp_check` (pour *posterior predictive check*).
+
+--
+
+- Dans tous les cas, les valeurs sont simulées à partir du modèle complet, incluant l'incertitude des paramètres et la composante aléatoire des observations.
+
+---
+
+# Densité de la réponse prédite vs. observée
+
+```{r}
+pp_check(bmod, nsamples = 100, type = "dens_overlay")
+```
+
+
+---
+
+# Intervalles de prédiction par observation
+
+```{r}
+pp_check(bmod, nsamples = 100, type = "intervals")
+```
+
+---
+
+# Statistiques sommaires
+
+- Il est utile de vérifier des statistiques qui ne sont pas directement ajustées par le modèle, comme l'écart-type dans un modèle de Poisson.
+
+```{r}
+pp_check(bmod, nsamples = 100, type = "stat", stat = "sd")
+```
+
+--
+
+- Il semble y avoir une surdispersion des données par rapport au modèle.
+
+---
+
+# Résumé
+
+- Dans l'inférence bayésienne, la probabilité *a posteriori* d'une valeur d'un paramètre est proportionnelle au produit de sa probabilité *a priori* et de sa vraisemblance selon les données observées.
+
+$$p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}$$
+
+--
+
+- Pour un modèle complexe, la distribution *a priori* sert à pénaliser l'éloignement d'un paramètre des valeurs plausibles pour le système étudié.
+
+--
+
+- L'influence de la distribution *a priori* diminue lorsque le nombre d'observations augmente.
+
+---
+
+# Résumé
+
+- Les intervalles de crédibilité contiennent un certain % de la probabilité *a posteriori*. 
+
+--
+
+- La vérification du modèle se fait en comparant les données simulées par le modèle ajusté aux observations (vérification des prédictions *a posteriori*). 
+
+--
+
+- Ces vérifications doivent être basées sur des statistiques sommaires dont l'ajustement n'est pas garanti par le modèle.
+
+
+

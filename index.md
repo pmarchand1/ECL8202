@@ -18,6 +18,8 @@
 
 7. [Modèles additifs généralisés](notes_cours/07-Modeles_additifs_generalises.html) ([PDF](notes_cours/07-Modeles_additifs_generalises.pdf))
 
+8. [Introduction à l'analyse bayésienne](notes_cours/08-Intro_Bayes.html) ([PDF](notes_cours/08-Intro_Bayes.pdf)) - Données: [galapagos.csv](donnees/galapagos.csv)
+
 
 ## Exercices
 
