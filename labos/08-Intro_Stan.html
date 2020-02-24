@@ -312,7 +312,7 @@ head(radon)</code></pre>
 <p>La valeur moyenne <span class="math inline">\(\mu_i\)</span> dépend d’une ordonnée à l’origine qui varie d’un comté à l’autre, où <span class="math inline">\(\beta_{0j[i]}\)</span> est l’ordonnée à l’origine pour le comté <span class="math inline">\(j\)</span> contenant l’observation <span class="math inline">\(i\)</span>, ainsi que d’une différence entre le rez-de-chaussée et le sous-sol (<span class="math inline">\(\beta_1\)</span>) qui reste la même pour tous les comtés.</p>
 <p><span class="math display">\[\mu_i = \beta_{0j[i]} + \beta_{1} x_i\]</span></p>
 <p>Finalement, l’ordonnée à l’origine d’un comté (représentant la log-concentration moyenne de radon dans un sous-sol) suit une régression linéaire dont la moyenne dépend de la log-concentration d’uranium du comté, avec un écart-type de <span class="math inline">\(\sigma_{\beta_0}\)</span>.</p>
-<p><span class="math display">\[\beta_{0j} \sim \text{N}(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})\]</span></p>
+<p><span class="math display">\[\beta_{0j} \sim \text{N}(\gamma_0 + \gamma_{1} u_j, \sigma_{\beta_0})\]</span></p>
 <p>Le reste de ce document est consacré au codage de ce modèle avec Stan.</p>
 </div>
 <div id="creer-un-modele-stan" class="section level1">
@@ -504,6 +504,10 @@ model {
     mu[i] = b_0[comte[i]] + b_etage * etage[i];
   log_rad ~ normal(mu, sigma);
 }  </code></pre>
+</div>
+<div id="utilisation-du-package-brms" class="section level2">
+<h2>Utilisation du package <em>brms</em></h2>
+<p>Le package <em>brms</em> permet d’implémenter plusieurs modèles sans écrire le code Stan soi-même. Il est recommandé de l’utiliser lorsque possible, car <em>brms</em> s’occupe automatiquement d’optimiser le code Stan, par exemple normaliser les paramètres, adopter une paramétrisation non-centrée, etc.</p>
 </div>
 <div id="references" class="section level2">
 <h2>Références</h2>

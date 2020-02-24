@@ -34,7 +34,7 @@ $$\mu_i = \beta_{0j[i]} + \beta_{1} x_i$$
 
 Finalement, l'ordonnée à l'origine d'un comté (représentant la log-concentration moyenne de radon dans un sous-sol) suit une régression linéaire dont la moyenne dépend de la log-concentration d'uranium du comté, avec un écart-type de $\sigma_{\beta_0}$.
 
-$$\beta_{0j} \sim \text{N}(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})$$
+$$\beta_{0j} \sim \text{N}(\gamma_0 + \gamma_{1} u_j, \sigma_{\beta_0})$$
 
 Le reste de ce document est consacré au codage de ce modèle avec Stan.
 
@@ -271,6 +271,11 @@ model {
   log_rad ~ normal(mu, sigma);
 }  
 ```
+
+## Utilisation du package *brms*
+
+Le package *brms* permet d'implémenter plusieurs modèles sans écrire le code Stan soi-même. Il est recommandé de l'utiliser lorsque possible, car *brms* s'occupe automatiquement d'optimiser le code Stan, par exemple normaliser les paramètres, adopter une paramétrisation non-centrée, etc.  
+
 
 ## Références
 

@@ -257,7 +257,7 @@ Comme nous verrons plus tard, la modélisation d'effets aléatoires de groupe pe
 
 Finalement, un autre avantage des modèles mixtes est que nous pouvons inclure à la fois un effet aléatoire de groupe et l'effet d'un prédicteur qui varie au niveau du groupe. Par exemple, la variation de l'ordonnée à l'origine $\beta_0$ entre les groupes peut dépendre de la valeur d'un prédicteur $u$:
 
-$$\beta_{0j} \sim N(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})$$
+$$\beta_{0j} \sim N(\gamma_0 + \gamma_1 u_j, \sigma_{\beta_0})$$
 
 Puisque la variation de la réponse est modélisée à plusieurs niveaux (groupe et observation individuelle), les modèles mixtes sont aussi nommés "modèles hiérarchiques".
 
