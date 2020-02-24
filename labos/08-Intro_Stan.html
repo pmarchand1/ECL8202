@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Spécifier des modèles avec Stan</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Spécifier des modèles avec Stan</h1>
+
+</div>
+
+
+<div id="donnees" class="section level1">
+<h1>Données</h1>
+<p>Le jeu de données <a href="../donnees/radon.csv">radon.csv</a>, tiré du manuel de Gelman et Hill, contient des mesures de concentration de radon (<code>log_radon</code>, échelle logarithmique) prises dans 919 maisons réparties dans 85 comtés (<code>county</code>) de l’état américain du Minnesota. Le nombre de maisons par comté varie de 1 à 116. Ce jeu de données inclut un prédicteur au niveau de la maison, soit l’étage où la mesure a été prise (<code>floor</code>, avec 0 = sous-sol et 1 = rez-de-chaussée) et un prédicteur au niveau du comté, soit la concentration d’uranium du sol (<code>log_uranium</code>, échelle logarithmique).</p>
+<pre class="r"><code>radon &lt;- read.csv(&quot;../donnees/radon.csv&quot;)
+head(radon)</code></pre>
+<pre><code>##   county floor log_uranium log_radon
+## 1 AITKIN     1  -0.6890476 0.7884574
+## 2 AITKIN     0  -0.6890476 0.7884574
+## 3 AITKIN     0  -0.6890476 1.0647107
+## 4 AITKIN     0  -0.6890476 0.0000000
+## 5  ANOKA     0  -0.8473129 1.1314021
+## 6  ANOKA     0  -0.8473129 0.9162907</code></pre>
+</div>
+<div id="modele" class="section level1">
+<h1>Modèle</h1>
+<p>Dans le modèle ci-dessous, <span class="math inline">\(y_i\)</span> représente la valeur de <code>log_radon</code> pour l’observation <span class="math inline">\(i\)</span> et <span class="math inline">\(x_i\)</span> est l’étage de la mesure (0 ou 1). Nous supposons que le log de la concentration de radon est distribué normalement autour de la valeur moyenne attendue <span class="math inline">\(\mu_i\)</span>, avec un écart-type <span class="math inline">\(\sigma_y\)</span>.</p>
+<p><span class="math display">\[y_i \sim \text{N}(\mu_i, \sigma_y)\]</span></p>
+<p>La valeur moyenne <span class="math inline">\(\mu_i\)</span> dépend d’une ordonnée à l’origine qui varie d’un comté à l’autre, où <span class="math inline">\(\beta_{0j[i]}\)</span> est l’ordonnée à l’origine pour le comté <span class="math inline">\(j\)</span> contenant l’observation <span class="math inline">\(i\)</span>, ainsi que d’une différence entre le rez-de-chaussée et le sous-sol (<span class="math inline">\(\beta_1\)</span>) qui reste la même pour tous les comtés.</p>
+<p><span class="math display">\[\mu_i = \beta_{0j[i]} + \beta_{1} x_i\]</span></p>
+<p>Finalement, l’ordonnée à l’origine d’un comté (représentant la log-concentration moyenne de radon dans un sous-sol) suit une régression linéaire dont la moyenne dépend de la log-concentration d’uranium du comté, avec un écart-type de <span class="math inline">\(\sigma_{\beta_0}\)</span>.</p>
+<p><span class="math display">\[\beta_{0j} \sim \text{N}(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})\]</span></p>
+<p>Le reste de ce document est consacré au codage de ce modèle avec Stan.</p>
+</div>
+<div id="creer-un-modele-stan" class="section level1">
+<h1>Créer un modèle Stan</h1>
+<p>Dans RStudio, aller dans <em>File -&gt; New File -&gt; Stan File</em>. RStudio crée un nouveau fichier de code Stan contenant déjà un exemple de modèle. Enregistrez le ficher avec l’extension <code>.stan</code> (ex.: <code>radon.stan</code>) avant de continuer.</p>
+<p>D’abord, remarquez que le symbole <code>//</code> sert à dénoter des commentaires dans Stan, contrairement à R qui utilise <code>#</code> pour la même fonction. Excepté ces commentaires, le fichier Stan créé contient trois blocs.</p>
+<ul>
+<li><code>data</code>: Définit les variables qui seront fournies au modèle comme données à l’entrée.</li>
+<li><code>parameters</code>: Définit les variables qui doivent être estimées par le modèle.</li>
+<li><code>model</code>: Définit le modèle statistique pour les données en fonction des paramères.</li>
+</ul>
+<p>La plupart des modèles Stan utilisent au minimum ces trois blocs, bien que d’autres blocs soient possibles: <code>functions</code>, <code>transformed data</code>, <code>transformed parameters</code> et <code>generated quantities</code>. Comme dans R, les blocs sont délimités par des accolades <code>{}</code>.</p>
+<p>Le bloc <code>model</code> ne contient qu’une instruction, <code>y ~ normal(mu, sigma);</code>, qui indique que <code>y</code> suit une distribution normale avec moyenne <code>mu</code> et écart-type <code>sigma</code>. Dans Stan, le symbole <code>~</code> est utilisé pour assigner une certaine distribution de probabilité à une variable (contrairement à R où ce symbole sert à relier la réponse d’un modèle aux prédicteurs).</p>
+<p><em>Note</em>: Dans Stan, toutes les instructions doivent se terminer par un point-virgule <code>;</code>, sauf celles qui débutent un bloc (comme <code>model</code>).</p>
+<div id="declaration-de-variables" class="section level2">
+<h2>Déclaration de variables</h2>
+<p>Contrairement à R, toutes les variables apparaissant dans un modèle Stan doivent être au préalable “déclarées”. La première ligne de <code>data</code>, <code>int&lt;lower=0&gt; N;</code> déclare la variable <code>N</code> qui est un nombre entier (type <code>int</code> pour <em>integer</em>) prenant une valeur minimale de 0. Il est important de différencier les variables <code>int</code> prenant seulement des valeurs entières des variables pouvant prendre n’importe quelle valeur réelle (<code>real</code>). La spécification de bornes inférieures (<code>lower</code>) ou supérieures (<code>upper</code>) est optionnelle pour les éléments de <code>data</code>, mais elles permettent à Stan de produire une erreur si les données fournies à l’entrée ne respectent pas ces bornes. Dans ce cas-ci, la borne inférieure devrait probablement être de 1 vu que les données contiennent au moins 1 observation.</p>
+<p>La deuxième ligne de <code>data</code>, <code>vector[N] y;</code> déclare la variable <code>y</code> comme un vecteur de <code>N</code> éléments. Notez qu’il était important de déclarer <code>N</code> avant de l’utiliser dans la déclaration de <code>y</code>. Les vecteurs dans Stan fonctionnent de façon similaire à R, excepté qu’ils peuvent seulement être composés de nombres réels (nous verrons plus tard comment définir l’équivalent d’un vecteur pour des nombres entiers).</p>
+<p>Le bloc <code>parameters</code> déclare deux variables réelles, <code>mu</code> et <code>sigma</code>, la deuxième étant contrainte à être supérieure ou égale à 0. Il est important de définir les valeurs minimales et maximales possibles pour les paramètres, sinon Stan pourrait tenter par exemple d’assigner une valeur négative à <code>sigma</code>, ce qui générerait une erreur lorsque celle-ci serait utilisée comme écart-type de la distribution normale dans le modèle.</p>
+</div>
+<div id="vectorisation" class="section level2">
+<h2>Vectorisation</h2>
+<p>Puisque <code>y</code> est un vecteur de <code>N</code> éléments, alors que <code>mu</code> et <code>sigma</code> contiennent chacun une seule valeur, l’instruction <code>y ~ normal(mu, sigma);</code> dans le bloc <code>model</code> indique que chaque élément de <code>y</code> suit la distribution normale avec paramètres <code>mu</code> et <code>sigma</code>. Dans un modèle de régression linéaire par exemple, <code>mu</code> serait aussi un vecteur de taille <code>N</code>, donc la même instruction associerait chaque <code>y</code> au <code>mu</code> correspondant, tandis que tous les éléments partageraient le même <code>sigma</code>.</p>
+</div>
+</div>
+<div id="representation-du-modele-pour-le-radon" class="section level1">
+<h1>Représentation du modèle pour le radon</h1>
+<div id="regression-lineaire-simple" class="section level2">
+<h2>Régression linéaire simple</h2>
+<p>Modifions maintenant le programme pour représenter notre modèle du radon. Commençons par décrire une régression linéaire simple du log de la concentration de radon en fonction de l’étage, en ignorant l’effet de l’uranium et l’effet aléatoire par comté.</p>
+<p>Il est préférable de donner aux variables des noms plus descriptifs que <em>x</em>, <em>y</em> ou <em>N</em>. Dans le bloc <code>data</code>, changeons donc <code>N</code> pour <code>n_obs</code> (nombre d’observations) et <code>y</code> pour <code>log_rad</code>, le nom de notre variable réponse. Nous ajoutons aussi le prédicteur <code>etage</code> qui est un nombre entier compris entre 0 et 1.</p>
+<p>Pour un nombre entier, nous ne pouvons pas définir un vecteur, mais plutôt un “tableau” (<em>array</em>) de <code>n_obs</code> éléments, comme suit: <code>int&lt;lower=0, upper=1&gt; etage[n_obs];</code>. Notez que dans ce cas la spécification du nombre d’éléments apparaît après le nom de la variable, contrairement à un vecteur où elle apparaît après le mot <code>vector</code>.</p>
+<p>Dans le bloc <code>parameters</code>, remplaçons <code>mu</code> par deux paramètres de notre régression, <code>b_0</code> (l’ordonnée à l’origine) et <code>b_etage</code> (l’effet de l’étage), tous deux réels.</p>
+<p>Dans le bloc <code>model</code>, nous déclarons d’abord <code>mu</code> comme un vecteur de taille <code>n_obs</code>, qui contiendra la prédiction du modèle linéaire pour chaque observation. Les variables déclarées dans le bloc <code>model</code> servent souvent à définir des valeurs “intermédiaires” qui ne sont ni des paramètres du modèle, ni des données.</p>
+<p>En plus de remplacer <code>y</code> par <code>log_rad</code>, nous devons maintenant spécifier l’équation pour <code>mu</code>. Si <code>etage</code> était un vecteur, nous pourrions simplement écrire <code>mu = b_0 + b_etage * etage</code>, dans lequel cas chaque valeur de <code>mu</code> serait calculé à partir de chaque valeur d’étage. Et en fait, nous aurions pu définir <code>etage</code> comme valeur réelle sans affecter les conclusions du modèle. Cependant, une autre option ici est de créer une boucle:</p>
+<pre><code>for (i in 1:n_obs)
+    mu[i] = b_0 + b_etage * etage[i];</code></pre>
+<p>L’instruction <code>for</code> décrit une boucle, avec une variable de comptage <code>i</code> qui prendra successivement les valeurs de 1 à <code>n_obs</code>. Pour chaque valeur de <code>i</code>, les instructions dans la boucle sont exécutées, donc ici <code>mu[i]</code> reçoit une valeur déterminée par <code>etage[i]</code> et par les paramètres de la régression.</p>
+<p>En général, les instructions de la boucle (le bloc <code>for</code>) devraient être délimitées par des accolades, mais celles-ci peuvent être omises lorsqu’il n’y a qu’une seule instruction.</p>
+<p>Voici à quoi devrait ressembler votre modèle jusqu’à présent:</p>
+<pre><code>data {
+  int&lt;lower=1&gt; n_obs; // Nombre d&#39;observations
+  vector[n_obs] log_rad; // Log-conc. radon
+  int&lt;lower=0, upper=1&gt; etage[n_obs];
+}
+
+parameters {
+  real b_0;
+  real b_etage;
+  real&lt;lower=0&gt; sigma;
+}
+
+model {
+  vector[n_obs] mu;
+
+  for (i in 1:n_obs)
+    mu[i] = b_0 + b_etage * etage[i];
+  log_rad ~ normal(mu, sigma);
+}  </code></pre>
+<p>En haut à droite de la fenêtre du script, au lieu du bouton <code>Run</code> présent pour un script R, il y a un bouton <code>Check</code> qui permet de vérifier la syntaxe du modèle Stan.</p>
+</div>
+<div id="modele-hierarchique" class="section level2">
+<h2>Modèle hiérarchique</h2>
+<p>Nous pouvons maintenant définir le deuxième niveau de la régression, soit l’effet de chaque comté et de sa concentration d’uranium sur l’ordonnée à l’origine <code>b_0</code>.</p>
+<p>Tout d’abord, nous devons effectuer quelques modifications à nos données dans R. Dans Stan, une variable catégorielle doit être codée par des nombres entiers. Nous définission donc une nouvelle colonne du jeu de données <code>radon</code> pour le numéro de comté <code>county_no</code>, obtenu en convertissant le facteur <code>county</code> en nombre entier.</p>
+<pre class="r"><code>radon$county_no &lt;- as.integer(radon$county)
+head(radon)</code></pre>
+<pre><code>##   county floor log_uranium log_radon county_no
+## 1 AITKIN     1  -0.6890476 0.7884574         1
+## 2 AITKIN     0  -0.6890476 0.7884574         1
+## 3 AITKIN     0  -0.6890476 1.0647107         1
+## 4 AITKIN     0  -0.6890476 0.0000000         1
+## 5  ANOKA     0  -0.8473129 1.1314021         2
+## 6  ANOKA     0  -0.8473129 0.9162907         2</code></pre>
+<p>Ensuite, nous créons un jeu de données séparé pour les données au niveau du comté. La fonction <code>distinct</code> de <em>dplyr</em> conserve les combinaisons uniques de <code>county_no</code> et <code>log_uranium</code> présentes dans le jeu de données <code>radon</code>.</p>
+<pre class="r"><code>library(dplyr)
+comtes &lt;- distinct(radon, county_no, log_uranium) %&gt;%
+    arrange(county_no)
+head(comtes)</code></pre>
+<pre><code>##   county_no log_uranium
+## 1         1  -0.6890476
+## 2         2  -0.8473129
+## 3         3  -0.1134588
+## 4         4  -0.5933525
+## 5         5  -0.1428905
+## 6         6   0.3870567</code></pre>
+<p>Il est important d’ordonner ce deuxième jeu de données par numéro de comté, afin que les valeurs d’uranium soient données à Stan dans le bon ordre.</p>
+<p>Nous sommes maintenant prêts à modifier le programme Stan. Sous <code>data</code>, nous devons déclarer les variables suivantes:</p>
+<ul>
+<li><code>int&lt;lower=1&gt; n_comt;</code> qui dénotera le nombre de comtés présents dans le jeu de données;</li>
+<li><code>int&lt;lower=1, upper=n_comt&gt; comte[n_obs];</code>, un tableau contenant pour chaque observation le numéro du comté correspondant;</li>
+<li><code>vector[n_comt] log_u</code>, un vecteur contenant le log de la concentration d’uranium pour chaque comté.</li>
+</ul>
+<p>Dans le bloc <code>parameters</code>, l’ordonnée à l’origine du modèle <code>b_0</code> est maintenant un vecteur de <code>n_comt</code> valeurs et nous devons ajouter les paramètres réels suivants: <code>g_0</code>, l’ordonnée à l’origine de la régression de <code>b_0</code> par comté; <code>g_u</code>, l’effet de l’uranium sur <code>b_0</code> et <code>sigma_b0</code>, l’écart-type de <code>b_0</code> autour de la valeur prédite par la concentration d’uranium.</p>
+<p>Finalement, dans le bloc <code>model</code>, nous ajoutons l’équation pour la régression de <code>b_0</code> par comté, qui suit une distribution normale de moyenne <code>g_0 + g_u * log_u</code> et d’écart-type <code>sigma_b0</code>.</p>
+<pre><code>b_0 ~ normal(g_0 + g_u * log_u, sigma_b0);</code></pre>
+<p>Notez que puisque tous les éléments de cette équation sont soient des nombres réels, soient des vecteurs de longueur <code>n_comt</code>, il est possible de l’écrire d’un seul coup sans faire de boucle.</p>
+<p>Dans l’équation pour <code>mu</code>, la valeur <code>b_0</code> doit être remplacée par <code>b_0[comte[i]]</code>. Dans ce cas, pour chaque observation <code>i</code>, nous allons chercher le numéro de comté correspondant, puis la valeur de l’ordonnée à l’origine <code>b_0</code> pour ce numéro de comté.</p>
+<p><em>Note</em>: Pour ce modèle-ci, l’effet aléatoire par comté <code>b_0</code> est une valeur intermédiaire que nous aurions pu définir dans le bloc <code>parameters</code> ou <code>model</code>. La différence est qu’à la sortie du programme, Stan fournira des estimés de la distribution des variables définies dans <code>parameters</code>, mais pas celles définies dans <code>model</code>.</p>
+</div>
+<div id="distributions-a-priori" class="section level2">
+<h2>Distributions <em>a priori</em></h2>
+<p>Ce modèle contient cinq paramètres actuellement sans distribution: <code>g_0</code>, <code>g_u</code>, <code>b_etage</code>, <code>sigma_b0</code> et <code>sigma</code>. Si nous ne spécifions pas de distribution <em>a priori</em> pour ces paramètres, Stan choisit des distributions <em>a priori</em> extrêmement diffuses à l’intérieur des bornes spécifiées, qui produisent des estimés équivalents au maximum de vraisemblance. Cela fonctionne si on a beaucoup de données, mais comme nous avons vu dans le cours, il est recommandé dans l’approche bayésienne de choisir des distributions <em>a priori</em> qui établissent de légères contraintes sur la valeur de nos paramètres.</p>
+<p>Ici, nos deux variables numériques (<code>log_radon</code> et <code>log_uranium</code>) ont une variation de l’ordre de quelques unités.</p>
+<pre class="r"><code>par(mfrow = c(1, 2))
+hist(radon$log_uranium)
+hist(radon$log_radon)</code></pre>
+<p><img src="08-Intro_Stan_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Dans ce cas, il est réaliste de penser que les coefficients seront de l’ordre de quelques unités et non pas de dizaines ou centaines. Lorsque les variables sont sur une échelle d’environ 1, les développeurs de Stan suggèrent des distributions <em>a priori</em> normales centrées réduites, définies par <code>std_normal()</code>, une fonction équivalente à <code>normal(0, 1)</code>. Notez que pour les variables contraintes à être supérieures à zéro, comme <code>sigma</code>, la distribution <em>a priori</em> est tronquée à 0, donc nous avons seulement la moitié droite de la distribution normale centrée réduite.</p>
+<p><em>Note</em>: Si les variables sont sur des échelles très différentes, il peut être utile de les normaliser, par exemple avec <code>scale</code> dans R, car l’algorithme d’inférence bayésienne fonctionne mieux si toutes les variables ont des échelles comparables, plutôt que de comporter des valeurs très grandes et très petites.</p>
+<p>Voici le programme obtenu jusqu’à maintenant:</p>
+<pre><code>data {
+  int&lt;lower=1&gt; n_obs; // Nombre d&#39;observations
+  int&lt;lower=1&gt; n_comt; // Nombre de comtés
+  vector[n_obs] log_rad; // Log-conc. radon
+  int&lt;lower=0, upper=1&gt; etage[n_obs];
+  int&lt;lower=1, upper=n_comt&gt; comte[n_obs]; // No. de comté de chaque observation
+  vector[n_comt] log_u; // Log-conc. uranium par comté
+}
+
+parameters {
+  vector[n_comt] b_0;
+  real b_etage; // 
+  real g_0; // Ordonnée à l&#39;origine pour le modèle de b_0 par comté
+  real g_u; // Effet de log_u sur b_0 par comté
+  real&lt;lower=0&gt; sigma_b0; 
+  real&lt;lower=0&gt; sigma;
+}
+
+model {
+  vector[n_obs] mu;
+  
+  b_etage ~ std_normal();
+  g_0 ~ std_normal();
+  g_u ~ std_normal();
+  sigma_b0 ~ std_normal();
+  sigma ~ std_normal();
+  
+  
+  b_0 ~ normal(g_0 + g_u * log_u, sigma_b0);
+  for (i in 1:n_obs)
+    mu[i] = b_0[comte[i]] + b_etage * etage[i];
+  log_rad ~ normal(mu, sigma);
+}  </code></pre>
+</div>
+<div id="parametrisation-non-centree" class="section level2">
+<h2>Paramétrisation non-centrée</h2>
+<p>Dans le modèle ci-dessous, nous demandons à Stan d’estimer à la fois les effets aléatoires <code>b_0</code> de chaque comté, ainsi que leur écart-type <code>sigma_b0</code>. Pour des raisons que nous discuterons davantage au prochain cours en présentant l’algorithme d’inférence, la dépendance entre ces quantités peut poser problème. Brièvement, cela est dû au fait que plus l’écart-type <code>sigma_b0</code> est petit, plus les effets <code>b_0</code> sont contraints près de 0.</p>
+<p>Il est donc recommandé d’utiliser une paramétrisation “non-centrée” pour les effets aléatoires dans Stan. L’équation pour <span class="math inline">\(\beta_{0j}\)</span> dans notre modèle:</p>
+<p><span class="math display">\[\beta_{0j} \sim \text{N}(\gamma_0 + \gamma_{1j} u_j, \sigma_{\beta_0})\]</span></p>
+<p>peut être ré-écrite ainsi:</p>
+<p><span class="math display">\[\beta_{0j} = \gamma_0 + \gamma_{1j} u_j + \sigma_{\beta_0} \nu_j\]</span></p>
+<p>où <span class="math inline">\(\nu_j \sim \text{N}(0, 1)\)</span> est une variable normale centrée réduite. Puisque les effets aléatoires <span class="math inline">\(\nu_j\)</span> sont représentés en multiples de <span class="math inline">\(\sigma_{\beta_0}\)</span>, ces deux paramètres se retrouvent donc découplés.</p>
+<p>Dans le code ci-dessous, nous avons utilisé la variable <code>b0_alea</code> pour <span class="math inline">\(\nu_j\)</span>. Puisque <code>b_0</code> est maintenant une valeur dépendant entièrement d’une combinaison d’autres paramètres et de données, nous pouvons la définir dans un nouveau bloc <code>transformed parameters</code>. La distribution des variables dans ce bloc, comme celles de <code>parameters</code>, seront données par Stan à la sortie du programme.</p>
+<pre><code>data {
+  int&lt;lower=1&gt; n_obs; // Nombre d&#39;observations
+  int&lt;lower=1&gt; n_comt; // Nombre de comtés
+  vector[n_obs] log_rad; // Log-conc. radon
+  int&lt;lower=0, upper=1&gt; etage[n_obs];
+  int&lt;lower=1, upper=n_comt&gt; comte[n_obs]; // No. de comté de chaque observation
+  vector[n_comt] log_u; // Log-conc. uranium par comté
+}
+
+parameters {
+  vector[n_comt] b0_alea; // Portion aléatoire de b_0
+  real b_etage; // 
+  real g_0; // Ordonnée à l&#39;origine pour le modèle de b_0 par comté
+  real g_u; // Effet de log_u sur b_0 par comté
+  real&lt;lower=0&gt; sigma_b0; 
+  real&lt;lower=0&gt; sigma;
+}
+
+transformed parameters {
+  vector[n_comt] b_0; // Ordonnée à l&#39;origine par comté
+  b_0 = g_0 + g_u * log_u + sigma_b0 * b0_alea;
+}
+
+model {
+  vector[n_obs] mu;
+  
+  b_etage ~ std_normal();
+  g_0 ~ std_normal();
+  g_u ~ std_normal();
+  sigma_b0 ~ std_normal();
+  sigma ~ std_normal();
+  b0_alea ~ std_normal();
+  
+  for (i in 1:n_obs)
+    mu[i] = b_0[comte[i]] + b_etage * etage[i];
+  log_rad ~ normal(mu, sigma);
+}  </code></pre>
+</div>
+<div id="references" class="section level2">
+<h2>Références</h2>
+<p>Documentation pour Stan: <a href="https://mc-stan.org/users/documentation/">https://mc-stan.org/users/documentation/</a></p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

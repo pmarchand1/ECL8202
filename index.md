@@ -23,6 +23,8 @@
 
 ## Exercices
 
+[Options avancées dans ggplot2](labos/Options_avancees_ggplot2.html) ([PDF](labos/Options_avancees_ggplot2.pdf))
+
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01R-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
 
 2. [Tests de randomisation](labos/02-Tests_randomisation.html) ([PDF](labos/02-Tests_randomisation.pdf)) - Données: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_plots.csv](donnees/portal_plots.csv)
@@ -36,3 +38,5 @@
 6. [Modèles linéaires généralisés à effets mixtes 2](labos/06-Modeles_generalises_mixtes2.html) ([PDF](labos/06-Modeles_generalises_mixtes2.pdf)) - Données: [aiv_ducks.csv](donnees/aiv_ducks.csv)
 
 7. Modèles additifs généralisés - [Exercices en classe](labos/07A-Modeles_additifs_generalises.html) ([PDF](labos/07A-Modeles_additifs_generalises.pdf), Données: [dendro_wa082.csv](donnees/dendro_wa082.csv)) - [Travail à remettre](labos/07-Modeles_additifs_generalises.html) ([PDF](labos/07-Modeles_additifs_generalises.pdf), Données: [portal_ot.csv](donnees/portal_ot.csv))
+
+8. [Introduction à l'analyse bayésienne - Spécifier des modèles avec Stan](labos/08-Intro_Stan.html) ([PDF](labos/08-Intro_Stan.pdf)) - Données: [radon.csv](donnees/radon.csv)

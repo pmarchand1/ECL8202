@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Options avancées dans ggplot2</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Options avancées dans ggplot2</h1>
+
+</div>
+
+
+<div id="livres-de-reference-sur-la-visualisation-des-donnees" class="section level2">
+<h2>Livres de référence sur la visualisation des données</h2>
+<ul>
+<li><p>Healy, K. <em>Data Visualization: A practical introduction</em> <a href="https://socviz.co/">https://socviz.co/</a> (aussi disponible en format papier à la bibliothèque de l’UQAT)</p></li>
+<li><p>Wilke, C.O. <em>Fundamentals of Data Visualization</em> <a href="https://serialmentor.com/dataviz/">(https://serialmentor.com/dataviz/</a></p></li>
+</ul>
+</div>
+<div id="references-utiles-pour-ggplot2" class="section level2">
+<h2>Références utiles pour <em>ggplot2</em></h2>
+<ul>
+<li><p>Liste des fonctions: <a href="https://ggplot2.tidyverse.org/reference/">https://ggplot2.tidyverse.org/reference/</a></p></li>
+<li><p><a href="https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf">Aide-mémoire des fonctions</a></p></li>
+<li><p>Codes des couleurs, types de lignes et points, etc.: <a href="https://ggplot2.tidyverse.org/articles/ggplot2-specs.html">https://ggplot2.tidyverse.org/articles/ggplot2-specs.html</a></p></li>
+<li><p>Liste des <em>packages</em> d’extension disponibles: <a href="https://www.ggplot2-exts.org/">https://www.ggplot2-exts.org/</a></p></li>
+</ul>
+</div>
+<div id="exemples-de-packages-dextension" class="section level2">
+<h2>Exemples de packages d’extension</h2>
+<ul>
+<li><a href="https://gganimate.com/">gganimate</a>: Produire des figures animées.</li>
+<li><a href="https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html">ggrepel</a>: Faciliter le placement d’étiquettes de texte sur les graphiques.</li>
+<li><a href="https://indrajeetpatil.github.io/ggstatsplot/index.html">ggstatsplot</a>: Visualiser le résultat de tests statistiques.</li>
+<li><a href="https://mran.microsoft.com/snapshot/2017-02-04/web/packages/ggthemes/vignettes/ggthemes.html">ggthemes</a>: Davantage d’options de thèmes pour les figures.</li>
+<li><a href="https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html">cowplot</a> et <a href="https://patchwork.data-imaginist.com/articles/patchwork.html">patchwork</a>: Créer des figures composées.</li>
+<li><a href="https://github.com/yeukyul/lindia/blob/master/README.md">lindia</a>: Plus de graphiques de diagnostic pour les modèles linéaires.</li>
+</ul>
+</div>
+<div id="exemple-1" class="section level2">
+<h2>Exemple 1</h2>
+<p>Jeu de données <a href="../donnees/aiv_ducks.csv">aiv_ducks.csv</a> utilisé pour le laboratoire sur les modèles linéaires mixtes généralisés: présence ou absence de la grippe aviaire (AIV) chez des canards dans l’est du Canada en fonction de différents prédicteurs.</p>
+<pre class="r"><code>aiv &lt;- read.csv(&quot;../donnees/aiv_ducks.csv&quot;)
+str(aiv)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    8967 obs. of  10 variables:
+##  $ Species           : Factor w/ 7 levels &quot;ABDU&quot;,&quot;AGWT&quot;,..: 5 5 5 5 5 5 4 5 5 5 ...
+##  $ Age               : Factor w/ 2 levels &quot;AHY&quot;,&quot;HY&quot;: 2 2 2 1 1 1 1 2 1 2 ...
+##  $ Sex               : Factor w/ 2 levels &quot;F&quot;,&quot;M&quot;: 2 1 1 2 2 2 1 2 2 2 ...
+##  $ AIV               : int  1 0 1 1 1 0 1 1 1 0 ...
+##  $ Site              : Factor w/ 72 levels &quot;Allisary&quot;,&quot;Amherst Point&quot;,..: 2 70 70 67 67 67 1 70 67 1 ...
+##  $ Latitude          : num  45.8 46 46 46 46 ...
+##  $ Longitude         : num  -64.2 -64.3 -64.3 -64.3 -64.3 ...
+##  $ Year              : int  2005 2005 2005 2005 2005 2005 2005 2005 2005 2005 ...
+##  $ Temperature       : num  18.6 17.6 17.6 17.6 17.6 ...
+##  $ Population_Density: num  1.2 1.16 1.16 1.16 1.16 ...</code></pre>
+<pre class="r"><code>library(ggplot2)
+ggplot(aiv, aes(x = Age, fill = as.factor(AIV))) +
+    geom_bar()</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Par défaut, les barres de différentes couleurs sont superposées (<code>position = "stack"</code>) pour les diagrammes à barres, ce qui rend plus difficile la comparaison sur l’axe des y. On peut spécifier <code>position = "dodge"</code> dans <code>geom_bar</code> pour qu’elles soient côte-à-côte:</p>
+<pre class="r"><code>ggplot(aiv, aes(x = Age, fill = as.factor(AIV))) +
+    geom_bar(position = &quot;dodge&quot;)</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Personnaliser le graphique:</p>
+<ul>
+<li><p>Modifier les titres du graphique, les titres des axes et de la légende avec <code>labs</code>.</p></li>
+<li><p>Modifier les échelles avec les fonctions <code>scale_...</code>; l’argument <code>labels</code> permet de changer les libellés.</p></li>
+</ul>
+<pre class="r"><code>ggplot(aiv, aes(x = Age, fill = as.factor(AIV))) +
+    labs(title = &quot;AIV en fonction de l&#39;âge&quot;, x = &quot;Âge&quot;, y = &quot;Nombre de cas&quot;, fill = &quot;AIV&quot;) +
+    geom_bar(position = &quot;dodge&quot;) +
+    scale_x_discrete(labels = c(&quot;&gt; 1 an&quot;, &quot;&lt; 1 an&quot;)) +
+    scale_fill_discrete(labels = c(&quot;Absent&quot;, &quot;Présent&quot;))</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>On peut aussi changer la palette de couleur dans <code>scale_fill_...</code>. La fonction <code>scale_fill_brewer</code> donne accès aux palettes de ColorBrewer; voir le site <a href="http://colorbrewer2.org">http://colorbrewer2.org</a> pour une liste.</p>
+<p>Ici, le graphique est “enregistré” dans une variable <code>p1</code>, puis on peut l’afficher en imprimant le résultat de <code>p1</code>.</p>
+<pre class="r"><code>p1 &lt;- ggplot(aiv, aes(x = Age, fill = as.factor(AIV))) +
+    labs(title = &quot;AIV en fonction de l&#39;âge&quot;, x = &quot;Âge&quot;, y = &quot;Nombre de cas&quot;, fill = &quot;AIV&quot;) +
+    geom_bar(position = &quot;dodge&quot;) +
+    scale_x_discrete(labels = c(&quot;&gt; 1 an&quot;, &quot;&lt; 1 an&quot;)) +
+    scale_fill_brewer(palette = &quot;Dark2&quot;, labels = c(&quot;Absent&quot;, &quot;Présent&quot;))
+p1</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Différents thèmes disponibles dans <em>ggplot2</em>. Le thème <code>theme_cowplot</code> du package <em>cowplot</em> est généralement bon pour les figures à publier (minimaliste, police de caractères assez grande). La fonction <code>theme_set</code> permet de modifier le thème par défaut pour tous les graphiques produits dans une session R.</p>
+<pre class="r"><code>library(cowplot)
+theme_set(theme_cowplot(font_size = 14))
+p1</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Le package <em>cowplot</em> permet aussi de combiner différentes figures, ex.: Figure 1(a), 1(b), etc. Notez que nous avons éliminé la légende de la figure de gauche avec <code>theme(legend.position = "none")</code>. La fonction <code>theme</code> contient différentes options de personnalisation (ex.: position de la légende, taille du texte, couleur d’arrière plan, etc.); consultez les documents de référence de <em>ggplot2</em> pour plus de détails.</p>
+<pre class="r"><code>p2 &lt;- ggplot(aiv, aes(x = Temperature, fill = as.factor(AIV))) +
+    labs(x = &quot;Température&quot;, y = &quot;Nombre de cas&quot;) +
+    geom_histogram(color = &quot;white&quot;) +
+    scale_fill_brewer(palette = &quot;Dark2&quot;) +
+    theme(legend.position = &quot;none&quot;)
+
+plot_grid(p2, p1, labels = c(&quot;A&quot;, &quot;B&quot;))</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="exemple-2" class="section level2">
+<h2>Exemple 2</h2>
+<p>Jeu de données <code>Animals2</code> du package <em>robustbase</em>: masse corporelle (en kg) et masse du cerveau (en g) pour 62 espèces de mammifères et 3 dinosaures (valeurs aberrantes). Dans le code ci-dessous, nous utilisons la fonction <code>add_rownames</code> du package <em>dplyr</em> pour créer une colonne <code>rowname</code> à partir des noms de rangées (noms des animaux).</p>
+<pre class="r"><code>library(robustbase)
+library(dplyr)
+data(Animals2)
+Animals2 &lt;- add_rownames(Animals2)
+head(Animals2)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   rowname             body brain
+##   &lt;chr&gt;              &lt;dbl&gt; &lt;dbl&gt;
+## 1 Mountain beaver     1.35   8.1
+## 2 Cow               465    423  
+## 3 Grey wolf          36.3  120. 
+## 4 Goat               27.7  115  
+## 5 Guinea pig          1.04   5.5
+## 6 Dipliodocus     11700     50</code></pre>
+<p>Nous créons des jeux de données séparés pour les dinosaures (rangées 6, 16 et 26) et les autres. Nous illustrons les données avec un nuage de points, auquel est superposé une droite de régression linéaire avec <code>geom_smooth</code> et des points mettant en évidence les 3 valeurs aberrantes.</p>
+<pre class="r"><code>dino &lt;- Animals2[c(6, 16, 26),]
+non_dino &lt;- Animals2[-c(6,16,26),]
+
+p_animals &lt;- ggplot(Animals2, aes(x = body, y = brain)) +
+    geom_point() +
+    geom_smooth(data = non_dino, method = &quot;lm&quot;, linetype = &quot;dashed&quot;) +
+    geom_point(data = dino, size = 2, color = &quot;red&quot;) +
+    scale_x_log10() +
+    scale_y_log10()
+p_animals</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Dans cet exemple, notez l’utilisation de l’argument <code>data</code> pour associer différents jeux de données à des <code>geom</code> spécifiques (ex.: non-dinosaures pour <code>geom_smooth</code>, dinosaures pour le 2e <code>geom_point</code>). Nous personnalisons aussi l’apparence de la droite (“dashed” = ligne en tirets) et les points (couleur et grosseur). <em>Rappel</em>: Des attributs comme <code>linetype</code>, <code>size</code> et <code>color</code> peuvent être associés à une variable dans <code>aes</code> pour varier l’apparence selon les niveaux de la variable, mais hors de la fonction <code>aes</code> ils appliquent une valeur unique à tous les points/lignes du <code>geom</code>.</p>
+<p>Finalement, nous avons appliqué une échelle logarithmique aux deux axes (<code>scale_x_log10()</code> et <code>scale_y_log10()</code>). Le résultat est semblable à celui qui serait obtenu avec une transformation des variables (ex.: <code>aes(x = log(body), y = log(brain))</code>), excepté qu’ici les nombres affichés sur les axes sont les valeurs non-transformées, qui sont souvent plus faciles à interpréter.</p>
+<p>Puisque nous avons enregistré le graphique précédent dans une variable <code>p_animals</code>, nous pouvons y ajouter des éléments sans répéter tout le code. Ici, nous ajoutons le nom des trois dinosaures avec <code>geom_text</code>. L’attribut <code>label</code> dans <code>aes</code> indique quelle variable fournit le texte à afficher.</p>
+<pre class="r"><code>p_animals + 
+    geom_text(data = dino, aes(label = rowname))</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Le package <em>ggrepel</em> est très utile pour ajouter des étiquettes aux observations d’un graphique. En remplaçant <code>geom_text</code> par <code>geom_text_repel</code>, le texte est automatiquement déplacé pour cacher le moins possible les autres éléments du graphique. Dans l’exemple ci-dessous, nous ajoutons des étiquettes pour toutes les espèces avec une masse inférieure à 0.01 kg ou supérieure à 1000 kg.</p>
+<pre class="r"><code>library(ggrepel)
+p_animals +
+    geom_text_repel(data = filter(Animals2, body &lt; 0.01 | body &gt; 1000),
+                    aes(label = rowname))</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+<div id="exemple-3" class="section level2">
+<h2>Exemple 3</h2>
+<p>Dans cet exemple, nous voulons comparer la représentation de 5 catégories (colonne <code>cat</code>) parmi des valeurs observées (proportions dans la colonne <code>obs</code>) à des proportions de références (colonne <code>ref</code>).</p>
+<pre class="r"><code>prop &lt;- data.frame(
+    cat = LETTERS[1:5],
+    ref = c(0.2, 0.35, 0.15, 0.12, 0.18),
+    obs = c(0.26, 0.16, 0.42, 0.09, 0.07)
+)
+prop</code></pre>
+<pre><code>##   cat  ref  obs
+## 1   A 0.20 0.26
+## 2   B 0.35 0.16
+## 3   C 0.15 0.42
+## 4   D 0.12 0.09
+## 5   E 0.18 0.07</code></pre>
+<p>Dans le graphique ci-dessous, les observations sont représentées par des points reliés par des lignes, tandis que les proportions de référence sont indiquées par des barres.</p>
+<ul>
+<li><p><code>geom_col</code> (pour colonne) produit un diagramme à barres où la variable <span class="math inline">\(y\)</span> est donnée par une colonne du jeu de données, contrairement à <code>geom_bar</code> où l’axe des <span class="math inline">\(y\)</span> compte le nombre de fois où la valeur montrée en <span class="math inline">\(x\)</span> apparaît (voir l’exemple 1).</p></li>
+<li><p><code>shape = 18</code> donne une forme de losange aux points. (Voir la référence en haut du document pour la définition de ces codes.)</p></li>
+<li><p>L’attribut <code>group</code> dans <code>aes</code> spécifie quelle variable définit les groupes de points à relier par des lignes (si un attribut comme <code>color</code> est spécifié, celui-là définit aussi les groupes). Ici <code>group = 1</code> signifie que tous les points sont dans le même groupe.</p></li>
+</ul>
+<pre class="r"><code>ggplot(prop, aes(x = cat, y = obs, group = 1)) +
+    geom_col(aes(y = ref), fill = &quot;grey70&quot;) +
+    geom_point(color = &quot;darkred&quot;, shape = 18, size = 3) +
+    geom_line(linetype = &quot;dashed&quot;, color = &quot;darkred&quot;)</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>Pour ordonner les catégories en <span class="math inline">\(x\)</span> en ordre décroissant de la variable <code>obs</code>, nous pouvons spécifier <code>x = reorder(cat, -obs)</code>, où le signe “-” indique l’ordre décroissant.</p>
+<pre class="r"><code>ggplot(prop, aes(x = reorder(cat, -obs), y = obs, group = 1)) +
+    geom_col(aes(y = ref), fill = &quot;grey70&quot;) +
+    geom_point(color = &quot;darkred&quot;, shape = 18, size = 3) +
+    geom_line(linetype = &quot;dashed&quot;, color = &quot;darkred&quot;)</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>La version suivante ajoute les valeurs de la colonne <code>obs</code> au-dessus de chaque point; <code>nudge_y = 0.05</code> indique que le texte doit être déplacé de 0.05 unités vers le haut sur l’axe des y. Pour représenter les valeurs en pourcentages, nous transformons <code>obs</code> avec la fonction <code>percent</code> du packge <em>scales</em>. Ce package contient plusieurs fonctions pour formatter les valeurs numériques.</p>
+<pre class="r"><code>library(scales)
+ggplot(prop, aes(x = reorder(cat, -obs), y = obs, group = 1)) +
+    geom_col(aes(y = ref), fill = &quot;grey70&quot;) +
+    geom_point(color = &quot;darkred&quot;, shape = 18, size = 3) +
+    geom_line(linetype = &quot;dashed&quot;, color = &quot;darkred&quot;) +
+    geom_text(aes(label = percent(obs)), color = &quot;darkred&quot;, nudge_y = 0.05)</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Nous pouvons aussi transformer l’axe des <span class="math inline">\(y\)</span> en pourcentages, en donnant la fonction <code>percent_format</code> à l’argument <code>labels</code> (plutôt que <code>percent</code> pour transformer des valeurs individuelles). L’argument <code>accuracy = 1</code> dans <code>percent</code> et <code>percent_format</code> indique que les valeurs sont affichées à l’unité près (<code>accuracy = 0.1</code> serait au dixième près, etc.)</p>
+<pre class="r"><code>library(scales)
+ggplot(prop, aes(x = reorder(cat, -obs), y = obs, group = 1)) +
+    geom_col(aes(y = ref), fill = &quot;grey70&quot;) +
+    geom_point(color = &quot;darkred&quot;, shape = 18, size = 3) +
+    geom_line(linetype = &quot;dashed&quot;, color = &quot;darkred&quot;) +
+    geom_text(aes(label = percent(obs, accuracy = 1)), color = &quot;darkred&quot;, nudge_y = 0.05) +
+    scale_y_continuous(labels = percent_format(accuracy = 1))</code></pre>
+<p><img src="Options_avancees_ggplot2_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
