@@ -20,6 +20,8 @@
 
 8. [Introduction à l'analyse bayésienne](notes_cours/08-Intro_Bayes.html) ([PDF](notes_cours/08-Intro_Bayes.pdf)) - Données: [galapagos.csv](donnees/galapagos.csv)
 
+9. [Modèles hiérarchiques bayésiens](notes_cours/09-Modeles_hierarchiques_bayesiens.html) ([PDF](notes_cours/09-Modeles_hierarchiques_bayesiens.pdf)) - Données: [rikz.csv](donnees/rikz.csv)
+
 
 ## Exercices
 

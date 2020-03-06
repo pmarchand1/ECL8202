@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Modèles hiérarchiques bayésiens</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modèles hiérarchiques bayésiens
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+# Contenu du cours
+
+- Méthodes de Monte-Carlo par chaînes de Markov
+
+- Plateforme Stan pour l'inférence bayésienne
+
+- Étapes de développement d'un modèle hiérarchique bayésien
+
+- GLMM bayésien avec brms
+
+---
+
+class: inverse, center, middle
+
+# Méthodes de Monte-Carlo par chaînes de Markov
+
+---
+
+# Rappel: Inférence bayésienne
+
+Estimation d'un paramètre `\(\theta\)` à partir d'un vecteur d'observations `\(y\)`:
+
+`$$p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}$$`
+
+--
+
+- `\(p(\theta)\)` est la distribution de probabilité *a priori* de `\(\theta\)`.
+
+--
+
+- `\(p(y | \theta)\)` est la probabilité des observations `\(y\)` conditionnelle à une valeur de `\(\theta\)`, autrement dit la fonction de vraisemblance.
+
+--
+
+- `\(p(\theta | y)\)` est la distribution *a posteriori* de `\(\theta\)` après avoir observé `\(y\)`. 
+
+--
+
+- Pour un modèle avec plusieurs paramètres, `\(\theta\)` est un vecteur et `\(p(\theta | y)\)` est la distribution *a posteriori* conjointe des paramètres du modèle.
+
+---
+
+# Méthodes de Monte-Carlo
+
+`$$p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}$$`
+
+- `\(p(y)\)` est la probabilité marginale des données, soit l'intégrale de `\(p(y | \theta) p(\theta)\)` pour toutes les valeurs possibles de `\(\theta\)`.
+
+--
+
+- Problème: Excepté dans des cas simples, on ne peut pas calculer exactement `\(p(y)\)` pour obtenir `\(p(\theta | y)\)`.
+
+--
+
+- Méthodes de Monte-Carlo: Simuler des échantillons de la distribution de `\(p(\theta | y)\)`.
+
+---
+
+# Rapport de probabilité
+
+On peut calculer le rapport des probabilités *a posteriori* de deux vecteurs `\(\theta\)`:
+
+`$$\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} = \frac{p(y | \theta_{(2)}) p(\theta_{(2)})}{p(y | \theta_{(1)}) p(\theta_{(1)})}$$`
+
+---
+
+# Algorithme de Metropolis-Hastings
+
+Méthode pour obtenir des échantillons d'une distribution à partir des rapports de probabilité
+
+--
+
+1. Choisir aléatoirement un premier vecteur de paramètres `\(\theta_{(1)}\)`.
+
+--
+
+2. Choisir un deuxième vecteur `\(\theta_{(2)}\)` selon une certaine probabilité de transition, ex.: déplacement aléatoire normal autour de `\(\theta_{(1)}\)`.
+
+--
+
+3. Calculer le rapport des probabilités *a posteriori* `\(\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)}\)`.
+
+--
+
+    + Si le rapport est plus grand ou égal à 1, on accepte `\(\theta_{(2)}\)`.
+
+    + Si le rapport est plus petit que 1, on accepte `\(\theta_{(2)}\)` avec une probabilité égale à ce rapport; sinon, on reste au même point donc `\(\theta_{(2)} = \theta_{(1)}\)`.
+
+--
+
+Répéter 2-3 pour le nombre d'itérations voulu.
+
+---
+
+# Algorithme de Metropolis-Hastings
+
+- Avec suffisament d'itérations, la distribution des `\(\theta_{(i)}\)` s'approche aussi près que voulu de la distribution recherchée: `\(p(\theta | y)\)`. *
+
+--
+
+\**Certaines conditions s'appliquent.*
+
+--
+
+- Chaque vecteur `\(\theta_{(i+1)}\)` est un vecteur aléatoire qui dépend de `\(\theta_{(i)}\)`: c'est une chaîne de Markov.
+
+--
+
+- Pour cette raison, on parle d'une méthode de Monte-Carlo par chaînes de Markov (*Markov chain Monte Carlo* ou MCMC en anglais).
+
+---
+
+# Progression des chaînes de Markov
+
+![](../images/mcmc_dens_ex1.png)
+
+---
+
+# Progression des chaînes de Markov
+
+![](../images/mcmc_dens_ex2.png)
+
+---
+
+# Progression des chaînes de Markov
+
+![](../images/mcmc_dens_ex3.png)
+
+---
+
+# Progression des chaînes de Markov
+
+![](../images/mcmc_dens_ex4.png)
+
+---
+
+# Tracé des chaînes de Markov
+
+.pull-left[
+![](../images/mcmc_trace_ex.png)
+]
+
+--
+
+.pull-right[
+- Avant la ligne pointillée: période de rodage (*burn-in* ou *warmup*)
+
+- Après la ligne: période d'échantillonnage
+]
+
+---
+
+# Vérification de la convergence des chaînes
+
+- Inspecter le tracé (*trace plot*).
+
+--
+
+- Statistique de Gelman-Rubin `\(\hat{R}\)`: variance d'un paramètre entre les chaînes relative à la variance du paramètre dans chaque chaîne.
+
+--
+
+    + `\(\hat{R} \approx 1\)` à la convergence, ne devrait pas dépasser 1.1.
+    + `\(\hat{R} \leq 1.1\)` ne garantit pas la convergence vers la bonne distribution.
+
+--
+
+- Si problème de convergence: allonger la période de rodage, revoir le modèle.
+
+---
+
+# Efficacité de l'échantillonnage
+
+- Considérons une fonction `\(f\)` calculée à partir des paramètres du modèle.
+
+--
+
+- Supposons qu'on ait un échantillon de `\(N\)` tirages aléatoires **indépendants** de la distribution conjointe *a posteriori* des paramètres.
+
+--
+
+- La valeur de `\(f\)` calculée à partir de cet échantillon s'approche de sa valeur pour la distribution exacte, avec une erreur d'approximation (erreur-type de Monte-Carlo) proportionnelle à `\(1/\sqrt{N}\)`.
+
+--
+
+- Ne pas confondre erreur-type de Monte-Carlo avec l'écart-type de la distribution *a posteriori* du paramètre.
+
+---
+
+# Efficacité de l'échantillonnage
+
+- La chaîne de Markov ne produit *pas* des tirages indépendants.
+
+--
+
+- Les logiciels d'inférence bayésienne calculent l'erreur-type de Monte-Carlo et la taille effective de l'échantillon, `\(N_{eff}\)`, soit le nombre de tirages indépendants nécessaires pour avoir la même précision.
+
+---
+
+class: inverse, center, middle
+
+# Plateforme Stan pour l'inférence bayésienne
+
+---
+
+# Stan
+
+- Langage pour spécifier des modèles statistiques et algorithmes d'inférence pour ces modèles (https://mc-stan.org).
+
+Carpenter, B. et al. (2017) Stan: A Probabilistic Programming Language. *Journal of Statistical Software* 76(1). 10.18637/jss.v076.i01.
+
+--
+
+- Modèles compilés en code C++ (rapide).
+
+--
+
+- Interface avec R (*rstan*) et Python.
+
+--
+
+- Plusieurs packages R associés: *brms*, *rstanarm*, *bayesplot*, *shinystan*, *loo*, *tidybayes*.
+
+---
+
+# Méthode de Monte-Carlo hamiltonienne
+
+- Type d'algorithme MCMC implémenté par Stan.
+
+- Évalue non seulement la valeur de `\(p(y | \theta) p(\theta)\)` à chaque point, mais aussi son gradient (pente en plusieurs dimensions).
+
+---
+
+# Chaîne de Markov
+
+![](../images/mcmc_dens_ex4.png)
+
+---
+
+# Méthode de Monte-Carlo hamiltonienne
+
+- Type d'algorithme MCMC implémenté par Stan.
+
+- Évalue non seulement la valeur de `\(p(y | \theta) p(\theta)\)` à chaque point, mais aussi son gradient (pente en plusieurs dimensions).
+
+  + Convergence plus rapide
+  + `\(N_{eff}\)` plus élevé
+  
+--
+
+- Diagnostics uniques (ex. divergences) pour vérifier la validité de l'algorithme.
+
+--
+
+Référence: Monnahan, C.C., Thorson, J.T. et Branch, T.A. (2017) Faster estimation of Bayesian models in ecology using Hamiltonian Monte Carlo. *Methods in Ecology and Evolution* 8: 339-348.
+
+---
+
+# Diagnostics
+
+## Transitions divergentes
+
+- Indiquent que l'algorithme a de la difficulté à explorer une région de la distribution de probabilité *a posteriori*, généralement en raison d'un changement trop abrupt de la forme de cette distribution.
+
+--
+
+- La validité de l'algorithme est compromise dans ce cas.
+
+--
+
+- Peuvent parfois être résolues en forçant l'algorithme à faire des plus petits pas (paramètre *adapt_delta*). 
+
+--
+
+- Dans des cas plus sévères, il faut revoir la paramétrisation du modèle.
+
+---
+
+# Diagnostics
+
+## Profondeur maximale de l'arbre (*maximum tree depth*)
+
+- L'algorithme évalue différentes trajectoires possibles (représentées par un arbre) pour choisir la valeur des paramètres à la prochaine itération.
+
+--
+
+- Cet avertissement signifie que l'algorithme a essayé le nombre maximal de trajectoires, mais qu'une trajectoire plus longue demeure possible.
+
+--
+
+- Contrairement aux transitions divergentes, cet avertissement n'invalide pas les résultats, mais il peut indiquer une paramétrisation sous-optimale.
+
+--
+
+- On peut augmenter la profondeur maximum avec l'argument *max_treedepth*, mais cela augmente le temps pris pour chaque itération.
+
+---
+
+# Diagnostics
+
+## Énergie (*BFMI low*)
+
+- Indique que l'algorithme ne parcourt pas la distribution *a posteriori* de façon efficace.
+
+--
+
+- Ce problème peut parfois être réglé en allongeant la période de rodage.
+
+--
+
+- Si cet avertissement se produit en même temps qu'un des précédents, la formulation du modèle doit probablement être revue.
+
+---
+
+# Options pour utiliser Stan en R
+
+## Programme écrit en Stan
+
+```
+data {
+  int N;
+  vector[N] y;
+  vector[N] x;
+}
+
+[...]
+
+```
+--
+
+- Créer une liste dans R associant les données à chaque variable. 
+
+
+```r
+dat &lt;- list(N = nrow(df), y = df$y, x = df$x)
+```
+
+---
+
+# Options pour utiliser Stan en R
+
+## Programme écrit en Stan
+
+- Appeler la fonction `stan_model` pour compiler le modèle, puis `sampling` pour estimer la distribution *a posteriori* des paramètres à partir des données.
+
+
+```r
+library(rstan)
+mod &lt;- stan_model("model.stan")
+result &lt;- sampling(mod, data = dat)
+```
+
+---
+
+# Options pour utiliser Stan en R
+
+## Package *brms*
+
+
+```r
+library(brms)
+res_brms &lt;- brm(y ~ x, data = df)
+```
+
+--
+
+## Package *rstanarm*
+
+
+```r
+library(rstanarm)
+res_arm &lt;- stan_lm(y ~ x, data = df)
+```
+
+--
+
+- Différentes fonctions pour différents types de modèles (`stan_lm`, `stan_glm`, `stan_lmer`, etc.).
+
+- Moins d'options que *brms*, mais programmes pré-compilés.
+
+---
+
+class: inverse, center, middle
+
+# Étapes de développement d'un modèle hiérarchique bayésien
+
+---
+
+# Aperçu des étapes
+
+Référence: Betancourt, M. (2018) Towards A Principled Bayesian Workflow (RStan). https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html.
+
+--
+
+1. Formuler le modèle.
+
+--
+
+2. Vérifier les prédictions *a priori*.
+
+--
+
+3. Tester l'ajustement du modèle à des données simulées.
+
+--
+
+4. Ajuster le modèle aux données réelles et vérifier les diagnostics.
+
+--
+
+5. Vérifier les prédictions *a posteriori*.
+
+---
+
+# Formulation du modèle
+
+- Description des variables et de leurs relations possibles
+
+--
+
+- Structure de l'échantillonnage ou de l'expérience
+
+--
+
+- Distributions *a priori* des paramètres
+
+---
+
+# Prédictions *a priori*
+
+- Générer des vecteurs de paramètres à partir de leur distribution *a priori*.
+
+--
+
+- Simuler un jeu de données à partir du modèle pour chaque vecteur de paramètres (utiliser les valeurs réelles des prédicteurs).
+
+--
+
+- Vérifier si les propriétés des observations simulées correspondent à des valeurs réalistes pour le problème (sans comparer directement aux observations).
+
+---
+
+# Ajustement aux données simulées
+
+- Ajuster le modèle à chaque vecteur d'observations simulé à l'étape précédente.
+
+--
+
+- Vérifier les diagnostics de l'ajustement pour chaque simulation. 
+
+--
+
+- Vérifier l'exactitude des inférences du modèle en comparant les distributions *a posteriori* aux valeurs des paramètres utilisées pour chaque simulation.
+
+--
+
+  + Test de calibration: les intervalles de probabilité *a posteriori* sont-ils justes?
+  
+  + Test de sensibilité: Les données permettent-elles de cerner la valeur du paramètre?
+
+---
+
+# Calibration par simulation
+
+- Observations `\(y\)` simulées à partir du modèle avec `\(\theta\)` tiré de la distribution *a priori*.
+
+--
+
+- On ajuste le modèle à ces `\(y\)` pour obtenir un échantillon de la distribution *a posteriori* de `\(\theta\)`, soit `\(\theta_{(i)}\)` pour `\(i\)` de 1 jusqu'à `\(N\)` itérations.
+
+--
+
+- Si l'inférence est correcte, le rang de `\(\theta\)` parmi les `\(\theta_{(i)}\)` est distribué uniformément entre 1 et `\(N + 1\)`.
+
+--
+
+- En effectuant de nombreuses simulations, on peut vérifier que la distribution du rang est uniforme.
+
+--
+
+Référence: Talts, S. et al. (2018) Validating Bayesian inference algorithms with simulation-based calibration. arXiv:1804.06788.
+
+---
+
+# Sensibilité
+
+### `\(z\)`-score
+
+Différence centrée réduite entre la valeur postérieure estimée et la valeur réelle du paramètre
+
+`\(\frac{\bar{\theta}_{post} - \theta}{\sigma_{post}}\)`
+
+--
+
+### Contraction (*shrinkage*)
+
+Réduction de la variance par rapport à la distribution *a priori*
+
+`\(1 - \frac{\sigma^2_{post}}{\sigma^2_{prior}}\)`
+
+---
+
+# Ajustement aux données réelles
+
+- Vérifier les diagnostics (divergences, profondeur de l'arbre, énergie), réajuster le modèle au besoin en modifiant les paramètres de l'algorithme.
+
+--
+
+- Consulter le sommaire des estimés et visualiser les distributions *a posteriori* des paramètres.
+
+---
+
+# Prédictions *a posteriori*
+
+- Comparer les intervalles de prédiction aux valeurs observées.
+
+--
+
+- Comparer les prédictions et observations au moyen de statistiques sommaires décrivant des caractéristiques importantes du jeu de données qui ne sont pas directement ajustées par le modèle.
+
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
