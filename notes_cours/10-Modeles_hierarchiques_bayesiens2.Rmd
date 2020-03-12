@@ -160,7 +160,7 @@ Comme pour l'AIC, nous pouvons définir des poids selon les différences d'IC en
 
 Cependant, il n'est pas toujours optimal de combiner les modèles proportionnellement à leur plausibilité. Par exemple, les deux meilleurs modèles peuvent produire des prédictions redondantes, tandis que le troisième et quatrième meilleur modèle peuvent aider à corriger certaines prédictions moins bonnes du meilleur modèle.
 
-La **superposition de modèles** (*model stacking*) consiste à chercher les poids $w_j$ qui minimisent l'erreur de prédiction multi-modèles donnée par la moyenne pondérée. Ce calcul peut être fait directement à partir des résultats de la méthode PSIS-LOO, comme nous verrons dans l'exemple de la prochaine section.
+La **superposition de modèles** (*model stacking*) consiste à chercher les poids $w_j$ qui minimisent l'erreur de prédiction multi-modèles donnée par la moyenne pondérée (Yao et al. 2018). Ce calcul peut être fait directement à partir des résultats de la méthode PSIS-LOO, comme nous verrons dans l'exemple de la prochaine section.
 
 # Comparaison de modèles avec *loo* et *brms*
 
@@ -278,3 +278,6 @@ Pour l'estimé du PSIS-LOO avec correction des valeurs problématiques, nous voy
 # Références
 
 Vehtari, A., Gelman, A. et Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing* 27(5), 1413--1432. doi:10.1007/s11222-016-9696-4.
+
+Yao, Y., Vehtari, A., Simpson, D. et Gelman, A. (2018) Using stacking to average Bayesian predictive distributions. Bayesian Analysis 13(3), 917--1007. doi:10.1214/17-BA1091.
+

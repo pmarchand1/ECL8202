@@ -391,7 +391,7 @@ div.tocify {
 <p><span class="math display">\[\tilde{y} = \sum_{j = 1}^m w_j \tilde{y_j}\]</span></p>
 <p>Comme pour l’AIC, nous pouvons définir des poids selon les différences d’IC entre deux modèles et cela pour différents critères bayésiens (ex.: WAIC, LOOIC).</p>
 <p>Cependant, il n’est pas toujours optimal de combiner les modèles proportionnellement à leur plausibilité. Par exemple, les deux meilleurs modèles peuvent produire des prédictions redondantes, tandis que le troisième et quatrième meilleur modèle peuvent aider à corriger certaines prédictions moins bonnes du meilleur modèle.</p>
-<p>La <strong>superposition de modèles</strong> (<em>model stacking</em>) consiste à chercher les poids <span class="math inline">\(w_j\)</span> qui minimisent l’erreur de prédiction multi-modèles donnée par la moyenne pondérée. Ce calcul peut être fait directement à partir des résultats de la méthode PSIS-LOO, comme nous verrons dans l’exemple de la prochaine section.</p>
+<p>La <strong>superposition de modèles</strong> (<em>model stacking</em>) consiste à chercher les poids <span class="math inline">\(w_j\)</span> qui minimisent l’erreur de prédiction multi-modèles donnée par la moyenne pondérée (Yao et al. 2018). Ce calcul peut être fait directement à partir des résultats de la méthode PSIS-LOO, comme nous verrons dans l’exemple de la prochaine section.</p>
 </div>
 </div>
 <div id="comparaison-de-modeles-avec-loo-et-brms" class="section level1">
@@ -524,6 +524,7 @@ stacking_weights(cbind(loo1$mod1$pointwise[,1], loo1$mod2$pointwise[,1]))</code>
 <div id="references" class="section level1">
 <h1>Références</h1>
 <p>Vehtari, A., Gelman, A. et Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. <em>Statistics and Computing</em> 27(5), 1413–1432. <a href="doi:10.1007/s11222-016-9696-4" class="uri">doi:10.1007/s11222-016-9696-4</a>.</p>
+<p>Yao, Y., Vehtari, A., Simpson, D. et Gelman, A. (2018) Using stacking to average Bayesian predictive distributions. Bayesian Analysis 13(3), 917–1007. <a href="doi:10.1214/17-BA1091" class="uri">doi:10.1214/17-BA1091</a>.</p>
 </div>
 
 
