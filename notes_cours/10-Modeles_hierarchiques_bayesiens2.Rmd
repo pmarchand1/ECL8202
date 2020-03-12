@@ -71,7 +71,7 @@ correspond au rapport de la plausibilité (*evidence ratio*) de chaque modèle v
 
 Avec $m$ modèles candidats, on peut se servir des rapports de plausibilité décrits ci-dessus pour définir le poids d'Akaike $w$ pour chaque modèle:
 
-$$ w_i = \frac{e^{\frac{-\Delta AIC_i}{2}}}{\sum_{j=1}^{m} e^{\frac{-\Delta AIC_j}{2}}}$$
+$$w_i = \frac{e^{\frac{-\Delta AIC_i}{2}}}{\sum_{j=1}^{m} e^{\frac{-\Delta AIC_j}{2}}}$$
 
 Le dénominateur normalise chaque rapport par leur somme, de façon à ce que la somme des poids $w_i$ égale 1.
 

@@ -329,7 +329,7 @@ div.tocify {
 <div id="predictions-multi-modeles" class="section level2">
 <h2>Prédictions multi-modèles</h2>
 <p>Avec <span class="math inline">\(m\)</span> modèles candidats, on peut se servir des rapports de plausibilité décrits ci-dessus pour définir le poids d’Akaike <span class="math inline">\(w\)</span> pour chaque modèle:</p>
-<p><span class="math display">\[ w_i = \frac{e^{\frac{-\Delta AIC_i}{2}}}{\sum_{j=1}^{m} e^{\frac{-\Delta AIC_j}{2}}}\]</span></p>
+<p><span class="math display">\[w_i = \frac{e^{\frac{-\Delta AIC_i}{2}}}{\sum_{j=1}^{m} e^{\frac{-\Delta AIC_j}{2}}}\]</span></p>
 <p>Le dénominateur normalise chaque rapport par leur somme, de façon à ce que la somme des poids <span class="math inline">\(w_i\)</span> égale 1.</p>
 <p>Si plusieurs modèles sont plausibles et ont un poids d’Akaike non-négligeable, alors il est possible de faire la moyenne de leurs prédictions d’une nouvelle observation de la réponse (cette prédiction est notée <span class="math inline">\(\tilde{y}\)</span>), en pondérant la prédiction <span class="math inline">\(\tilde{y_j}\)</span> de chaque modèle candidat par son poids <span class="math inline">\(w_j\)</span>.</p>
 <p><span class="math display">\[\tilde{y} = \sum_{j = 1}^m w_j \tilde{y_j}\]</span></p>
