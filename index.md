@@ -22,6 +22,9 @@
 
 9. [Modèles hiérarchiques bayésiens](notes_cours/09-Modeles_hierarchiques_bayesiens.html) ([PDF](notes_cours/09-Modeles_hierarchiques_bayesiens.pdf)) - Données: [rikz.csv](donnees/rikz.csv)
 
+10. [Modèles hiérarchiques bayésiens 2](notes_cours/10-Modeles_hierarchiques_bayesiens2.html)
+([PDF](notes_cours/10-Modeles_hierarchiques_bayesiens2.pdf))
+
 
 ## Exercices
 

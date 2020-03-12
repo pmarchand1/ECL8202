@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Modèles hiérarchiques bayésiens 2</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Modèles hiérarchiques bayésiens 2</h1>
+
+</div>
+
+
+<div id="contenu-du-cours" class="section level1">
+<h1>Contenu du cours</h1>
+<ul>
+<li><p>Révision: Comparaison et sélection de modèles</p></li>
+<li><p>Approche bayésienne pour la comparaison de modèles</p></li>
+<li><p>Comparaison de modèles avec <em>loo</em> et <em>brms</em></p></li>
+<li><p>Plus d’exemples de modèles bayésiens en écologie</p></li>
+</ul>
+</div>
+<div id="comparaison-et-selection-de-modeles" class="section level1">
+<h1>Comparaison et sélection de modèles</h1>
+<p>Supposons que nous avons différents modèles statistiques qui visent à expliquer les mêmes données. Les modèles pourraient inclure différents prédicteurs, une distribution différente de la réponse, etc. Comment déterminer quel modèle représente le mieux le phénomène étudié?</p>
+<p>La plupart des méthodes de comparaison de modèles cherchent à optimiser la capacité du modèle à <strong>prédire de nouvelles observations</strong> du phénomène. Autrement dit, il ne suffit pas d’évaluer si le modèle s’approche des données utilisées pour son ajustement. Un modèle plus complexe, avec davantage de paramètres ajustables, va toujours être plus près de ces données.</p>
+<p>De façon générale, un modèle trop simple comporte une grande erreur systématique (biais ou sous-ajustement), car il omet des effets importants sur la variable réponse; un modèle trop complexe comporte une grande erreur aléatoire (variance ou surajustement), car il tend à représenter des associations “accidentelles” d’un échantillon particulier qui ne se généralisent pas à la population. Le compromis idéal entre ces deux types d’erreur, qui minimise l’erreur totale, dépend de la quantité de données, car un grand échantillon diminue la variance associée à l’estimation de nombreux paramètres dans un modèle complexe.</p>
+<p><img src="../images/biais_variance.png" /></p>
+<p>Avec des grands jeux de données, il est possible de mettre de côté une partie des données (souvent ~20 à 30%) pour créer un ensemble de validation, tandis que le reste des données forment l’ensemble d’entraînement (<em>training set</em>). Dans ce cas, chacun des modèles candidats est ajusté à partir des données d’entraînement et la performance prédictive des modèles ajustés est évaluée sur l’ensemble de validation.</p>
+<div id="validation-croisee" class="section level2">
+<h2>Validation croisée</h2>
+<p>La mise de côté d’une partie des données pour la validation n’est pas pratique si la taille de l’échantillon est modeste. Avec relativement peu de données, chaque point est important pour estimer précisément les paramètres du modèle; aussi, plus l’ensemble de validation est petit, plus il a des chances d’être non-représentatif de la population.</p>
+<p>La validation croisée (<em>cross-validation</em>) offre une façon d’évaluer la performance prédictive sur des nouvelles observations sans avoir à mettre de côté un ensemble de validation. Cette méthode consiste à diviser aléatoirement les observations en groupes et mesurer la qualité de la prédiction des observations d’un groupe selon un modèle ajusté au reste des observations.</p>
+<p>Par exemple, si chaque groupe ne comporte qu’une seule observation (<em>leave-one-out cross-validation</em>), nous pouvons évaluer la prédiction de chaque valeur de la réponse <span class="math inline">\(y_i\)</span> pour un modèle ajusté sans l’observation <span class="math inline">\(i\)</span>. Cependant, cette méthode requiert de réajuster le modèle <span class="math inline">\(n\)</span> fois, où <span class="math inline">\(n\)</span> est le nombre d’observations.</p>
+<p>Si le nombre d’observations est grand, il peut être plus pratique de diviser les observations en <span class="math inline">\(k\)</span> groupes (<em>k-fold cross-validation</em>), par exemple <span class="math inline">\(k\)</span> = 10, et d’ajuster chaque modèle à évaluer <span class="math inline">\(k\)</span> fois en laissant une fraction <span class="math inline">\(1/k\)</span> des observations de côté.</p>
+</div>
+<div id="critere-dinformation-dakaike" class="section level2">
+<h2>Critère d’information d’Akaike</h2>
+<p>Puisque les méthodes de validation croisée sont coûteuses en terme de calcul, il est utile de pouvoir approximer l’erreur de prédiction qui serait obtenue en validation croisée sans avoir à réajuster le modèle plusieurs fois.</p>
+<p>Pour les modèles ajustés par la méthode du maximum de vraisemblance, le critère d’information d’Akaike (AIC) offre une mesure d’ajustement basée sur la théorie de l’information, qui tend à produire le même résultat que la validation croisée <em>leave-one-out</em> si la taille de l’échantillon est assez grand. L’AIC est calculé ainsi:</p>
+<p><span class="math display">\[ AIC = -2 \log L + 2 K \]</span></p>
+<p>où <span class="math inline">\(L\)</span> est la fonction de vraisemblance à son maximum et <span class="math inline">\(K\)</span> est le nombre de paramètres estimés par le modèle. Une petite valeur de l’AIC représente un meilleur pouvoir prédictif du modèle. Le premier terme de l’équation représente l’ajustement aux données observées, tandis que le deuxième terme pénalise les modèles plus complexes.</p>
+<p>L’AIC est défini à une constante additive près, donc sa valeur absolue ne donne aucune information. C’est plutôt la différence d’AIC entre les modèles candidats qui est interprétable. Cette différence est définie par rapport à la valeur minimale de l’AIC parmi les modèles comparés: <span class="math inline">\(\Delta AIC = AIC - \min AIC\)</span>. Le meilleur modèle a un <span class="math inline">\(\Delta AIC = 0\)</span>.</p>
+<p>L’expression:</p>
+<p><span class="math display">\[ e^{-\frac{\Delta AIC}{2} } \]</span></p>
+<p>correspond au rapport de la plausibilité (<em>evidence ratio</em>) de chaque modèle vs. celui ayant l’AIC minimal. Par exemple, <span class="math inline">\(\Delta AIC = 2\)</span> correspond à un ratio de ~0.37 (~3 fois moins probable), tandis que <span class="math inline">\(\Delta AIC = 10\)</span> correspond à un ratio de ~0.0067 (~150 fois moins probable).</p>
+</div>
+<div id="predictions-multi-modeles" class="section level2">
+<h2>Prédictions multi-modèles</h2>
+<p>Avec <span class="math inline">\(m\)</span> modèles candidats, on peut se servir des rapports de plausibilité décrits ci-dessus pour définir le poids d’Akaike <span class="math inline">\(w\)</span> pour chaque modèle:</p>
+<p><span class="math display">\[ w_i = \frac{e^{\frac{-\Delta AIC_i}{2}}}{\sum_{j=1}^{m} e^{\frac{-\Delta AIC_j}{2}}}\]</span></p>
+<p>Le dénominateur normalise chaque rapport par leur somme, de façon à ce que la somme des poids <span class="math inline">\(w_i\)</span> égale 1.</p>
+<p>Si plusieurs modèles sont plausibles et ont un poids d’Akaike non-négligeable, alors il est possible de faire la moyenne de leurs prédictions d’une nouvelle observation de la réponse (cette prédiction est notée <span class="math inline">\(\tilde{y}\)</span>), en pondérant la prédiction <span class="math inline">\(\tilde{y_j}\)</span> de chaque modèle candidat par son poids <span class="math inline">\(w_j\)</span>.</p>
+<p><span class="math display">\[\tilde{y} = \sum_{j = 1}^m w_j \tilde{y_j}\]</span></p>
+<p>Les prédictions multi-modèles sont souvent plus précises que celles obtenues en considérant seulement le meilleur modèle, car elles tiennent compte de l’incertitude sur la forme du modèle.</p>
+</div>
+</div>
+<div id="approche-bayesienne-pour-la-comparaison-de-modeles" class="section level1">
+<h1>Approche bayésienne pour la comparaison de modèles</h1>
+<div id="densite-predictive" class="section level2">
+<h2>Densité prédictive</h2>
+<p>Pour un modèle estimé par maximum de vraisemblance, les prédictions de nouvelles observations sont obtenues en fixant les paramètres du modèles à leur valeur estimée. La vraisemblance de cette nouvelle observation est donc <span class="math inline">\(p(\tilde{y} | \hat{\theta})\)</span>, où <span class="math inline">\(\hat{\theta}\)</span> sont les estimés des paramètres au maximum de vraisemblance.</p>
+<p>Dans une approche bayésienne, les prédictions de nouvelles observations sont obtenues en faisant la moyenne des prédictions en fonction de la distribution <em>a posteriori</em> de la valeur des paramètres. La densité prédictive de <span class="math inline">\(\tilde{y}\)</span> en fonction du modèle ajusté aux observations <span class="math inline">\(y\)</span>, notée <span class="math inline">\(p(\tilde{y} | y)\)</span>, est égale à la moyenne de la vraisemblance <span class="math inline">\(p(\tilde{y} | \theta)\)</span> pour la distribution <em>a posteriori</em> conjointe des <span class="math inline">\(\theta\)</span>:</p>
+<p><span class="math inline">\(p(\tilde{y} | y) = \int p(\tilde{y} | \theta) p(\theta | y) \text{d}\theta\)</span> .</p>
+<p>En pratique, si un algorithme de Monte-Carlo génère <span class="math inline">\(S\)</span> vecteurs de paramètres <span class="math inline">\(\theta_{(1)}, ..., \theta_{(S)}\)</span> approximant la distribution <em>a posteriori</em>, nous calculons <span class="math inline">\(p(\tilde{y} | y)\)</span> par la moyenne des prédictions de chaque vecteur:</p>
+<p><span class="math inline">\(p(\tilde{y} | y) = \frac{1}{S} \sum_{j = 1}^S p(\tilde{y} | \theta_{(j)})\)</span> .</p>
+<p>Comme pour la vraisemblance, il est plus facile de travailler avec le logarithme de la densité prédictive.</p>
+</div>
+<div id="validation-croisee-1" class="section level2">
+<h2>Validation croisée</h2>
+<p>Pour déterminer le modèle qui maximise la densité prédictive de nouvelles observations, telle que définie ci-dessus, nous pouvons utiliser la validation croisée. Cependant, puisque l’ajustement des modèles hiérarchiques bayésiens demande parfois considérablement de temps de calcul, il n’est pas pratique dans ces cas de répéter l’estimation du modèle un grand nombre de fois, en laissant de côté une partie des données. Nous utilisons donc le plus souvent des critères qui approximent la performance prédictive d’une validation croisée.</p>
+<p>Si l’AIC approxime bien l’erreur de validation croisée pour les modèles ajustés par maximum de vraisemblance avec un nombre d’observations assez grand, ce critère s’applique mal aux modèles bayésiens. D’une part, le maximum de vraisemblance n’est pas directement produit par l’ajustement du modèle bayésien. De plus, il est difficile de définir un nombre de paramètres ajustables <span class="math inline">\(K\)</span> en raison de la structure hiérarchique et des contraintes imposées par les distributions <em>a priori</em> des paramètres, qui font que ces paramètres ne varient pas librement.</p>
+</div>
+<div id="criteres-de-selection-pour-les-modeles-hierarchiques-bayesiens" class="section level2">
+<h2>Critères de sélection pour les modèles hiérarchiques bayésiens</h2>
+<div id="dic" class="section level3">
+<h3>DIC</h3>
+<p>Le critère d’information de la déviance (DIC), basé sur l’AIC, a été l’un des premiers critères développés pour la comparaison de modèles bayésiens:</p>
+<p><span class="math display">\[DIC = -2 \log p(y | \bar{\theta}) + 2 p_D\]</span></p>
+<p>où <span class="math inline">\(\bar{\theta}\)</span> est la moyenne de la distribution <em>a posteriori</em> de <span class="math inline">\(\theta\)</span> et <span class="math inline">\(p_D\)</span> est le nombre effectif de paramètres, qui peut être calculé de plusieurs façons.</p>
+<p>Comme l’AIC, le DIC représente bien la performance prédictive relative de modèles sur de nouvelles données, si la taille de l’échantillon est assez grand. Cependant, il ne s’agit pas d’une prédiction bayésienne car elle se base sur un estimé unique de chaque paramètre (sa valeur moyenne) plutôt que sur la distribution <em>a posteriori</em> au complet.</p>
+</div>
+<div id="waic" class="section level3">
+<h3>WAIC</h3>
+<p>Le critère de Watanabe-Akaike (WAIC) est semblable au DIC, mais le premier terme est basé sur la densité prédictive conjointe des observations <span class="math inline">\(y_1, ..., y_n\)</span>.</p>
+<p><span class="math display">\[WAIC = -2 \sum_{i=1}^n \log \left( \frac{1}{S} \sum_{j = 1}^S p(y_i | \theta_{(j)}) \right) + 2 p_W\]</span> ,</p>
+<p>où la pénalité <span class="math inline">\(p_W\)</span> est la somme des variances du logarithme de la densité prédictive à chaque point:</p>
+<p><span class="math display">\[p_W = \sum_{i=1}^n \text{Var}_j \left(\log p(y_i | \theta_{(j)}) \right)\]</span></p>
+<p>Ici, Var<span class="math inline">\(_j\)</span> désigne la variance de l’expression entre parenthèses sur l’ensemble des itérations <span class="math inline">\(j\)</span>.</p>
+<p>Le WAIC d’un modèle <em>brms</em> peut être calculé avec la fonction <code>waic</code>.</p>
+</div>
+<div id="psis-loo" class="section level3">
+<h3>PSIS-LOO</h3>
+<p>Une méthode développée récemment par Vehtari et al. (2017) consiste à estimer la densité prédictive à chaque point qui serait obtenue par validation croisée <em>leave-one-out</em>, c’est-à-dire en prédisant <span class="math inline">\(y_i\)</span> à partir du modèle ajusté aux données excluant <span class="math inline">\(i\)</span>, <span class="math inline">\(y_{-i}\)</span>.</p>
+<p><span class="math inline">\(p(y_i | y_{-i}) = \int p(y_i | \theta) p(\theta | y_{-i}) \text{d}\theta\)</span> .</p>
+<p>La méthode PSIS-LOO (PSIS = <em>Patero smoothed importance sampling</em>, LOO = <em>leave-one-out</em>) vise à estimer cette quantité sans effectuer la validation croisée. En bref, cette approximation est obtenue en faisant la moyenne des <span class="math inline">\(p(y | \theta_{(j)})\)</span>, mais avec une pondération particulière des <span class="math inline">\(\theta_{(j)}\)</span> (échantillonnage préférentiel). Cette pondération est ensuite ajustée pour que les poids extrêmes suivent un modèle théorique (distribution de Pareto).</p>
+<p>Cette méthode est implémentée dans le package R <em>loo</em> et peut être appelée à partir de la fonction <code>loo</code> appliquée au résultat d’un modèle dans <em>brms</em>.</p>
+<p>Comme nous verrons dans l’exemple plus loin, la méthode PSIS-LOO produit son propre diagnostic. L’ajustement des poids pour chaque valeur <span class="math inline">\(y_i\)</span> est basé sur un paramètre de la distribution de Pareto <span class="math inline">\(k\)</span> et lorsque <span class="math inline">\(k &gt; 0.7\)</span>, l’approximation de <span class="math inline">\(p(y_i | y_{-i})\)</span> est potentiellement instable. Si ce problème se produit pour quelques observations, il est possible de réajuster le modèle en excluant ces observations seulement afin de calculer directement <span class="math inline">\(p(y_i | y_{-i})\)</span>.</p>
+<p>Le résultat de cette méthode est l’estimé du logarithme de la densité prédictive <span class="math inline">\(elpd_{loo}\)</span>, autrement dit la somme de <span class="math inline">\(\log p(y_i | y_{-i})\)</span>. Un critère d’information (LOOIC) semblable au DIC et WAIC peut être obtenu en multipliant <span class="math inline">\(elpd_{loo}\)</span> par -2.</p>
+</div>
+<div id="comparaison-des-methodes" class="section level3">
+<h3>Comparaison des méthodes</h3>
+<p>La méthode PSIS-LOO est un peu plus précise que le WAIC, surtout pour les petits échantillons, mais le WAIC est généralement plus rapide à calculer.</p>
+<p>Puisqu’elles sont basés sur la densité prédictive bayésienne plutôt que sur un seul estimé moyen de chaque paramètre, ces deux méthodes (WAIC et PSIS-LOO) sont actuellement préférées au DIC. Cependant, les deux supposent que les observations individuelles <span class="math inline">\(y_i\)</span> soient indépendantes les unes des autres, conditionnellement à la valeur des paramètres. Typiquement, cette supposition n’est pas respectée si le modèle inclut directement une corrélation entre différentes valeurs de la réponse (ex.: corrélation temporelle ou spatiale).</p>
+</div>
+</div>
+<div id="predictions-multi-modeles-1" class="section level2">
+<h2>Prédictions multi-modèles</h2>
+<p>Dans la section précédente, nous avons vu qu’une prédiction multi-modèles pour une nouvelle observation <span class="math inline">\(\tilde{y}\)</span> est calculée par la moyenne pondérée des prédictions des différents modèles.</p>
+<p><span class="math display">\[\tilde{y} = \sum_{j = 1}^m w_j \tilde{y_j}\]</span></p>
+<p>Comme pour l’AIC, nous pouvons définir des poids selon les différences d’IC entre deux modèles et cela pour différents critères bayésiens (ex.: WAIC, LOOIC).</p>
+<p>Cependant, il n’est pas toujours optimal de combiner les modèles proportionnellement à leur plausibilité. Par exemple, les deux meilleurs modèles peuvent produire des prédictions redondantes, tandis que le troisième et quatrième meilleur modèle peuvent aider à corriger certaines prédictions moins bonnes du meilleur modèle.</p>
+<p>La <strong>superposition de modèles</strong> (<em>model stacking</em>) consiste à chercher les poids <span class="math inline">\(w_j\)</span> qui minimisent l’erreur de prédiction multi-modèles donnée par la moyenne pondérée. Ce calcul peut être fait directement à partir des résultats de la méthode PSIS-LOO, comme nous verrons dans l’exemple de la prochaine section.</p>
+</div>
+</div>
+<div id="comparaison-de-modeles-avec-loo-et-brms" class="section level1">
+<h1>Comparaison de modèles avec <em>loo</em> et <em>brms</em></h1>
+<p>Le jeu de données <a href="../donnees/rikz.csv">rikz.csv</a> contient des données sur la richesse de la microfaune benthique (<em>Richness</em>) pour 45 sites répartis sur 5 plages (<em>Beach</em>) aux Pays-Bas, en fonction de la position verticale du site (<em>NAP</em>) et d’un indice d’exposition mesuré au niveau de la plage (<em>Exposure</em>).</p>
+<pre class="r"><code>rikz &lt;- read.csv(&quot;../donnees/rikz.csv&quot;)
+rikz$Exposure &lt;- as.factor(rikz$Exposure)
+head(rikz)</code></pre>
+<pre><code>##   Sample Richness Exposure    NAP Beach
+## 1      1       11       10  0.045     1
+## 2      2       10       10 -1.036     1
+## 3      3       13       10 -1.336     1
+## 4      4       11       10  0.616     1
+## 5      5       10       10 -0.684     1
+## 6      6        8        8  1.190     2</code></pre>
+<p>La semaine dernière, nous avions ajusté avec <em>brms</em> un modèle de régression de Poisson pour la richesse spécifique en fonction de <em>NAP</em> et <em>Exposure</em>, avec un effet aléatoire de la plage sur l’ordonnée à l’origine.</p>
+<pre class="r"><code>library(brms)
+
+rikz_prior &lt;- c(set_prior(&quot;normal(0, 1)&quot;, class = &quot;b&quot;),
+                set_prior(&quot;normal(2, 1)&quot;, class = &quot;Intercept&quot;),
+                set_prior(&quot;normal(0, 0.5)&quot;, class = &quot;sd&quot;))
+
+mod1 &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+            family = poisson, prior = rikz_prior,
+            control = list(adapt_delta = 0.99))</code></pre>
+<p>Nous considérons maintenant une autre version du modèle où l’effet du <em>NAP</em> varie aussi aléatoirement d’une plage à l’autre.</p>
+<pre class="r"><code>mod2 &lt;- brm(Richness ~ NAP + Exposure + (1 + NAP | Beach), data = rikz, 
+            family = poisson, prior = rikz_prior,
+            control = list(adapt_delta = 0.99))</code></pre>
+<p>Voici les effets fixes et l’écart-type des effets aléatoires estimés pour les deux modèles. Dans le modèle 2, l’incertitude sur <code>b_NAP</code> a augmenté et l’effet aléatoire de la plage sur ce coefficient a un écart-type de 0.34 avec un intervalle de crédibilité de 0.06 à 0.70, comparable à l’effet aléatoire de la plage sur l’ordonnée à l’origine.</p>
+<pre class="r"><code>posterior_summary(mod1, pars = &quot;b|sd&quot;)</code></pre>
+<pre><code>##                       Estimate  Est.Error        Q2.5      Q97.5
+## b_Intercept          2.3788040 0.27615489  1.74487771  2.8691934
+## b_NAP               -0.5032195 0.07366964 -0.64828270 -0.3646325
+## b_Exposure10        -0.4577874 0.30481657 -1.00858360  0.2101938
+## b_Exposure11        -1.1561954 0.32993779 -1.74651918 -0.4278037
+## sd_Beach__Intercept  0.2354980 0.13628407  0.02462989  0.5505502</code></pre>
+<pre class="r"><code>posterior_summary(mod2, pars = &quot;b|sd&quot;)</code></pre>
+<pre><code>##                       Estimate Est.Error        Q2.5      Q97.5
+## b_Intercept          2.3782676 0.3170210  1.67435976  2.9420583
+## b_NAP               -0.5780931 0.1539788 -0.89730220 -0.2826288
+## b_Exposure10        -0.3955992 0.3520599 -1.05767071  0.3829608
+## b_Exposure11        -1.1522182 0.3710122 -1.79959178 -0.3161168
+## sd_Beach__Intercept  0.2983289 0.1543567  0.03129036  0.6546068
+## sd_Beach__NAP        0.3491766 0.1610685  0.07562777  0.7159394</code></pre>
+<div id="calcul-du-looic" class="section level2">
+<h2>Calcul du LOOIC</h2>
+<p>La fonction <code>loo</code> de <em>brms</em> compare différents modèles en fonction du critère estimé avec PSIS-LOO (LOOIC, égal à -2 fois la densité prédictive estimée pour la validtion croisée).</p>
+<pre class="r"><code>loo1 &lt;- loo(mod1, mod2, compare = TRUE)</code></pre>
+<pre><code>## Warning: Found 1 observations with a pareto_k &gt; 0.7 in model &#39;mod1&#39;. It is
+## recommended to set &#39;reloo = TRUE&#39; in order to calculate the ELPD without
+## the assumption that these observations are negligible. This will refit
+## the model 1 times to compute the ELPDs for the problematic observations
+## directly.</code></pre>
+<pre><code>## Warning: Found 2 observations with a pareto_k &gt; 0.7 in model &#39;mod2&#39;. It is
+## recommended to set &#39;reloo = TRUE&#39; in order to calculate the ELPD without
+## the assumption that these observations are negligible. This will refit
+## the model 2 times to compute the ELPDs for the problematic observations
+## directly.</code></pre>
+<pre class="r"><code>loo1</code></pre>
+<pre><code>##              LOOIC    SE
+## mod1        211.93 19.33
+## mod2        204.64 14.93
+## mod1 - mod2   7.28  6.56</code></pre>
+<p>Le résultat indique que le modèle 1 a un LOOIC plus élevé de 6.42 comparé au modèle 2, ce qui semble une grande différence, sauf que l’erreur-type de cette différence (2e colonne) est de 5.92. Donc il n’est peut-être pas certain que le modèle 2 soit le meilleur.</p>
+<p>De plus, R nous avertit que pour 3 observations (1 du modèle 1, 2 du modèle 2), l’estimé PSIS-LOO est instable avec un <span class="math inline">\(k &gt; 0.7\)</span> dans la distribution de Pareto. Cet avertissement signifie que pour ces observations, les poids utilisés pour l’approximation de la densité prédictive de validation croisée ont trop de valeurs extrêmes pour estimer leur variance. Tel que suggéré par le message, nous ré-évaluons le LOOIC avec l’argument <code>reloo = TRUE</code>, qui va réajuster le modèle en omettant chacune des observations problématiques, pour calculer la densité prédictive de validation croisée directement.</p>
+<pre class="r"><code>loo_corr &lt;- loo(mod1, mod2, compare = TRUE, reloo = TRUE)</code></pre>
+<pre><code>## 1 problematic observation(s) found.
+## The model will be refit 1 times.</code></pre>
+<pre><code>## 
+## Fitting model 1 out of 1 (leaving out observation 22)</code></pre>
+<pre><code>## Start sampling</code></pre>
+<pre><code>## 2 problematic observation(s) found.
+## The model will be refit 2 times.</code></pre>
+<pre><code>## 
+## Fitting model 1 out of 2 (leaving out observation 10)</code></pre>
+<pre><code>## Start sampling</code></pre>
+<pre><code>## 
+## Fitting model 2 out of 2 (leaving out observation 22)</code></pre>
+<pre><code>## Start sampling</code></pre>
+<pre class="r"><code>loo_corr</code></pre>
+<pre><code>##              LOOIC    SE
+## mod1        212.03 19.41
+## mod2        206.15 15.41
+## mod1 - mod2   5.88  6.30</code></pre>
+<p>Ici, la valeur des LOOIC a un peu changé par rapport au cas précédent. À titre de comparaison, le WAIC produit une différence plus grande entre les deux modèles.</p>
+<pre class="r"><code>waic(mod1, mod2, compare = TRUE)</code></pre>
+<pre><code>##               WAIC    SE
+## mod1        211.40 19.37
+## mod2        201.39 13.98
+## mod1 - mod2  10.01  7.49</code></pre>
+</div>
+<div id="comparaison-avec-le-glmm" class="section level2">
+<h2>Comparaison avec le GLMM</h2>
+<p>Lorsque nous avions ajusté ces modèles avec des GLMM au cours 5, l’AIC était plus faible pour le modèle 1, avec un effet aléatoire sur l’ordonnée à l’origine seulement. Pourquoi la méthode bayésienne donne-t-elle un résultat différent?</p>
+<ul>
+<li><p>D’abord, l’utilisation de distributions <em>a priori</em> contraint les valeurs des paramètres de façon à ce qu’un modèle plus complexe présente un surajustement moindre.</p></li>
+<li><p>Ensuite, l’AIC et les critères bayésiens sont basés sur des prédictions différentes. Supposons que deux modèles diffèrent par un paramètre <span class="math inline">\(\theta\)</span>. L’AIC compare les prédictions lorsque ce paramètre est omis, ce qui implique par exemple <span class="math inline">\(\theta = 0\)</span>, avec les prédictions à la valeur estimée du maximum de vraisemblance <span class="math inline">\(\hat{\theta}\)</span>. En contrepartie, les prédictions bayésiennes du modèle incluant <span class="math inline">\(\theta\)</span> sont une moyenne réalisée à partir de la distribution <em>a posteriori</em> de <span class="math inline">\(\theta\)</span>, qui va inclure des valeurs proches de 0 si ce cas a une probabilité <em>a posteriori</em> non-négligeable.</p></li>
+</ul>
+<p>Pour ces deux raisons, les prédictions du maximum de vraisemblance et de l’approche bayésienne diffèrent sauf dans des cas très particuliers, ex.: un modèle linéaire où la distribution <em>a priori</em> a peu d’importance et la distribution <em>a posteriori</em> de tous les paramètres est symétrique.</p>
+</div>
+<div id="superposition-des-modeles" class="section level2">
+<h2>Superposition des modèles</h2>
+<p>Le résultat de <code>loo</code> contient un élément pour chacun des modèles comparés. Chacun de ces éléments contient une matrice <code>pointwise</code> qui présente notamment la valeur estimée du log de la densité prédictive <span class="math inline">\(\log p(y_i | y_{-i})\)</span> pour chaque point <span class="math inline">\(i\)</span> (<code>elpd_loo</code>) et l’erreur-type de cet estimé (<code>mcse_elpd_loo</code>).</p>
+<pre class="r"><code>head(loo1$mod1$pointwise)</code></pre>
+<pre><code>##       elpd_loo mcse_elpd_loo      p_loo    looic
+## [1,] -3.059897   0.009854576 0.22985466 6.119794
+## [2,] -2.637554   0.010912299 0.18006890 5.275108
+## [3,] -2.563243   0.010065991 0.12952672 5.126487
+## [4,] -4.616274   0.020119600 0.68755813 9.232547
+## [5,] -2.207825   0.003453611 0.02730487 4.415650
+## [6,] -2.226250   0.005270581 0.06288233 4.452501</code></pre>
+<p>Si nous voulions faire combiner les prédictions de ces deux modèles, la fonction <code>stacking_weights</code> du package <em>loo</em> permet de déterminer les poids pour la superposition optimale des deux modèles. Cette fonction requière une matrice avec une colonne par modèle, correspondant à la colonne <code>elpd_loo</code> de la matrice <code>pointwise</code> mentionnée ci-dessus.</p>
+<pre class="r"><code>library(loo)
+stacking_weights(cbind(loo1$mod1$pointwise[,1], loo1$mod2$pointwise[,1]))</code></pre>
+<pre><code>## Method: stacking
+## ------
+##        weight
+## model1 0.000 
+## model2 1.000</code></pre>
+<pre class="r"><code>stacking_weights(cbind(loo_corr$mod1$pointwise[,1], loo_corr$mod2$pointwise[,1]))</code></pre>
+<pre><code>## Method: stacking
+## ------
+##        weight
+## model1 0.099 
+## model2 0.901</code></pre>
+<p>Pour l’estimé du PSIS-LOO avec correction des valeurs problématiques, nous voyons que presque tout le poids est donné au modèle 2, donc il suffit probablement de faire des prédictions avec le modèle plus complexe. Tel que mentionné plus haut, puisque les prédictions sont basées sur la distribution <em>a posteriori</em> entière de <code>sd_Beach__NAP</code>, cela inclut des cas où l’écart-type de cet effet aléatoire s’approche de 0 et on s’approche donc du modèle 1.</p>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>Références</h1>
+<p>Vehtari, A., Gelman, A. et Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. <em>Statistics and Computing</em> 27(5), 1413–1432. <a href="doi:10.1007/s11222-016-9696-4" class="uri">doi:10.1007/s11222-016-9696-4</a>.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
