@@ -45,3 +45,5 @@
 7. Modèles additifs généralisés - [Exercices en classe](labos/07A-Modeles_additifs_generalises.html) ([PDF](labos/07A-Modeles_additifs_generalises.pdf), Données: [dendro_wa082.csv](donnees/dendro_wa082.csv)) - [Travail à remettre](labos/07-Modeles_additifs_generalises.html) ([PDF](labos/07-Modeles_additifs_generalises.pdf), Données: [portal_ot.csv](donnees/portal_ot.csv))
 
 8. [Introduction à l'analyse bayésienne - Spécifier des modèles avec Stan](labos/08-Intro_Stan.html) ([PDF](labos/08-Intro_Stan.pdf)) - Données: [radon.csv](donnees/radon.csv)
+
+9. [Modèles hiérarchiques bayésiens](labos/09-Modeles_hierarchiques_bayesiens.html) ([PDF](labos/09-Modeles_hierarchiques_bayesiens.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
