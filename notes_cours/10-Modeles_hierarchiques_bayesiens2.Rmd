@@ -274,8 +274,116 @@ stacking_weights(cbind(loo_corr$mod1$pointwise[,1], loo_corr$mod2$pointwise[,1])
 
 Pour l'estimé du PSIS-LOO avec correction des valeurs problématiques, nous voyons que presque tout le poids est donné au modèle 2, donc il suffit probablement de faire des prédictions avec le modèle plus complexe. Tel que mentionné plus haut, puisque les prédictions sont basées sur la distribution *a posteriori* entière de `sd_Beach__NAP`, cela inclut des cas où l'écart-type de cet effet aléatoire s'approche de 0 et on s'approche donc du modèle 1. 
 
+Nous terminons ce cours en présentant des exemples récents d'application des modèles hiérarchiques bayésiens avec Stan en écologie.
+
+# Application: modèle prédateur-proie
+
+Rosenbaum et al. (2019) modélisent la dynamique de population d'un système prédateur-proie-ressource dans un environnement contrôlé (chemostat). Le prédateur est une espèce de rotifère (animal microscopique) et la proie est une algue unicellulaire dont la croissance dépend de la concentration d'azote (ressource limitante).
+
+## Modèle théorique
+
+Les auteurs supposent que la concentration d'azote $S$, la densité des algues $A$ et celle des rotifères $R$ varient au cours du temps selon les équations suivantes:
+
+$$\frac{dS}{dt} = \delta S^* - \frac{1}{c_A} \frac{f_A S}{h_A + S} A - \delta S$$
+
+Cette équation indique que le taux de variation de la concentration d'azote dépend de (1) l'influx d'azote $\delta S^*$ ($\delta$ est le débit du chemostat et $S^*$ la concentration dans la solution entrante); (2) la consommation d'azote par les algues ($c_A$ est le facteur de conversion, $f_A$ est le taux de croissance maximal et $h_A$ le point de demi-saturation) et (3) le flux de sortie $\delta S$.
+
+$$\frac{dA}{dt} = \frac{f_A S}{h_A + S} A - \frac{1}{c_R} \frac{f_R A}{h_R + A} R - \delta A$$
+
+Cette équation indique que le taux de variation de la densité d'algues dépend de (1) la consommation d'azote par les algues, (2) la consommation d'algues par les rotifères (facteur de conversion $c_R$, taux de croissance maximal $f_R$ et point de demi-saturation $h_R$) et (3) le flux de sortie $\delta A$.
+
+$$\frac{dR}{dt} = \frac{f_R A}{h_R + A} R - \delta R$$
+
+Finalement, le taux de variation de la densité de rotifères dépend de leur consommation d'algues et du flux de sortie.
+
+## Données et modèle statistique
+
+Les auteurs ont mesuré la concentration quotidienne d'algues et de rotifères pour une vingtaine de jours dans 18 réplicats de cette expérience. Dans certains réplicats, les séries temporelles montraient des concentrations stables, tandis que d'autres montraient une dynamique cyclique.
+
+Pour cette expérience, les paramètres $\delta$, $S^*$, $h_A$ et $h_R$ sont connus, tandis que les taux de croissance maximaux des deux organismes ($f_A$ et $f_R$) et les facteurs de conversion ($c_A$ et $c_R$) doivent être estimés à partir des données. Voici un résumé du modèle Stan implémentant ce modèle:
+
+- Les logarithmes des paramètres $f_A$, $f_R$, $c_A$ et $c_R$ varient de façon aléatoire entre les réplicats, selon une distribution normale dont la moyenne et l'écart-type sont des paramètres à estimer.
+
+- Les concentrations de chaque élément du système au début de l'expérience ($S_0$, $A_0$ et $R_0$) sont des paramètres à estimer.
+
+- Pour une valeur donnée des paramètres, la série de trois équations ci-dessus est résolue numériquement pour obtenir les séries temporelles de $S$, $A$ et $R$. (Stan permet de résoudre des systèmes d'équations différentielles dans un modèle.)
+
+- Les observations de $A$ et $R$ suivent une distribution log-normale autour de leur vraie valeur, avec un écart-type à estimer.
+
+Les auteurs ont assigné à tous les paramètres à estimer des distributions *a priori* avec contraintes légères (*weakly informative prior*) basées sur des expériences passées avec ce type de système. 
+
+## Simulations
+
+Les auteurs ont réalisé des simulations à partir du modèle complet, avec des paramètres tirés de leur distribution *a priori*, afin d'assurer que le modèle ajusté aux résultats de ces simulations soit capable de retrouver les vraies valeurs des paramètres $f_A$, $f_R$, $c_A$ et $c_R$ (autrement dit, que les paramètres soient *identifiables*). 
+
+La Figure 1 de cette étude reproduite ci-dessous montre la distribution *a posteriori* de l'erreur d'estimation des paramètres pour différentes simulations. Ce test a permis aux auteurs de déterminer que lorsque les populations des deux espèces sont stables plutôt que cycliques (résultats du haut en vert), trois des quatres paramètres sont difficiles à estimer précisément. 
+
+![](../images/Rosenbaum2019_Fig1.jpg)
+*Source: Rosenbaum et al. 2019, Fig.1*
+
+## Ajustement du modèle
+
+À partir du modèle ajusté aux observations, les auteurs ont produit des estimations *a posteriori* des concentrations $S$, $A$ et $R$ à chaque jour pour chacun des réplicats (Figure 3, reproduite ci-dessous, avec les points correspondant aux valeurs observées de $A$ et $R$). Puisque la concentration d'azote $S$ (en haut en bleu) n'était pas mesurée, la précision de son estimation dépend de la précision des paramètres du modèle, c'est pourquoi elle est moins précise dans le cas où les populations sont stables plutôt que cycliques (rangée du haut).
+
+![](../images/Rosenbaum2019_Fig3.jpg)
+*Source: Rosenbaum et al. 2019, Fig.3.*
+
+En comparant la dynamique estimée par le modèle aux points d'observation, on voit que le modèle suit plus précisément les observations des concentrations d'algues (au milieu en vert) que celles des rotifères (en bas en rouge). Une des raisons possibles évoquées par les auteurs pour expliquer ces résultats est que la croissance de la population d'algues dépend de la concentration d'azote non-mesurée, donc le modèle a la flexibilité d'ajuster cette concentration pour bien reproduire la dynamique des algues, ce qui n'est pas le cas pour les rotifères dont la croissance dépend de la population d'algues.
+
+# Application: dispersion des graines et semis
+
+Cet exemple présente une étude que j'ai réalisée avec des collaborateurs afin d'estimer les courbes de dispersion des graines et des semis en fonction de la distance pour différentes espèces de la forêt de l'île Barro Colorado au Panama (Marchand et al. 2020).
+
+## Modèle et données
+
+Le site d'étude est une parcelle de 50 ha (1 km x 0.5 km) du Smithsonian Tropical Research Institute (STRI) où tous les arbres avec un DHP >1 cm sont cartographiés et mesurés aux 5 ans depuis 1985. Les chercheurs du STRI ont aussi fait la collecte annuelle et l'identification des graines dans 500 capteurs (filets) dispersés dans cette parcelle, ainsi que le comptage des nouveaux semis dans des placettes autour de ces capteurs.
+
+La dispersion des graines est modélisée séparément pour chacune des principales espèces d'arbres. Le nombre de graines trouvées dans le capteur $j$ lors de l'année $t$ suit une distribution binomiale négative dont la moyenne $\mu_{jt}$ est donnée par l'équation suivante:
+
+$$\mu_{jt} = a \sum_i Q(b_{it}) F(r_{ij})$$
+
+Pour chaque arbre $i$ de cette espèce, on multiplie la production de graines $Q$ par la fonction de dispersion $F$, qui donne la probabilité qu'une graine tombe dans une surface d'un mètre carré située à une distance $r_{ij}$. On fait ensuite la somme pour tous les arbres et on multiplie par l'aire du capteur $a$.
+
+La production de graines d'un arbre est supposée proportionnelle à sa surface terrière $b$.
+
+$$Q(b_{it}) = e^{\beta_t} b_{it}$$
+
+Le logarithme de la constante de proportionalité, $\beta_t$, varie d'une année à l'autre selon une distribution normale dont les paramètres doivent être estimés.
+
+$$\beta_t \sim \text{N}(\mu_{\beta}, \sigma_{\beta})$$
+
+Le même modèle peut être utilisé pour estimer la dispersion des semis par rapport aux parents potentiels. 
+
+Notre objectif principal était de déterminer la forme de la fonction de dispersion $F$ pour les graines et semis de différentes espèces, ainsi que le succès relatif de germination (rapport entre le nombre de semis et de graines) en fonction de la distance du parent.
+
+La figure ci-dessous montre les différentes fonctions de dispersion que nous avons considérées. Chacune contient deux paramètres à ajuster à partir des données.
+
+![](../images/Marchand2020_disp.png)
+
+Le problème d'estimation de courbes de dispersion pose deux problèmes pour lesquels l'approche bayésienne offre des solutions intéressantes:
+
+- La dispersion des graines suit un patron *leptokurtique*, c'est-à-dire que la plupart des graines tombe près du parent, mais une petite proportion peut atteindre des distances extrêmes (plusieurs kilomètres) sous l'action du vent et des animaux. Cependant, nos données ne nous permettent pas d'observer la dispersion sur de longues distances ou de très courtes distances. Dans cette situation, un ajustement aux données sans contraintes peut mener à une fonction de dispersion non-réaliste (ex.: distance de dispersion médiane < 10 cm et moyenne > 10 km).
+
+- Il est probable qu'aucune des fonctions de dispersion présentées ci-dessus n'est tout à fait appropriée. Dans ce cas, nous voudrions estimer des caractéristiques de la dispersion (distance moyenne des graines et des semis, taux de germination relatif en fonction de la distance) en tenant compte de l'incertitude sur la forme de la fonction de dispersion.
+
+Pour résoudre le deuxième problème, nous avons estimé les paramètres de chacune des 5 fonctions de dispersion pour chaque espèce et avons utilisé la superposition de modèles pour obtenir des prédictions multi-modèles des caractéristiques de dispersion qui nous intéressent. Avant d'effectuer cette superposition, nous avons utilisé la vérification des prédictions *a posteriori* pour éliminer les modèles très mal ajustés aux données: par exemple, ceux qui ne donnaient pas des valeurs plausibles pour le nombre total de graines observées dans les capteurs, ou pour le nombre de zéros observés.
+
+Pour résoudre le premier problème, nous avons choisi des distributions *a priori* pour les paramètres de chaque fonction de dispersion, afin que les valeurs plausibles de la distance médiane et moyenne de dispersion soient de l'ordre de 1 m à 1 km; cela ne signifie pas que la distribution *a posteriori* est confinée à cet intervalle, mais que ces valeurs plus plausibles sont favorisées sauf si les données appuient fortement des valeurs plus extrêmes. Nous avons aussi choisi des distributions *a priori* basées sur la plausibilité biologique pour les paramètres de la production de graines.
+
+## Résultats
+
+La figure ci-dessous présente un exemple des courbes de dispersion et du taux de germination relatif que nous avons estimées à partir de la superposition des modèles. Dans les deux cas, les semis se trouvent en moyenne plus loin du parent que les graines. Pour l'espèce à gauche, le taux de germination augmente de façon continue entre 1 et 100 m de distance du parent, tandis que pour l'espèce à droite, il semble atteindre un plateau entre 10 et 100 m.
+
+![](../images/Marchand2020_res.png)
+
+
+
 
 # Références
+
+Marchand, P., Comita, L. S., Wright, S. J., Condit, R., Hubbell, S. P., & Beckman, N. G. (2020). Seed‐to‐seedling transitions exhibit distance‐dependent mortality but no strong spacing effects in a Neotropical forest. *Ecology*, 101(2), e02926. doi:10.1002/ecy.2926.
+
+Rosenbaum, B., Raatz, M., Weithoff, G., Fussmann, G.F. et Gaedke, U. (2019) Estimating parameters From multiple time series of population dynamics using bayesian inference. *Frontiers in Ecology and Evolution* 6, 234. doi: 10.3389/fevo.2018.00234.
 
 Vehtari, A., Gelman, A. et Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing* 27(5), 1413--1432. doi:10.1007/s11222-016-9696-4.
 
