@@ -381,9 +381,9 @@ La figure ci-dessous présente un exemple des courbes de dispersion et du taux d
 
 # Références
 
-Marchand, P., Comita, L. S., Wright, S. J., Condit, R., Hubbell, S. P., & Beckman, N. G. (2020). Seed‐to‐seedling transitions exhibit distance‐dependent mortality but no strong spacing effects in a Neotropical forest. *Ecology*, 101(2), e02926. doi:10.1002/ecy.2926.
+Marchand, P., Comita, L. S., Wright, S. J., Condit, R., Hubbell, S. P., & Beckman, N. G. (2020). Seed-to-seedling transitions exhibit distance-dependent mortality but no strong spacing effects in a Neotropical forest. *Ecology*, 101(2), e02926. doi:10.1002/ecy.2926.
 
-Rosenbaum, B., Raatz, M., Weithoff, G., Fussmann, G.F. et Gaedke, U. (2019) Estimating parameters From multiple time series of population dynamics using bayesian inference. *Frontiers in Ecology and Evolution* 6, 234. doi: 10.3389/fevo.2018.00234.
+Rosenbaum, B., Raatz, M., Weithoff, G., Fussmann, G.F. et Gaedke, U. (2019) Estimating parameters from multiple time series of population dynamics using bayesian inference. *Frontiers in Ecology and Evolution* 6, 234. doi: 10.3389/fevo.2018.00234.
 
 Vehtari, A., Gelman, A. et Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing* 27(5), 1413--1432. doi:10.1007/s11222-016-9696-4.
 
