@@ -1,4 +1,6 @@
-# ECL8202 - Analyses des données complexes
+---
+title: ECL8202 - Analyses des données complexes
+---
 
 [Capsules vidéo du cours (YouTube)](https://www.youtube.com/channel/UCfU-xwzWWTo3G_sTkquzOQg/playlists?view=50&sort=dd&shelf_id=2&view_as=subscriber)
 
@@ -47,3 +49,5 @@
 8. [Introduction à l'analyse bayésienne - Spécifier des modèles avec Stan](labos/08-Intro_Stan.html) ([PDF](labos/08-Intro_Stan.pdf)) - Données: [radon.csv](donnees/radon.csv)
 
 9. [Modèles hiérarchiques bayésiens](labos/09-Modeles_hierarchiques_bayesiens.html) ([PDF](labos/09-Modeles_hierarchiques_bayesiens.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
+
+10. [Modèles hiérarchiques bayésiens 2](labos/10-Modeles_hierarchiques_bayesiens2.html) ([PDF](labos/10-Modeles_hierarchiques_bayesiens2.pdf))
