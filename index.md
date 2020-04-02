@@ -27,6 +27,8 @@ title: ECL8202 - Analyses des données complexes
 10. [Modèles hiérarchiques bayésiens 2](notes_cours/10-Modeles_hierarchiques_bayesiens2.html)
 ([PDF](notes_cours/10-Modeles_hierarchiques_bayesiens2.pdf))
 
+11. [Séries temporelles](notes_cours/11-Series_temporelles.html) ([PDF](notes_cours/11-Series_temporelles.pdf)) - Données: [sea_ice.txt](donnees/sea_ice.txt), [dendro_wa082.csv](donnees/dendro_wa082.csv)
+
 
 ## Exercices
 
@@ -51,3 +53,4 @@ title: ECL8202 - Analyses des données complexes
 9. [Modèles hiérarchiques bayésiens (solutions)](labos/09R-Modeles_hierarchiques_bayesiens.html) ([PDF](labos/09R-Modeles_hierarchiques_bayesiens.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
 
 10. [Modèles hiérarchiques bayésiens 2](labos/10-Modeles_hierarchiques_bayesiens2.html) ([PDF](labos/10-Modeles_hierarchiques_bayesiens2.pdf))
+

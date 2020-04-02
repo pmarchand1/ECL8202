@@ -1,0 +1,1082 @@
+---
+title: "Séries temporelles"
+date: "ECL8202 - Hiver 2020"
+output: 
+  xaringan::moon_reader:
+    css: ["default", "metropolis", "metropolis-fonts", "styles-xar8202.css"]
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,
+                      fig.dim = c(8, 5))
+library(tidyverse)
+library(cowplot)
+theme_set(
+  theme_cowplot(font_size = 18) +
+    theme(panel.background = element_rect(fill = "#fafafa"),
+          plot.background = element_rect(fill = "#fafafa"))
+)
+
+set.seed(8202)
+```
+
+# Contenu du cours
+
+- Dépendance temporelle et spatiale
+
+- Propriétés des séries temporelles
+
+- Modèles ARIMA pour les séries temporelles
+
+- Ajuster les modèles ARIMA dans R
+
+- Prévisions à partir d'un modèle
+
+- Dépendance temporelle dans les modèles additifs et bayésiens
+
+---
+
+class: inverse, center, middle
+
+# Dépendance temporelle et spatiale
+
+---
+
+# Dépendance temporelle et spatiale
+
+- Les observations rapprochées dans le temps ou l'espace sont plus semblables que celles éloignées.
+
+- Première loi de la géographie (W. Tobler): "Everything is related to everything else, but near things are more related than distant things."
+
+--
+
+- Autocorrélation: corrélation entre les mesures d'une même variable à différents moments ou lieux.
+
+---
+
+# Dépendance induite ou intrinsèque
+
+Deux types de dépendance spatiale ou temporelle pour une variable mesurée $y$.
+
+--
+
+Dépendance induite: due à la dépendance spatiale ou temporelle des variables externes influençant $y$.
+
+--
+
+- La croissance d'une plante à l'année $t+1$ est corrélée avec celle à l'année $t$ car les conditions climatiques sont semblables pour deux années successives. 
+
+--
+
+- L'abondance d'une espèce est corrélée entre deux sites rapprochés, car les conditions d'habitat sont plus semblables.
+
+--
+
+Si les variables externes sont incluses dans un modèle pour $y$, les résidus de ce modèle seront indépendants.  
+
+---
+
+# Dépendance induite ou intrinsèque
+
+Dépendance intrinsèque: due à une dépendance temporelle ou spatiale au niveau de la variable $y$ elle-même.
+
+--
+
+- Si une plante croît davantage à l'année $t$, elle aura plus de feuilles et de racines et donc pourra aller chercher plus de ressources pour croître à l'année $t+1$.
+
+--
+
+- L'abondance d'une espèce est corrélée entre deux sites rapprochés en raison de la dispersion d'individus entre ces populations.
+
+--
+
+Une dépendance intrinsèque ne peut être éliminée en ajoutant des prédicteurs au modèle.
+
+---
+
+# Temps ou position comme prédicteur
+
+- Exemple: ajout de l'année, de la longitude ou de la latitude comme prédicteur dans un modèle linéaire ou additif.
+
+--
+
+- Utile pour détecter une tendance systématique (linéaire ou non) à grande échelle.
+
+--
+
+- Différent d'une corrélation temporelle ou spatiale dans les fluctuations aléatoires d'une variable (i.e., dans les résidus après avoir enlevé tout effet systématique).
+
+---
+
+# Comparaison avec les effets aléatoires
+
+- Effets aléatoires pour la non-indépendance de données groupées: variation résiduelle corrélée entre éléments d'un même groupe.
+
+--
+
+- Groupes souvent définis selon des critères temporels (ex.: même année d'observation) ou spatiaux (même site).
+
+--
+
+- Ignore les relations de proximité temporelle et spatiale entre groupes. 
+
+---
+
+# Aperçu des deux prochains cours
+
+- Ce cours-ci: données temporelles à intervalles réguliers (ex.: une mesure par mois).
+
+--
+
+- Prochain cours: données spatiales, méthodes aussi applicables aux séries temporelles irrégulières.
+
+---
+
+class: inverse, center, middle
+
+# Propriétés des séries temporelles
+
+---
+
+# Packages R utilisés
+
+- Package *fpp3* accompagnant le manuel de Hyndman et Athanasopoulos, *Forecasting: Principles and Practice*, 3e édition (https://otexts.com/fpp3/).
+
+```{r, message = FALSE, warning = FALSE}
+library(fpp3)
+```
+
+--
+
+- Charge plusieurs autres packages reliés à l'analyse de séries temporelles.
+
+---
+
+# Exemple: Commerce de fourrures
+
+- Jeu de données `pelt`: Nombre de fourrures de lièvre (*Hare*) et de lynx échangées à la Compagnie de la Baie d'Hudson entre 1845 et 1935.
+
+```{r}
+data(pelt)
+head(pelt)
+```
+
+--
+
+- `pelt` est un tableau de données temporel ou *tsibble*.
+
+---
+
+# Visualiser une série temporelle
+
+- La commande `autoplot` appliquée à un objet de type *tsibble* produit un graphique temporel des variables spécifiées avec `vars`.
+
+```{r}
+autoplot(pelt, vars(Hare, Lynx))
+```
+
+--
+
+- Notez que l'axe des $x$ indique le temps entre chaque observation, soit [1Y] pour "1 year".
+
+---
+
+# Visualiser une série temporelle
+
+- Il s'agit d'un graphique de type `ggplot` que nous pouvons personnaliser.
+
+```{r}
+autoplot(pelt, vars(Hare, Lynx)) +
+  labs(x = "Année", y = "Fourrures échangées")
+```
+
+---
+
+# Exemple: Couverture de glace en Arctique
+
+```{r}
+ice <- read.table("../donnees/sea_ice.txt")
+colnames(ice) <- c("year", "month", "day", "ice_km2")
+head(ice)
+```
+
+*Source*: Spreen, G., L. Kaleschke, and G.Heygster (2008), Sea ice remote sensing using AMSR-E 89 GHz channels J. Geophys. Res.,vol. 113, C02S03, doi:10.1029/2005JC003384.
+
+---
+
+# Exemple: Couverture de glace en Arctique
+
+- Créer une date à partir des colonnes *year*, *month* et *day*, convertir la surface glacée en millions de km<sup>2</sup>, puis convertir en *tsibble*.
+
+.code60[
+```{r}
+ice <- mutate(ice, date = make_date(year, month, day),
+              ice_Mkm2 = ice_km2 / 1E6) %>%
+    select(-year, -month, -day, -ice_km2)
+ice <- as_tsibble(ice, index = date)
+head(ice)
+```
+]
+
+---
+
+# Opérations sur des données temporelles
+
+- Les opérations de *dplyr* s'appliquent aussi aux *tsibble* avec quelques changements.
+
+--
+
+- `index_by`: Comme `group_by`, mais pour grouper les rangées par période temporelle.
+
+.code60[
+```{r}
+ice <- index_by(ice, month = yearmonth(date)) %>%
+    summarize(ice_Mkm2 = mean(ice_Mkm2))
+head(ice)
+```
+]
+
+---
+
+# Saisonnalité
+
+- Variation se produisant avec une période fixe et connue (ex.: semaine, mois, année).
+
+```{r}
+autoplot(ice)
+```
+
+---
+
+# Saisonnalité
+
+- Graphique de saisonnalité
+
+```{r}
+gg_season(ice)
+```
+
+---
+
+# Saisonnalité
+
+- Graphiques des sous-séries saisonnières (*seasonal subseries*)
+
+```{r}
+gg_subseries(ice)
+```
+
+---
+
+# Composantes d'une série temporelle
+
+- Tendance: Changement directionnel (+ ou -, pas nécessairement linéaire) de la série temporelle à long-terme.
+
+--
+
+- Saisonnalité: Fluctuations répétées avec une période fixe et connue.
+
+--
+
+- Cycle: Fluctuations répétées, mais dont la période n'est pas fixe (ex.: dynamique cyclique de populations, cycles économiques).
+
+--
+
+- Bruit ou résidu: Fluctuations restantes après avoir soustrait les effets précédents. 
+
+---
+
+# Décomposition d'une série temporelle
+
+.pull-left[
+
+- Voir Chapitre 3 du manuel de Hyndman et Athanasopoulos.
+
+```{r, eval = FALSE}
+decomp <- model(ice, STL())
+autoplot(components(decomp))
+```
+]
+
+.pull-right[
+```{r, echo = FALSE, fig.dim = c(7, 7)}
+decomp <- model(ice, STL())
+autoplot(components(decomp))
+```
+]
+
+---
+
+# Autocorrélation
+
+- Pour une série temporelle $y$, corrélation entre $y_t$ et $y_{t-k}$ mesurée pour un délai (*lag*) $k$.
+
+```{r}
+head(ACF(ice))
+```
+
+---
+
+# Autocorrélation
+
+```{r}
+autoplot(ACF(ice))
+```
+
+---
+
+# Autocorrélation
+
+```{r}
+autoplot(ACF(pelt, Lynx))
+```
+
+---
+
+class: inverse, center, middle
+
+# Modèles ARIMA pour les séries temporelles
+
+---
+
+# Stationnarité
+
+- Une série temporelle est stationnaire si ses propriétés statistiques ne dépendent pas de la valeur absolue de la variable temporelle $t$.
+
+--
+
+- Autrement dit, ces propriétés ne sont pas affectées par une translation quelconque de la série dans le temps. 
+
+--
+
+- Une série avec une tendance (moyenne varie selon $t$) n'est pas stationnaire.
+
+--
+
+- Une série avec une composante saisonnière n'est pas stationnaire.
+
+---
+
+# Stationnarité
+
+- Une série avec un cycle non-saisonnier peut être stationnaire. 
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+autoplot(pelt)
+```
+
+---
+
+# Stationnarité
+
+- La tendance d'une série temporelle peut être stochastique.
+
+--
+
+- Marche aléatoire: $y_t = y_{t-1} + \epsilon_t$ où $\epsilon_t \sim \text{N}(0, \sigma)$.
+
+--
+
+```{r, echo = FALSE}
+march_alea <- tsibble(serie = rep(1:3, each = 1000),
+                      t = rep(1:1000, 3),
+                      y = as.vector(replicate(3, cumsum(rnorm(1000, 0, 1)))),
+                      key = serie, index = t)
+autoplot(march_alea) + 
+  scale_color_brewer(palette = "Dark2") +
+  theme(legend.position = "none")
+```
+
+---
+
+# Différenciation 
+
+- La différence entre deux valeurs consécutives d'une marche aléatoire est stationnaire: $y_t - y_{t-1} = y_t' = \epsilon_t$. 
+
+--
+
+- Ici, $\epsilon_t$ est un "bruit blanc" (aucune corrélation temporelle).
+
+```{r, echo = FALSE, warning = FALSE}
+march_alea <- group_by(march_alea, serie) %>% 
+  mutate(dy = difference(y))
+autoplot(march_alea, dy) +
+  scale_color_brewer(palette = "Dark2") +
+  theme(legend.position = "none")
+```
+
+---
+
+# Différenciation
+
+- La différenciation est une méthode générale pour éliminer une tendance d'une série temporelle.
+
+--
+
+- La différence d'ordre 1: 
+
+$$y_t' = y_t - y_{t-1}$$ 
+
+est généralement suffisante, mais on doit parfois aller à l'ordre 2: 
+
+$$y_t'' = (y_t - y_{t-1}) - (y_{t-1} - y_{t-2})$$
+
+--
+
+- Pour éliminer la saisonnalité, nous pouvons faire la différence entre valeurs consécutives de la même saison.
+
+- Ex.: $y_t' = y_t - y_{t-12}$ pour des données mensuelles.
+
+---
+
+# Modèle de moyenne mobile
+
+### Exemple
+
+$$y_t = \epsilon_t + 0.6 \epsilon_{t-1} + 0.4 \epsilon_{t-2}$$ 
+
+$$\epsilon_t \sim \text{N}(0, 1)$$
+
+--
+
+```{r, echo = FALSE}
+ma2_sim <- tsibble(t = 1:200, 
+                   y = arima.sim(n = 200, list(ma = c(0.6, 0.4)), sd = 1), 
+                   index = t)
+autoplot(ma2_sim)
+```
+
+---
+
+# Modèle de moyenne mobile
+
+Modèle MA(q)
+
+$$y_t = \epsilon_t + \theta_1 \epsilon_{t-1} + ... + \theta_q \epsilon_{t-q}$$
+
+--
+
+- $y$ est la moyenne pondérée des $q+1$ dernières valeurs d'un bruit blanc.
+
+--
+
+- L'effet d'un "choc" $\epsilon_t$ disparaît au temps $t+q+1$. L'autocorrélation temporelle est limitée à un délai $q$. 
+
+---
+
+# Modèle de moyenne mobile
+
+Exemple de modèle MA(2): $y_t = \epsilon_t + 0.6 \epsilon_{t-1} + 0.4 \epsilon_{t-2}$
+
+```{r, echo = FALSE}
+autoplot(ACF(ma2_sim))
+```
+
+---
+
+# Modèle autorégressif
+
+- Exemple: $y_t = 0.6 y_{t-1} + \epsilon_t$.
+
+```{r, echo = FALSE}
+ar1_sim <- tsibble(t = 1:200, y = arima.sim(n = 200, list(ar = 0.6), sd = 1), 
+                   index = t)
+autoplot(ar1_sim)
+```
+
+---
+
+# Modèle autorégressif
+
+Modèle AR(p)
+
+$$y_t = \phi_1 y_{t-1} + ... + \phi_p y_{t-p} + \epsilon_t$$
+
+--
+
+- $y_t$ est une fonction des $p$ valeurs précédentes, plus un bruit blanc.
+
+--
+
+- Les coefficients $\phi$ doivent être $<1$ pour une série stationnaire.
+
+--
+
+- L'autocorrélation est présente au-delà d'un délai $p$, mais l'effet s'estompe avec le temps. 
+
+- Par exemple: pour AR(1), $y_t$ dépend de $y_{t-1}$, mais $y_{t-1}$ dépend de $y_{t-2}$, donc $y_t$ dépend indirectement de $y_{t-2}$.
+
+---
+
+# Modèle autorégressif
+
+- Exemple de modèle AR(1): $y_t = 0.6 y_{t-1} + \epsilon_t$.
+
+```{r, echo = FALSE}
+autoplot(ACF(ar1_sim))
+```
+
+---
+
+# Autocorrélation partielle
+
+- Corrélation entre $y_t$ et $y_{t-k}$ après avoir tenu compte de l'effet des délais inférieurs à $k$.
+
+--
+
+.pull-left[
+- Fonction `PACF` plutôt que `ACF`.
+
+```{r, eval = FALSE}
+plot_grid(autoplot(ACF(ar1_sim)), 
+          autoplot(PACF(ar1_sim)))
+```
+]
+
+--
+
+.pull-right[
+```{r, echo = FALSE}
+plot_grid(autoplot(ACF(ar1_sim)), autoplot(PACF(ar1_sim)), ncol = 1)
+```
+]
+
+---
+
+# Modèle ARIMA
+
+- Acronyme pour *autoregressive integrated moving average model*
+
+--
+
+- ARIMA(p,d,q): Combinaison d'un modèle autorégressif d'ordre $p$ et d'une moyenne mobile d'ordre $q$ sur la variable $y$ différenciée $d$ fois.
+
+--
+
+- Ex.: ARIMA(1,1,2)
+
+$$y'_t = c + \phi_1 y'_{t-1} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2}$$
+
+--
+
+- Il existe des modèles ARIMA avec saisonnalité (pas vus dans ce cours).
+
+---
+
+# Régression avec résidus corrélés
+
+- Exemple: $y_t = \beta_0 + \beta_1 x_{t} + \eta_t$
+
+--
+
+- Le résidu $\eta_t$ suit un modèle ARIMA.
+
+--
+
+- D'après le phénomène à modéliser, il peut être utile de différencier les valeurs de $y$ et $x$, ou de modéliser $y$ en fonction des $x$ à des temps antérieurs (effet de délai).
+
+---
+
+class: inverse, center, middle
+
+# Modèles ARIMA dans R: Exemple 1
+
+---
+
+# Fourrures de lynx échangées à la CBH
+
+```{r}
+pelt <- mutate(pelt, Lynx = Lynx / 1000)
+autoplot(pelt, Lynx)
+```
+
+---
+
+# Choix du modèle ARIMA
+
+- La fonction `unitroot_ndiffs` effectue un test statistique pour déterminer le nombre de différenciations à réaliser avant d'obtenir une série stationnaire.
+
+--
+
+```{r}
+unitroot_ndiffs(pelt$Lynx)
+```
+
+- Aucune différenciation nécessaire.
+
+---
+
+# Choix du modèle ARIMA
+
+- Si les données suivent un modèle autorégressif d'ordre $p$, l'autocorrélation partielle (PACF) devient non-significative pour des délais $>p$.
+
+--
+
+- Si les données suivent un modèle de moyenne mobile d'ordre $q$, l'autocorrélation (ACF) devient non-significative pour des délais $>q$.
+
+--
+
+- Pour un modèle combinant AR et MA, il est difficile de déduire $p$ et $q$ graphiquement.
+
+---
+
+# ACF et PACF
+
+- Un modèle AR(2) pourrait être suffisant ici.
+
+```{r}
+plot_grid(autoplot(ACF(pelt, Lynx)), autoplot(PACF(pelt, Lynx)))
+```
+
+---
+
+# Ajuster un modèle ARIMA
+
+- Fonction `model` du package *fable* permet d'ajuster différents modèles de séries temporelles.
+
+--
+
+```{r}
+lynx_ar2 <- model(pelt, ARIMA(Lynx ~ pdq(2,0,0)))
+```
+
+--
+
+- `ARIMA(Lynx ~ pdq(2,0,0))` spécifie un modèle AR(2) $(p = 2, d = 0, q = 0)$.
+
+--
+
+- `ARIMA` estime les coefficients du modèle par la méthode du maximum de vraisemblance.
+
+---
+
+# Sommaire du modèle
+
+```{r}
+report(lynx_ar2)
+```
+
+---
+
+# Sélection automatique du modèle
+
+```{r}
+lynx_arima <- model(pelt, ARIMA(Lynx))
+```
+
+--
+
+- Si on ne spécifie pas `pdq(...)`, `ARIMA` choisit automatiquement le nombre de différenciations $d$ avec le test `unitroot_ndiffs`, puis choisit les valeurs de $p$ et $q$ minimisant l'AIC par une méthode séquentielle (*stepwise*).
+
+---
+
+# Sélection automatique du modèle
+
+```{r}
+report(lynx_arima)
+```
+
+---
+
+# Graphiques de diagnostic
+
+```{r}
+gg_tsresiduals(lynx_arima)
+```
+
+---
+
+# Valeurs attendues vs. observées
+
+```{r}
+autoplot(pelt, Lynx) +
+  autolayer(fitted(lynx_arima), linetype = "dashed")
+```
+
+---
+
+# Prévisions
+
+```{r}
+prev_lynx <- forecast(lynx_arima, h = 10)
+head(prev_lynx)
+```
+
+---
+
+# Prévisions
+
+```{r}
+autoplot(prev_lynx, pelt, level = c(50, 95))
+```
+
+---
+
+class: inverse, center, middle
+
+# Modèles ARIMA dans R: Exemple 2
+
+---
+
+# Demande d'électricité de l'état du Victoria
+
+```{r}
+data(vic_elec)
+head(vic_elec)
+```
+
+- Demande d'électricité en MW enregistrée aux demi-heures en fonction de la température. 
+
+---
+
+# Transformation des données
+
+- Agrégation journalière et définition des jours ouvrables (*workday*).
+
+```{r}
+vic_elec <- index_by(vic_elec, Date) %>%
+  summarize(Demand = sum(Demand), Tmean = mean(Temperature),
+            Holiday = any(Holiday)) %>%
+  mutate(Workday = (!Holiday) & (wday(Date) %in% 2:6))
+```
+
+--
+
+- Convertir la demande en GW.
+
+```{r}
+vic_elec <- mutate(vic_elec, Demand = Demand / 1000)
+```
+
+---
+
+# Visualisation des données
+
+```{r}
+ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2")
+```
+
+---
+
+# Modèle de régression linéaire
+
+.code60[
+```{r}
+elec_lm <- lm(Demand ~ Tmean + I(Tmean^2) + Workday, vic_elec)
+
+ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
+  geom_point(alpha = 0.3) +
+  geom_line(aes(y = fitted(elec_lm))) +
+  scale_color_brewer(palette = "Dark2")
+```
+]
+
+---
+
+# Résidus corrélés
+
+```{r}
+ggplot(vic_elec, aes(x = Date, y = residuals(elec_lm), color = Workday)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2")
+```
+
+---
+
+# Modèle ARIMA
+
+.code60[
+```{r}
+elec_arima <- model(vic_elec, ARIMA(Demand ~ Tmean + I(Tmean^2) + Workday + PDQ(0,0,0)))
+```
+]
+
+- `PDQ(0,0,0)` (à ne pas confondre avec `pdq`) spécifie qu'il n'y a pas de composante saisonnière.
+
+--
+
+.code60[
+```{r}
+report(elec_arima)
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+```{r}
+gg_tsresiduals(elec_arima)
+```
+
+---
+
+# Prévisions
+
+```{r}
+prev_df <- new_data(vic_elec, 14) %>%
+  mutate(Tmean = 20, Workday = TRUE)
+
+head(prev_df)
+```
+
+---
+
+# Prévisions
+
+```{r}
+prev_elec <- forecast(elec_arima, new_data = prev_df)
+autoplot(prev_elec, vic_elec) +
+  coord_cartesian(xlim = c(as_date("2014-11-01"), as_date("2015-01-15")))
+```
+
+---
+
+# Résumé des fonctions R
+
+- `as_tsibble(..., index = ...)`: Convertir en *tsibble*.
+
+- `index_by`: Grouper un *tsibble* en vue d'une agrégation temporelle.
+ 
+--
+ 
+- `ACF` et `PACF`
+
+--
+
+- `model`: Créer un modèle de série temporelle.
+
+- `ARIMA(y ~ x + pdq(...) + PDQ(...))`
+
+--
+
+- `forecast(mod, h = ...)` ou `forecast(mod, new_data = ...)`
+
+--
+
+- Graphiques: `autoplot` (tsibble, ACF/PACF, forecast), `gg_season` et `gg_subseries`, `gg_tsresiduals`.
+
+---
+
+# Référence
+
+Hyndman, R.J. et Athanasopoulos, G. (2019) Forecasting: principles and practice, 3e édition, OTexts: Melbourne, Australia. http://OTexts.com/fpp3. (surtout les chapitres 2 à 5, 9 et 10).
+
+---
+
+class: inverse, center, middle
+
+# Modèles additifs et bayésiens avec corrélations temporelles
+
+---
+
+# Séries temporelles multiples
+
+- Dans les exemples précédents, toutes les données provenaient de la même série temporelle.
+
+--
+
+- Il est fréquent de vouloir ajuster le même modèle (mêmes paramètres) à plusieurs séries temporelles indépendantes. 
+
+- Ex.: croissance de plusieurs arbres d'une même espèce, abondance d'une même espèce sur plusieurs sites.
+
+--
+
+- Un tableau de données temporel (*tsibble*) peut contenir plusieurs séries temporelles, mais dans ce cas l'ajustement d'un modèle `ARIMA` est effectué séparément pour chaque série.
+
+---
+
+# Séries temporelles multiples
+
+- Dans cette partie: comment ajouter une corrélation temporelle de type ARMA aux résidus d'un GAM (avec *mgcv*) ou d'un modèle hiérarchique bayésien (avec *brms*). 
+
+--
+
+- Pas de sélection automatique de $p$ et $q$.
+
+--
+
+- Pas de différenciation (le  I dans ARIMA), mais les résidus devraient être stationnaires et toute tendance devrait être incluse dans le modèle principal.
+
+---
+
+# Exemple: Séries dendrochronologiques
+
+- Séries dendrochronologiques de 23 *Abies amabilis* (jeu de données `wa082` du package *dplr*).
+
+--
+
+- Croissance en surface terrière (*cst*) en fonction de la surface terrière (*st*) et de l'âge de l'arbre. 
+
+```{r, echo = FALSE}
+library(tidyr)
+
+wa <- read.csv("../donnees/dendro_wa082.csv")
+wa <- pivot_longer(wa, cols = -year, names_to = "id_arbre",
+                   values_to = "cst", values_drop_na = TRUE)
+wa <- arrange(wa, id_arbre, year) %>%
+  group_by(id_arbre) %>%
+  mutate(age = row_number(), st = cumsum(cst)) %>%
+  ungroup() %>%
+  rename(annee = year) %>%
+  mutate(id_arbre = as.factor(id_arbre))
+head(wa)
+```
+
+---
+
+# Modèle additif de la croissance
+
+- Effets fixe de la surface terrière et de l'âge, effet aléatoire de l'arbre.
+
+```{r, warning = FALSE, message = FALSE}
+library(mgcv)
+gam_wa <- gam(log(cst) ~ log(st) + s(age) + s(id_arbre, bs = "re"), data = wa)
+plot(gam_wa, pages = 1)
+```
+
+---
+
+# Autre fonction pour ajuster un GAMM
+
+- La fonction `gamm` spécifie les effets aléatoires différemment, basée sur la fonction `lme` du package *nlme*.
+
+```{r, eval = FALSE}
+gam_wa2 <- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                random = list(id_arbre = ~1))
+gam_wa2$lme
+```
+
+
+---
+
+# Autre fonction pour ajuster un GAMM
+
+.code50[
+```{r, echo = FALSE}
+gam_wa2 <- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                random = list(id_arbre = ~1))
+gam_wa2$lme
+```
+]
+
+---
+
+# Ajout d'une corrélation temporelle
+
+- `corAR1(form = ~ 1 | id_arbre)`: Signifie que les résidus consécutifs du même arbre sont corrélés selon un modèle AR(1).
+
+```{r, eval = FALSE}
+gam_wa_ar <- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                  random = list(id_arbre = ~1), 
+                  correlation = corAR1(form = ~ 1 | id_arbre))
+```
+
+---
+
+# Ajout d'une corrélation temporelle
+
+.code50[
+```{r, echo = FALSE}
+gam_wa_ar <- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                  random = list(id_arbre = ~1), 
+                  correlation = corAR1(form = ~ 1 | id_arbre))
+gam_wa_ar$lme
+```
+]
+
+---
+
+# Estimation de la spline
+
+```{r}
+par(mfrow = c(1, 2))
+plot(gam_wa2$gam, select = 1, main = "GAMM")
+plot(gam_wa_ar$gam, select = 1, main = "GAMM AR(1)")
+```
+
+---
+
+# Autres options avec `gamm` et `lme`
+
+- `corARMA` pour un modèle plus général. 
+
+- Exemple: `correlation = corARMA(form = ~ 1 | id_arbre, p = 2, q = 1)` pour AR(2), MA(1).
+
+--
+
+- `lme` (package *nlme*) offre la même fonctionnalité pour les modèles linéaires mixtes, avec les mêmes arguments `random`et `correlation`. 
+
+---
+
+# Limites de `gamm` et `lme`
+
+- Pas approprié pour les modèles généralisés (résidus non-normaux).
+
+--
+
+- Impossible d'inclure plusieurs effets aléatoires non-nichés.
+
+--
+
+- Modèles bayésiens (avec *brms*) offrent l'option la plus flexible pour combiner effets aléatoires et corrélations temporelles.
+
+---
+
+# Version bayésienne du modèle
+
+- Ajout d'un terme `ar(p = 1, gr = id_arbre)`: corrélation AR(1) à l'intérieur des groupes définis par *id_arbre*.
+
+```{r, eval = FALSE}
+library(brms)
+
+wa_br <- brm(log(cst) ~ log(st) + s(age) + (1 | id_arbre) + ar(p = 1, gr = id_arbre), 
+             data = wa, chains = 2)
+```
+
+```{r, include = FALSE, message = FALSE, warning = FALSE}
+library(brms)
+```
+
+
+```{r, include = FALSE, cache = TRUE}
+wa_br <- brm(log(cst) ~ log(st) + s(age) + (1 | id_arbre) + ar(p = 1, gr = id_arbre), 
+             data = wa, chains = 2)
+
+```
+
+--
+
+- Autres options: `ma(q = ...)`, `arma(p = ..., q = ...)`.
+
+--
+
+- Dans cet exemple, on laisse `brms` choisir des distributions *a priori* par défaut.
+
+---
+
+# Résultats du modèle
+
+.code50[
+```{r}
+summary(wa_br)
+```
+]
+
+---
+
+# Visualiser la spline
+
+```{r, warning = FALSE, message = FALSE}
+marginal_smooths(wa_br)
+```
+
+---

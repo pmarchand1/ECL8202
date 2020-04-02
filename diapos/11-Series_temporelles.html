@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Séries temporelles</title>
+    <meta charset="utf-8" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles-xar8202.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Séries temporelles
+### ECL8202 - Hiver 2020
+
+---
+
+
+
+
+# Contenu du cours
+
+- Dépendance temporelle et spatiale
+
+- Propriétés des séries temporelles
+
+- Modèles ARIMA pour les séries temporelles
+
+- Ajuster les modèles ARIMA dans R
+
+- Prévisions à partir d'un modèle
+
+- Dépendance temporelle dans les modèles additifs et bayésiens
+
+---
+
+class: inverse, center, middle
+
+# Dépendance temporelle et spatiale
+
+---
+
+# Dépendance temporelle et spatiale
+
+- Les observations rapprochées dans le temps ou l'espace sont plus semblables que celles éloignées.
+
+- Première loi de la géographie (W. Tobler): "Everything is related to everything else, but near things are more related than distant things."
+
+--
+
+- Autocorrélation: corrélation entre les mesures d'une même variable à différents moments ou lieux.
+
+---
+
+# Dépendance induite ou intrinsèque
+
+Deux types de dépendance spatiale ou temporelle pour une variable mesurée `\(y\)`.
+
+--
+
+Dépendance induite: due à la dépendance spatiale ou temporelle des variables externes influençant `\(y\)`.
+
+--
+
+- La croissance d'une plante à l'année `\(t+1\)` est corrélée avec celle à l'année `\(t\)` car les conditions climatiques sont semblables pour deux années successives. 
+
+--
+
+- L'abondance d'une espèce est corrélée entre deux sites rapprochés, car les conditions d'habitat sont plus semblables.
+
+--
+
+Si les variables externes sont incluses dans un modèle pour `\(y\)`, les résidus de ce modèle seront indépendants.  
+
+---
+
+# Dépendance induite ou intrinsèque
+
+Dépendance intrinsèque: due à une dépendance temporelle ou spatiale au niveau de la variable `\(y\)` elle-même.
+
+--
+
+- Si une plante croît davantage à l'année `\(t\)`, elle aura plus de feuilles et de racines et donc pourra aller chercher plus de ressources pour croître à l'année `\(t+1\)`.
+
+--
+
+- L'abondance d'une espèce est corrélée entre deux sites rapprochés en raison de la dispersion d'individus entre ces populations.
+
+--
+
+Une dépendance intrinsèque ne peut être éliminée en ajoutant des prédicteurs au modèle.
+
+---
+
+# Temps ou position comme prédicteur
+
+- Exemple: ajout de l'année, de la longitude ou de la latitude comme prédicteur dans un modèle linéaire ou additif.
+
+--
+
+- Utile pour détecter une tendance systématique (linéaire ou non) à grande échelle.
+
+--
+
+- Différent d'une corrélation temporelle ou spatiale dans les fluctuations aléatoires d'une variable (i.e., dans les résidus après avoir enlevé tout effet systématique).
+
+---
+
+# Comparaison avec les effets aléatoires
+
+- Effets aléatoires pour la non-indépendance de données groupées: variation résiduelle corrélée entre éléments d'un même groupe.
+
+--
+
+- Groupes souvent définis selon des critères temporels (ex.: même année d'observation) ou spatiaux (même site).
+
+--
+
+- Ignore les relations de proximité temporelle et spatiale entre groupes. 
+
+---
+
+# Aperçu des deux prochains cours
+
+- Ce cours-ci: données temporelles à intervalles réguliers (ex.: une mesure par mois).
+
+--
+
+- Prochain cours: données spatiales, méthodes aussi applicables aux séries temporelles irrégulières.
+
+---
+
+class: inverse, center, middle
+
+# Propriétés des séries temporelles
+
+---
+
+# Packages R utilisés
+
+- Package *fpp3* accompagnant le manuel de Hyndman et Athanasopoulos, *Forecasting: Principles and Practice*, 3e édition (https://otexts.com/fpp3/).
+
+
+```r
+library(fpp3)
+```
+
+--
+
+- Charge plusieurs autres packages reliés à l'analyse de séries temporelles.
+
+---
+
+# Exemple: Commerce de fourrures
+
+- Jeu de données `pelt`: Nombre de fourrures de lièvre (*Hare*) et de lynx échangées à la Compagnie de la Baie d'Hudson entre 1845 et 1935.
+
+
+```r
+data(pelt)
+head(pelt)
+```
+
+```
+## # A tsibble: 6 x 3 [1Y]
+##    Year  Hare  Lynx
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  1845 19580 30090
+## 2  1846 19600 45150
+## 3  1847 19610 49150
+## 4  1848 11990 39520
+## 5  1849 28040 21230
+## 6  1850 58000  8420
+```
+
+--
+
+- `pelt` est un tableau de données temporel ou *tsibble*.
+
+---
+
+# Visualiser une série temporelle
+
+- La commande `autoplot` appliquée à un objet de type *tsibble* produit un graphique temporel des variables spécifiées avec `vars`.
+
+
+```r
+autoplot(pelt, vars(Hare, Lynx))
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+--
+
+- Notez que l'axe des `\(x\)` indique le temps entre chaque observation, soit [1Y] pour "1 year".
+
+---
+
+# Visualiser une série temporelle
+
+- Il s'agit d'un graphique de type `ggplot` que nous pouvons personnaliser.
+
+
+```r
+autoplot(pelt, vars(Hare, Lynx)) +
+  labs(x = "Année", y = "Fourrures échangées")
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+
+# Exemple: Couverture de glace en Arctique
+
+
+```r
+ice &lt;- read.table("../donnees/sea_ice.txt")
+colnames(ice) &lt;- c("year", "month", "day", "ice_km2")
+head(ice)
+```
+
+```
+##   year month day  ice_km2
+## 1 1972     1   1 14449000
+## 2 1972     1   2 14541400
+## 3 1972     1   3 14633900
+## 4 1972     1   4 14716100
+## 5 1972     1   5 14808500
+## 6 1972     1   6 14890700
+```
+
+*Source*: Spreen, G., L. Kaleschke, and G.Heygster (2008), Sea ice remote sensing using AMSR-E 89 GHz channels J. Geophys. Res.,vol. 113, C02S03, doi:10.1029/2005JC003384.
+
+---
+
+# Exemple: Couverture de glace en Arctique
+
+- Créer une date à partir des colonnes *year*, *month* et *day*, convertir la surface glacée en millions de km&lt;sup&gt;2&lt;/sup&gt;, puis convertir en *tsibble*.
+
+.code60[
+
+```r
+ice &lt;- mutate(ice, date = make_date(year, month, day),
+              ice_Mkm2 = ice_km2 / 1E6) %&gt;%
+    select(-year, -month, -day, -ice_km2)
+ice &lt;- as_tsibble(ice, index = date)
+head(ice)
+```
+
+```
+## # A tsibble: 6 x 2 [1D]
+##   date       ice_Mkm2
+##   &lt;date&gt;        &lt;dbl&gt;
+## 1 1972-01-01     14.4
+## 2 1972-01-02     14.5
+## 3 1972-01-03     14.6
+## 4 1972-01-04     14.7
+## 5 1972-01-05     14.8
+## 6 1972-01-06     14.9
+```
+]
+
+---
+
+# Opérations sur des données temporelles
+
+- Les opérations de *dplyr* s'appliquent aussi aux *tsibble* avec quelques changements.
+
+--
+
+- `index_by`: Comme `group_by`, mais pour grouper les rangées par période temporelle.
+
+.code60[
+
+```r
+ice &lt;- index_by(ice, month = yearmonth(date)) %&gt;%
+    summarize(ice_Mkm2 = mean(ice_Mkm2))
+head(ice)
+```
+
+```
+## # A tsibble: 6 x 2 [1M]
+##        month ice_Mkm2
+##        &lt;mth&gt;    &lt;dbl&gt;
+## 1 1972 janv.     15.4
+## 2 1972 févr.     16.3
+## 3  1972 mars     16.2
+## 4  1972 avr.     15.5
+## 5   1972 mai     14.6
+## 6  1972 juin     12.9
+```
+]
+
+---
+
+# Saisonnalité
+
+- Variation se produisant avec une période fixe et connue (ex.: semaine, mois, année).
+
+
+```r
+autoplot(ice)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+
+---
+
+# Saisonnalité
+
+- Graphique de saisonnalité
+
+
+```r
+gg_season(ice)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+
+---
+
+# Saisonnalité
+
+- Graphiques des sous-séries saisonnières (*seasonal subseries*)
+
+
+```r
+gg_subseries(ice)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+
+---
+
+# Composantes d'une série temporelle
+
+- Tendance: Changement directionnel (+ ou -, pas nécessairement linéaire) de la série temporelle à long-terme.
+
+--
+
+- Saisonnalité: Fluctuations répétées avec une période fixe et connue.
+
+--
+
+- Cycle: Fluctuations répétées, mais dont la période n'est pas fixe (ex.: dynamique cyclique de populations, cycles économiques).
+
+--
+
+- Bruit ou résidu: Fluctuations restantes après avoir soustrait les effets précédents. 
+
+---
+
+# Décomposition d'une série temporelle
+
+.pull-left[
+
+- Voir Chapitre 3 du manuel de Hyndman et Athanasopoulos.
+
+
+```r
+decomp &lt;- model(ice, STL())
+autoplot(components(decomp))
+```
+]
+
+.pull-right[
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Autocorrélation
+
+- Pour une série temporelle `\(y\)`, corrélation entre `\(y_t\)` et `\(y_{t-k}\)` mesurée pour un délai (*lag*) `\(k\)`.
+
+
+```r
+head(ACF(ice))
+```
+
+```
+## # A tsibble: 6 x 2 [1M]
+##     lag     acf
+##   &lt;lag&gt;   &lt;dbl&gt;
+## 1    1M  0.857 
+## 2    2M  0.491 
+## 3    3M  0.0263
+## 4    4M -0.411 
+## 5    5M -0.718 
+## 6    6M -0.829
+```
+
+---
+
+# Autocorrélation
+
+
+```r
+autoplot(ACF(ice))
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+---
+
+# Autocorrélation
+
+
+```r
+autoplot(ACF(pelt, Lynx))
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+
+---
+
+class: inverse, center, middle
+
+# Modèles ARIMA pour les séries temporelles
+
+---
+
+# Stationnarité
+
+- Une série temporelle est stationnaire si ses propriétés statistiques ne dépendent pas de la valeur absolue de la variable temporelle `\(t\)`.
+
+--
+
+- Autrement dit, ces propriétés ne sont pas affectées par une translation quelconque de la série dans le temps. 
+
+--
+
+- Une série avec une tendance (moyenne varie selon `\(t\)`) n'est pas stationnaire.
+
+--
+
+- Une série avec une composante saisonnière n'est pas stationnaire.
+
+---
+
+# Stationnarité
+
+- Une série avec un cycle non-saisonnier peut être stationnaire. 
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+
+---
+
+# Stationnarité
+
+- La tendance d'une série temporelle peut être stochastique.
+
+--
+
+- Marche aléatoire: `\(y_t = y_{t-1} + \epsilon_t\)` où `\(\epsilon_t \sim \text{N}(0, \sigma)\)`.
+
+--
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+
+---
+
+# Différenciation 
+
+- La différence entre deux valeurs consécutives d'une marche aléatoire est stationnaire: `\(y_t - y_{t-1} = y_t' = \epsilon_t\)`. 
+
+--
+
+- Ici, `\(\epsilon_t\)` est un "bruit blanc" (aucune corrélation temporelle).
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+
+---
+
+# Différenciation
+
+- La différenciation est une méthode générale pour éliminer une tendance d'une série temporelle.
+
+--
+
+- La différence d'ordre 1: 
+
+`$$y_t' = y_t - y_{t-1}$$` 
+
+est généralement suffisante, mais on doit parfois aller à l'ordre 2: 
+
+`$$y_t'' = (y_t - y_{t-1}) - (y_{t-1} - y_{t-2})$$`
+
+--
+
+- Pour éliminer la saisonnalité, nous pouvons faire la différence entre valeurs consécutives de la même saison.
+
+- Ex.: `\(y_t' = y_t - y_{t-12}\)` pour des données mensuelles.
+
+---
+
+# Modèle de moyenne mobile
+
+### Exemple
+
+`$$y_t = \epsilon_t + 0.6 \epsilon_{t-1} + 0.4 \epsilon_{t-2}$$` 
+
+`$$\epsilon_t \sim \text{N}(0, 1)$$`
+
+--
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+
+---
+
+# Modèle de moyenne mobile
+
+Modèle MA(q)
+
+`$$y_t = \epsilon_t + \theta_1 \epsilon_{t-1} + ... + \theta_q \epsilon_{t-q}$$`
+
+--
+
+- `\(y\)` est la moyenne pondérée des `\(q+1\)` dernières valeurs d'un bruit blanc.
+
+--
+
+- L'effet d'un "choc" `\(\epsilon_t\)` disparaît au temps `\(t+q+1\)`. L'autocorrélation temporelle est limitée à un délai `\(q\)`. 
+
+---
+
+# Modèle de moyenne mobile
+
+Exemple de modèle MA(2): `\(y_t = \epsilon_t + 0.6 \epsilon_{t-1} + 0.4 \epsilon_{t-2}\)`
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
+
+---
+
+# Modèle autorégressif
+
+- Exemple: `\(y_t = 0.6 y_{t-1} + \epsilon_t\)`.
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+---
+
+# Modèle autorégressif
+
+Modèle AR(p)
+
+`$$y_t = \phi_1 y_{t-1} + ... + \phi_p y_{t-p} + \epsilon_t$$`
+
+--
+
+- `\(y_t\)` est une fonction des `\(p\)` valeurs précédentes, plus un bruit blanc.
+
+--
+
+- Les coefficients `\(\phi\)` doivent être `\(&lt;1\)` pour une série stationnaire.
+
+--
+
+- L'autocorrélation est présente au-delà d'un délai `\(p\)`, mais l'effet s'estompe avec le temps. 
+
+- Par exemple: pour AR(1), `\(y_t\)` dépend de `\(y_{t-1}\)`, mais `\(y_{t-1}\)` dépend de `\(y_{t-2}\)`, donc `\(y_t\)` dépend indirectement de `\(y_{t-2}\)`.
+
+---
+
+# Modèle autorégressif
+
+- Exemple de modèle AR(1): `\(y_t = 0.6 y_{t-1} + \epsilon_t\)`.
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+
+---
+
+# Autocorrélation partielle
+
+- Corrélation entre `\(y_t\)` et `\(y_{t-k}\)` après avoir tenu compte de l'effet des délais inférieurs à `\(k\)`.
+
+--
+
+.pull-left[
+- Fonction `PACF` plutôt que `ACF`.
+
+
+```r
+plot_grid(autoplot(ACF(ar1_sim)), 
+          autoplot(PACF(ar1_sim)))
+```
+]
+
+--
+
+.pull-right[
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-24-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Modèle ARIMA
+
+- Acronyme pour *autoregressive integrated moving average model*
+
+--
+
+- ARIMA(p,d,q): Combinaison d'un modèle autorégressif d'ordre `\(p\)` et d'une moyenne mobile d'ordre `\(q\)` sur la variable `\(y\)` différenciée `\(d\)` fois.
+
+--
+
+- Ex.: ARIMA(1,1,2)
+
+`$$y'_t = c + \phi_1 y'_{t-1} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2}$$`
+
+--
+
+- Il existe des modèles ARIMA avec saisonnalité (pas vus dans ce cours).
+
+---
+
+# Régression avec résidus corrélés
+
+- Exemple: `\(y_t = \beta_0 + \beta_1 x_{t} + \eta_t\)`
+
+--
+
+- Le résidu `\(\eta_t\)` suit un modèle ARIMA.
+
+--
+
+- D'après le phénomène à modéliser, il peut être utile de différencier les valeurs de `\(y\)` et `\(x\)`, ou de modéliser `\(y\)` en fonction des `\(x\)` à des temps antérieurs (effet de délai).
+
+---
+
+class: inverse, center, middle
+
+# Modèles ARIMA dans R: Exemple 1
+
+---
+
+# Fourrures de lynx échangées à la CBH
+
+
+```r
+pelt &lt;- mutate(pelt, Lynx = Lynx / 1000)
+autoplot(pelt, Lynx)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+
+---
+
+# Choix du modèle ARIMA
+
+- La fonction `unitroot_ndiffs` effectue un test statistique pour déterminer le nombre de différenciations à réaliser avant d'obtenir une série stationnaire.
+
+--
+
+
+```r
+unitroot_ndiffs(pelt$Lynx)
+```
+
+```
+## ndiffs 
+##      0
+```
+
+- Aucune différenciation nécessaire.
+
+---
+
+# Choix du modèle ARIMA
+
+- Si les données suivent un modèle autorégressif d'ordre `\(p\)`, l'autocorrélation partielle (PACF) devient non-significative pour des délais `\(&gt;p\)`.
+
+--
+
+- Si les données suivent un modèle de moyenne mobile d'ordre `\(q\)`, l'autocorrélation (ACF) devient non-significative pour des délais `\(&gt;q\)`.
+
+--
+
+- Pour un modèle combinant AR et MA, il est difficile de déduire `\(p\)` et `\(q\)` graphiquement.
+
+---
+
+# ACF et PACF
+
+- Un modèle AR(2) pourrait être suffisant ici.
+
+
+```r
+plot_grid(autoplot(ACF(pelt, Lynx)), autoplot(PACF(pelt, Lynx)))
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+
+---
+
+# Ajuster un modèle ARIMA
+
+- Fonction `model` du package *fable* permet d'ajuster différents modèles de séries temporelles.
+
+--
+
+
+```r
+lynx_ar2 &lt;- model(pelt, ARIMA(Lynx ~ pdq(2,0,0)))
+```
+
+--
+
+- `ARIMA(Lynx ~ pdq(2,0,0))` spécifie un modèle AR(2) `\((p = 2, d = 0, q = 0)\)`.
+
+--
+
+- `ARIMA` estime les coefficients du modèle par la méthode du maximum de vraisemblance.
+
+---
+
+# Sommaire du modèle
+
+
+```r
+report(lynx_ar2)
+```
+
+```
+## Series: Lynx 
+## Model: ARIMA(2,0,0) w/ mean 
+## 
+## Coefficients:
+##          ar1      ar2  constant
+##       1.3446  -0.7393   11.0927
+## s.e.  0.0687   0.0681    0.8307
+## 
+## sigma^2 estimated as 64.44:  log likelihood=-318.39
+## AIC=644.77   AICc=645.24   BIC=654.81
+```
+
+---
+
+# Sélection automatique du modèle
+
+
+```r
+lynx_arima &lt;- model(pelt, ARIMA(Lynx))
+```
+
+--
+
+- Si on ne spécifie pas `pdq(...)`, `ARIMA` choisit automatiquement le nombre de différenciations `\(d\)` avec le test `unitroot_ndiffs`, puis choisit les valeurs de `\(p\)` et `\(q\)` minimisant l'AIC par une méthode séquentielle (*stepwise*).
+
+---
+
+# Sélection automatique du modèle
+
+
+```r
+report(lynx_arima)
+```
+
+```
+## Series: Lynx 
+## Model: ARIMA(2,0,1) w/ mean 
+## 
+## Coefficients:
+##          ar1      ar2      ma1  constant
+##       1.4851  -0.8468  -0.3392   10.1657
+## s.e.  0.0652   0.0571   0.1185    0.5352
+## 
+## sigma^2 estimated as 60.92:  log likelihood=-315.39
+## AIC=640.77   AICc=641.48   BIC=653.33
+```
+
+---
+
+# Graphiques de diagnostic
+
+
+```r
+gg_tsresiduals(lynx_arima)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-32-1.png)&lt;!-- --&gt;
+
+---
+
+# Valeurs attendues vs. observées
+
+
+```r
+autoplot(pelt, Lynx) +
+  autolayer(fitted(lynx_arima), linetype = "dashed")
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+
+---
+
+# Prévisions
+
+
+```r
+prev_lynx &lt;- forecast(lynx_arima, h = 10)
+head(prev_lynx)
+```
+
+```
+## # A fable: 6 x 4 [1Y]
+## # Key:     .model [1]
+##   .model       Year  Lynx .distribution
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dist&gt;       
+## 1 ARIMA(Lynx)  1936  37.4 N(37,  61)   
+## 2 ARIMA(Lynx)  1937  35.7 N(36, 141)   
+## 3 ARIMA(Lynx)  1938  31.5 N(32, 185)   
+## 4 ARIMA(Lynx)  1939  26.7 N(27, 191)   
+## 5 ARIMA(Lynx)  1940  23.2 N(23, 196)   
+## 6 ARIMA(Lynx)  1941  22.0 N(22, 223)
+```
+
+---
+
+# Prévisions
+
+
+```r
+autoplot(prev_lynx, pelt, level = c(50, 95))
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+
+---
+
+class: inverse, center, middle
+
+# Modèles ARIMA dans R: Exemple 2
+
+---
+
+# Demande d'électricité de l'état du Victoria
+
+
+```r
+data(vic_elec)
+head(vic_elec)
+```
+
+```
+## # A tsibble: 6 x 5 [30m] &lt;UTC&gt;
+##   Time                Demand Temperature Date       Holiday
+##   &lt;dttm&gt;               &lt;dbl&gt;       &lt;dbl&gt; &lt;date&gt;     &lt;lgl&gt;  
+## 1 2012-01-01 00:00:00  4263.        21.0 2012-01-01 TRUE   
+## 2 2012-01-01 00:30:00  4049.        20.7 2012-01-01 TRUE   
+## 3 2012-01-01 01:00:00  3878.        20.6 2012-01-01 TRUE   
+## 4 2012-01-01 01:30:00  4036.        20.4 2012-01-01 TRUE   
+## 5 2012-01-01 02:00:00  3866.        20.2 2012-01-01 TRUE   
+## 6 2012-01-01 02:30:00  3694.        20.1 2012-01-01 TRUE
+```
+
+- Demande d'électricité en MW enregistrée aux demi-heures en fonction de la température. 
+
+---
+
+# Transformation des données
+
+- Agrégation journalière et définition des jours ouvrables (*workday*).
+
+
+```r
+vic_elec &lt;- index_by(vic_elec, Date) %&gt;%
+  summarize(Demand = sum(Demand), Tmean = mean(Temperature),
+            Holiday = any(Holiday)) %&gt;%
+  mutate(Workday = (!Holiday) &amp; (wday(Date) %in% 2:6))
+```
+
+--
+
+- Convertir la demande en GW.
+
+
+```r
+vic_elec &lt;- mutate(vic_elec, Demand = Demand / 1000)
+```
+
+---
+
+# Visualisation des données
+
+
+```r
+ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2")
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
+
+---
+
+# Modèle de régression linéaire
+
+.code60[
+
+```r
+elec_lm &lt;- lm(Demand ~ Tmean + I(Tmean^2) + Workday, vic_elec)
+
+ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
+  geom_point(alpha = 0.3) +
+  geom_line(aes(y = fitted(elec_lm))) +
+  scale_color_brewer(palette = "Dark2")
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-40-1.png)&lt;!-- --&gt;
+]
+
+---
+
+# Résidus corrélés
+
+
+```r
+ggplot(vic_elec, aes(x = Date, y = residuals(elec_lm), color = Workday)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2")
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-41-1.png)&lt;!-- --&gt;
+
+---
+
+# Modèle ARIMA
+
+.code60[
+
+```r
+elec_arima &lt;- model(vic_elec, ARIMA(Demand ~ Tmean + I(Tmean^2) + Workday + PDQ(0,0,0)))
+```
+]
+
+- `PDQ(0,0,0)` (à ne pas confondre avec `pdq`) spécifie qu'il n'y a pas de composante saisonnière.
+
+--
+
+.code60[
+
+```r
+report(elec_arima)
+```
+
+```
+## Series: Demand 
+## Model: LM w/ ARIMA(2,1,3) errors 
+## 
+## Coefficients:
+##           ar1      ar2     ma1     ma2      ma3     Tmean  I(Tmean^2)
+##       -0.7617  -0.4933  0.3275  0.0870  -0.4584  -12.0692      0.3723
+## s.e.   0.0926   0.0984  0.0884  0.0991   0.0375    0.3607      0.0092
+##       WorkdayTRUE
+##           33.3255
+## s.e.       0.4456
+## 
+## sigma^2 estimated as 45.4:  log likelihood=-3638.97
+## AIC=7295.94   AICc=7296.11   BIC=7340.93
+```
+]
+
+---
+
+# Graphiques de diagnostic
+
+
+```r
+gg_tsresiduals(elec_arima)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-44-1.png)&lt;!-- --&gt;
+
+---
+
+# Prévisions
+
+
+```r
+prev_df &lt;- new_data(vic_elec, 14) %&gt;%
+  mutate(Tmean = 20, Workday = TRUE)
+
+head(prev_df)
+```
+
+```
+## # A tsibble: 6 x 3 [1D]
+##   Date       Tmean Workday
+##   &lt;date&gt;     &lt;dbl&gt; &lt;lgl&gt;  
+## 1 2015-01-01    20 TRUE   
+## 2 2015-01-02    20 TRUE   
+## 3 2015-01-03    20 TRUE   
+## 4 2015-01-04    20 TRUE   
+## 5 2015-01-05    20 TRUE   
+## 6 2015-01-06    20 TRUE
+```
+
+---
+
+# Prévisions
+
+
+```r
+prev_elec &lt;- forecast(elec_arima, new_data = prev_df)
+autoplot(prev_elec, vic_elec) +
+  coord_cartesian(xlim = c(as_date("2014-11-01"), as_date("2015-01-15")))
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-46-1.png)&lt;!-- --&gt;
+
+---
+
+# Résumé des fonctions R
+
+- `as_tsibble(..., index = ...)`: Convertir en *tsibble*.
+
+- `index_by`: Grouper un *tsibble* en vue d'une agrégation temporelle.
+ 
+--
+ 
+- `ACF` et `PACF`
+
+--
+
+- `model`: Créer un modèle de série temporelle.
+
+- `ARIMA(y ~ x + pdq(...) + PDQ(...)`
+
+--
+
+- `forecast(mod, h = ...)` ou `forecast(mod, new_data = ...)`
+
+--
+
+- Graphiques: `autoplot` (tsibble, ACF/PACF, forecast), `gg_season` et `gg_subseries`, `gg_tsresiduals`.
+
+---
+
+# Référence
+
+Hyndman, R.J. et Athanasopoulos, G. (2019) Forecasting: principles and practice, 3e édition, OTexts: Melbourne, Australia. http://OTexts.com/fpp3. (surtout les chapitres 2 à 5, 9 et 10).
+
+---
+
+class: inverse, center, middle
+
+# Modèles additifs et bayésiens avec corrélations temporelles
+
+---
+
+# Séries temporelles multiples
+
+- Dans les exemples précédents, toutes les données provenaient de la même série temporelle.
+
+--
+
+- Il est fréquent de vouloir ajuster le même modèle (mêmes paramètres) à plusieurs séries temporelles indépendantes. 
+
+- Ex.: croissance de plusieurs arbres d'une même espèce, abondance d'une même espèce sur plusieurs sites.
+
+--
+
+- Un tableau de données temporel (*tsibble*) peut contenir plusieurs séries temporelles, mais dans ce cas l'ajustement d'un modèle `ARIMA` est effectué séparément pour chaque série.
+
+---
+
+# Séries temporelles multiples
+
+- Dans cette partie: comment ajouter une corrélation temporelle de type ARMA aux résidus d'un GAM (avec *mgcv*) ou d'un modèle hiérarchique bayésien (avec *brms*). 
+
+--
+
+- Pas de sélection automatique de `\(p\)` et `\(q\)`.
+
+--
+
+- Pas de différenciation (le  I dans ARIMA), mais les résidus devraient être stationnaires et toute tendance devrait être incluse dans le modèle principal.
+
+---
+
+# Exemple: Séries dendrochronologiques
+
+- Séries dendrochronologiques de 23 *Abies amabilis* (jeu de données `wa082` du package *dplr*).
+
+--
+
+- Croissance en surface terrière (*cst*) en fonction de la surface terrière (*st*) et de l'âge de l'arbre. 
+
+
+```
+## # A tibble: 6 x 5
+##   annee id_arbre   cst   age     st
+##   &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;
+## 1  1811 X712011   7.35     1   7.35
+## 2  1812 X712011  19.2      2  26.6 
+## 3  1813 X712011  32.3      3  58.9 
+## 4  1814 X712011  48.6      4 108.  
+## 5  1815 X712011  58.5      5 166.  
+## 6  1816 X712011  67.4      6 233.
+```
+
+---
+
+# Modèle additif de la croissance
+
+- Effets fixe de la surface terrière et de l'âge, effet aléatoire de l'arbre.
+
+
+```r
+library(mgcv)
+gam_wa &lt;- gam(log(cst) ~ log(st) + s(age) + s(id_arbre, bs = "re"), data = wa)
+plot(gam_wa, pages = 1)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-48-1.png)&lt;!-- --&gt;
+
+---
+
+# Autre fonction pour ajuster un GAMM
+
+- La fonction `gamm` spécifie les effets aléatoires différemment, basée sur la fonction `lme` du package *nlme*.
+
+
+```r
+gam_wa2 &lt;- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                random = list(id_arbre = ~1))
+gam_wa2$lme
+```
+
+
+---
+
+# Autre fonction pour ajuster un GAMM
+
+.code50[
+
+```
+## Linear mixed-effects model fit by maximum likelihood
+##   Data: strip.offset(mf) 
+##   Log-likelihood: -1958.017
+##   Fixed: y ~ X - 1 
+## X(Intercept)     Xlog(st)   Xs(age)Fx1 
+##   -2.8430849    0.8926357   -3.6526718 
+## 
+## Random effects:
+##  Formula: ~Xr - 1 | g
+##  Structure: pdIdnot
+##              Xr1      Xr2      Xr3      Xr4      Xr5      Xr6      Xr7      Xr8
+## StdDev: 5.359563 5.359563 5.359563 5.359563 5.359563 5.359563 5.359563 5.359563
+## 
+##  Formula: ~1 | id_arbre %in% g
+##         (Intercept)  Residual
+## StdDev:   0.1834672 0.3666839
+## 
+## Number of Observations: 4536
+## Number of Groups: 
+##               g id_arbre %in% g 
+##               1              23
+```
+]
+
+---
+
+# Ajout d'une corrélation temporelle
+
+- `corAR1(form = ~ 1 | id_arbre)`: Signifie que les résidus consécutifs du même arbre sont corrélés selon un modèle AR(1).
+
+
+```r
+gam_wa_ar &lt;- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                  random = list(id_arbre = ~1), 
+                  correlation = corAR1(form = ~ 1 | id_arbre))
+```
+
+---
+
+# Ajout d'une corrélation temporelle
+
+.code50[
+
+```
+## Linear mixed-effects model fit by maximum likelihood
+##   Data: strip.offset(mf) 
+##   Log-likelihood: -567.5418
+##   Fixed: y ~ X - 1 
+## X(Intercept)     Xlog(st)   Xs(age)Fx1 
+##   -2.6964027    0.8779548   -3.3712324 
+## 
+## Random effects:
+##  Formula: ~Xr - 1 | g
+##  Structure: pdIdnot
+##             Xr1     Xr2     Xr3     Xr4     Xr5     Xr6     Xr7     Xr8
+## StdDev: 4.92288 4.92288 4.92288 4.92288 4.92288 4.92288 4.92288 4.92288
+## 
+##  Formula: ~1 | id_arbre %in% g
+##         (Intercept)  Residual
+## StdDev:   0.1718674 0.3730067
+## 
+## Correlation Structure: AR(1)
+##  Formula: ~1 | g/id_arbre 
+##  Parameter estimate(s):
+##       Phi 
+## 0.6870206 
+## Number of Observations: 4536
+## Number of Groups: 
+##               g id_arbre %in% g 
+##               1              23
+```
+]
+
+---
+
+# Estimation de la spline
+
+
+```r
+par(mfrow = c(1, 2))
+plot(gam_wa2$gam, select = 1, main = "GAMM")
+plot(gam_wa_ar$gam, select = 1, main = "GAMM AR(1)")
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-53-1.png)&lt;!-- --&gt;
+
+---
+
+# Autres options avec `gamm` et `lme`
+
+- `corARMA` pour un modèle plus général. 
+
+- Exemple: `correlation = corARMA(form = ~ 1 | id_arbre, p = 2, q = 1)` pour AR(2), MA(1).
+
+--
+
+- `lme` (package *nlme*) offre la même fonctionnalité pour les modèles linéaires mixtes, avec les mêmes arguments `random`et `correlation`. 
+
+---
+
+# Limites de `gamm` et `lme`
+
+- Pas approprié pour les modèles généralisés (résidus non-normaux).
+
+--
+
+- Impossible d'inclure plusieurs effets aléatoires non-nichés.
+
+--
+
+- Modèles bayésiens (avec *brms*) offrent l'option la plus flexible pour combiner effets aléatoires et corrélations temporelles.
+
+---
+
+# Version bayésienne du modèle
+
+- Ajout d'un terme `ar(p = 1, gr = id_arbre)`: corrélation AR(1) à l'intérieur des groupes définis par *id_arbre*.
+
+
+```r
+library(brms)
+
+wa_br &lt;- brm(log(cst) ~ log(st) + s(age) + (1 | id_arbre) + ar(p = 1, gr = id_arbre), 
+             data = wa, chains = 2)
+```
+
+
+
+
+
+
+--
+
+- Autres options: `ma(q = ...)`, `arma(p = ..., q = ...)`.
+
+--
+
+- Dans cet exemple, on laisse `brms` choisir des distributions *a priori* par défaut.
+
+---
+
+# Résultats du modèle
+
+.code50[
+
+```r
+summary(wa_br)
+```
+
+```
+## Warning: There were 1 divergent transitions after warmup. Increasing adapt_delta
+## above 0.8 may help. See http://mc-stan.org/misc/warnings.html#divergent-
+## transitions-after-warmup
+```
+
+```
+##  Family: gaussian 
+##   Links: mu = identity; sigma = identity 
+## Formula: log(cst) ~ log(st) + s(age) + (1 | id_arbre) + ar(p = 1, gr = id_arbre) 
+##    Data: wa (Number of observations: 4536) 
+## Samples: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup samples = 2000
+## 
+## Smooth Terms: 
+##             Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sds(sage_1)     5.97      1.78     3.36    10.20 1.01      435      720
+## 
+## Correlation Structures:
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## ar[1]     0.69      0.01     0.67     0.71 1.00     2156     1487
+## 
+## Group-Level Effects: 
+## ~id_arbre (Number of levels: 23) 
+##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)     0.18      0.04     0.13     0.26 1.00      414      828
+## 
+## Population-Level Effects: 
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept    -2.51      0.21    -2.92    -2.08 1.00      769     1052
+## logst         0.86      0.02     0.82     0.90 1.00      836     1167
+## sage_1      -22.60      2.65   -27.85   -17.38 1.00      721      877
+## 
+## Family Specific Parameters: 
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sigma     0.27      0.00     0.27     0.28 1.00     2393     1457
+## 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+]
+
+---
+
+# Visualiser la spline
+
+
+```r
+marginal_smooths(wa_br)
+```
+
+![](11-Series_temporelles_files/figure-html/unnamed-chunk-58-1.png)&lt;!-- --&gt;
+
+---
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  /* Replace <script> tags in slides area to make them executable
+   *
+   * Runs after post-processing of markdown source into slides and replaces only
+   * <script>s on the last slide of continued slides using the .has-continuation
+   * class added by xaringan. Finally, any <script>s in the slides area that
+   * aren't executed are commented out.
+   */
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container:not(.has-continuation) script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+  var scriptsNotExecuted = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container.has-continuation script'
+  );
+  if (!scriptsNotExecuted.length) return;
+  for (var i = 0; i < scriptsNotExecuted.length; i++) {
+    var comment = document.createComment(scriptsNotExecuted[i].outerHTML)
+    scriptsNotExecuted[i].parentElement.replaceChild(comment, scriptsNotExecuted[i])
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
