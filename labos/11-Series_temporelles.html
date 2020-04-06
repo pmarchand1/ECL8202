@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Séries temporelles</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Séries temporelles</h1>
+
+</div>
+
+
+<div id="données" class="section level2">
+<h2>Données</h2>
+<p>Le jeu de données <a href="../donnees/oak_seeds.csv">oak_seeds.csv</a> indique le nombre de graines du chêne <em>Quercus crispula</em> recueillies annuellement (1980-2017) par 16 capteurs (<em>trap</em>) situés dans un peuplement de cette espèce au Japon.</p>
+<pre class="r"><code>seed &lt;- read.csv(&quot;../donnees/oak_seeds.csv&quot;)
+head(seed)</code></pre>
+<pre><code>##   year trap seeds
+## 1 1980    1    13
+## 2 1980    2   131
+## 3 1980    3    44
+## 4 1980    4    44
+## 5 1980    5    47
+## 6 1980    6    27</code></pre>
+<p>Le fichier <a href="../donnees/oak_weather.csv">oak_weather.csv</a> contient quant à lui des données météo annuelles pour ce même site:</p>
+<pre class="r"><code>weather &lt;- read.csv(&quot;../donnees/oak_weather.csv&quot;)
+head(weather)</code></pre>
+<pre><code>##   year temp_fl temp_gr rain_fl rain_gr
+## 1 1980    14.9    15.2      75     437
+## 2 1981     9.3    15.4      40     766
+## 3 1982    11.5    15.8     109     487
+## 4 1983    11.5    15.9      49     657
+## 5 1984    13.4    17.1      49     622
+## 6 1985    11.5    16.9      63     501</code></pre>
+<ul>
+<li><em>temp_fl</em>: Température (<span class="math inline">\(^{\circ}\)</span>C) moyenne durant la période de floraison de l’arbre.</li>
+<li><em>temp_gr</em>: Température (<span class="math inline">\(^{\circ}\)</span>C) moyenne durant la saison de croissance</li>
+<li><em>rain_fl</em>: Quantité totale de pluie (en mm) durant la période de floraison de l’arbre.</li>
+<li><em>rain_gr</em>: Quantité totale de pluie (en mm) durant la saison de croissance.</li>
+</ul>
+<p>Ces données proviennent de l’étude suivante:</p>
+<blockquote>
+<p>Shibata, M., Masaki, T., Yagihashi, T., Shimada, T., &amp; Saitoh, T. (2019). Data from: Decadal changes in masting behaviour of oak trees with rising temperature. Dryad Digital Repository. <a href="https://doi.org/10.5061/dryad.v6wwpzgrb">https://doi.org/10.5061/dryad.v6wwpzgrb</a></p>
+</blockquote>
+</div>
+<div id="série-temporelle-à-léchelle-du-site" class="section level2">
+<h2>1. Série temporelle à l’échelle du site</h2>
+<ol style="list-style-type: lower-alpha">
+<li>Calculez le nombre total de graines recueillies par année (tous capteurs confondus) et appliquez une transformation racine carrée au résultat. Convertissez le résultat en tableau de données temporel (<em>tsibble</em>) et visualisez la série temporelle obtenue.</li>
+</ol>
+<p><em>Note</em>: Puisque nous utiliserons des modèles linéaires plutôt que des modèles généralisés dans cet exercice, la transformation racine carrée vise à stabiliser la variance des données de comptage.</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li><p>Visualisez les corrélations temporelles pour cette série. Quel type de modèle ARIMA (AR et/ou MA, ainsi que leur ordre) pourrait être approprié ici?</p></li>
+<li><p>Ajustez un modèle ARIMA en laissant la fonction choisir automatiquement le type et l’ordre du modèle. Que signifient les coefficients obtenus?</p></li>
+<li><p>Joignez le jeu de données <code>weather</code> et ajustez un modèle ARIMA incluant les quatre variables météorologiques comme prédicteurs externes. Est-ce que ces variables contribuent à mieux prédire le nombre de graines produites par année?</p></li>
+<li><p>Quel type de modèle est choisi par <code>ARIMA()</code> si vous ne considérez que la sous-série débutant en l’an 2000? Expliquez ce choix à partir du graphique en (a) et des corrélations temporelles pour cette sous-série.</p></li>
+</ol>
+</div>
+<div id="série-temporelle-par-capteur" class="section level2">
+<h2>2. Série temporelle par capteur</h2>
+<ol style="list-style-type: lower-alpha">
+<li>Reprenez le tableau original indiquant le nombre de graines par année et capteur, puis appliquez la transformation racine carrée au nombre de graines. Utilisez ensuite la fonction <code>lme</code> du package <em>nlme</em> pour ajuster un modèle linéaire mixte incluant: l’effet fixe des variables météo, l’effet aléatoire du capteur et les corrélations temporelles d’une année à l’autre.</li>
+</ol>
+<p>Voici un exemple de la façon de spécifier un effet aléatoire d’une variable <code>GROUPE</code> sur l’ordonnée à l’origine d’un modèle <code>lme</code>, ainsi qu’une corrélation de type ARMA entre éléments successifs d’un même <code>GROUPE</code>:</p>
+<pre class="r"><code>library(nlme)
+mod_lme &lt;- lme(..., data = ...,
+             random = list(GROUPE = ~1), 
+             correlation = corARMA(p = ..., q = ..., form = ~ 1 | GROUPE))</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Comparez la précision des effets fixes dans ce modèle en (a) par rapport au modèle en 1(d). Quelle est la raison de cette différence?</li>
+</ol>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
