@@ -51,8 +51,9 @@ Ces données proviennent de l'étude suivante:
 
 (d) Joignez le jeu de données `weather` et ajustez un modèle ARIMA incluant les quatre variables météorologiques comme prédicteurs externes. Est-ce que ces variables contribuent à mieux prédire le nombre de graines produites par année?
 
-(e) Quel type de modèle est choisi par `ARIMA()` si vous ne considérez que la sous-série débutant en l'an 2000? Expliquez ce choix à partir du graphique en (a) et des corrélations temporelles pour cette sous-série.
+(e) Quel type de modèle est choisi par `ARIMA()` si vous ne considérez que la sous-série débutant en l'an 2000, sans prédicteur externe? Expliquez ce choix à partir du graphique en (a) et des corrélations temporelles pour cette sous-série.
 
+(f) Calculez les prévisions des modèles en (c) et (e) pour les cinq années suivantes. Comment ces prévisions différent-elles?
 
 ## 2. Série temporelle par capteur
 
