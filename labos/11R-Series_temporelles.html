@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Séries temporelles - Solutions</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Séries temporelles - Solutions</h1>
+
+</div>
+
+
+<div id="données" class="section level2">
+<h2>Données</h2>
+<p>Le jeu de données <a href="../donnees/oak_seeds.csv">oak_seeds.csv</a> indique le nombre de graines du chêne <em>Quercus crispula</em> recueillies annuellement (1980-2017) par 16 capteurs (<em>trap</em>) situés dans un peuplement de cette espèce au Japon.</p>
+<pre class="r"><code>seed &lt;- read.csv(&quot;../donnees/oak_seeds.csv&quot;)
+head(seed)</code></pre>
+<pre><code>##   year trap seeds
+## 1 1980    1    13
+## 2 1980    2   131
+## 3 1980    3    44
+## 4 1980    4    44
+## 5 1980    5    47
+## 6 1980    6    27</code></pre>
+<p>Le fichier <a href="../donnees/oak_weather.csv">oak_weather.csv</a> contient quant à lui des données météo annuelles pour ce même site:</p>
+<pre class="r"><code>weather &lt;- read.csv(&quot;../donnees/oak_weather.csv&quot;)
+head(weather)</code></pre>
+<pre><code>##   year temp_fl temp_gr rain_fl rain_gr
+## 1 1980    14.9    15.2      75     437
+## 2 1981     9.3    15.4      40     766
+## 3 1982    11.5    15.8     109     487
+## 4 1983    11.5    15.9      49     657
+## 5 1984    13.4    17.1      49     622
+## 6 1985    11.5    16.9      63     501</code></pre>
+<ul>
+<li><em>temp_fl</em>: Température (<span class="math inline">\(^{\circ}\)</span>C) moyenne durant la période de floraison de l’arbre.</li>
+<li><em>temp_gr</em>: Température (<span class="math inline">\(^{\circ}\)</span>C) moyenne durant la saison de croissance</li>
+<li><em>rain_fl</em>: Quantité totale de pluie (en mm) durant la période de floraison de l’arbre.</li>
+<li><em>rain_gr</em>: Quantité totale de pluie (en mm) durant la saison de croissance.</li>
+</ul>
+<p>Ces données proviennent de l’étude suivante:</p>
+<blockquote>
+<p>Shibata, M., Masaki, T., Yagihashi, T., Shimada, T., &amp; Saitoh, T. (2019). Data from: Decadal changes in masting behaviour of oak trees with rising temperature. Dryad Digital Repository. <a href="https://doi.org/10.5061/dryad.v6wwpzgrb">https://doi.org/10.5061/dryad.v6wwpzgrb</a></p>
+</blockquote>
+</div>
+<div id="série-temporelle-à-léchelle-du-site" class="section level2">
+<h2>1. Série temporelle à l’échelle du site</h2>
+<ol style="list-style-type: lower-alpha">
+<li>Calculez le nombre total de graines recueillies par année (tous capteurs confondus) et appliquez une transformation racine carrée au résultat. Convertissez le résultat en tableau de données temporel (<em>tsibble</em>) et visualisez la série temporelle obtenue.</li>
+</ol>
+<p><em>Note</em>: Puisque nous utiliserons des modèles linéaires plutôt que des modèles généralisés dans cet exercice, la transformation racine carrée vise à stabiliser la variance des données de comptage.</p>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>library(fpp3)
+library(dplyr)
+library(ggplot2)
+
+seed &lt;- group_by(seed, year) %&gt;%
+    summarize(seeds = sum(seeds)) %&gt;%
+    mutate(sqrt_seeds = sqrt(seeds))
+
+seed &lt;- as_tsibble(seed, index = year)
+autoplot(seed, sqrt_seeds)</code></pre>
+<p><img src="11R-Series_temporelles_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Visualisez les corrélations temporelles pour cette série. Quel type de modèle ARIMA (AR et/ou MA, ainsi que leur ordre) pourrait être approprié ici?</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>cowplot::plot_grid(autoplot(ACF(seed, sqrt_seeds)), 
+                   autoplot(PACF(seed, sqrt_seeds)))</code></pre>
+<p><img src="11R-Series_temporelles_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>L’ACF et la PACF ont une valeur significative pour un délai de 1, ce qui suggère un modèle MA(1) ou AR(1).</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Ajustez un modèle ARIMA en laissant la fonction choisir automatiquement le type et l’ordre du modèle. Que signifient les coefficients obtenus?</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>mod_1c &lt;- model(seed, ARIMA(sqrt_seeds))
+report(mod_1c)</code></pre>
+<pre><code>## Series: sqrt_seeds 
+## Model: ARIMA(0,0,1) w/ mean 
+## 
+## Coefficients:
+##           ma1  constant
+##       -0.6926   14.5833
+## s.e.   0.1638    0.4527
+## 
+## sigma^2 estimated as 74.57:  log likelihood=-135.14
+## AIC=276.28   AICc=276.99   BIC=281.19</code></pre>
+<p>Il s’agit d’un modèle MA(1). Le coefficient MA1 est de -0.69 ce qui signifie que le résidu à une année contribue négativement à l’année suivante. Le terme <code>constant</code> (14.6) est la moyenne de <code>sqrt_seeds</code> entre les années.</p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Joignez le jeu de données <code>weather</code> et ajustez un modèle ARIMA incluant les quatre variables météorologiques comme prédicteurs externes. Est-ce que ces variables contribuent à mieux prédire le nombre de graines produites par année?</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>seed &lt;- inner_join(seed, weather)</code></pre>
+<pre><code>## Joining, by = &quot;year&quot;</code></pre>
+<pre class="r"><code>mod_1d &lt;- model(seed, ARIMA(sqrt_seeds ~ temp_gr + rain_gr + temp_fl + rain_fl))
+report(mod_1d)</code></pre>
+<pre><code>## Series: sqrt_seeds 
+## Model: LM w/ ARIMA(0,0,1) errors 
+## 
+## Coefficients:
+##           ma1  temp_gr  rain_gr  temp_fl  rain_fl
+##       -0.6564   -0.879  -0.0051   2.5660   0.0188
+## s.e.   0.1810    0.801   0.0082   1.0448   0.0404
+## 
+## sigma^2 estimated as 72.27:  log likelihood=-132.85
+## AIC=277.7   AICc=280.41   BIC=287.52</code></pre>
+<p>Seule la température durant la période de floraison (<code>temp_fl</code>) semble avoir une effet significatif, mais l’AIC est plus élevé que le modèle précédent, donc ce modèle n’est pas préférable à celui sans prédicteur.</p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Quel type de modèle est choisi par <code>ARIMA()</code> si vous ne considérez que la sous-série débutant en l’an 2000, sans prédicteur externe? Expliquez ce choix à partir du graphique en (a) et des corrélations temporelles pour cette sous-série.</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>seed2000 &lt;- filter(seed, year &gt;= 2000)
+mod_1e &lt;- model(seed2000, ARIMA(sqrt_seeds))
+report(mod_1e)</code></pre>
+<pre><code>## Series: sqrt_seeds 
+## Model: ARIMA(1,0,0) w/ mean 
+## 
+## Coefficients:
+##           ar1  constant
+##       -0.7719   26.5884
+## s.e.   0.1394    1.2182
+## 
+## sigma^2 estimated as 28.52:  log likelihood=-55.09
+## AIC=116.18   AICc=117.89   BIC=118.85</code></pre>
+<p>Il s’agit maintenant d’un modèle AR(1) avec une corrélation négative de -0.77. À partir de l’an 2000, la série temporelle en 1(a) semble alterner plus régulièrement entre des valeurs hautes et basses aux 2 ans. Aussi, si le graphique de la PACF contient une seule valeur significative, l’ACF est significativement positive à un délai 2, comme on s’atteint pour un modèle AR. (La corrélation négative entre <span class="math inline">\(y(t)\)</span> et <span class="math inline">\(y(t-1)\)</span>, puis <span class="math inline">\(y(t-1)\)</span> et <span class="math inline">\(y(t-2)\)</span>, cause une corrélation positive entre <span class="math inline">\(y(t)\)</span> et <span class="math inline">\(y(t-2)\)</span>.)</p>
+<pre class="r"><code>cowplot::plot_grid(autoplot(ACF(seed2000, sqrt_seeds)),
+                   autoplot(PACF(seed2000, sqrt_seeds)))</code></pre>
+<p><img src="11R-Series_temporelles_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Calculez les prévisions des modèles en (c) et (e) pour les cinq années suivantes. Comment ces prévisions différent-elles?</li>
+</ol>
+<pre class="r"><code>cowplot::plot_grid(autoplot(forecast(mod_1c, h = 5), seed),
+                   autoplot(forecast(mod_1e, h = 5), seed))</code></pre>
+<p><img src="11R-Series_temporelles_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Lors de la 2e année, le modèle MA(1) perd toute “mémoire” et revient à la moyenne de la série, tandis que le modèle AR(1) poursuit un cycle aux 2 ans.</p>
+</div>
+<div id="série-temporelle-par-capteur" class="section level2">
+<h2>2. Série temporelle par capteur</h2>
+<ol style="list-style-type: lower-alpha">
+<li>Reprenez le tableau original indiquant le nombre de graines par année et capteur, puis appliquez la transformation racine carrée au nombre de graines. Utilisez ensuite la fonction <code>lme</code> du package <em>nlme</em> pour ajuster un modèle linéaire mixte incluant: l’effet fixe des variables météo, l’effet aléatoire du capteur et les corrélations temporelles d’une année à l’autre.</li>
+</ol>
+<p>Voici un exemple de la façon de spécifier un effet aléatoire d’une variable <code>GROUPE</code> sur l’ordonnée à l’origine d’un modèle <code>lme</code>, ainsi qu’une corrélation de type ARMA entre éléments successifs d’un même <code>GROUPE</code>:</p>
+<pre class="r"><code>library(nlme)
+mod_lme &lt;- lme(..., data = ...,
+             random = list(GROUPE = ~1), 
+             correlation = corARMA(p = ..., q = ..., form = ~ 1 | GROUPE))</code></pre>
+<p><strong>Réponse</strong></p>
+<pre class="r"><code>seed &lt;- read.csv(&quot;../donnees/oak_seeds.csv&quot;)
+seed &lt;- mutate(seed, sqrt_seeds = sqrt(seeds))
+seed &lt;- inner_join(seed, weather)</code></pre>
+<pre><code>## Joining, by = &quot;year&quot;</code></pre>
+<p>Essayons un modèle MA(1) comme en 1(d).</p>
+<pre class="r"><code>library(nlme)
+mod_lme &lt;- lme(sqrt_seeds ~ temp_gr + rain_gr + temp_fl + rain_fl, 
+               data = seed, random = list(trap = ~1), 
+               correlation = corARMA(p = 0, q = 1, form = ~ 1 | trap))
+
+summary(mod_lme)</code></pre>
+<pre><code>## Linear mixed-effects model fit by REML
+##  Data: seed 
+##        AIC      BIC    logLik
+##   2982.101 3017.317 -1483.051
+## 
+## Random effects:
+##  Formula: ~1 | trap
+##         (Intercept) Residual
+## StdDev:   0.5691401 2.758073
+## 
+## Correlation Structure: ARMA(0,1)
+##  Formula: ~1 | trap 
+##  Parameter estimate(s):
+##     Theta1 
+## -0.2633027 
+## Fixed effects: sqrt_seeds ~ temp_gr + rain_gr + temp_fl + rain_fl 
+##                  Value Std.Error  DF   t-value p-value
+## (Intercept)  0.7291741 2.0910432 588  0.348713  0.7274
+## temp_gr     -0.3832523 0.1208343 588 -3.171717  0.0016
+## rain_gr     -0.0016734 0.0007029 588 -2.380675  0.0176
+## temp_fl      0.8182160 0.1012331 588  8.082497  0.0000
+## rain_fl      0.0002783 0.0043666 588  0.063724  0.9492
+##  Correlation: 
+##         (Intr) tmp_gr ran_gr tmp_fl
+## temp_gr -0.782                     
+## rain_gr  0.126 -0.297              
+## temp_fl -0.355 -0.258 -0.047       
+## rain_fl -0.356  0.205 -0.243  0.132
+## 
+## Standardized Within-Group Residuals:
+##        Min         Q1        Med         Q3        Max 
+## -1.6980503 -0.7257518 -0.1678371  0.5658611  3.8985049 
+## 
+## Number of Observations: 608
+## Number of Groups: 16</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Comparez la précision des effets fixes dans ce modèle en (a) par rapport au modèle en 1(d). Quelle est la raison de cette différence?</li>
+</ol>
+<p><strong>Réponse</strong></p>
+<p>Ici, trois des variables climatiques ont un effet significatif, mais l’effet MA(1) est aussi moindre (Theta1 = -0.26).</p>
+<p>La transformation racine carrée appliquée au nombre de graines dans chaque capteur n’est pas équivalente à la transformation racine carrée appliquée à la somme des graines dans tous les capteurs. (La racine carrée de la somme n’est pas égale à la somme des racines carrées.) Il semble que la variance résiduelle soit plus petite dans ce modèle que dans celui basé sur la racine carrée de la somme, ce qui augmente la précision des estimés des effets fixes.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

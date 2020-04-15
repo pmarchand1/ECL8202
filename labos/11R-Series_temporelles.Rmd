@@ -1,0 +1,165 @@
+---
+title: "Séries temporelles - Solutions"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Données
+
+Le jeu de données [oak_seeds.csv](../donnees/oak_seeds.csv) indique le nombre de graines du chêne *Quercus crispula* recueillies annuellement (1980-2017) par 16 capteurs (*trap*) situés dans un peuplement de cette espèce au Japon.
+
+```{r}
+seed <- read.csv("../donnees/oak_seeds.csv")
+head(seed)
+```
+
+Le fichier [oak_weather.csv](../donnees/oak_weather.csv) contient quant à lui des données météo annuelles pour ce même site:
+
+```{r}
+weather <- read.csv("../donnees/oak_weather.csv")
+head(weather)
+```
+
+- *temp_fl*: Température ($^{\circ}$C) moyenne durant la période de floraison de l'arbre.
+- *temp_gr*: Température ($^{\circ}$C) moyenne durant la saison de croissance
+- *rain_fl*: Quantité totale de pluie (en mm) durant la période de floraison de l'arbre.
+- *rain_gr*: Quantité totale de pluie (en mm) durant la saison de croissance.
+
+Ces données proviennent de l'étude suivante:
+
+> Shibata, M., Masaki, T., Yagihashi, T., Shimada, T., & Saitoh, T. (2019). Data from: Decadal changes in masting behaviour of oak trees with rising temperature. Dryad Digital Repository. [https://doi.org/10.5061/dryad.v6wwpzgrb](https://doi.org/10.5061/dryad.v6wwpzgrb)
+
+
+## 1. Série temporelle à l'échelle du site
+
+(a) Calculez le nombre total de graines recueillies par année (tous capteurs confondus) et appliquez une transformation racine carrée au résultat. Convertissez le résultat en tableau de données temporel (*tsibble*) et visualisez la série temporelle obtenue.
+
+*Note*: Puisque nous utiliserons des modèles linéaires plutôt que des modèles généralisés dans cet exercice, la transformation racine carrée vise à stabiliser la variance des données de comptage.
+
+**Réponse**
+
+```{r, message = FALSE, warning = FALSE}
+library(fpp3)
+library(dplyr)
+library(ggplot2)
+
+seed <- group_by(seed, year) %>%
+    summarize(seeds = sum(seeds)) %>%
+    mutate(sqrt_seeds = sqrt(seeds))
+
+seed <- as_tsibble(seed, index = year)
+autoplot(seed, sqrt_seeds)
+```
+
+(b) Visualisez les corrélations temporelles pour cette série. Quel type de modèle ARIMA (AR et/ou MA, ainsi que leur ordre) pourrait être approprié ici? 
+
+**Réponse**
+
+```{r}
+cowplot::plot_grid(autoplot(ACF(seed, sqrt_seeds)), 
+                   autoplot(PACF(seed, sqrt_seeds)))
+```
+
+L'ACF et la PACF ont une valeur significative pour un délai de 1, ce qui suggère un modèle MA(1) ou AR(1).
+
+(c) Ajustez un modèle ARIMA en laissant la fonction choisir automatiquement le type et l'ordre du modèle. Que signifient les coefficients obtenus?
+
+**Réponse**
+
+```{r}
+mod_1c <- model(seed, ARIMA(sqrt_seeds))
+report(mod_1c)
+```
+
+Il s'agit d'un modèle MA(1). Le coefficient MA1 est de -0.69 ce qui signifie que le résidu à une année contribue négativement à l'année suivante. Le terme `constant` (14.6) est la moyenne de `sqrt_seeds` entre les années.
+
+(d) Joignez le jeu de données `weather` et ajustez un modèle ARIMA incluant les quatre variables météorologiques comme prédicteurs externes. Est-ce que ces variables contribuent à mieux prédire le nombre de graines produites par année?
+
+**Réponse**
+
+```{r}
+seed <- inner_join(seed, weather)
+
+mod_1d <- model(seed, ARIMA(sqrt_seeds ~ temp_gr + rain_gr + temp_fl + rain_fl))
+report(mod_1d)
+```
+
+Seule la température durant la période de floraison (`temp_fl`) semble avoir une effet significatif, mais l'AIC est plus élevé que le modèle précédent, donc ce modèle n'est pas préférable à celui sans prédicteur.
+
+(e) Quel type de modèle est choisi par `ARIMA()` si vous ne considérez que la sous-série débutant en l'an 2000, sans prédicteur externe? Expliquez ce choix à partir du graphique en (a) et des corrélations temporelles pour cette sous-série.
+
+**Réponse**
+
+```{r}
+seed2000 <- filter(seed, year >= 2000)
+mod_1e <- model(seed2000, ARIMA(sqrt_seeds))
+report(mod_1e)
+```
+
+Il s'agit maintenant d'un modèle AR(1) avec une corrélation négative de -0.77. À partir de l'an 2000, la série temporelle en 1(a) semble alterner plus régulièrement entre des valeurs hautes et basses aux 2 ans. Aussi, si le graphique de la PACF contient une seule valeur significative, l'ACF est significativement positive à un délai 2, comme on s'atteint pour un modèle AR. (La corrélation négative entre $y(t)$ et $y(t-1)$, puis $y(t-1)$ et $y(t-2)$, cause une corrélation positive entre $y(t)$ et $y(t-2)$.)
+
+```{r}
+cowplot::plot_grid(autoplot(ACF(seed2000, sqrt_seeds)),
+                   autoplot(PACF(seed2000, sqrt_seeds)))
+```
+
+(f) Calculez les prévisions des modèles en (c) et (e) pour les cinq années suivantes. Comment ces prévisions différent-elles?
+
+```{r}
+cowplot::plot_grid(autoplot(forecast(mod_1c, h = 5), seed),
+                   autoplot(forecast(mod_1e, h = 5), seed))
+```
+
+Lors de la 2e année, le modèle MA(1) perd toute "mémoire" et revient à la moyenne de la série, tandis que le modèle AR(1) poursuit un cycle aux 2 ans.
+
+## 2. Série temporelle par capteur
+
+(a) Reprenez le tableau original indiquant le nombre de graines par année et capteur, puis appliquez la transformation racine carrée au nombre de graines. Utilisez ensuite la fonction `lme` du package *nlme* pour ajuster un modèle linéaire mixte incluant: l'effet fixe des variables météo, l'effet aléatoire du capteur et les corrélations temporelles d'une année à l'autre. 
+
+Voici un exemple de la façon de spécifier un effet aléatoire d'une variable `GROUPE` sur l'ordonnée à l'origine d'un modèle `lme`, ainsi qu'une corrélation de type ARMA entre éléments successifs d'un même `GROUPE`:
+
+```{r, eval = FALSE}
+library(nlme)
+mod_lme <- lme(..., data = ...,
+             random = list(GROUPE = ~1), 
+             correlation = corARMA(p = ..., q = ..., form = ~ 1 | GROUPE))
+```
+
+**Réponse**
+
+```{r}
+seed <- read.csv("../donnees/oak_seeds.csv")
+seed <- mutate(seed, sqrt_seeds = sqrt(seeds))
+seed <- inner_join(seed, weather)
+```
+
+Essayons un modèle MA(1) comme en 1(d).
+
+```{r, message = FALSE, warning = FALSE}
+library(nlme)
+mod_lme <- lme(sqrt_seeds ~ temp_gr + rain_gr + temp_fl + rain_fl, 
+               data = seed, random = list(trap = ~1), 
+               correlation = corARMA(p = 0, q = 1, form = ~ 1 | trap))
+
+summary(mod_lme)
+```
+
+
+(b) Comparez la précision des effets fixes dans ce modèle en (a) par rapport au modèle en 1(d). Quelle est la raison de cette différence?
+
+**Réponse**
+
+Ici, trois des variables climatiques ont un effet significatif, mais l'effet MA(1) est aussi moindre (Theta1 = -0.26). 
+
+La transformation racine carrée appliquée au nombre de graines dans chaque capteur n'est pas équivalente à la transformation racine carrée appliquée à la somme des graines dans tous les capteurs. (La racine carrée de la somme n'est pas égale à la somme des racines carrées.) Il semble que la variance résiduelle soit plus petite dans ce modèle que dans celui basé sur la racine carrée de la somme, ce qui augmente la précision des estimés des effets fixes.
+
+

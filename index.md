@@ -56,5 +56,5 @@ title: ECL8202 - Analyses des données complexes
 
 10. [Modèles hiérarchiques bayésiens 2](labos/10-Modeles_hierarchiques_bayesiens2.html) ([PDF](labos/10-Modeles_hierarchiques_bayesiens2.pdf))
 
-11. [Séries temporelles](labos/11-Series_temporelles.html) ([PDF](labos/11-Series_temporelles.pdf)) - Données: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
+11. [Séries temporelles (solutions)](labos/11R-Series_temporelles.html) ([PDF](labos/11R-Series_temporelles.pdf)) - Données: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 
