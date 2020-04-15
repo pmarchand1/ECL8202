@@ -29,6 +29,8 @@ title: ECL8202 - Analyses des données complexes
 
 11. [Séries temporelles](notes_cours/11-Series_temporelles.html) ([PDF](notes_cours/11-Series_temporelles.pdf)) - Données: [sea_ice.txt](donnees/sea_ice.txt), [dendro_wa082.csv](donnees/dendro_wa082.csv)
 
+12. [Données spatiales](notes_cours/12-Donnees_spatiales.html) ([PDF](notes_cours/12-Donnees_spatiales.pdf)) - Données: [semis_xy.csv](donnees/semis_xy.csv)
+
 
 ## Exercices
 
