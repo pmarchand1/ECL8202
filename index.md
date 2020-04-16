@@ -58,3 +58,4 @@ title: ECL8202 - Analyses des données complexes
 
 11. [Séries temporelles (solutions)](labos/11R-Series_temporelles.html) ([PDF](labos/11R-Series_temporelles.pdf)) - Données: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 
+12. [Données spatiales](labos/12-Donnees_spatiales.html) ([PDF](labos/12-Donnees_spatiales.pdf)) - Données: [bryo_belg.csv](donnees/bryo_belg.csv)
