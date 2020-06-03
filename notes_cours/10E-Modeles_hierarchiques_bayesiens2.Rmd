@@ -1,0 +1,281 @@
+---
+title: "Hierarchical Bayesian models, part 2"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+```
+
+# Contents
+
+- Review: Model comparison and selection
+
+- Bayesian approach to model comparison
+
+- Comparing models with *loo* and *brms*
+
+
+# Model comparison and selection
+
+Suppose we have different statistical models that aim to explain the same data. Models could include different predictors, different distributions of the response, etc. How to determine which model best represents the phenomenon studied?
+
+Most model comparison methods seek to optimize the model's ability to **predict new observations** of the phenomenon. In other words, it is not enough to assess whether the model approaches the data used to fit it. A more complex model, with more adjustable parameters, will always be closer to this data.
+
+In general, an overly simple model has a large systematic error (bias or underfitting), because it omits significant effects on the response variable; an overly complex model has a large random error (variance or overfitting), because it tends to represent "accidental" associations of a particular sample that do not generalize to the population. The ideal compromise between these two types of error, which minimizes the total error, depends on the amount of data, since a large sample decreases the variance associated with the estimation of many parameters in a complex model.
+
+![](../images/biais_variance_en.png)
+
+With large data sets, it is possible to set aside part of the data (often ~20 to 30%) to create a validation set, while the rest of the data form the training set. In this case, each of the candidate models is fit on the training data and the predictive performance of the fitted models is evaluated on the validation set.
+
+## Cross-validation
+
+Setting aside part of the data for validation is not practical if the sample size is small. With relatively little data, each point is important for accurately estimating the parameters of the model; also, the smaller the validation set, the more likely it is to be non-representative of the population.
+
+Cross-validation provides a way to assess predictive performance on new observations without having to set aside a validation set. This method consists in randomly dividing the observations into groups and measuring the quality of the prediction of the observations of a group according to a model fitted to the rest of the observations.
+
+For example, if each group has only one observation (leave-one-out cross-validation), we can evaluate the prediction of each value of the response $y_i$ for a model fitted without observation $i$. However, this method requires refitting the model $n$ times, where $n$ is the number of observations.
+
+If the number of observations is large, it may be more practical to divide the observations into $k$ groups (k-fold cross-validation), for example $k$ = 10, and to fit each of the models to be compared $k$ times, leaving a different $1/k$ fraction of the observations aside each time.
+
+## Akaike information criterion
+
+Since cross-validation methods are costly in terms of calculation, it is useful to be able to approximate the prediction error that would be obtained in cross-validation without having to refit the model several times.
+
+For models fitted by the maximum likelihood method, the Akaike information criterion (AIC) offers a measure of fit based on information theory, which tends to produce the same result as leave-one-out cross-validation if the sample size is large enough. The AIC is calculated as follows:
+
+$$ AIC = -2 \log L + 2 K $$
+
+where $L$ is the likelihood function at its maximum and $K$ is the number of parameters estimated by the model. A small AIC value represents a better predictive power of the model. The first term in the equation represents the fit to the observed data, while the second term penalizes more complex models.
+
+The AIC is defined to the nearest additive constant, so its absolute value gives no information. Rather, it is the difference of AIC between the candidate models which is interpretable. This difference is defined with respect to the minimum value of the AIC among the compared models: $\Delta AIC = AIC - \min AIC$. The best model has a $\Delta AIC = 0$.
+
+The expression:
+
+$$ e^{-\frac{\Delta AIC}{2} } $$
+
+corresponds to the evidence ratio of each model vs. the one with the minimum AIC. For example, $\Delta AIC = 2$ corresponds to a ratio of ~0.37 (~3 times less likely), while $\Delta AIC = 10$ corresponds to a ratio of ~0.0067 (~150 times less likely).
+
+## Multi-model predictions
+
+With $m$ candidate models, we can use the evidence ratios described above to define the Akaike weight $w$ for each model:
+
+$$w_i = \frac{e^{\frac{-\Delta AIC_i}{2}}}{\sum_{j=1}^{m} e^{\frac{-\Delta AIC_j}{2}}}$$
+
+The denominator normalizes each ratio by their sum, so that the sum of the weights $w_i$ equals 1.
+
+If several models are plausible and have a significant Akaike weight, then it is possible to average their predictions for a new observation of the response (this prediction is noted $\tilde{y}$), by weighting the prediction $\tilde{y_j}$ of each candidate model by its weight $w_j$.
+
+$$\tilde{y} = \sum_{j = 1}^m w_j \tilde{y_j}$$ 
+
+Multi-model predictions are often more accurate than those obtained by considering only the best model, because they take into account the uncertainty about the form of the model.
+
+
+# Bayesian approach for model comparison
+
+## Predictive density
+
+For a model estimated by maximum likelihood, the predictions of new observations are obtained by fixing the parameters of the model at their estimated value. The likelihood of this new observation is therefore $p(\tilde {y} | \hat{\ theta})$, where $\hat{\theta}$ are the maximum likelihood parameter estimates.
+
+In a Bayesian approach, the predictions of new observations are obtained by averaging the predictions over the posterior distribution of the parameters. The predictive density of $\tilde{y}$ conditional on the model fitted to observations $y$, denoted $p(\tilde{y} | y)$, is equal to the mean of the likelihood $p(\tilde{y} | \theta)$ for the joint posterior distribution of $\theta$:
+
+$p(\tilde{y} | y) = \int p(\tilde{y} | \theta) p(\theta | y) \text{d}\theta$ .
+
+In practice, if a Monte-Carlo method generates $S$ parameter vectors $\theta_{(1)}, ..., \theta_{(S)}$ that approximate the joint posterior distribution, we calculate $p(\tilde{y} | y)$ by averaging the predictions of each vector:
+
+$p(\tilde{y} | y) = \frac{1}{S} \sum_{j = 1}^S p(\tilde{y} | \theta_{(j)})$ .
+
+As with likelihood, it is easier to work with the logarithm of the predictive density.
+
+## Cross-validation
+
+To determine the model that maximizes the predictive density of new observations, as defined above, we can use cross-validation. However, since fitting hierarchical Bayesian models sometimes requires considerable computing time, it is not practical in these cases to repeat the estimation of the model a large number of times, leaving aside some of the data. We therefore most often use criteria which approximate the predictive performance of a cross-validation.
+
+If the AIC approximates the cross-validation error for the models fit by maximum likelihood with a fairly large number of observations, this criterion does not apply well to Bayesian models. On the one hand, the parameter values maximizing the likelihood are not directly found when fitting Bayesian models. In addition, it is difficult to define a number of parameters $K$ because of the hierarchical structure and the constraints imposed by the prior distributions of the parameters, which result in those parameters not being completely "free".
+
+## Selection criteria for hierarchical Bayesian models
+
+### DIC
+
+The Deviance Information Criterion (DIC), based on AIC, was one of the first criteria developed for the comparison of Bayesian models:
+
+$$DIC = -2 \log p(y | \bar{\theta}) + 2 p_D$$
+
+where $\bar{\theta}$ is the mean of the posterior distribution of $\theta$ and $p_D$ is the effective number of parameters, which can be calculated in several ways.
+
+Like the AIC, the DIC represents well the relative predictive performance of models on new data, if the sample size is large enough. However, this is not a Bayesian prediction because it is based on a single estimate of each parameter (its mean value) rather than on the entire posterior distribution.
+
+### WAIC
+
+The Watanabe-Akaike information criterion (WAIC) is similar to the DIC, but the first term is based on the joint predictive density of the observations $y_1, ..., y_n$.
+
+$$WAIC = -2 \sum_{i=1}^n \log \left( \frac{1}{S} \sum_{j = 1}^S p(y_i | \theta_{(j)}) \right) + 2 p_W$$ ,
+
+where the penalty $p_W$ is the sum of variances of the log predictive density at each point:
+
+$$p_W = \sum_{i=1}^n \text{Var}_j \left(\log p(y_i | \theta_{(j)}) \right)$$
+
+Here, Var$_j$ denotes the variance of the expression in parentheses over the set of iterations $j$.
+
+The WAIC of a *brms* model can be calculated with the `waic` function.
+
+### PSIS-LOO
+
+A method recently developed by Vehtari et al. (2017) consists in estimating the predictive density at each point which would be obtained by leave-one-out cross-validation, that is to say by predicting $y_i$ from the model fitted to the data excluding $i$, $y_{-i}$.
+
+$p(y_i | y_{-i}) = \int p(y_i | \theta) p(\theta | y_{-i}) \text{d}\theta$ .
+
+The PSIS-LOO method (PSIS = Patero smoothed importance sampling, LOO = leave-one-out) aims to estimate this quantity without performing cross-validation. Summarily, this approximation is obtained by averaging the $p(y | \theta_{(j)})$, but with a special weighting of the $\theta_{(j)}$ (importance sampling). This weighting is then adjusted so that the extreme weights follow a theoretical model (Pareto distribution).
+
+This method is implemented in the R package *loo* and can be called from the `loo` function applied to the result of a model in *brms*.
+
+As we will see in the example below, the PSIS-LOO method produces its own diagnosis. The choice of the weights for each value $y_i$ is based on a parameter of the Pareto distribution $k$ and when $k > 0.7$, the approximation of $p(y_i | y_{- i})$ is potentially unstable. If this problem occurs for some observations, it is possible to refit the model by excluding these observations only in order to directly calculate $p(y_i | y_{-i})$.
+
+The result of this method is the estimated logarithm of the predictive density $elpd_{loo}$, in other words the sum of $\log p(y_i | y_{- i})$. An information criterion (LOOIC) similar to DIC and WAIC can be obtained by multiplying $elpd_{loo}$ by -2.
+
+### Comparison of methods
+
+The PSIS-LOO method is a little more precise than the WAIC, especially for small samples, but the WAIC is generally faster to calculate.
+
+Since they are based on Bayesian predictive density rather than on a single mean estimate of each parameter, these two methods (WAIC and PSIS-LOO) are currently preferred over DIC. However, both assume that the individual observations $y_i$ are independent of each other, conditional on the value of the parameters. Typically, this assumption is not respected if the model directly includes a correlation between different values of the response (e.g. temporal or spatial correlation).
+
+## Multi-model predictions
+
+In the previous section, we saw that a multi-model prediction for a new observation $\tilde{y}$ is calculated by the weighted average of the predictions of the different models.
+
+$$\tilde{y} = \sum_{j = 1}^m w_j \tilde{y_j}$$
+
+As for the AIC, we can define weights according to the differences in IC between two models and this for different Bayesian criteria (e.g. WAIC, LOOIC).
+
+However, it is not always optimal to combine the models in proportion to the evidence ratios. For example, the two best models can produce redundant predictions, while the third and fourth best models can help correct some of the worse models' poor predictions.
+
+**Model stacking** consists in searching for the weights $w_j$ which minimize the multi-model prediction error given by the weighted average (Yao et al. 2018). This calculation can be done directly from the results of the PSIS-LOO method, as we will see in the example in the next section.
+
+# Comparison of models with *loo* and *brms*
+
+The [rikz.csv](../donnees/rikz.csv) dataset contains data on the richness of the benthic microfauna (*Richness*) for 45 sites spread over 5 beaches (*Beach*) in the Netherlands, depending on the vertical position of the site (*NAP*) and an exposure index measured at the beach level (*Exposure*).
+
+```{r, message = FALSE, warning = FALSE}
+rikz <- read.csv("../donnees/rikz.csv")
+rikz$Exposure <- as.factor(rikz$Exposure)
+head(rikz)
+```
+
+Last week, we fit with *brms* a Poisson regression model for specific richness as a function of *NAP* and *Exposure*, with a random effect of the *Beach* on the intercept.
+
+```{r, eval = FALSE}
+library(brms)
+
+rikz_prior <- c(set_prior("normal(0, 1)", class = "b"),
+                set_prior("normal(2, 1)", class = "Intercept"),
+                set_prior("normal(0, 0.5)", class = "sd"))
+
+mod1 <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+            family = poisson, prior = rikz_prior,
+            control = list(adapt_delta = 0.99))
+```
+
+```{r, include = FALSE}
+library(brms)
+```
+
+```{r, cache = TRUE, include = FALSE}
+rikz_prior <- c(set_prior("normal(0, 1)", class = "b"),
+                set_prior("normal(2, 1)", class = "Intercept"),
+                set_prior("normal(0, 0.5)", class = "sd"))
+
+mod1 <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+            family = poisson, prior = rikz_prior,
+            control = list(adapt_delta = 0.99))
+```    
+
+We now consider a different version of the model where the effect of *NAP* also varies randomly between beaches.
+
+```{r, eval = FALSE}
+mod2 <- brm(Richness ~ NAP + Exposure + (1 + NAP | Beach), data = rikz, 
+            family = poisson, prior = rikz_prior,
+            control = list(adapt_delta = 0.99))
+```
+
+
+```{r, cache = TRUE, include = FALSE}
+mod2 <- brm(Richness ~ NAP + Exposure + (1 + NAP | Beach), data = rikz, 
+            family = poisson, prior = rikz_prior,
+            control = list(adapt_delta = 0.99))
+```
+
+Here are the fixed effects and the standard deviation of the random effects estimated for the two models. In model 2, the uncertainty on `b_NAP` has increased and the random effect of the range on this coefficient has a standard deviation of 0.34 with a credibility interval of 0.06 to 0.70, comparable to the random effect of the beach on the intercept.
+
+```{r}
+posterior_summary(mod1, pars = "b|sd")
+posterior_summary(mod2, pars = "b|sd")
+```
+
+## LOOIC computation
+
+The `loo` function in *brms* compares different models according to the PSIS-LOO criterion.
+
+```{r}
+loo1 <- loo(mod1, mod2, compare = TRUE)
+loo1
+```
+
+The result indicates that model 1 has a higher LOOIC of 6.42 compared to model 2, which seems a big difference, except that the standard error of this difference (column 2) is 5.92. So we cannot be certain that model 2 is the best.
+
+In addition, R warns us that for 3 observations (1 of model 1, 2 of model 2), the PSIS-LOO estimate is unstable with a $ k> 0.7 $ in the Pareto distribution. This warning means that for these observations, the weights used for the approximation of the predictive density of cross validation have too many extreme values to estimate their variance. As suggested by the message, we re-evaluate the LOOIC with the argument `reloo = TRUE`, which will refit the model by omitting each of the problematic observations, to calculate the predictive density of cross validation directly.
+
+```{r, cache = TRUE}
+loo_corr <- loo(mod1, mod2, compare = TRUE, reloo = TRUE)
+loo_corr
+```
+
+Here, the LOOIC value changed lightly compared with the previous case. As a comparison, WAIC produces a larger difference between the two models.
+
+```{r}
+waic(mod1, mod2, compare = TRUE)
+```
+
+## Comparison with GLMM
+
+When we fitted these models with GLMMs in course 5, the AIC was lower for model 1, with a random effect on the intercept only. Why does the Bayesian method give a different result?
+
+- First, the use of prior distributions constrains the values of the parameters so that a more complex model shows less overfitting.
+
+- Then, the AIC and the Bayesian criteria are based on different predictions. Suppose that two models differ by the inclusion or omission of a parameter $\theta$. The AIC compares the predictions when this parameter is omitted, which implies for example $\theta = 0$, with the predictions at the estimated maximum likelihood value $\hat{\theta} $. In contrast, the Bayesian predictions of the model including $\theta$ are an average on the posterior distribution of $\theta$, which will include values close to 0 if the posterior probability of that case is not negligible.
+
+For these two reasons, the maximum likelihood and Bayesian approach predictions differ except in very specific cases, e.g. a linear model where the prior distribution is of little importance and the posterior distribution for all parameters is symmetrical.
+
+## Model stacking
+
+The result of `loo` contains an element for each of the compared models. Each of these elements contains a `pointwise` matrix which presents among other statistics the estimated value of the log predictive density $\log p(y_i | y_{- i})$ for each point $i$ (` elpd_loo`) and the standard error of this estimate (`mcse_elpd_loo`).
+
+```{r}
+head (loo1$loos$mod1$pointwise)
+```
+
+If we wanted to combine the predictions of these two models, the `stacking_weights` function of the *loo* package allows us to determine the weights for the optimal superposition of the two models. This function requires a matrix with one column per model, corresponding to the `elpd_loo` column of the` pointwise` matrix mentioned above.
+
+```{r, warning = FALSE, message = FALSE}
+library(loo)
+stacking_weights(cbind(loo1$loos$mod1$pointwise[,1], loo1$loos$mod2$pointwise[,1]))
+stacking_weights(cbind(loo_corr$loos$mod1$pointwise[,1], loo_corr$loos$mod2$pointwise[,1]))
+```
+
+For the PSIS-LOO estimate with correction of problematic values, we see that almost all the weight is given to model 2, so it is probably enough to make predictions with the more complex model. As mentioned above, since the predictions are based on the whole posterior distribution of `sd_Beach__NAP`, this includes cases where the standard deviation of this random effect approaches 0 and we therefore approach model 1.
+
+
+# References
+
+Vehtari, A., Gelman, A. et Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing* 27(5), 1413--1432. doi:10.1007/s11222-016-9696-4.
+
+Yao, Y., Vehtari, A., Simpson, D. et Gelman, A. (2018) Using stacking to average Bayesian predictive distributions. Bayesian Analysis 13(3), 917--1007. doi:10.1214/17-BA1091.
+

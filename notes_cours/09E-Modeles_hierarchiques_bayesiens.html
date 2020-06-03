@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Hierarchical Bayesian models</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Hierarchical Bayesian models</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Today’s course first covers Markov chain Monte-Carlo methods, a family of algorithms for applying Bayesian inference to complex models. We will specifically talk about the Stan platform, which has some unique advantages over other software due to its implementation of the Hamiltonian Monte-Carlo algorithm. We will then present a protocol for the development of hierarchical Bayesian models.</p>
+</div>
+<div id="contents" class="section level1">
+<h1>Contents</h1>
+<ul>
+<li><p>Markov chain Monte-Carlo methods</p></li>
+<li><p>Stan platform for Bayesian inference</p></li>
+<li><p>Steps for developing a hierarchical Bayesian model</p></li>
+</ul>
+</div>
+<div id="markov-chain-monte-carlo-methods" class="section level1">
+<h1>Markov chain Monte-Carlo methods</h1>
+<p>In the previous class, we saw the application of Bayes’ theorem to estimate the posterior distribution of the parameters <span class="math inline">\(\theta\)</span> of a model according to the observations <span class="math inline">\(y\)</span>.</p>
+<p><span class="math display">\[p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}\]</span></p>
+<p>In this equation, <span class="math inline">\(p(\theta)\)</span> is the prior probability distribution of <span class="math inline">\(\theta\)</span> (representing their uncertainty before observing the data), while <span class="math inline">\(p(y | \theta)\)</span> is the probability of observations <span class="math inline">\(y\)</span> conditional on a value of <span class="math inline">\(\theta\)</span>, that is, the likelihood function.</p>
+<p>With several parameters, <span class="math inline">\(\theta\)</span> is a vector, so the resulting posterior distribution is the joint distribution of <span class="math inline">\(\theta\)</span> as a function of the data. It is important to consider this joint distribution, as the most likely values for one parameter may depend on the value of the other parameters.</p>
+<p>In the above equation, the denominator <span class="math inline">\(p(y)\)</span> is the marginal probability of the data. Since it does not depend on <span class="math inline">\(\theta\)</span>, this probability can be seen as a normalization constant necessary for the integral of the posterior probability distribution to be equal to 1.</p>
+<p>We have also seen that <span class="math inline">\(p(y)\)</span> corresponds to the integral of the numerator <span class="math inline">\(p(y | \theta) p(\theta)\)</span> for all possible values of <span class="math inline">\(\theta\)</span>. Except in simple cases, we cannot exactly calculate this integral to obtain a mathematical formula of <span class="math inline">\(p(\theta | y)\)</span>.</p>
+<p>To solve this problem, we will use Monte-Carlo methods. As we saw in the first class of the semester, these are methods for approximating a distribution by drawing samples from this distribution.</p>
+<p>It does not seem possible to draw samples from the distribution <span class="math inline">\(p(\theta | y)\)</span> if we do not know <span class="math inline">\(p(y)\)</span>. However, since <span class="math inline">\(p(y)\)</span> does not depend on <span class="math inline">\(\theta\)</span>, it is possible to calculate the <em>ratio</em> of the posterior probabilities of two vectors <span class="math inline">\(\theta\)</span>:</p>
+<p><span class="math display">\[\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} = \frac{p(y | \theta_{(2)}) p(\theta_{(2)})}{p(y | \theta_{(1)}) p(\theta_{(1)})}\]</span> <em>Note</em>: Here, we use indices in parentheses to represent different <span class="math inline">\(\theta\)</span> vectors, in order to avoid confusion with the different elements of a single vector, e.g. if <span class="math inline">\(\theta\)</span> is a vector of <span class="math inline">\(m\)</span> parameters, <span class="math inline">\(\theta_{(1)} = (\theta_{1(1)}, \theta_{2(1)}, ... \theta_{m(1)})\)</span>.</p>
+<div id="metropolis-hastings-algorithm" class="section level2">
+<h2>Metropolis-Hastings algorithm</h2>
+<p>The Metropolis-Hastings algorithm makes it possible to generate a sample of the distribution <span class="math inline">\(p(\theta | y)\)</span> from these probability ratios. Here is a summary of how this method works.</p>
+<ol style="list-style-type: decimal">
+<li><p>First, we randomly choose a first vector of parameters <span class="math inline">\(\theta_{(1)}\)</span>.</p></li>
+<li><p>Next, we choose a second vector <span class="math inline">\(\theta_{(2)}\)</span>, which depends on <span class="math inline">\(\theta_{(1)}\)</span> according to some transition probability. For example, adding to each of the parameters in <span class="math inline">\(\theta_{(1)}\)</span> an amount drawn from a normal distribution.</p></li>
+<li><p>We compute the posterior probability ratio $ $.</p>
+<ul>
+<li><p>If the ratio is greater than or equal to 1 (<span class="math inline">\(\theta_{(2)}\)</span> is more likely than <span class="math inline">\(\theta_{(1)}\)</span>), we accept <span class="math inline">\(\theta_{(2)}\)</span>.</p></li>
+<li><p>If the ratio is less than 1, we accept <span class="math inline">\(\theta_{(2)}\)</span> with a probability equal to this ratio; otherwise, we stay at the same point so <span class="math inline">\(\theta_{(2)} = \theta_{(1)}\)</span>.</p></li>
+</ul></li>
+</ol>
+<p>Steps 2 and 3 are repeated for the desired number of iterations.</p>
+<p>It has been shown that with enough iterations, the distribution of <span class="math inline">\(\theta_{(i)}\)</span> can become as close as desired to the distribution sought: <span class="math inline">\(p(\theta | y)\)</span>. This theoretical result in fact depends on certain conditions; however, we will not discuss these details here, as we are concerned not with whether the algorithm eventually converges, but whether it converges quickly enough to be useful in practice. This depends on the problem and it will be necessary to determine the convergence empirically by inspecting the algorithm output, as we will see later.</p>
+</div>
+<div id="markov-chains" class="section level2">
+<h2>Markov chains</h2>
+<p>In the Metropolis-Hastings algorithm, each vector <span class="math inline">\(\theta_{(i + 1)}\)</span> is a random vector which depends on <span class="math inline">\(\theta_{(i)}\)</span>. In probability theory, this type of sequence is called a Markov chain. This algorithm is therefore the basis of Markov chain Monte-Carlo methods (abbreviated MCMC).</p>
+<p>To illustrate the progression of a Markov chain, take the example below which represents the joint distribution of two parameters <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span>; the darker regions represent a higher probability density. Note that the two distributions are correlated: the larger <span class="math inline">\(\theta_1\)</span> is, the more likely it is that <span class="math inline">\(\theta_2\)</span> is small and vice versa.</p>
+<p><img src="../images/mcmc_dens_ex1.png" /></p>
+<p>In the graph below, the green and purple arrows represent two Markov chains initialized at different random positions. Although the transitions are random, the probability of accepting a transition is greater when the posterior probability density is higher, so the chains gradually approach the main part of the distribution.</p>
+<p><img src="../images/mcmc_dens_ex3.png" /></p>
+<p>After this initial period, the two chains explore the distribution and the probability that each point <span class="math inline">\((\theta_1, \theta_2)\)</span> is visited by a chain is proportional to its posterior probability density.</p>
+<p><img src="../images/mcmc_dens_ex4.png" /></p>
+<p>Let’s now consider the sequence of values for one parameter <span class="math inline">\(\theta\)</span> visited by three Markov chains, as presented in the graph below (called a trace plot).</p>
+<p><img src="../images/mcmc_trace_ex.png" /></p>
+<p>At the start, the chains must start from their respective initial points and approach the main part of the distribution. This is called the “burn-in” or “warmup” period. The parameter values during that period are not used for inference. After the dotted line, we see that the chains have converged and mixed. This is the sampling period that will be used to approximate the posterior distribution of the parameter.</p>
+</div>
+<div id="verification-of-the-convergence-of-the-chains" class="section level2">
+<h2>Verification of the convergence of the chains</h2>
+<p>As we saw above, the inspection of the trace plot can tell us if different Markov chains have converged, which means that their values can be used to estimate the posterior distribution.</p>
+<p>To assess the convergence more quantitatively, we can use the Gelman-Rubin statistic <span class="math inline">\(\hat{R}\)</span>. This statistic represents the variance of a parameter between the chains relative to the variance of the parameter within each chain. This statistic is conceptually similar to an ANOVA: if the chains explore the same distribution, then the level of variation between values from the same chain is similar to the variation between values from different chains.</p>
+<p>At convergence, <span class="math inline">\(\hat{R}\)</span> must be around 1. There is no definitive threshold for this value, but most authors agree that <span class="math inline">\(\hat{R}\)</span> should not exceed 1.1. However, <span class="math inline">\(\hat{R} \leq 1.1\)</span> does not guarantee convergence towards the correct distribution; we will see later other diagnostics aiming to confirm that the algorithm is fully exploring the posterior distribution.</p>
+<p>In the event of a convergence problem, we can extend the warmup period. If convergence is much too slow or if each chain remains “caught” in a part of the distribution rather than mixing with the other chains, this could indicate a difficulty in estimating the parameters of the model with the data provided. In this case, it would be useful to reparametrize or modify the model.</p>
+</div>
+<div id="sampling-efficiency" class="section level2">
+<h2>Sampling efficiency</h2>
+<p>If the algorithm converges, we can quantify the efficiency with which the Markov chains approximate the posterior distribution.</p>
+<p>Let us consider a function <span class="math inline">\(f\)</span> calculated from the parameters of the model. It can be the mean of the parameter, a quantile, or any statistic of interest which depends on one or more parameters of the model. If we had a sample of <span class="math inline">\(N\)</span> <strong>independent</strong> random draws of the joint posterior distribution of the parameters, then the value of <span class="math inline">\(f\)</span> calculated from this sample would approach its value for the exact distribution, with an approximation error (Monte-Carlo standard error, or MCSE) proportional to <span class="math inline">\(1 / \sqrt{N}\)</span>.</p>
+<p><em>Note</em>: One should not confuse the Monte-Carlo standard error with the standard deviation of the posterior distribution of the parameter. The standard deviation of the posterior distribution (similar to the standard error for a frequentist estimator) represents uncertainty about the value of the parameter and depends (among other things) on the number of observations. The Monte-Carlo standard error is the numerical approximation error of the algorithm. By increasing the number of iterations, we can estimate more precisely all the properties of the posterior distribution, including its standard deviation, but we cannot reduce this standard deviation without having more data. We had the same situation in the case of the bootstrap: we could increase the number of bootstrap samples to reduce the numerical approximation error, but not the uncertainty due to the limited data.</p>
+<p>However, the Markov chain does <em>not</em> produce independent draws, since the value of <span class="math inline">\(\theta_{(i + 1)}\)</span> is conditional on <span class="math inline">\(\theta_{i}\)</span>. In this case, the successive values of the chain are correlated, so <span class="math inline">\(N\)</span> iterations are not equivalent to a sample of <span class="math inline">\(N\)</span> independent values.</p>
+<p>Bayesian inference software calculates the Monte-Carlo standard error and the effective sample size, <span class="math inline">\(N_{eff}\)</span>, which is the number of independent draws necessary to have the same precision as the <span class="math inline">\(N\)</span> correlated iterations. In general, <span class="math inline">\(N_{eff}\)</span> is less than the number of iterations, but this is not always the case, in particular for more efficient algorithms like the Hamiltonian Monte-Carlo algorithm seen in the following section.</p>
+</div>
+</div>
+<div id="stan-platform-for-bayesian-inference" class="section level1">
+<h1>Stan platform for Bayesian inference</h1>
+<p>Stan (<a href="https://mc-stan.org" class="uri">https://mc-stan.org</a>) is both a language to specify statistical models (as we saw during the previous lab) and a software implementing various inferential algorithms for those models. Released in 2015, it is among the more recent Bayesian inference software.</p>
+<blockquote>
+<p>Carpenter, B. et al. (2017) Stan: A Probabilistic Programming Language. <em>Journal of Statistical Software</em> 76(1). 10.18637/jss.v076.i01. Models coded in Stan language are compiled in C ++ code in order to obtain a good speed of execution.</p>
+</blockquote>
+<p>While Stan is a standalone software, there are packages in R (<em>rstan</em>) and Python allowing to interface with Stan. Also, there are several R packages that offer more options for using Stan:</p>
+<ul>
+<li><p><em>brms</em> and <em>rstanarm</em> automatically translate models specified in R into the Stan language;</p></li>
+<li><p><em>bayesplot</em> and <em>shinystan</em> produce visualizations of the results of the models, as we will see later;</p></li>
+<li><p><em>loo</em> implements a model comparison and multi-model prediction method based on the approximation of the cross-validation error;</p></li>
+<li><p><em>tidybayes</em> offers other viewing options, in particular for posterior distributions of parameters.</p></li>
+</ul>
+<div id="hamiltonian-monte-carlo-method" class="section level2">
+<h2>Hamiltonian Monte-Carlo method</h2>
+<p>The MCMC algorithm implemented by Stan is the Hamiltonian Monte-Carlo (HMC) method. One specific feature of this method is that it evaluates not only the value of <span class="math inline">\(p(y | \theta) p(\theta)\)</span> at each iteration, but also its gradient, which is the equivalent of the “slope” of a surface in several dimensions. Thus, the algorithm knows in which direction the posterior probability is increasing, which makes it possible to converge more quickly towards the part of the distribution containing most of the probability.</p>
+<p>In addition, each iteration of this algorithm is made up of several steps and follows a “curve” in the parameter space which is guided by the shape of the probability distribution. This allows successive points in the chain to be more spaced apart than in the case of traditional MCMC methods, which means that these points are more independent and that the effective sample size <span class="math inline">\(N_{eff}\)</span> is larger for a same number of iterations.</p>
+<p>In addition to these performance advantages, the Hamiltonian algorithm offers unique diagnostics, such as the presence of divergent transitions, which make it possible to check its validity.</p>
+<p>The following article presents more details on the Hamiltonian Monte-Carlo method in an ecological modeling context.</p>
+<blockquote>
+<p>Monnahan, C.C., Thorson, J.T. et Branch, T.A. (2017) Faster estimation of Bayesian models in ecology using Hamiltonian Monte Carlo. <em>Methods in Ecology and Evolution</em> 8: 339-348.</p>
+</blockquote>
+</div>
+<div id="diagnostics-in-stan" class="section level2">
+<h2>Diagnostics in Stan</h2>
+<div id="divergent-transitions" class="section level3">
+<h3>Divergent transitions</h3>
+<p>The divergent transitions indicate that the algorithm has difficulty exploring a region of the posterior probability distribution, generally due to an abrupt change in the form of this distribution. This is the most serious diagnostic error, since even a small number of divergences compromise the validity of the results of the algorithm.</p>
+<p>One of the ways to eliminate divergent transitions is to force the algorithm to take smaller steps, by increasing the <em>adapt_delta</em> parameter adjustable in Stan. However, in a case where the divergences persist, it may be necessary to reparametrize the model.</p>
+</div>
+<div id="maximum-tree-depth" class="section level3">
+<h3>Maximum tree depth</h3>
+<p>The Hamiltonian algorithm evaluates different possible trajectories (represented by a tree) to choose the value of the parameters at the next iteration. When the maximum tree depth is reached, this means that the algorithm has tried the maximum number of trajectories, but that a longer trajectory remains possible. Unlike divergent transitions, this warning does not invalidate the results, but it can indicate a suboptimal parameterization.</p>
+<p>You can increase the maximum depth with the <em>max_treedepth</em> argument, but this increases the time taken for each iteration.</p>
+</div>
+<div id="energy-bfmi-low" class="section level3">
+<h3>Energy (<em>BFMI low</em>)</h3>
+<p>As with the divergences, this warning indicates that the algorithm does not traverse the posterior distribution efficiently. This problem can sometimes be resolved by extending the warmup period. However, if it occurs at the same time as one of the previous ones, the formulation of the model should probably be reviewed.</p>
+</div>
+</div>
+<div id="options-for-using-stan-from-r" class="section level2">
+<h2>Options for using Stan from R</h2>
+<p>To conclude this section, we will see different ways to use Stan from R. First, we can write a Stan program, as seen in the previous lab. Here is the beginning of the Stan code for a simple model, where there are <span class="math inline">\(N\)</span> observations of a response variable <span class="math inline">\(y\)</span> and a predictor <span class="math inline">\(x\)</span>.</p>
+<pre><code>data {
+  int N;
+  vector[N] y;
+  vector[N] x;
+}
+
+[...]
+</code></pre>
+<p>To estimate the parameters of this model from data present in a data frame <code>df</code> containing the<code>x</code> and <code>y</code> columns, we must first create a list associating the data with each variable of the <code>data</code> block in the Stan program.</p>
+<pre class="r"><code>dat &lt;- list(N = nrow(df), y = df$y, x = df$x)</code></pre>
+<p>Then, we call the <code>stan_model</code> function to compile the model, then <code>sampling</code> to estimate the posterior distribution of the parameters from the data.</p>
+<pre class="r"><code>library(rstan)
+mod &lt;- stan_model(&quot;model.stan&quot;)
+result &lt;- sampling(mod, data = dat)</code></pre>
+<p>In the previous class, we briefly presented the <em>brms</em> package, which allows us to represent models with a formula similar to the functions already seen in the course (<code>lm</code>,<code>glm</code>, <code>lmer</code>, etc.), then automatically translates them into Stan language to estimate the parameters in a Bayesian framework. The <code>brm</code> function is used for all types of models supported by the package (generalized linear models, mixed effect models, temporal and spatial dependence, etc.)</p>
+<pre class="r"><code>library(brms)
+res_brms &lt;- brm(y ~ x, data = df)</code></pre>
+<p>The <em>rstanarm</em> package is an alternative to <em>brms</em>. Rather than using a single function, this package contains functions specialized for each model type (e.g. <code>stan_lm</code>, <code>stan_glm</code>, <code>stan_lmer</code>).</p>
+<pre class="r"><code>library(rstanarm)
+res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
+<p>This package has slightly fewer options than <em>brms</em>, but its main advantage is that the Stan programs used are pre-compiled. The compilation time is generally only a few minutes for a new model, but this time saving can be useful when it is necessary to evaluate successively many different models.</p>
+<p>The two packages <em>rstanarm</em> and <em>brms</em> make it possible to estimate the parameters of frequently-used model types without worrying about programming in the Stan language and specifically optimizing the formulation of the model to facilitate efficient sampling. Their use is therefore recommended, except when a custom model is required which must be coded in Stan.</p>
+</div>
+</div>
+<div id="steps-for-developing-a-hierarchical-bayesian-model" class="section level1">
+<h1>Steps for developing a hierarchical Bayesian model</h1>
+<p>This part presents the steps of a suggested protocol for the development and validation of a hierarchical Bayesian model.</p>
+<p>The protocol is based on the article:</p>
+<blockquote>
+<p>Betancourt, M. (2018) Towards A Principled Bayesian Workflow (RStan). <a href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html" class="uri">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a>.</p>
+</blockquote>
+<p>Michael Betancourt is one of Stan’s developers and his website contains several articles on the theory related to hierarchical Bayesian models, as well as case studies on their application to different problems.</p>
+<p>Here are the main steps to follow when developing a new hierarchical Bayesian model to represent a given system.</p>
+<ol style="list-style-type: decimal">
+<li><p>Formulate the model.</p></li>
+<li><p>Check the prior predictions.</p></li>
+<li><p>Test the fit of the model to simulated data.</p></li>
+<li><p>Fit the model to actual data and check the diagnostics.</p></li>
+<li><p>Check the posterior predictions.</p></li>
+</ol>
+<p>Note that before step 4, we check the internal consistency of the model, then in steps 4 and 5 we check if it adequately represents the observed data.</p>
+<div id="model-formulation" class="section level2">
+<h2>Model formulation</h2>
+<p>First, we must describe the variables of the model and their mathematical relationships, as well as the statistical distributions assigned to the response variables. It is particularly important to consider the structure of the sampling or experimental design in order to specify the hierarchy of random effects.</p>
+<p>It is also at this stage that we choose the prior distributions for the parameters.</p>
+</div>
+<div id="prior-predictive-checks" class="section level2">
+<h2>Prior predictive checks</h2>
+<p>To check whether the prior distributions of the predictors generate realistic values of the observations, we start by generating parameter vectors from their prior distribution, then we simulate a data set similar to that observed from the model based on each vector of parameters. This simulation uses the actual values of the predictors for each observation.</p>
+<p>From the results of the simulations, we check whether the properties of the simulated observations correspond to realistic values for the problem. At this stage, we do not directly compare the simulations to actual observations, only to our prior knowledge of what constitutes a reasonable value of the response.</p>
+</div>
+<div id="fit-of-the-model-to-simulated-data" class="section level2">
+<h2>Fit of the model to simulated data</h2>
+<p>For this step, we fit the model to each dataset simulated in the previous step. These datasets contain the actual values of the predictors, but the response is simulated using known parameters taken from the prior distribution.</p>
+<p>Next, we check the fitting diagnostics for each simulation, then we check the accuracy of the model inferences by comparing the posterior distributions to the parameter values used for each simulation. Since the data were obtained by simulation, we expect the inference to produce estimates compatible with the known values of the parameters. Two tests are useful at this point:</p>
+<ul>
+<li><p>Calibration test: Are the posterior probability intervals correct?</p></li>
+<li><p>Sensitivity test: Does the data allow us to determine the value of the parameter?</p></li>
+</ul>
+<div id="calibration-by-simulation" class="section level3">
+<h3>Calibration by simulation</h3>
+<p>Suppose we have observations <span class="math inline">\(y\)</span> simulated from the model with a parameter value <span class="math inline">\(\theta\)</span> drawn from the prior distribution. By fitting the model to these <span class="math inline">\(y\)</span>, we obtain a sample of the posterior distribution of <span class="math inline">\(\theta\)</span>, that is <span class="math inline">\(\theta_{(i)}\)</span> for <span class="math inline">\(i\)</span> from 1 to <span class="math inline">\(N\)</span> iterations .</p>
+<p>If the inference is correct, the rank of <span class="math inline">\(\theta\)</span> among the <span class="math inline">\(\theta_{(i)}\)</span> is distributed uniformly between 1 and <span class="math inline">\(N + 1\)</span>. This is equivalent to saying that if an interval contains a certain fraction (say 90%) of the posterior probability of <span class="math inline">\(\theta\)</span>, the true value of the parameter is included in that invertal this same fraction of time. (This coverage property is analogous to that of frequentist confidence intervals.) In particular, if <span class="math inline">\(\theta\)</span> is more often at the extreme ranks than expected, this would mean that the posterior distribution underestimates the uncertainty on <span class="math inline">\(\theta\)</span>. On the contrary, if <span class="math inline">\(\theta\)</span> is always at the center, it would mean that its uncertainty is overestimated.</p>
+<p>The calibration test therefore aims to verify that over a large number of simulations, the rank of the true value of <span class="math inline">\(\theta\)</span> among the <span class="math inline">\(\theta_{(i)}\)</span> is uniformly distributed.</p>
+<blockquote>
+<p>Talts, S. et al. (2018) Validating Bayesian inference algorithms with simulation-based calibration. arXiv:1804.06788.</p>
+</blockquote>
+</div>
+<div id="sensitivity" class="section level3">
+<h3>Sensitivity</h3>
+<p>If the model is well calibrated, the sensitivity test aims to determine whether, based on the amount of data available, it is possible to accurately estimate the value of each parameter.</p>
+<p>The <span class="math inline">\(z\)</span>-score is the standardized difference between the estimated posterior value and the real value of the parameter.</p>
+<p><span class="math inline">\(\frac{\bar{\theta}_{post} - \theta}{\sigma_{post}}\)</span></p>
+<p>In other words, this statistic gives the difference between the estimated value and the real value of the parameter, in standard deviation units of the posterior distribution. This value should generally be near zero; for example, if the posterior distribution of the parameter is normal, for 95% of simulations the value of this score will be between -2 and 2.</p>
+<p>The shrinkage represents the reduction of the variance compared to the prior distribution:</p>
+<p><span class="math inline">\(1 - \frac{\sigma^2_{post}}{\sigma^2_{prior}}\)</span></p>
+<p>In general, we expect the posterior variance to be smaller than that the prior variance. For example, if the posterior variance is 10 times smaller than the prior variance, the contraction is 90%.</p>
+<p>Note that this term does not have the same meaning here as that seen earlier in the context of mixed models, where it designates the shrinkage of random effects towards the general mean.</p>
+</div>
+</div>
+<div id="fit-to-real-data" class="section level2">
+<h2>Fit to real data</h2>
+<p>Once the internal consistency of the model has been verified, we can now fit the model to the actual data, check the diagnoses (divergences, tree depth, energy), then refit the model if necessary by modifying the parameters of the algorithm.</p>
+<p>If no problem is detected, we can consult the summary of estimates and view the posterior distributions of the parameters.</p>
+</div>
+<div id="posterior-predictive-checks" class="section level2">
+<h2>Posterior predictive checks</h2>
+<p>In this last step, we want to verify that the predictions obtained by simulating observations from the posterior distribution of the parameters are sufficiently close to the observations.</p>
+<p>As seen at the end of the last class, we can check if enough observations are in their prediction interval according to the fitted model. Also, we can compare predictions and observations using summary statistics describing important characteristics of the data set that are not directly fit by the model.</p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

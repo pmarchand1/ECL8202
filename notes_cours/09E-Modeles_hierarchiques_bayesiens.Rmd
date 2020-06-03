@@ -1,0 +1,294 @@
+---
+title: "Hierarchical Bayesian models"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+```
+
+# Introduction
+
+Today's course first covers Markov chain Monte-Carlo methods, a family of algorithms for applying Bayesian inference to complex models. We will specifically talk about the Stan platform, which has some unique advantages over other software due to its implementation of the Hamiltonian Monte-Carlo algorithm. We will then present a protocol for the development of hierarchical Bayesian models.
+
+# Contents
+
+- Markov chain Monte-Carlo methods
+
+- Stan platform for Bayesian inference
+
+- Steps for developing a hierarchical Bayesian model
+
+
+# Markov chain Monte-Carlo methods
+
+In the previous class, we saw the application of Bayes' theorem to estimate the posterior distribution of the parameters $\theta$ of a model according to the observations $y$.
+
+$$p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}$$
+
+In this equation, $p(\theta)$ is the prior probability distribution of $\theta$ (representing their uncertainty before observing the data), while $p(y | \theta)$ is the probability of observations $y$ conditional on a value of $\theta$, that is, the likelihood function.
+
+With several parameters, $\theta$ is a vector, so the resulting posterior distribution is the joint distribution of $\theta$ as a function of the data. It is important to consider this joint distribution, as the most likely values for one parameter may depend on the value of the other parameters.
+
+In the above equation, the denominator $p(y)$ is the marginal probability of the data. Since it does not depend on $\theta$, this probability can be seen as a normalization constant necessary for the integral of the posterior probability distribution to be equal to 1.
+
+We have also seen that $p(y)$ corresponds to the integral of the numerator $p(y | \theta) p(\theta)$ for all possible values of $\theta$. Except in simple cases, we cannot exactly calculate this integral to obtain a mathematical formula of $p(\theta | y)$.
+
+To solve this problem, we will use Monte-Carlo methods. As we saw in the first class of the semester, these are methods for approximating a distribution by drawing samples from this distribution.
+
+It does not seem possible to draw samples from the distribution $p(\theta | y)$ if we do not know $p(y)$. However, since $p(y)$ does not depend on $\theta$, it is possible to calculate the *ratio* of the posterior probabilities of two vectors $\theta$:
+
+$$\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} = \frac{p(y | \theta_{(2)}) p(\theta_{(2)})}{p(y | \theta_{(1)}) p(\theta_{(1)})}$$
+*Note*: Here, we use indices in parentheses to represent different $\theta$ vectors, in order to avoid confusion with the different elements of a single vector, e.g. if $\theta$ is a vector of $m$ parameters, $\theta_{(1)} = (\theta_{1(1)}, \theta_{2(1)}, ... \theta_{m(1)})$.
+
+## Metropolis-Hastings algorithm
+
+The Metropolis-Hastings algorithm makes it possible to generate a sample of the distribution $p(\theta | y)$ from these probability ratios. Here is a summary of how this method works.
+
+1. First, we randomly choose a first vector of parameters $\theta_{(1)}$.
+
+2. Next, we choose a second vector $\theta_{(2)}$, which depends on $\theta_{(1)}$ according to some transition probability. For example, adding to each of the parameters in $\theta_{(1)}$ an amount drawn from a normal distribution.
+
+3. We compute the posterior probability ratio $\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} $.
+
+    + If the ratio is greater than or equal to 1 ($\theta_{(2)}$ is more likely than $\theta_{(1)}$), we accept $\theta_{(2)}$.
+
+    + If the ratio is less than 1, we accept $\theta_{(2)}$ with a probability equal to this ratio; otherwise, we stay at the same point so $\theta_{(2)} = \theta_{(1)}$.
+
+Steps 2 and 3 are repeated for the desired number of iterations.
+
+It has been shown that with enough iterations, the distribution of $\theta_{(i)}$ can become as close as desired to the distribution sought: $p(\theta | y)$. This theoretical result in fact depends on certain conditions; however, we will not discuss these details here, as we are concerned not with whether the algorithm eventually converges, but whether it converges quickly enough to be useful in practice. This depends on the problem and it will be necessary to determine the convergence empirically by inspecting the algorithm output, as we will see later.
+
+## Markov chains
+
+In the Metropolis-Hastings algorithm, each vector $\theta_{(i + 1)}$ is a random vector which depends on $\theta_{(i)}$. In probability theory, this type of sequence is called a Markov chain. This algorithm is therefore the basis of Markov chain Monte-Carlo methods (abbreviated MCMC).
+
+To illustrate the progression of a Markov chain, take the example below which represents the joint distribution of two parameters $\theta_1$ and $\theta_2$; the darker regions represent a higher probability density. Note that the two distributions are correlated: the larger $\theta_1$ is, the more likely it is that $\theta_2$ is small and vice versa.
+
+![](../images/mcmc_dens_ex1.png)
+
+In the graph below, the green and purple arrows represent two Markov chains initialized at different random positions. Although the transitions are random, the probability of accepting a transition is greater when the posterior probability density is higher, so the chains gradually approach the main part of the distribution.
+
+![](../images/mcmc_dens_ex3.png)
+
+After this initial period, the two chains explore the distribution and the probability that each point $(\theta_1, \theta_2)$ is visited by a chain is proportional to its posterior probability density.
+
+![](../images/mcmc_dens_ex4.png)
+
+Let's now consider the sequence of values for one parameter $\theta$ visited by three Markov chains, as presented in the graph below (called a trace plot).
+
+![](../images/mcmc_trace_ex.png)
+
+At the start, the chains must start from their respective initial points and approach the main part of the distribution. This is called the "burn-in" or "warmup" period. The parameter values during that period are not used for inference. After the dotted line, we see that the chains have converged and mixed. This is the sampling period that will be used to approximate the posterior distribution of the parameter.
+
+## Verification of the convergence of the chains
+
+As we saw above, the inspection of the trace plot can tell us if different Markov chains have converged, which means that their values can be used to estimate the posterior distribution.
+
+To assess the convergence more quantitatively, we can use the Gelman-Rubin statistic $\hat{R}$. This statistic represents the variance of a parameter between the chains relative to the variance of the parameter within each chain. This statistic is conceptually similar to an ANOVA: if the chains explore the same distribution, then the level of variation between values from the same chain is similar to the variation between values from different chains.
+
+At convergence, $\hat{R}$ must be around 1. There is no definitive threshold for this value, but most authors agree that $\hat{R}$ should not exceed 1.1. However, $\hat{R} \leq 1.1$ does not guarantee convergence towards the correct distribution; we will see later other diagnostics aiming to confirm that the algorithm is fully exploring the posterior distribution.
+
+In the event of a convergence problem, we can extend the warmup period. If convergence is much too slow or if each chain remains "caught" in a part of the distribution rather than mixing with the other chains, this could indicate a difficulty in estimating the parameters of the model with the data provided. In this case, it would be useful to reparametrize or modify the model.
+
+## Sampling efficiency
+
+If the algorithm converges, we can quantify the efficiency with which the Markov chains approximate the posterior distribution.
+
+Let us consider a function $f$ calculated from the parameters of the model. It can be the mean of the parameter, a quantile, or any statistic of interest which depends on one or more parameters of the model. If we had a sample of $N$ **independent** random draws of the joint posterior distribution of the parameters, then the value of $f$ calculated from this sample would approach its value for the exact distribution, with an approximation error (Monte-Carlo standard error, or MCSE) proportional to $1 / \sqrt{N}$.
+
+*Note*: One should not confuse the Monte-Carlo standard error with the standard deviation of the posterior distribution of the parameter. The standard deviation of the posterior distribution (similar to the standard error for a frequentist estimator) represents uncertainty about the value of the parameter and depends (among other things) on the number of observations. The Monte-Carlo standard error is the numerical approximation error of the algorithm. By increasing the number of iterations, we can estimate more precisely all the properties of the posterior distribution, including its standard deviation, but we cannot reduce this standard deviation without having more data. We had the same situation in the case of the bootstrap: we could increase the number of bootstrap samples to reduce the numerical approximation error, but not the uncertainty due to the limited data.
+
+However, the Markov chain does *not* produce independent draws, since the value of $\theta_{(i + 1)}$ is conditional on $\theta_{i}$. In this case, the successive values of the chain are correlated, so $N$ iterations are not equivalent to a sample of $N$ independent values.
+
+Bayesian inference software calculates the Monte-Carlo standard error and the effective sample size, $N_{eff}$, which is the number of independent draws necessary to have the same precision as the $N$ correlated iterations. In general, $N_{eff}$ is less than the number of iterations, but this is not always the case, in particular for more efficient algorithms like the Hamiltonian Monte-Carlo algorithm seen in the following section.
+
+
+# Stan platform for Bayesian inference
+
+Stan (https://mc-stan.org) is both a language to specify statistical models (as we saw during the previous lab) and a software implementing various inferential algorithms for those models. Released in 2015, it is among the more recent Bayesian inference software.
+
+> Carpenter, B. et al. (2017) Stan: A Probabilistic Programming Language. *Journal of Statistical Software* 76(1). 10.18637/jss.v076.i01.
+Models coded in Stan language are compiled in C ++ code in order to obtain a good speed of execution.
+
+While Stan is a standalone software, there are packages in R (*rstan*) and Python allowing to interface with Stan. Also, there are several R packages that offer more options for using Stan:
+
+- *brms* and *rstanarm* automatically translate models specified in R into the Stan language;
+
+- *bayesplot* and *shinystan* produce visualizations of the results of the models, as we will see later;
+
+- *loo* implements a model comparison and multi-model prediction method based on the approximation of the cross-validation error;
+
+- *tidybayes* offers other viewing options, in particular for posterior distributions of parameters.
+
+## Hamiltonian Monte-Carlo method
+
+The MCMC algorithm implemented by Stan is the Hamiltonian Monte-Carlo (HMC) method. One specific feature of this method is that it evaluates not only the value of $p(y | \theta) p(\theta)$ at each iteration, but also its gradient, which is the equivalent of the "slope" of a surface in several dimensions. Thus, the algorithm knows in which direction the posterior probability is increasing, which makes it possible to converge more quickly towards the part of the distribution containing most of the probability.
+
+In addition, each iteration of this algorithm is made up of several steps and follows a "curve" in the parameter space which is guided by the shape of the probability distribution. This allows successive points in the chain to be more spaced apart than in the case of traditional MCMC methods, which means that these points are more independent and that the effective sample size $N_{eff}$ is larger for a same number of iterations.
+
+In addition to these performance advantages, the Hamiltonian algorithm offers unique diagnostics, such as the presence of divergent transitions, which make it possible to check its validity.
+
+The following article presents more details on the Hamiltonian Monte-Carlo method in an ecological modeling context.
+
+> Monnahan, C.C., Thorson, J.T. et Branch, T.A. (2017) Faster estimation of Bayesian models in ecology using Hamiltonian Monte Carlo. *Methods in Ecology and Evolution* 8: 339-348.
+
+## Diagnostics in Stan
+
+### Divergent transitions
+
+The divergent transitions indicate that the algorithm has difficulty exploring a region of the posterior probability distribution, generally due to an abrupt change in the form of this distribution. This is the most serious diagnostic error, since even a small number of divergences compromise the validity of the results of the algorithm.
+
+One of the ways to eliminate divergent transitions is to force the algorithm to take smaller steps, by increasing the *adapt_delta* parameter adjustable in Stan. However, in a case where the divergences persist, it may be necessary to reparametrize the model.
+
+### Maximum tree depth
+
+The Hamiltonian algorithm evaluates different possible trajectories (represented by a tree) to choose the value of the parameters at the next iteration. When the maximum tree depth is reached, this means that the algorithm has tried the maximum number of trajectories, but that a longer trajectory remains possible. Unlike divergent transitions, this warning does not invalidate the results, but it can indicate a suboptimal parameterization.
+
+You can increase the maximum depth with the *max_treedepth* argument, but this increases the time taken for each iteration.
+
+### Energy (*BFMI low*)
+
+As with the divergences, this warning indicates that the algorithm does not traverse the posterior distribution efficiently. This problem can sometimes be resolved by extending the warmup period. However, if it occurs at the same time as one of the previous ones, the formulation of the model should probably be reviewed.
+
+## Options for using Stan from R
+
+To conclude this section, we will see different ways to use Stan from R. First, we can write a Stan program, as seen in the previous lab. Here is the beginning of the Stan code for a simple model, where there are $N$ observations of a response variable $y$ and a predictor $x$.
+
+```
+data {
+  int N;
+  vector[N] y;
+  vector[N] x;
+}
+
+[...]
+
+```
+
+To estimate the parameters of this model from data present in a data frame `df` containing the` x` and `y` columns, we must first create a list associating the data with each variable of the `data` block in the Stan program.
+
+```{r, eval = FALSE}
+dat <- list(N = nrow(df), y = df$y, x = df$x)
+```
+
+Then, we call the `stan_model` function to compile the model, then `sampling` to estimate the posterior distribution of the parameters from the data.
+
+```{r, eval = FALSE}
+library(rstan)
+mod <- stan_model("model.stan")
+result <- sampling(mod, data = dat)
+```
+
+In the previous class, we briefly presented the *brms* package, which allows us to represent models with a formula similar to the functions already seen in the course (`lm`,` glm`, `lmer`, etc.), then automatically translates them into Stan language to estimate the parameters in a Bayesian framework. The `brm` function is used for all types of models supported by the package (generalized linear models, mixed effect models, temporal and spatial dependence, etc.)
+
+```{r, eval = FALSE}
+library(brms)
+res_brms <- brm(y ~ x, data = df)
+```
+
+The *rstanarm* package is an alternative to *brms*. Rather than using a single function, this package contains functions specialized for each model type (e.g. `stan_lm`, `stan_glm`, `stan_lmer`). 
+
+```{r, eval = FALSE}
+library(rstanarm)
+res_arm <- stan_lm(y ~ x, data = df)
+```
+
+This package has slightly fewer options than *brms*, but its main advantage is that the Stan programs used are pre-compiled. The compilation time is generally only a few minutes for a new model, but this time saving can be useful when it is necessary to evaluate successively many different models.
+
+The two packages *rstanarm* and *brms* make it possible to estimate the parameters of frequently-used model types without worrying about programming in the Stan language and specifically optimizing the formulation of the model to facilitate efficient sampling. Their use is therefore recommended, except when a custom model is required which must be coded in Stan.
+
+# Steps for developing a hierarchical Bayesian model
+
+This part presents the steps of a suggested protocol for the development and validation of a hierarchical Bayesian model.
+
+The protocol is based on the article:
+
+> Betancourt, M. (2018) Towards A Principled Bayesian Workflow (RStan). https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html.
+
+Michael Betancourt is one of Stan's developers and his website contains several articles on the theory related to hierarchical Bayesian models, as well as case studies on their application to different problems.
+
+Here are the main steps to follow when developing a new hierarchical Bayesian model to represent a given system.
+
+1. Formulate the model.
+
+2. Check the prior predictions.
+
+3. Test the fit of the model to simulated data.
+
+4. Fit the model to actual data and check the diagnostics.
+
+5. Check the posterior predictions.
+
+Note that before step 4, we check the internal consistency of the model, then in steps 4 and 5 we check if it adequately represents the observed data.
+
+## Model formulation
+
+First, we must describe the variables of the model and their mathematical relationships, as well as the statistical distributions assigned to the response variables. It is particularly important to consider the structure of the sampling or experimental design in order to specify the hierarchy of random effects.
+
+It is also at this stage that we choose the prior distributions for the parameters.
+
+## Prior predictive checks
+
+To check whether the prior distributions of the predictors generate realistic values of the observations, we start by generating parameter vectors from their prior distribution, then we simulate a data set similar to that observed from the model based on each vector of parameters. This simulation uses the actual values of the predictors for each observation.
+
+From the results of the simulations, we check whether the properties of the simulated observations correspond to realistic values for the problem. At this stage, we do not directly compare the simulations to actual observations, only to our prior knowledge of what constitutes a reasonable value of the response. 
+
+## Fit of the model to simulated data
+
+For this step, we fit the model to each dataset simulated in the previous step. These datasets contain the actual values of the predictors, but the response is simulated using known parameters taken from the prior distribution.
+
+Next, we check the fitting diagnostics for each simulation, then we check the accuracy of the model inferences by comparing the posterior distributions to the parameter values used for each simulation. Since the data were obtained by simulation, we expect the inference to produce estimates compatible with the known values of the parameters. Two tests are useful at this point:
+
+- Calibration test: Are the posterior probability intervals correct?
+  
+- Sensitivity test: Does the data allow us to determine the value of the parameter?
+
+### Calibration by simulation
+
+Suppose we have observations $y$ simulated from the model with a parameter value $\theta$ drawn from the prior distribution. By fitting the model to these $y$, we obtain a sample of the posterior distribution of $\theta$, that is $\theta_{(i)}$ for $i$ from 1 to $N$ iterations .
+
+If the inference is correct, the rank of $\theta$ among the $\theta_{(i)}$ is distributed uniformly between 1 and $N + 1$. This is equivalent to saying that if an interval contains a certain fraction (say 90%) of the posterior probability of $\theta$, the true value of the parameter is included in that invertal this same fraction of time. (This coverage property is analogous to that of frequentist confidence intervals.) In particular, if $\theta$ is more often at the extreme ranks than expected, this would mean that the posterior distribution underestimates the uncertainty on $\theta$. On the contrary, if $\theta$ is always at the center, it would mean that its uncertainty is overestimated.
+
+The calibration test therefore aims to verify that over a large number of simulations, the rank of the true value of $\theta$ among the $\theta_{(i)}$ is uniformly distributed.
+
+> Talts, S. et al. (2018) Validating Bayesian inference algorithms with simulation-based calibration. arXiv:1804.06788.
+
+### Sensitivity
+
+If the model is well calibrated, the sensitivity test aims to determine whether, based on the amount of data available, it is possible to accurately estimate the value of each parameter.
+
+The $z$-score is the standardized difference between the estimated posterior value and the real value of the parameter.
+
+$\frac{\bar{\theta}_{post} - \theta}{\sigma_{post}}$
+
+In other words, this statistic gives the difference between the estimated value and the real value of the parameter, in standard deviation units of the posterior distribution. This value should generally be near zero; for example, if the posterior distribution of the parameter is normal, for 95% of simulations the value of this score will be between -2 and 2.
+
+The shrinkage represents the reduction of the variance compared to the prior distribution:
+
+$1 - \frac{\sigma^2_{post}}{\sigma^2_{prior}}$
+
+In general, we expect the posterior variance to be smaller than that the prior variance. For example, if the posterior variance is 10 times smaller than the prior variance, the contraction is 90%.
+
+Note that this term does not have the same meaning here as that seen earlier in the context of mixed models, where it designates the shrinkage of random effects towards the general mean.
+
+## Fit to real data
+
+Once the internal consistency of the model has been verified, we can now fit the model to the actual data, check the diagnoses (divergences, tree depth, energy), then refit the model if necessary by modifying the parameters of the algorithm.
+
+If no problem is detected, we can consult the summary of estimates and view the posterior distributions of the parameters.
+
+## Posterior predictive checks
+
+In this last step, we want to verify that the predictions obtained by simulating observations from the posterior distribution of the parameters are sufficiently close to the observations.
+
+As seen at the end of the last class, we can check if enough observations are in their prediction interval according to the fitted model. Also, we can compare predictions and observations using summary statistics describing important characteristics of the data set that are not directly fit by the model.
