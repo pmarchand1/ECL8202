@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-## Données
+## Données (FG)
 
 Pour ce laboratoire, nous utiliserons le jeu de données [sphagnum_cover.csv](../donnees/sphagnum_cover.csv), qui provient de l'article:
 
