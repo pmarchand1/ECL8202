@@ -16,14 +16,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Données
 
-Pour ce laboratoire, nous utiliserons le jeu de données [sphagnum_cover.csv](../donnees/sphagnum_cover.csv), qui provient de l'article:
+Pour ce laboratoire, nous utiliserons le jeu de données [sphagnum_cover.csv](sphagnum_cover.csv), qui provient de l'article:
 
 > Maanavilja, L., Kangas, L., Mehtätalo, L. and Tuittila, E.‐S. (2015), Rewetting of drained boreal spruce swamp forests results in rapid recovery of Sphagnum production. J Appl Ecol, 52: 1355-1363. [doi:10.1111/1365-2664.12474](https://doi.org/10.1111/1365-2664.12474))
 
 Ces données contiennent des mesures du pourcentage de couverture par les sphaignes (*sphcover*) pour 36 marécages boréaux divisés en trois types (*habitat*): *Dr* = drainés, *Re* = remouillés et *Un* = non-drainés.
 
 ```{r}
-cover <- read.csv("../donnees/sphagnum_cover.csv")
+cover <- read.csv("sphagnum_cover.csv")
 str(cover)
 ```
 
@@ -94,7 +94,7 @@ qqnorm(boot_moy$t)
 qqline(boot_moy$t)
 ```
 
-La distribution du bootstrap est asymétrique: les plus petites valeurs s'approchent plus de la moyenne comparé à une distribution normale, tandis que les plus grandes valeurs s'en éloignent.
+La distribution du bootstrap est asymétrique: les plus petites valeurs sont au-dessus de la droite, donc plus rapprochées de la moyenne comparé à une distribution normale, tandis que les plus grandes valeurs sont aussi au-dessus de la droite, donc elles sont plus éloignées de la moyenne.
 
 
 d) Calculez l'intervalle de confiance à 95% de la moyenne selon la méthode BCa. Comment diffère-t-il de celui calculé en a) selon la formule classique? Pouvez-vous expliquer cette différence en fonction du résultat en c)?
@@ -106,7 +106,7 @@ d) Calculez l'intervalle de confiance à 95% de la moyenne selon la méthode BCa
 boot.ci(boot_moy)
 ```
 
-L'intervalle BCa (3.44, 13.09) diffère de celui en a) (1.36, 12.97) surtout au niveau de la borne inférieure et les deux bornes sont corrigées vers le haut. En c), nous avons vu que les petites valeurs de la distribution du bootstrap sont plus rapprochées de la moyenne par rapport à la distribution normale et les plus grandes valeurs s'en éloignent.
+L'intervalle BCa (3.43, 13.28) diffère de celui en a) (1.36, 12.97) surtout au niveau de la borne inférieure et les deux bornes sont corrigées vers le haut. En c), nous avons vu que les petites valeurs de la distribution du bootstrap sont plus rapprochées de la moyenne par rapport à la distribution normale et les plus grandes valeurs s'en éloignent.
 
 
 ## 2. Estimation des différences entre habitats
@@ -174,14 +174,14 @@ La moyenne du bootstrap est très proche des coefficients estimés en b), mais l
 Notons que tous les coefficients dépendent de la moyenne du groupe de référence *Dr*. La moyenne et l'écart-type de ce groupe sont fortement affectés par deux valeurs extrêmes autour de 20, comme on peut voir sur le graphique en a). Ces valeurs extrêmes seront absentes dans plusieurs échantillons bootstrap, ce qui a pour effet de réduire l'écart-type estimée pour le groupe *Dr* et ainsi réduire l'erreur-type des coefficients du modèle.
 
 
-d) L'application du bootstrap en c) ré-échantillonne parmi l'ensemble des rangées, ce qui fait que le nombre d'observations dans chaque type d'habitat varie d'un échantillon à l'autre. S'il est préférable de considérer ces nombres comme des quantités fixes, on peut définir les types d'habitat comme des strates en ajoutant l'argument `strata = cover$habitat` à la fonction `boot`. 
+d) L'application du bootstrap en c) ré-échantillonne parmi l'ensemble des rangées, ce qui fait que le nombre d'observations dans chaque type d'habitat varie d'un échantillon à l'autre. S'il est préférable de considérer ces nombres comme des quantités fixes, on peut définir les types d'habitat comme des strates en ajoutant l'argument `strata = as.factor(cover$habitat)` à la fonction `boot`. (La conversion de la variable `habitat` en facteur est nécessaire ici.)
 
 Répétez l'analyse en c) avec un ré-échantillonnage stratifié et comparez les erreurs-types obtenues pour chaque coefficient.
 
 **Réponse**
 
 ```{r}
-boot_strat <- boot(cover, lm_hab, R = 10000, strata = cover$habitat)
+boot_strat <- boot(cover, lm_hab, R = 10000, strata = as.factor(cover$habitat))
 
 # Moyenne
 apply(boot_strat$t, 2, mean)
@@ -208,7 +208,7 @@ f) Finalement, nous allons ré-échantillonner les résidus du modèle.
 
 - Écrivez une fonction qui crée un nouveau jeu de données en additionnant un vecteur ré-échantillonné `x[i]` aux valeurs attendues pour produire une nouvelle variable réponse, puis qui ajuste un modèle avec cette nouvelle variable réponse en fonction de l'habitat.
 
-- Simulez 10 000 échantillons avec la fonction `boot`, avec comme arguments (1) le vecteurs de résidus (`residuals`) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l'erreur-type et l'intervalle de confiance à 95% des coefficients.
+- Simulez 10 000 échantillons avec la fonction `boot`, avec comme arguments (1) le vecteur de résidus (`residuals`) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l'erreur-type et l'intervalle de confiance à 95% des coefficients.
 
 Le ré-échantillonnage des résidus est-il un bon choix pour ces données?
 

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -292,7 +257,7 @@ div.tocify {
 </div>
 
 
-<div id="donnees" class="section level2">
+<div id="données" class="section level2">
 <h2>Données</h2>
 <p>Pour ce laboratoire, nous utiliserons le jeu de données <a href="../donnees/sphagnum_cover.csv">sphagnum_cover.csv</a>, qui provient de l’article:</p>
 <blockquote>
@@ -302,11 +267,11 @@ div.tocify {
 <pre class="r"><code>cover &lt;- read.csv(&quot;../donnees/sphagnum_cover.csv&quot;)
 str(cover)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    36 obs. of  3 variables:
-##  $ site    : Factor w/ 36 levels &quot;AmLuxx&quot;,&quot;Ev01VR&quot;,..: 1 5 6 9 29 31 32 33 34 10 ...
-##  $ habitat : Factor w/ 3 levels &quot;Dr&quot;,&quot;Re&quot;,&quot;Un&quot;: 3 3 3 3 3 3 3 3 3 1 ...
+##  $ site    : chr  &quot;AmLuxx&quot; &quot;EvLuPa&quot; &quot;EvLuVK&quot; &quot;HeLuxx&quot; ...
+##  $ habitat : chr  &quot;Un&quot; &quot;Un&quot; &quot;Un&quot; &quot;Un&quot; ...
 ##  $ sphcover: num  35.3 56.2 46.6 56 54.3 ...</code></pre>
 </div>
-<div id="estimation-de-la-couverture-moyenne-pour-les-marecages-draines" class="section level2">
+<div id="estimation-de-la-couverture-moyenne-pour-les-marécages-drainés" class="section level2">
 <h2>1. Estimation de la couverture moyenne pour les marécages drainés</h2>
 <ol style="list-style-type: lower-alpha">
 <li>À partir du jeu de données, faites l’extraction des valeurs de <em>sphcover</em> pour les marécages drainés. Calculez le pourcentage de couverture moyen, ainsi que son erreur-type selon la formule classique (basée sur l’écart-type et la taille de l’échantillon). Finalement, calculez l’intervalle de confiance à 95% basé sur la distribution <span class="math inline">\(t\)</span>:</li>
@@ -323,7 +288,7 @@ qqline(res$t)</code></pre>
 <li>Calculez l’intervalle de confiance à 95% de la moyenne selon la méthode BCa. Comment diffère-t-il de celui calculé en a) selon la formule classique? Pouvez-vous expliquer cette différence en fonction du résultat en c)?</li>
 </ol>
 </div>
-<div id="estimation-des-differences-entre-habitats" class="section level2">
+<div id="estimation-des-différences-entre-habitats" class="section level2">
 <h2>2. Estimation des différences entre habitats</h2>
 <ol style="list-style-type: lower-alpha">
 <li>Voici la distribution des valeurs de <em>sphcover</em> dans chaque type d’habitat.</li>
@@ -353,7 +318,7 @@ ggplot(cover, aes(x = habitat, y = sphcover)) +
 <ul>
 <li><p>Ajustez un modèle linéaire comme en b), puis ajoutez au jeu de données <code>cover</code>une colonne pour les valeurs attendues (<code>fitted</code>) du modèle.</p></li>
 <li><p>Écrivez une fonction qui crée un nouveau jeu de données en additionnant un vecteur ré-échantillonné <code>x[i]</code> aux valeurs attendues pour produire une nouvelle variable réponse, puis qui ajuste un modèle avec cette nouvelle variable réponse en fonction de l’habitat.</p></li>
-<li><p>Simulez 10 000 échantillons avec la fonction <code>boot</code>, avec comme arguments (1) le vecteurs de résidus (<code>residuals</code>) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l’erreur-type et l’intervalle de confiance à 95% des coefficients.</p></li>
+<li><p>Simulez 10 000 échantillons avec la fonction <code>boot</code>, avec comme arguments (1) le vecteur de résidus (<code>residuals</code>) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l’erreur-type et l’intervalle de confiance à 95% des coefficients.</p></li>
 </ul>
 <p>Le ré-échantillonnage des résidus est-il un bon choix pour ces données?</p>
 </div>
@@ -376,6 +341,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

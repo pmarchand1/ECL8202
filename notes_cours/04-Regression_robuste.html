@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -306,7 +271,7 @@ div.tocify {
 </ul>
 </div>
 </div>
-<div id="sensibilite-aux-valeurs-extremes" class="section level1">
+<div id="sensibilité-aux-valeurs-extrêmes" class="section level1">
 <h1>Sensibilité aux valeurs extrêmes</h1>
 <div id="mesures-de-tendance-centrale" class="section level2">
 <h2>Mesures de tendance centrale</h2>
@@ -321,7 +286,7 @@ div.tocify {
 <p>Avec <span class="math inline">\(n\)</span> observations, la moyenne a un point de rupture de <span class="math inline">\(1/n\)</span>, car une seule observation extrême suffit à l’entraîner vers des valeurs extrêmes. Dans l’exemple précédent, si on augmentait la valeur extrême ajoutée, la moyenne pourrait augmenter sans limite.</p>
 <p>Dans le cas de la médiane, elle réagirait de la même façon à toute valeur extrême ajoutée d’un côté de la distribution, peu importe la magnitude de cette valeur extrême (la nouvelle médiane serait de 44 peu importe si la donnée ajoutée était de 100 ou 300 ou 1000). Pour faire augmenter la médiane sans limite, c’est toute la moitié supérieure du jeu de données qu’il faudrait faire augmenter; la médiane a donc un point de rupture de 0.5.</p>
 </div>
-<div id="precision-des-estimes-et-valeurs-extremes" class="section level2">
+<div id="précision-des-estimés-et-valeurs-extrêmes" class="section level2">
 <h2>Précision des estimés et valeurs extrêmes</h2>
 <p>Nous avons vu que la valeur de la moyenne est sensible à l’ajout de valeurs extrêmes d’un côté de la distribution (cas asymétrique). Si les valeurs extrêmes apparaissent de façon symétrique de part et d’autre de la moyenne, sa valeur reste inchangée. Cependant, puisque l’écart-type de la distribution est aussi sensible aux valeurs extrêmes, la précision avec laquelle on peut estimer de la moyenne est affectée.</p>
 <p>Dans le graphique ci-dessous, la courbe verte représente une distribution normale centrée réduite, <span class="math inline">\(y \sim N(0, 1)\)</span>. La courbe orange représente le mélange de deux distributions: 95% des observations proviennent de la distribution <span class="math inline">\(N(0, 1)\)</span> et 5% proviennent d’une distribution avec un écart-type plus grand: <span class="math inline">\(N(0, 5)\)</span>. Ce mélange représente le cas où la plupart des observations suivent une distribution normale, sauf une petite fraction dont les valeurs sont plus extrêmes qu’attendu. Sur une échelle linéaire de la densité de probabilité <span class="math inline">\(f(y)\)</span> (à gauche), les deux distributions apparaissent très semblables. Sur une échelle logarithmique (à droite), on voit clairement que les valeurs extrêmes sont beaucoup plus probables pour la distribution de mélange (ex.: environ 30 fois plus probable d’obtenir <span class="math inline">\(y = -4\)</span> ou <span class="math inline">\(y = 4\)</span>).</p>
@@ -343,7 +308,7 @@ mix_samp &lt;- replicate(1000, rnorm(100, mean = 0, sd = c(rep(1, 95), rep(5, 5)
 <p>Qu’est-ce que ces résultats signifient? Supposons que nous comparons deux groupes entre lesquels la moyenne et la médiane d’une variable réponse diffèrent; si la distribution de la variable est symétrique, alors la moyenne est identique à la médiane pour chaque groupe. Si la variable suit une distribution normale, il est plus facile de détecter une différence entre les moyennes qu’entre les médianes; un test basé sur les moyennes, comme le test <span class="math inline">\(t\)</span>, a une plus grande puissance. En présence de valeurs extrêmes, l’erreur-type de la moyenne augmente et un test basé sur la différence entre médianes pourrait être plus puissant.</p>
 <p>Les M-estimateurs, que nous verrons plus loin dans un contexte de régression, sont des mesures de tendance centrale qui font un compromis entre l’efficacité de la moyenne pour une distribution normale et la robustesse aux valeurs extrêmes de la médiane. Lorsque la distribution est normale, la précision de ces estimateurs s’approche de celle de la moyenne, mais ils ont un point de rupture plus élevé et peuvent donc mieux conserver leur précision en présence de plusieurs valeurs extrêmes.</p>
 </div>
-<div id="valeurs-extremes-et-regression" class="section level2">
+<div id="valeurs-extrêmes-et-régression" class="section level2">
 <h2>Valeurs extrêmes et régression</h2>
 <p>Dans une régression linéaire simple, la moyenne de la réponse <span class="math inline">\(y\)</span> correspond à une fonction linéaire du prédicteur <span class="math inline">\(x\)</span>, tandis que la variation aléatoire autour de cette moyenne est représentée par un résidu <span class="math inline">\(\epsilon\)</span> qui suit une distribution normale.</p>
 <p><span class="math display">\[y = \beta_0 + \beta_1 x + \epsilon\]</span></p>
@@ -353,6 +318,10 @@ mix_samp &lt;- replicate(1000, rnorm(100, mean = 0, sd = c(rep(1, 95), rep(5, 5)
 <p><span class="math display">\[\sum_{i=1}^n \hat{\epsilon_i}^2 = \sum_i^n \left( y_i - \hat{\beta_0} - \hat{\beta_1} x \right)^2\]</span></p>
 <p>Ici <span class="math inline">\(\hat{\epsilon_i}\)</span> est l’estimé de la valeur du résidu <span class="math inline">\(i\)</span> en fonction de la valeur estimée des coefficients.</p>
 <p>Pour une régression linéaire, l’influence d’une observation sur l’estimé des coefficients dépend de deux facteurs: la taille du résidu de cette observation, <span class="math inline">\(\hat{\epsilon_i}\)</span>, ainsi que le positionnement de <span class="math inline">\(x_i\)</span>. Pour un même <span class="math inline">\(x_i\)</span>, les résidus <span class="math inline">\(\hat{\epsilon_i}\)</span> plus extrêmes ont une plus grande influence; pour une même taille de résidu, ceux correspondant à une valeur de <span class="math inline">\(x_i\)</span> plus extrême ont aussi une plus grande influence, comme le montre le graphique ci-dessous.</p>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;
+## `geom_smooth()` using formula &#39;y ~ x&#39;
+## `geom_smooth()` using formula &#39;y ~ x&#39;
+## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>Dans les deux cas, le point en orange possède le même résidu, soit <span class="math inline">\(\epsilon = -20\)</span>. Cependant, celui placé près de la limite supérieure de <span class="math inline">\(x\)</span> (panneau droit) affecte davantage l’estimé de la pente <span class="math inline">\(\hat{\beta_1}\)</span> (ligne orange = avec ce point; ligne grise pointillée = sans ce point).</p>
 <p>Les résidus situés près des extrêmes de <span class="math inline">\(x\)</span> exercent un grand effet de levier (<em>leverage</em>) sur la droite de régression. Puisque la droite de régression passe toujours par le centre de gravité du nuage de points, <span class="math inline">\((\bar{x}, \bar{y})\)</span>, un résidu situé plus loin du centre fait davantage “pivoter” la droite dans sa direction.</p>
@@ -373,7 +342,7 @@ str(Animals2)</code></pre>
     scale_x_log10() +
     scale_y_log10()</code></pre>
 <p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>Tous les animaux dans ce jeu de données sont des mammifères, excepté trois qui sont des dinosaures. Il s’agit des trois observations avec la masse corporelle la plus grande, mais donc la masse du cerveau se retrouve sous la tendance générale.</p>
+<p>Tous les animaux dans ce jeu de données sont des mammifères, excepté trois qui sont des dinosaures. Il s’agit des trois observations avec la masse corporelle la plus grande, mais dont la masse du cerveau se retrouve sous la tendance générale.</p>
 <p>Dans une analyse statistique, les valeurs aberrantes (<em>outliers</em>) peuvent être exclues si nous avons des informations indépendantes indiquant que les mesures sont incorrectes, ou qu’elles proviennent d’une population différente du reste des observations. Puisqu’il est raisonnable de croire que la relation allométrique diffère entre les mammifères et les dinosaures, il serait justifié d’exclure ces derniers avant d’effectuer la régression. Pour les besoins du cours, nous supposerons qu’il n’y a pas de raison <em>a priori</em> d’exclure ces valeurs.</p>
 <p>Une régression linéaire basée sur l’ensemble des données donne une pente de 0.59 pour <em>log(brain)</em> en fonction de <em>log(body)</em>.</p>
 <pre class="r"><code>lm_ani &lt;- lm(log(brain) ~ log(body), Animals2)
@@ -429,11 +398,13 @@ summary(lm_ani)</code></pre>
     geom_point(data = Animals2[c(6,16,26),], color = &quot;#b3452c&quot;, size = 2) +
     scale_x_log10() +
     scale_y_log10()</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;
+## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <p>Dans les prochaines sections, nous verrons comment réduire l’influence des valeurs extrêmes sans les exclure complètement de l’analyse.</p>
 </div>
 </div>
-<div id="regression-robuste-avec-les-m-estimateurs" class="section level1">
+<div id="régression-robuste-avec-les-m-estimateurs" class="section level1">
 <h1>Régression robuste avec les M-estimateurs</h1>
 <p>Les M-estimateurs sont des mesures de la tendance centrale conçues en fonction de deux objectifs:</p>
 <ul>
@@ -447,7 +418,7 @@ summary(lm_ani)</code></pre>
 <p>Si tous les poids sont égaux à 1, on retrouve la méthode des moindres carrés.</p>
 <p>Un des premiers M-estimateurs proposés a été celui de Huber, qui correspond aux poids <span class="math inline">\(w_i = 1\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert \le k\)</span> et <span class="math inline">\(w_i = k/\vert \hat{\epsilon_i} \vert\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert &gt; k\)</span>. Avec cette méthode, tous les résidus inférieurs à <span class="math inline">\(-k\)</span> ou supérieurs à <span class="math inline">\(k\)</span> comptent comme des résidus égaux à <span class="math inline">\(-k\)</span> ou <span class="math inline">\(k\)</span>, respectivement, pour le calcul des coefficients de la régression.</p>
 <p>Le bipoids de Tukey (<em>Tukey’s biweight</em>) est un autre M-estimateur, qui correspond aux poids <span class="math inline">\(w_i = (1 - (\hat{\epsilon_i}/k)^2)^2\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert \le k\)</span> et <span class="math inline">\(w_i = 0\)</span> si <span class="math inline">\(\vert \hat{\epsilon_i} \vert &gt; k\)</span>. Cet estimateur donne donc un poids inférieur à 1 à tous les résidus; ce poids diminue avec la magnitude du résidu pour atteindre 0 si le résidu est inférieur à <span class="math inline">\(-k\)</span> ou supérieur à <span class="math inline">\(k\)</span>, ce qui équivaut à exclure complètement les résidus de cette magnitude.</p>
-<p>Les valeurs de <span class="math inline">\(k\)</span> utilisées le plus couramment sont <span class="math inline">\(k = 1.345\hat{\sigma}\)</span> pour la méthode de Huber et <span class="math inline">\(k = 4.685\hat{\sigma}\)</span> pour le bipoids de Tukey. Ici, <span class="math inline">\(\hat{\sigma}\)</span> est un estimé robuste de l’écart-type des données, dont nous ne discuterons pas dans ce cours. Ces valeurs de <span class="math inline">\(k\)</span> sont choisies afin que l’erreur-type des estimés soit au plus 5% au-dessus de celle obtenue par le modèle classique si la distribution des résidus est normale.</p>
+<p>Les valeurs de <span class="math inline">\(k\)</span> utilisées le plus couramment sont <span class="math inline">\(k = 1.345\hat{\sigma}\)</span> pour la méthode de Huber et <span class="math inline">\(k = 4.685\hat{\sigma}\)</span> pour le bipoids de Tukey; les poids résultants sont illustrés dans le graphique ci-dessous. Ici, <span class="math inline">\(\hat{\sigma}\)</span> est un estimé robuste de l’écart-type des données, dont nous ne discuterons pas dans ce cours. Ces valeurs de <span class="math inline">\(k\)</span> sont choisies afin que l’erreur-type des estimés soit au plus 5% au-dessus de celle obtenue par le modèle classique si la distribution des résidus est normale.</p>
 <p>Le graphique ci-dessous montre le poids accordé pour chacune des deux méthodes en fonction du résidu normalisé par <span class="math inline">\(\sigma\)</span>.</p>
 <p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>Pour estimer les coefficients d’une régression robuste avec les M-estimateurs, il faut minimiser la somme des carrés des résidus en fonction de poids qui dépendent eux-mêmes des résidus. Afin de résoudre ce problème, l’algorithme utilisé procède par itération (<em>iterative reweighted least squares</em> ou IRLS):</p>
@@ -516,13 +487,15 @@ summary(lmrob_ani)</code></pre>
     geom_point(data = Animals2[c(6,16,26),], color = &quot;#b3452c&quot;, size = 2) +
     scale_x_log10() +
     scale_y_log10()</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;
+## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
-<div id="extension-aux-modeles-lineaires-generalises" class="section level2">
+<div id="extension-aux-modèles-linéaires-généralisés" class="section level2">
 <h2>Extension aux modèles linéaires généralisés</h2>
 <p>Le package <em>robustbase</em> contient aussi une fonction <code>glmrob</code>. Celles-ci applique différentes méthodes semblables aux M-estimateurs pour produire des estimés robustes des coefficients de modèles linéaires généralisés (GLM).</p>
 </div>
 </div>
-<div id="regression-t" class="section level1">
+<div id="régression-t" class="section level1">
 <h1>Régression <span class="math inline">\(t\)</span></h1>
 <p>Les méthodes présentées dans la section précédente ne sont pas basées sur une forme spécifique de la distribution des résidus autour de la valeur attendue de <span class="math inline">\(y\)</span>, ce qui contribue à leur généralité.</p>
 <p>Toutefois, certaines approches de modélisation, comme le maximum de vraisemblance vu au dernier cours et les méthodes bayésiennes présentées plus tard cette session, requièrent de spécifier une distribution pour toutes les variables aléatoires du modèle. Dans ce cas, si on souhaite assigner à une variable une distribution semblable à la normale, mais qui permet davantage de valeurs extrêmes, nous pouvons avoir recours à la distribution <span class="math inline">\(t\)</span>.</p>
@@ -580,12 +553,12 @@ summary(treg)</code></pre>
 ## 
 ## Est. degrees of freedom parameter:  2.071194
 ## Standard error for d.o.f:  0.6678805
-## No. of iterations of model : 8 in 0.03
+## No. of iterations of model : 8 in 0.02
 ## Heteroscedastic t Likelihood : -86.3654</code></pre>
 <p>Il est important de spécifier <code>estDof = TRUE</code> pour estimer le nombre de degrés de liberté, plutôt que de supposer une valeur fixe. Cependant, cet estimé risque d’être peu précis sauf si on a beaucoup de données. Ici, le nombre de degrés de liberté est de 2.08, avec une erreur-type de 0.67.</p>
 <p>La fonction <code>tlm</code> permet aussi à <span class="math inline">\(\sigma\)</span> de varier en fonction des prédicteurs, une option que nous n’utilisons pas ici. Notez que l’<code>Intercept</code> sous <code>Scale model</code> est un estimé de <span class="math inline">\(\log \sigma^2\)</span>.</p>
 </div>
-<div id="regression-quantile" class="section level1">
+<div id="régression-quantile" class="section level1">
 <h1>Régression quantile</h1>
 <p>Au début du cours, nous avions présenté la médiane comme un exemple de statistique robuste aux valeurs extrêmes. Par définition, la probabilité qu’une variable <span class="math inline">\(y\)</span> soit inférieure ou égale à sa médiane est de 50%; la médiane est donc un <em>quantile</em> associé à une probabilité cumulative de 0.5. Les quantiles autres que la médiane sont aussi des statistiques robustes, bien que leur point de rupture soit moins élevé. Par exemple, un quantile associé à une probabilité de 0.1 ou 0.9 a un point de rupture correspondant à 10% de valeurs extrêmes.</p>
 <p>Plutôt que de modéliser la moyenne d’une variable réponse en fonction de prédicteurs, la régression quantile modélise un ou plusieurs quantiles de la réponse en fonction des mêmes prédicteurs. Il peut donc s’agir d’une méthode de régression robuste si on remplace la moyenne par la médiane, mais la régression quantile a d’autres utilités:</p>
@@ -681,7 +654,7 @@ head(qpred)</code></pre>
 <pre><code>## Smoothing formula not specified. Using: y ~ x</code></pre>
 <p><img src="04-Regression_robuste_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
-<div id="resume" class="section level1">
+<div id="résumé" class="section level1">
 <h1>Résumé</h1>
 <ul>
 <li><p>La moyenne et la variance sont des statistiques sensibles aux valeurs extrêmes.</p></li>
@@ -691,7 +664,7 @@ head(qpred)</code></pre>
 <li><p>La régression quantile modélise l’effet d’un prédicteur sur différents quantiles de la distribution de la réponse.</p></li>
 </ul>
 </div>
-<div id="references" class="section level1">
+<div id="références" class="section level1">
 <h1>Références</h1>
 <ul>
 <li><p>Cade, B.S. et Noon, B.R. (2003) A gentle introduction to quantile regression for ecologists. <em>Frontiers in Ecology and the Environment</em> 1: 412–420.</p></li>
@@ -717,6 +690,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

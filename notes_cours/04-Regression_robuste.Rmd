@@ -13,6 +13,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
+theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Introduction
@@ -59,7 +61,7 @@ Nous avons vu que la valeur de la moyenne est sensible à l'ajout de valeurs ext
 Dans le graphique ci-dessous, la courbe verte représente une distribution normale centrée réduite, $y \sim N(0, 1)$. La courbe orange représente le mélange de deux distributions: 95% des observations proviennent de la distribution $N(0, 1)$ et 5% proviennent d'une distribution avec un écart-type plus grand: $N(0, 5)$. Ce mélange représente le cas où la plupart des observations suivent une distribution normale, sauf une petite fraction dont les valeurs sont plus extrêmes qu'attendu. Sur une échelle linéaire de la densité de probabilité $f(y)$ (à gauche), les deux distributions apparaissent très semblables. Sur une échelle logarithmique (à droite), on voit clairement que les valeurs extrêmes sont beaucoup plus probables pour la distribution de mélange (ex.: environ 30 fois plus probable d'obtenir $y = -4$ ou $y = 4$).
 
 ```{r, echo = FALSE}
-p1 <- ggplot(NULL, aes(x = c(-4, 4))) +
+p1 <- ggplot(NULL) + xlim(-4, 4) +
     stat_function(fun = dnorm, geom = "line", color = "#1b9e77", size = 1) +
     stat_function(fun = function(x) 0.95*dnorm(x, 0 ,1) + 0.05*dnorm(x, 0, 5), geom = "line", color = "#d95f02", size = 1)
     
@@ -160,7 +162,7 @@ ggplot(Animals2, aes(x = body, y = brain)) +
     scale_y_log10()
 ```
 
-Tous les animaux dans ce jeu de données sont des mammifères, excepté trois qui sont des dinosaures. Il s'agit des trois observations avec la masse corporelle la plus grande, mais donc la masse du cerveau se retrouve sous la tendance générale. 
+Tous les animaux dans ce jeu de données sont des mammifères, excepté trois qui sont des dinosaures. Il s'agit des trois observations avec la masse corporelle la plus grande, mais dont la masse du cerveau se retrouve sous la tendance générale. 
 
 Dans une analyse statistique, les valeurs aberrantes (*outliers*) peuvent être exclues si nous avons des informations indépendantes indiquant que les mesures sont incorrectes, ou qu'elles proviennent d'une population différente du reste des observations. Puisqu'il est raisonnable de croire que la relation allométrique diffère entre les mammifères et les dinosaures, il serait justifié d'exclure ces derniers avant d'effectuer la régression. Pour les besoins du cours, nous supposerons qu'il n'y a pas de raison *a priori* d'exclure ces valeurs.
 
@@ -225,12 +227,12 @@ Un des premiers M-estimateurs proposés a été celui de Huber, qui correspond a
 
 Le bipoids de Tukey (*Tukey's biweight*) est un autre M-estimateur, qui correspond aux poids $w_i = (1 - (\hat{\epsilon_i}/k)^2)^2$ si $\vert \hat{\epsilon_i} \vert \le k$ et $w_i = 0$ si $\vert \hat{\epsilon_i} \vert > k$. Cet estimateur donne donc un poids inférieur à 1 à tous les résidus; ce poids diminue avec la magnitude du résidu pour atteindre 0 si le résidu est inférieur à $-k$ ou supérieur à $k$, ce qui équivaut à exclure complètement les résidus de cette magnitude.
 
-Les valeurs de $k$ utilisées le plus couramment sont $k = 1.345\hat{\sigma}$ pour la méthode de Huber et $k = 4.685\hat{\sigma}$ pour le bipoids de Tukey. Ici, $\hat{\sigma}$ est un estimé robuste de l'écart-type des données, dont nous ne discuterons pas dans ce cours. Ces valeurs de $k$ sont choisies afin que l'erreur-type des estimés soit au plus 5% au-dessus de celle obtenue par le modèle classique si la distribution des résidus est normale.
+Les valeurs de $k$ utilisées le plus couramment sont $k = 1.345\hat{\sigma}$ pour la méthode de Huber et $k = 4.685\hat{\sigma}$ pour le bipoids de Tukey; les poids résultants sont illustrés dans le graphique ci-dessous. Ici, $\hat{\sigma}$ est un estimé robuste de l'écart-type des données, dont nous ne discuterons pas dans ce cours. Ces valeurs de $k$ sont choisies afin que l'erreur-type des estimés soit au plus 5% au-dessus de celle obtenue par le modèle classique si la distribution des résidus est normale.
 
 Le graphique ci-dessous montre le poids accordé pour chacune des deux méthodes en fonction du résidu normalisé par $\sigma$.
 
 ```{r, echo = FALSE}
-ggplot(data = NULL, aes(x = c(-6, 6))) +
+ggplot(NULL) + xlim(-6, 6) +
     labs(x = expression(epsilon[i]/sigma), y = expression(w[i])) +
     stat_function(fun = function(x) ifelse(x >= -1.345 & x <= 1.345, 1, 1.345/abs(x)), geom = "line", aes(color = "Huber"), size = 1) +
     stat_function(fun = function(x) ifelse(x>= -4.685 & x <= 4.685, (1 - (x/4.685)^2)^2, 0), geom = "line", aes(color = "Tukey"), size = 1) +
@@ -297,7 +299,7 @@ Même à variance égale, la distribution $t$ contient plus de valeurs extrêmes
 Voici par exemple le graphique des distributions $t$ à 3 et 6 degrés de liberté, comparées à une distribution normale centrée réduite. Sur l'échelle logarithmique, on voit que les résidus à $\pm 4$ sont environ 100 fois plus probables pour la distribution $t$ à 3 degrés de liberté que pour la distribution normale.
 
 ```{r, echo = FALSE}
-p_t_norm <- ggplot(data = NULL, aes(x = c(-4, 4))) +
+p_t_norm <- ggplot(NULL) + xlim(-4, 4) +
     labs(x = "y", y = "f(y)") +
     stat_function(fun = dnorm, geom = "line", aes(color = "Normale"), size = 1) +
     stat_function(fun = dt, args = list(df = 3), geom = "line", aes(color = "t(df=3)"), size = 1) +

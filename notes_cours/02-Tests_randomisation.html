@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -307,18 +272,18 @@ div.tocify {
 </ul>
 </div>
 </div>
-<div id="tests-dhypothese" class="section level1">
+<div id="tests-dhypothèse" class="section level1">
 <h1>Tests d’hypothèse</h1>
 <p>Un test d’hypothèse statistique vise à déterminer si une variation observée dans un échantillon de données est compatible avec un modèle “par défaut” (l’hypothèse nulle), ou si les observations sont si improbables selon cette hypothèse nulle qu’elle doit être rejetée.</p>
-<div id="exemple-moyenne-comparee-a-une-valeur-de-reference" class="section level2">
+<div id="exemple-moyenne-comparée-à-une-valeur-de-référence" class="section level2">
 <h2>Exemple: Moyenne comparée à une valeur de référence</h2>
 <p>Supposons qu’une théorie nous indique que la moyenne d’une variable <span class="math inline">\(x\)</span> dans une population serait égale à une valeur de référence <span class="math inline">\(\mu_0\)</span>. Nous échantillonnons <span class="math inline">\(n\)</span> valeurs de cette variable dans la population; la moyenne de l’échantillon est <span class="math inline">\(\bar{x}\)</span> et son écart-type est <span class="math inline">\(s\)</span>.</p>
 <p>Si nous pouvons supposer que <span class="math inline">\(\bar{x}\)</span> suit une distribution normale, alors la différence entre <span class="math inline">\(\bar{x}\)</span> et la moyenne de la population <span class="math inline">\(\mu\)</span>, divisée par l’erreur type de <span class="math inline">\(\bar{x}\)</span> (soit <span class="math inline">\(s / \sqrt{n}\)</span>), suit une distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n - 1\)</span> degrés de liberté.</p>
 <p><span class="math display">\[t_{n-1} = \frac{\bar{x} - \mu}{s / \sqrt{n}}\]</span></p>
-<p>Dans ce cas, une fois <span class="math inline">\(\bar{x}\)</span> et <span class="math inline">\(s\)</span> calculés, la distribution <span class="math inline">\(t\)</span> nous indique quelle est la probabilité, si l’hypothèse nulle <span class="math inline">\(\mu\)</span> = <span class="math inline">\(\mu_0\)</span> est exacte, d’obtenir une valeur de <span class="math inline">\(\bar{x}\)</span> aussi extrême ou plus extrême que celle calculée à partir de cet échantillon.</p>
+<p>Dans ce cas, une fois <span class="math inline">\(\bar{x}\)</span> et <span class="math inline">\(s\)</span> calculés, la distribution <span class="math inline">\(t\)</span> nous indique quelle est la probabilité, si l’hypothèse nulle <span class="math inline">\(\mu\)</span> = <span class="math inline">\(\mu_0\)</span> est exacte, d’obtenir une valeur de <span class="math inline">\(\bar{x}\)</span> aussi loin où plus loin de <span class="math inline">\(\mu_0\)</span> que celle calculée à partir de cet échantillon.</p>
 <p>Par exemple, supposons que <span class="math inline">\(\mu_0 = 1\)</span>, <span class="math inline">\(n = 9\)</span>, <span class="math inline">\(\bar{x} = 4\)</span> et <span class="math inline">\(s = 5\)</span>. Dans ce cas, <span class="math inline">\(t = (4 - 1) / (5/3) = 1.8\)</span> si l’hypothèse nulle est vraie. La probabilité d’observer une déviation aussi grande si <span class="math inline">\(\mu = \mu_0\)</span> est donnée par l’aire sous la courbe de la distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n - 1 = 8\)</span> degrés de liberté, pour <span class="math inline">\(t &gt; 1.8\)</span> ou <span class="math inline">\(t &lt; -1.8\)</span>:</p>
 <pre class="r"><code>t_obs &lt;- 1.8
-ggplot(NULL, aes(x = seq(-4, 4, 0.1))) +
+ggplot(NULL) + xlim(-4, 4) +
     labs(x = &quot;t&quot;, y = &quot;p(t)&quot;) +
     stat_function(fun = function(x) dt(x, df = 8)) +
     stat_function(fun = function(x) ifelse(abs(x) &gt; t_obs, dt(x, df = 8), NA), geom = &quot;area&quot;, fill = &quot;#d3492a&quot;) +
@@ -331,7 +296,7 @@ ggplot(NULL, aes(x = seq(-4, 4, 0.1))) +
 <p>Les deux termes de l’addition sont égaux car la distribution <span class="math inline">\(t\)</span> est symétrique. Une hypothèse nulle du type <span class="math inline">\(\mu = \mu_0\)</span> est <em>bilatérale</em> car l’alternative peut se produire dans une direction ou l’autre. Pour une hypothèse unilatérale (ex.: <span class="math inline">\(\mu \le \mu_0\)</span>), la valeur <span class="math inline">\(p\)</span> correspondrait à l’aire sous la courbe d’un seul côté.</p>
 <p>Finalement, la valeur <span class="math inline">\(p\)</span> est comparée à un seuil de signification <span class="math inline">\(\alpha\)</span> choisi avant de réaliser le test. L’hypothèse nulle est rejetée si <span class="math inline">\(p &lt; \alpha\)</span>. Le seuil de signification est donc la probabilité de rejeter l’hypothèse nulle si celle-ci est vraie. La valeur la plus couramment utilisée est <span class="math inline">\(\alpha = 0.05\)</span>.</p>
 </div>
-<div id="elements-dun-test-dhypothese" class="section level2">
+<div id="éléments-dun-test-dhypothèse" class="section level2">
 <h2>Éléments d’un test d’hypothèse</h2>
 <p>À partir d’une hypothèse nulle donnée, la construction d’un test statistique requiert trois principaux éléments:</p>
 <ul>
@@ -413,7 +378,7 @@ head(cover_perm)</code></pre>
     geom_boxplot()</code></pre>
 <p><img src="02-Tests_randomisation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
-<div id="test-de-randomisation-pour-une-difference-entre-moyennes" class="section level2">
+<div id="test-de-randomisation-pour-une-différence-entre-moyennes" class="section level2">
 <h2>Test de randomisation pour une différence entre moyennes</h2>
 <p>Pour les données observées, les sites remouillés ont une couverture moyenne supérieure d’environ 16 points de pourcentage par rapport aux sites drainés.</p>
 <pre class="r"><code>diff_obs &lt;- mean(cover2$sphcover[cover2$habitat == &quot;Re&quot;]) -
@@ -493,18 +458,18 @@ ggplot(NULL, aes(x = diff_boot_res$t)) +
 <p>Par exemple, si l’intervalle de confiance à 95% pour la différence des moyennes exclut 0, nous savons que la valeur <span class="math inline">\(p\)</span> associée à l’hypothèse selon laquelle cette différence est zéro est inférieure à 0.05. Cependant, l’intervalle de confiance du bootstrap ne nous permet pas d’obtenir la valeur <span class="math inline">\(p\)</span> précise pour un test donné. D’autre part, si un test de randomisation nous permet de rejeter l’hypothèse nulle, il n’est pas facile de déduire l’intervalle de confiance pour la valeur du paramètre à partir de ce test.</p>
 <p>Finalement, il existe des tests statistiques ou l’hypothèse nulle ne peut pas être représentée par une randomisation. Par exemple, lorsqu’on compare la moyenne d’un seul groupe à une valeur de référence, il n’y a rien à randomiser. Dans ce cas, on peut tout de même obtenir un intervalle de confiance avec le bootstrap et vérifier s’il inclut la valeur de référence.</p>
 </div>
-<div id="randomisation-et-anova-a-un-facteur" class="section level1">
+<div id="randomisation-et-anova-à-un-facteur" class="section level1">
 <h1>Randomisation et ANOVA à un facteur</h1>
-<div id="modele-danova-a-un-facteur" class="section level2">
+<div id="modèle-danova-à-un-facteur" class="section level2">
 <h2>Modèle d’ANOVA à un facteur</h2>
 <p>Supposons que nous mesurons la variable <span class="math inline">\(y\)</span> pour <span class="math inline">\(m\)</span> groupes comprenant chacun <span class="math inline">\(n\)</span> observations. Le modèle d’ANOVA à un facteur suppose que <span class="math inline">\(y_{ik}\)</span>, l’observation <span class="math inline">\(k\)</span> du groupe <span class="math inline">\(i\)</span> est la somme de trois termes: la moyenne générale de la population <span class="math inline">\(\mu\)</span>, l’écart <span class="math inline">\(\alpha_i\)</span> entre la moyenne du groupe <span class="math inline">\(i\)</span> et la moyenne génréale, puis un résidu <span class="math inline">\(\epsilon_{ik}\)</span>.</p>
 <p><span class="math display">\[y_{ik} = \mu + \alpha_i + \epsilon_{ik}\]</span></p>
 <p>En particulier, les résidus suivent une distribution normale de même variance (indépendamment du groupe).</p>
 <p><span class="math display">\[\epsilon_{ik} \sim N(0, \sigma)\]</span></p>
 <p>Pour ce modèle, l’hypothèse nulle est que la moyenne de tous les groupes est identique, i.e. tous les <span class="math inline">\(\alpha_i\)</span> sont 0.</p>
-<p>Notons par <span class="math inline">\(\bar{y}\)</span> la moyenne des générale des observations et par <span class="math inline">\(\bar{y_i}\)</span> la moyenne des observations du groupe <span class="math inline">\(i\)</span>. On peut décomposer la somme des écarts au carré entre les observations et la moyenne générale (<em>SST</em>) en deux parties: une partie due aux écarts entre les moyennes des groupes et la moyenne générale (<em>SSA</em>) et une partie due aux écarts entre les observations et la moyenne de leur groupe (<em>SSE</em>).</p>
+<p>Notons par <span class="math inline">\(\bar{y}\)</span> la moyenne générale des observations et par <span class="math inline">\(\bar{y_i}\)</span> la moyenne des observations du groupe <span class="math inline">\(i\)</span>. On peut décomposer la somme des écarts au carré entre les observations et la moyenne générale (<em>SST</em>) en deux parties: une partie due aux écarts entre les moyennes des groupes et la moyenne générale (<em>SSA</em>) et une partie due aux écarts entre les observations et la moyenne de leur groupe (<em>SSE</em>).</p>
 <p><span class="math display">\[SST = SSA + SSE\]</span> <span class="math display">\[\sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2 = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2 + \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2\]</span></p>
-<p>En divisant <em>SSA</em> et <em>SSE</em> par le nombre de degrés de libertés appropriés (soit <span class="math inline">\(m-1\)</span> pour les écarts entre groupes, <span class="math inline">\(m(n-1)\)</span> pour les écarts entre observations d’un même groupe), on obtient les écarts moyens <em>MSA</em> et <em>MSE</em>, que nous pouvons considérer comme des variances intra-groupe et inter-groupe, respectivement. La statistique <span class="math inline">\(F\)</span> correspond au ratio <em>MSA/MSE</em>. Plus <span class="math inline">\(F\)</span> est élevée, plus la variance inter-groupe est importante comparée à la variance intra-groupe.</p>
+<p>En divisant <em>SSA</em> et <em>SSE</em> par le nombre de degrés de libertés appropriés (soit <span class="math inline">\(m-1\)</span> pour les écarts entre groupes, <span class="math inline">\(m(n-1)\)</span> pour les écarts entre observations d’un même groupe), on obtient les écarts moyens <em>MSA</em> et <em>MSE</em>, que nous pouvons considérer comme des variances inter-groupe et intra-groupe, respectivement. La statistique <span class="math inline">\(F\)</span> correspond au ratio <em>MSA/MSE</em>. Plus <span class="math inline">\(F\)</span> est élevée, plus la variance inter-groupe est importante comparée à la variance intra-groupe.</p>
 <table style="width:100%;">
 <colgroup>
 <col width="5%" />
@@ -582,14 +547,14 @@ f_null &lt;- replicate(nperm, f_perm())</code></pre>
 <pre class="r"><code>(sum(f_null &gt;= f_obs) + 1) / (nperm + 1)</code></pre>
 <pre><code>## [1] 1e-04</code></pre>
 </div>
-<div id="anova-pour-une-reponse-multivariee" class="section level2">
+<div id="anova-pour-une-réponse-multivariée" class="section level2">
 <h2>ANOVA pour une réponse multivariée</h2>
 <p>Le modèle d’ANOVA se généralise au cas où la réponse <span class="math inline">\(y\)</span> est multivariée; par exemple, si on souhaite comparer la composition de la végétation (mesures d’abondance de plusieurs espèces) sur des sites ayant subi différents traitements.</p>
 <p>Après avoir choisi une mesure de distance appropriée pour caractériser le niveau de dissimilarité entre les compositions de deux sites, on calcule la distance carrée moyenne entre (i) les sites ayant reçu le même traitement et (ii) les sites ayant reçu différents traitements. Ces deux statistiques sont l’équivalent de la <em>MSE</em> et de la <em>MSA</em>, respectivement, donc leur ratio est analogue à la statistique <span class="math inline">\(F\)</span>. Comme dans le cas univarié, nous pouvons calculer la valeur <span class="math inline">\(p\)</span> de cette statistique par un test de randomisation des traitements, l’hypothèse nulle étant que les traitements n’ont aucun effet sur la composition multivariée.</p>
 <p>Cette méthode connue sous le nom de PERMANOVA (pour <em>permutational multivariate analysis of variance</em>) est implémentée dans plusieurs logiciels, incluant le package R <em>vegan</em> (fonction <code>adonis</code>) et le logiciel commercial PRIMER.</p>
 </div>
 </div>
-<div id="regression-lineaire-simple" class="section level1">
+<div id="régression-linéaire-simple" class="section level1">
 <h1>Régression linéaire simple</h1>
 <p>Le jeu de données <a href="../donnees/environment.csv">environment.csv</a> (tiré du manuel de Beckerman et Petchey, <em>Getting started with R: An introduction for biologists</em>) inclut des mesures de biomasse racinaire (<em>biomass</em>, en g/m<span class="math inline">\(^2\)</span>) pour 10 sites en fonction de l’altitude (en m), de la température (en degrés C) et de la précipitation annuelle (<em>rainfall</em>, en m).</p>
 <pre class="r"><code>enviro &lt;- read.csv(&quot;../donnees/environment.csv&quot;)</code></pre>
@@ -632,7 +597,7 @@ rain_null &lt;- replicate(nperm, rain_cor())</code></pre>
 <pre><code>## [1] 0.0388</code></pre>
 <p>Ici, la valeur <span class="math inline">\(p\)</span> obtenue par le test de randomisation est très semblable à celle du modèle linéaire classique ci-dessus <span class="math inline">\((p = 0.034)\)</span>.</p>
 </div>
-<div id="modeles-incluant-des-predicteurs-multiples" class="section level1">
+<div id="modèles-incluant-des-prédicteurs-multiples" class="section level1">
 <h1>Modèles incluant des prédicteurs multiples</h1>
 <p>Jusqu’à maintenant, nous avons considéré les tests de randomisation pour des modèles avec une seule variable prédictrice (numérique ou catégorielle). La distribution de la statistique, selon l’hypothèse nulle où le prédicteur n’a aucun effet, peut être obtenue en permutant aléatoirement les valeurs du prédicteur. Cette permutation a pour effet de “détruire” toute corrélation existante entre la réponse et le prédicteur.</p>
 <p>La situation se complique lorsque nous voulons tester l’absence d’effet d’un prédicteur dans un modèle comportant plusieurs prédicteurs. Par exemple, considérons le cas où <span class="math inline">\(y\)</span> est une fonction linéaire de <span class="math inline">\(x\)</span> et <span class="math inline">\(w\)</span>:</p>
@@ -650,17 +615,17 @@ rain_null &lt;- replicate(nperm, rain_cor())</code></pre>
 lmperm(biomass ~ temperature + rainfall, data = enviro)</code></pre>
 <pre><code>## Table of marginal t-test of the betas
 ## Permutation test using freedman_lane to handle nuisance variables and 5000 permutations.
-##             Estimate Std. Error t value parametric Pr(&gt;|t|)
-## (Intercept)   525.28     97.247  5.4015            0.001007
-## temperature   -22.32      4.423 -5.0465            0.001486
-## rainfall      -29.51     44.449 -0.6639            0.528029
-##             permutation Pr(&lt;t) permutation Pr(&gt;t) permutation Pr(&gt;|t|)
-## (Intercept)                                                           
-## temperature             0.0030             0.9972               0.0030
-## rainfall                0.2678             0.7324               0.5264</code></pre>
+##             Estimate Std. Error t value parametric Pr(&gt;|t|) permutation Pr(&lt;t)
+## (Intercept)   525.28     97.247  5.4015            0.001007                   
+## temperature   -22.32      4.423 -5.0465            0.001486             0.0030
+## rainfall      -29.51     44.449 -0.6639            0.528029             0.2678
+##             permutation Pr(&gt;t) permutation Pr(&gt;|t|)
+## (Intercept)                                        
+## temperature             0.9972               0.0030
+## rainfall                0.7324               0.5264</code></pre>
 <p>Le tableau de résultats montre à la fois la valeur <span class="math inline">\(p\)</span> pour le test paramétrique standard (bilatéral), ainsi que les valeurs <span class="math inline">\(p\)</span> unilatérales et bilatérale obtenues par randomisation. Dans ce cas-ci, il y a peu de différences entre le test de randomisation bilatéral (dernière colonne) et les tests paramétriques.</p>
 </div>
-<div id="resume" class="section level1">
+<div id="résumé" class="section level1">
 <h1>Résumé</h1>
 <ul>
 <li><p>Les tests de randomisation offrent une alternative non-paramétrique à plusieurs tests d’hypothèse classique, lorsque l’hypothèse nulle représente l’absence d’effet d’un prédicteur sur une réponse donnée.</p></li>
@@ -669,7 +634,7 @@ lmperm(biomass ~ temperature + rainfall, data = enviro)</code></pre>
 <li><p>Le package <em>permuco</em> dans R permet d’effectuer un test de randomisation pour chaque prédicteur d’un modèle linéaire multiple ou d’une ANOVA à plusieurs facteurs.</p></li>
 </ul>
 </div>
-<div id="reference" class="section level1">
+<div id="référence" class="section level1">
 <h1>Référence</h1>
 <p>Anderson, M.J. (2001) Permutation tests for univariate or multivariate analysis of variance and regression. <em>Canadian Journal of Fisheries and Aquatic Sciences</em> 58: 626-639.</p>
 </div>
@@ -692,6 +657,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

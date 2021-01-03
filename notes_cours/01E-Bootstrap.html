@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>The bootstrap method</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">The bootstrap method</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Statistical inference aims to obtain knowledge about a population (any set of entities) from variables measured in a sample of that population. For example, suppose we want to determine the mean age of trees in a forest (a parameter of the population) from the mean age of 30 randomly selected individuals (a statistic). For some statistics, theory allows us to directly obtain the estimate along with its margin of error: for example, we know that the mean of a sample follows an approximately normal distribution centered on the mean of the population.</p>
+<p>However, we are often interested in statistics for which the distribution is unknown. For this type of problem, <strong>resampling</strong> methods are versatile strategies for assigning a standard error and a confidence interval to an estimate. These methods are based on the distribution of the observed data, with minimal additional assumptions. In this class, we will look more specifically at the <strong>bootstrap</strong> method.</p>
+<div id="contents" class="section level2">
+<h2>Contents</h2>
+<ul>
+<li><p>Review of concepts related to parameter estimation: bias, standard error and confidence interval.</p></li>
+<li><p>Monte Carlo methods: estimating the properties of a distribution by simulating samples of it.</p></li>
+<li><p>The bootstrap principle: resampling a sample.</p></li>
+<li><p>Calculation of the bias, variance and confidence intervals from the bootstrap.</p></li>
+<li><p>Application of the bootstrap to regression parameters.</p></li>
+</ul>
+</div>
+</div>
+<div id="parameter-estimation" class="section level1">
+<h1>Parameter estimation</h1>
+<p>The histogram below represents the diameter at breast height (DBH) of 90 eastern hemlock trees inventoried at a site in Kejimkujik National Park in Nova Scotia (source: Parks Canada open data). Only trees with a DBH <span class="math inline">\(\ge\)</span> 10 cm were included.</p>
+<pre class="r"><code># Load data
+pruche &lt;- read.csv(&quot;../donnees/pruche.csv&quot;, stringsAsFactors = FALSE)
+
+# Choose a single site and create a histograme of the DBH
+pruche_bd &lt;- filter(pruche, site == &quot;BD&quot;)
+ggplot(pruche_bd, aes(x = dhp)) + 
+    labs(x = &quot;DBH (cm)&quot;, y = &quot;Frequency&quot;) +
+    geom_histogram(col = &quot;white&quot;, fill = &quot;#d3492a&quot;) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="01E-Bootstrap_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>From a statistical point of view, the DBH of a randomly selected tree in a population is a random <strong>variable</strong>; let’s call this variable <span class="math inline">\(x\)</span>.</p>
+<p>The <strong>distribution</strong> of <span class="math inline">\(x\)</span> is a function that, for any range of values of <span class="math inline">\(x\)</span> <span class="math inline">\((x_1 &lt; x &lt; x_2)\)</span>, gives the probability that an observation of <span class="math inline">\(x\)</span> falls within that range.</p>
+<p>The characteristics of a probability distribution are represented by <strong>parameters</strong> such as the mean <span class="math inline">\(\mu\)</span>, the variance <span class="math inline">\(\sigma^2\)</span> and the standard deviation <span class="math inline">\(\sigma = \sqrt{\sigma^2}\)</span>. These parameters are not directly observable.</p>
+<p>On the other hand, a <strong>statistic</strong> is a function calculated from the observed data. An estimator is a statistic used to estimate the value of a parameter. For example, the mean <span class="math inline">\(\bar{x}\)</span> and the variance <span class="math inline">\(s^2\)</span> of a sample of <span class="math inline">\(n\)</span> observations <span class="math inline">\((x_1, x_2, ..., x_n)\)</span> are estimators for the parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma^2\)</span>:</p>
+<p><span class="math display">\[\hat{\mu} = \bar{x} = \frac{1}{n} \sum_{i = 1}^{n} x_i\]</span></p>
+<p><span class="math display">\[\hat{\sigma^2} = s^2 = \frac{1}{n - 1} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2  \]</span></p>
+<p>More generally, if <span class="math inline">\(\theta\)</span> represents some parameter, its estimator is denoted <span class="math inline">\(\hat{\theta}\)</span>.</p>
+<div id="properties-of-estimators" class="section level2">
+<h2>Properties of estimators</h2>
+<p>The estimator of a parameter is itself a random variable, with a distribution defined with respect to all possible samples in a population. In particular, we can define its mean <span class="math inline">\(\bar{\hat{\theta}}\)</span> and its variance <span class="math inline">\(\sigma^2_{\hat{\theta}}\)</span>.</p>
+<p>The <strong>bias</strong> of an estimator is the difference between its mean value and the real value of the parameter.</p>
+<p><span class="math display">\[ B = \bar{\hat{\theta}} - \theta \]</span></p>
+<p>If the bias is 0, the estimator is unbiased. For example, the <span class="math inline">\(\bar{x}\)</span> and <span class="math inline">\(s^2\)</span> estimators defined above are unbiased, but the variance estimator with <span class="math inline">\(n\)</span> in the denominator (rather than <span class="math inline">\(n - 1\)</span>) has a negative bias; on average, it underestimates the true variance of the population.</p>
+<p>The standard deviation of an estimator is specifically named **standard error*, so as not to confuse it with the standard deviation of individual measurements. For the estimator of the mean <span class="math inline">\(\bar{x}\)</span>, this standard error is equal to:</p>
+<p><span class="math display">\[ \sigma_{\bar{x}} = \frac{\sigma}{\sqrt{n}} \]</span></p>
+<p>where <span class="math inline">\(\sigma\)</span> is the standard deviation of the individual measurements and <span class="math inline">\(n\)</span> is the sample size. This standard error can be estimated by replacing <span class="math inline">\(\sigma\)</span> (usually unknown) with the sample standard deviation <span class="math inline">\(s\)</span>.</p>
+<p>For the example of the DBH of a sample of 90 hemlocks seen above, we get <span class="math inline">\(\bar{x} = 24.5\)</span>, <span class="math inline">\(s = 17.8\)</span>, and <span class="math inline">\(s_{\bar{x}} = 1.9\)</span>.</p>
+</div>
+<div id="confidence-interval" class="section level2">
+<h2>Confidence interval</h2>
+<p>In the case of the estimation of the mean <span class="math inline">\(\mu\)</span>, the central limit theorem tells us that with a large enough sample, the distribution of <span class="math inline">\(\bar{x}\)</span> is very close to a normal distribution of mean <span class="math inline">\(\mu\)</span> and standard deviation <span class="math inline">\(\sigma_{\bar{x}}\)</span>, even if the individual observations are not normally distributed (as in our example). By knowing this theoretical distribution, we can determine the probability that <span class="math inline">\(\bar{x}\)</span> measured on a sample is at a certain distance from <span class="math inline">\(\mu\)</span>.</p>
+<p>For example, suppose that <span class="math inline">\(\mu = 20\)</span> and <span class="math inline">\(\sigma_ {\bar{x}} = 2\)</span>. The graph below shows the probability distribution of <span class="math inline">\(\bar{x}\)</span>. By removing the 2.5% of extreme values on each side of this distribution, we obtain an interval (in red) in which <span class="math inline">\(\bar{x}\)</span> is found for 95% of the possible samples.</p>
+<p><img src="01E-Bootstrap_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>For a normal distribution, we know that this 95% interval has a width of 1.96 standard errors on each side of <span class="math inline">\(\mu\)</span>.</p>
+<p><span class="math display">\[ \left(- 1.96 \frac{\sigma}{\sqrt{n}} \le \bar{x} - \mu \le 1.96 \frac{\sigma}{\sqrt{n}} \right)\]</span></p>
+<p>Therefore, if our assumption that <span class="math inline">\(\bar{x}\)</span> follows a normal distribution is correct, we know that for 95% of the samples, the <span class="math inline">\(\bar{x}\)</span> estimator is within 1.96 standard errors of <span class="math inline">\(\mu\)</span>. This means that if we define an interval of 1.96 standard errors around the estimated mean <span class="math inline">\(\bar{x}\)</span>, then in 95% of the cases, this interval will contain the value of the <span class="math inline">\(\mu\)</span> parameter.</p>
+<p><span class="math display">\[ \left(\bar{x} - 1.96 \frac{\sigma}{\sqrt{n}}, \bar{x} + 1.96 \frac{\sigma}{\sqrt{n}} \right)\]</span></p>
+<p>This interval is named <em>95% confidence interval</em> for <span class="math inline">\(\mu\)</span>.</p>
+<p><em>Note</em>: In practice, we do not know <span class="math inline">\(\sigma\)</span>, so we must replace this value by its estimate <span class="math inline">\(s\)</span>, then replace the quantiles of the normal distribution (<span class="math inline">\(\pm 1.96\)</span>) by those of the <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(n-1\)</span> degrees of freedom.</p>
+</div>
+<div id="interpretation-of-the-confidence-interval" class="section level2">
+<h2>Interpretation of the confidence interval</h2>
+<p>The method used to produce a 95% confidence interval means that, if the assumed statistical model is correct, the statement that the interval contains <span class="math inline">\(\mu\)</span> will be correct in 95% of the cases; for 5% of the possible samples, we will be unlucky enough to get a <span class="math inline">\(\bar{x}\)</span> further from <span class="math inline">\(\mu\)</span>.</p>
+<p>The statement that “the mean has a 95% chance of being contained in the interval” is not strictly accurate and can be confusing, since it suggests that <span class="math inline">\(\mu\)</span> is a random variable, which is not the case in the theory presented here. The confidence level (95%) is a property of the estimator and the sampling design, not of the estimated parameter. The confidence interval obtained for a specific sample contains or does not contain <span class="math inline">\(\mu\)</span>.</p>
+</div>
+</div>
+<div id="monte-carlo-methods" class="section level1">
+<h1>Monte Carlo methods</h1>
+<p>Monte Carlo methods (or Monte Carlo simulations) take their name from the famous gambling city. Used in several domains, it is difficult to provide a single definition for them. For this course, we will consider them as a general strategy to estimate the properties of a statistic by simulating random draws. It is a kind of “virtual sampling”.</p>
+<p>The popularity of these methods is due to the ability of computers to quickly generate a large quantity of random numbers (in fact, pseudo-random numbers, as we will see later). Thus, it is possible to approximate statistical properties that are difficult to compute from exact formulas. The error due to the approximation of a distribution by a virtual sample can be reduced by increasing the number of simulated runs.</p>
+<p>For example, suppose we want to calculate the standard error of the median of a sample size <span class="math inline">\(n = 20\)</span>, where the variable follows a normal distribution of known mean and standard deviation. In the R code below, the distribution of this statistic can be estimated by simulating 1000 samples.</p>
+<pre class="r"><code># Number of samples to simulate
+R &lt;- 1000 
+    
+# n observations
+# mean m, standard deviation s
+med_norm &lt;- function(n, m, s) {
+  ech &lt;- rnorm(n, m, s)
+  median(ech)
+}
+
+med &lt;- replicate(R, med_norm(20, 5, 2))
+
+ggplot(NULL, aes(x = med)) + 
+    labs(x = &quot;Median&quot;, y = &quot;Frequency&quot;) +
+    geom_histogram(col = &quot;white&quot;, fill = &quot;#b3452c&quot;) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="01E-Bootstrap_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>The <code>replicate(R, expr)</code> function tells R to repeat <em>R</em> times the evaluation of the expression <em>expr</em>. In the example, <code>rnorm</code> performs a draw of <em>n</em> observations of a normal distribution with parameters <em>m</em> and <em>s</em>, then <code>median</code> calculates the median of this sample. The result <code>med</code> is a vector of length <em>R</em> that contains the median value of each replicate. This vector is an approximation of the distribution of the statistic of interest (median of 20 observations of a normal distribution). From these values, we can then estimate the properties of the statistic such as its bias or standard error.</p>
+<p>The graph below shows the estimated bias and standard error of the same statistic (median of <span class="math inline">\(n = 20\)</span> observations with <span class="math inline">\(\mu = 5\)</span> and <span class="math inline">\(\sigma = 2\)</span>) as we increase the number of simulated samples in two different Monte Carlo simulations. Each simulation produces different values, but the bias and the standard error converge as long as the number of replicates <em>R</em> is sufficiently large. The results are never completely accurate. In this case, both simulations show a slight positive bias, even though we know from theoretical results that this statistic is not biased.</p>
+<p><img src="01E-Bootstrap_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>These convergence graphs help determine how many replicates are sufficient for the Monte Carlo method to give a sufficiently accurate estimate. The number of replicates required varies according to the distribution of the data and the statistic to be estimated.</p>
+<div id="pseudo-random-numbers" class="section level2">
+<h2>Pseudo-random numbers</h2>
+<p>A pseudo-random number generator (used by functions such as <code>rnorm</code>) is an algorithm producing a sequence of values which, although perfectly determined by its initial value, is very difficult to distinguish from a random draw. The initial value supplied to the algorithm is called a <em>seed</em>. By default, this value is chosen by R according to the computer’s internal clock.</p>
+<p>We can also manually specify the seed at the beginning of a script with the function <code>set.seed(N)</code>, where <code>N</code> is an arbitrary integer. In this case, the sequence of generated numbers will be the same for each execution of the script, which can be useful if one wants to reproduce exactly the results of an analysis, or debug a script including random draws.</p>
+<pre class="r"><code>rnorm(5)</code></pre>
+<pre><code>## [1] -0.01702545  0.03844598  0.53606785  0.18343607 -2.01285543</code></pre>
+<pre class="r"><code>set.seed(82)
+rnorm(5)</code></pre>
+<pre><code>## [1] -1.2195343  0.3033129 -0.3304770 -1.4031843  0.2212113</code></pre>
+<pre class="r"><code>set.seed(82)
+rnorm(5)</code></pre>
+<pre><code>## [1] -1.2195343  0.3033129 -0.3304770 -1.4031843  0.2212113</code></pre>
+</div>
+<div id="applications-in-this-course" class="section level2">
+<h2>Applications in this course</h2>
+<p>Many of the techniques presented in this course are based on Monte Carlo simulations:</p>
+<ul>
+<li><p>resampling techniques (such as the bootstrap);</p></li>
+<li><p>hypothesis tests based on the randomization of data;</p></li>
+<li><p>calculation of the uncertainty of mixed model predictions;</p></li>
+<li><p>parameter estimation in hierarchical Bayesian models.</p></li>
+</ul>
+</div>
+</div>
+<div id="the-bootstrap-principle" class="section level1">
+<h1>The bootstrap principle</h1>
+<p>In the previous section, we saw that it is possible to approximate the distribution of a statistic by simulating the sampling process. However, that method requires that we assume a certain probability distribution for that process.</p>
+<p>What if we cannot assume the original data was drawn from a normal or other known distribution? Let’s take the example from the beginning of the class, where 90 trees had their DBH measured. Here are the summary statistics for this sample. Note that although, in principle, the inventory is limited to trees with a DBH <span class="math inline">\(\ge\)</span> 10 cm, the sample includes trees with diameters slightly below the threshold.</p>
+<pre class="r"><code>dhp &lt;- pruche_bd$dhp
+summary(dhp)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    8.80   10.10   14.60   24.47   32.83   71.00</code></pre>
+<p>How can we define a standard error or confidence interval for the median DBH of the sample (14.6 cm)?</p>
+<p>According to the <strong>bootstrap</strong> principle, if we cannot assume a distribution for a random variable, then the observed sample is our best approximation of the distribution of the variable in the population. This method therefore proposes to estimate the properties of statistics by <em>resampling</em> the observed sample.</p>
+<p>If the original sample has <span class="math inline">\(n\)</span> observations, a bootstrap sample is obtained by resampling <span class="math inline">\(n\)</span> items from the original sample. Since we sample <em>with replacement</em>, each original observation can have 0, 1, or more copies in the bootstrap sample.</p>
+<p>For example, here is an original sample of 10 values of a variable:</p>
+<pre><code>## 10 23 37 43 49 57 61 79 88 92</code></pre>
+<p>and three bootstrap samples drawn from it:</p>
+<pre><code>## 10 10 37 43 57 88 88 88 92 92 
+## 23 37 37 49 57 61 79 79 88 88 
+## 23 23 37 37 43 43 49 57 61 92</code></pre>
+<p>Let us consider a parameter <span class="math inline">\(\theta\)</span> and its estimator <span class="math inline">\(\hat{\theta}\)</span>; <span class="math inline">\(\hat{\theta}_0\)</span> denotes its value for the observed sample. In our example above, <span class="math inline">\(\hat{\theta}_0\)</span> is the median DBH of the sample and <span class="math inline">\(\theta\)</span> is the median DBH of the population (all hemlocks with a DBH <span class="math inline">\(\ge\)</span> 10 cm on this site).</p>
+<p>The value of the statistic for a bootstrap sample is noted <span class="math inline">\(\hat{\theta}^*\)</span>. According to the bootstrap principle, the distribution of <span class="math inline">\(\hat{\theta}^*\)</span> relative to <span class="math inline">\(\hat{\theta}_0\)</span> approximates the distribution of <span class="math inline">\(\hat{\theta}\)</span> relative to <span class="math inline">\(\theta\)</span>.</p>
+<p>In particular, the standard error of the estimator is given by the standard deviation of <span class="math inline">\(\hat{\theta}^*\)</span>, while its bias corresponds to <span class="math inline">\(\bar{\hat{\theta}^*} - \hat{\theta}_0\)</span>.</p>
+<div id="bootstrapping-in-r" class="section level2">
+<h2>Bootstrapping in R</h2>
+<p>The <strong>boot</strong> package included with R simplifies the application of the bootstrap. The <code>boot</code> function of this package automatically calculates a given statistic on a series of bootstrap samples of the original data.</p>
+<pre class="r"><code>library(boot)
+
+med_boot &lt;- function(x, i) median(x[i])
+
+boot_res &lt;- boot(dhp, med_boot, R = 10000)</code></pre>
+<p>The first argument of <code>boot</code> indicates the data to be resampled (the <code>dhp</code> vector) and the second argument is a function describing the statistic to be computed. It is important to specify this function with two arguments: the first one will receive the data, the second one will receive a vector of indices obtained by resampling. The <code>boot</code> function generates a random vector of indices for each bootstrap sample, and then calls the specified function. In the example, our function calculates the median of the <span class="math inline">\(x\)</span> elements chosen by the indices in <span class="math inline">\(i\)</span>.</p>
+<p>Finally, the <code>R</code> argument of <code>boot</code> indicates the number of bootstrap samples to simulate.</p>
+<p>The result of the function, <code>boot_res</code>, contains several elements. The most important is <code>boot_res$t</code>, which gives the values of the statistic for each bootstrap sample, while <code>boot_res$t0</code> gives its value for the original sample (corresponding to the dotted line in the graph below).</p>
+<pre class="r"><code>boot_hist &lt;- ggplot(NULL, aes(x = boot_res$t)) + 
+    labs(x = &quot;Median DBH (cm)&quot;, y = &quot;Frequency&quot;) +
+    geom_histogram(col = &quot;white&quot;) +
+    geom_vline(xintercept = boot_res$t0, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;) +
+    scale_y_continuous(expand = c(0, 0))
+boot_hist</code></pre>
+<p><img src="01E-Bootstrap_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>From the distribution obtained, we can estimate the bias and standard error of the median DBH of the sample.</p>
+<pre class="r"><code># Bias
+mean(boot_res$t) - boot_res$t0</code></pre>
+<pre><code>## [1] 1.105005</code></pre>
+<pre class="r"><code># Standard error
+sd(boot_res$t)</code></pre>
+<pre><code>## [1] 4.032191</code></pre>
+</div>
+<div id="points-to-consider-when-applying-the-bootstrap" class="section level2">
+<h2>Points to consider when applying the bootstrap</h2>
+<div id="validity-of-the-bootstrap" class="section level3">
+<h3>Validity of the bootstrap</h3>
+<p>Although the bootstrap does not require the data to follow a precise statistical distribution, this does not mean that the method makes no assumptions. In particular, the resampling must be representative of how the original sample was obtained.</p>
+<p>For the basic method presented here, it is assumed that the observations were drawn independently and randomly from the entire population (simple random sampling).</p>
+<p>For a stratified sample, the bootstrap must be stratified in the same way. The <code>strata</code> argument of the <code>boot</code> function allows us to specify the stratum corresponding to each observation. In this case, the resampling is done separately in each stratum.</p>
+</div>
+<div id="sources-of-error-and-number-of-samples" class="section level3">
+<h3>Sources of error and number of samples</h3>
+<p>The bootstrap method involves two sources of error: a statistical error and a numerical error.</p>
+<p>The statistical error is related to the original sampling, which is never fully representative of the population. As with all methods of statistical inference, this error is smaller for a larger sample size, although some sources of error can induce systematic bias.</p>
+<p>The numerical error is related to resampling; as in other Monte Carlo methods, this error can be reduced by increasing the number of simulated samples.</p>
+<p>It is recommended to simulate at least 1000 bootstrap samples, but it is often easy to generate more, as in our example. In general, it should be possible to reduce the numerical error until it is negligible compared to the statistical error. However, the number of bootstrap samples required can be very high in special cases, such as when the statistic is sensitive to a few extreme values in the sample.</p>
+</div>
+<div id="bias-correction" class="section level3">
+<h3>Bias correction</h3>
+<p>According to the bootstrap principle, the difference between the mean of the bootstrap estimates and the original estimate (<span class="math inline">\(\bar{\hat{\theta}^*} - \hat{\theta}_0\)</span>) approximates the bias of the estimator (<span class="math inline">\(\hat{\theta} - \theta\)</span>).</p>
+<p>In the above example, <span class="math inline">\(\bar{\hat{\theta}^*}\)</span> = 15.7 cm and <span class="math inline">\(\hat{\theta}_0\)</span> = 14.6 cm, for a positive bias of 1.1 cm. In this case, a better estimate of the population parameter could be obtained by subtracting the bias from the original estimate: 14.6 cm - 1.1 cm = 13.5 cm. However, the magnitude of the bias may vary depending on the value of the parameter <span class="math inline">\(\theta\)</span>. In this case, the simple correction presented here may produce erroneous results. This problem becomes more important for very skewed distributions.</p>
+</div>
+</div>
+</div>
+<div id="bootstrap-confidence-intervals" class="section level1">
+<h1>Bootstrap confidence intervals</h1>
+<p>The <code>boot.ci</code> function calculates different types of confidence intervals from the bootstrap results. If the confidence level is not specified, the function chooses 95% by default.</p>
+<p>Here are the intervals calculated for our example of the median DBH of 90 hemlocks. The differences between these methods are explained below.</p>
+<pre class="r"><code>boot.ci(boot_res)</code></pre>
+<pre><code>## Warning in boot.ci(boot_res): bootstrap variances needed for studentized
+## intervals</code></pre>
+<pre><code>## BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
+## Based on 10000 bootstrap replicates
+## 
+## CALL : 
+## boot.ci(boot.out = boot_res)
+## 
+## Intervals : 
+## Level      Normal              Basic         
+## 95%   ( 5.59, 21.40 )   ( 2.50, 18.05 )  
+## 
+## Level     Percentile            BCa          
+## 95%   (11.15, 26.70 )   (11.00, 26.55 )  
+## Calculations and Intervals on Original Scale</code></pre>
+<div id="normal-interval" class="section level3">
+<h3>Normal interval</h3>
+<p>This method calculates the interval from the quantiles of the <span class="math inline">\(t\)</span> distribution, as if <span class="math inline">\(\hat{\theta}\)</span> followed a normal distribution. For example, the 95% confidence interval is given by:</p>
+<p><span class="math display">\[(\hat{\theta}_0 + t_{(n-1)0.025} s_{\hat{\theta}}, \hat{\theta_0} + t_{(n-1)0.975} s_{\hat{\theta}})\]</span></p>
+<p>where <span class="math inline">\(s_{\hat{\theta}}\)</span> is the standard error estimated by the bootstrap, <span class="math inline">\(n\)</span> is the sample size and <span class="math inline">\(t_{(n-1)q}\)</span> is the quantile <span class="math inline">\(q\)</span> of the <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(n - 1\)</span> degrees of freedom.</p>
+<p>Since the bootstrap is often used when the statistic cannot be assumed to follow a normal distribution, the normal interval has limited usefulness. In our example, the lower limit (5.59 cm) is unrealistic, being below the minimum DBH of sampled trees.</p>
+</div>
+<div id="percentile-interval" class="section level3">
+<h3>Percentile interval</h3>
+<p>The percentile interval is estimated directly from the appropriate quantiles of the bootstrap distribution. For example, the 95% interval uses the 2.5% and 97.5% quantiles of the <span class="math inline">\(\hat{\theta}^*\)</span> distribution:</p>
+<p><span class="math display">\[ (\hat{\theta}^*_{0.025}, \hat{\theta}^*_{0.975}) \]</span></p>
+</div>
+<div id="basic-interval" class="section level3">
+<h3>Basic interval</h3>
+<p>The basic interval uses the quantiles of the difference <span class="math inline">\(\hat{\theta}^* - \hat{\theta}_0\)</span>. For example, a 95% interval for that difference is given by:</p>
+<p><span class="math display">\[ (\hat{\theta}^*_{0.025} - \hat{\theta}_0 \le \hat{\theta}^* - \hat{\theta}_0 \le \hat{\theta}^*_{0.975} - \hat{\theta}_0) \]</span></p>
+<p>Based on the principle that the distribution of <span class="math inline">\(\hat{\theta}^* - \hat{\theta}_0\)</span> approximates the distribution of <span class="math inline">\(\hat{\theta} - \theta\)</span>, the confidence interval for <span class="math inline">\(\theta\)</span> is given by:</p>
+<p><span class="math display">\[ \left( (\hat{\theta}_0 - (\hat{\theta}^*_{0.975} - \hat{\theta}_0), \hat{\theta}_0 - (\hat{\theta}^*_{0.025} - \hat{\theta}_0) \right) \]</span></p>
+<p>or by simplifying:</p>
+<p><span class="math display">\[ (2\hat{\theta}_0 - \hat{\theta}^*_{0.975}, 2\hat{\theta}_0 - \hat{\theta}^*_{0.025}) \]</span></p>
+<p>Why is the position of the quantiles inverted compared with the bootstrap distribution? It is easier to explain this method with an example. For our DBH data, the 95% interval of <span class="math inline">\(\hat{\theta}^* - \hat{\theta}_0\)</span> is (11.15 - 14.6, 26.7 - 14.6) = (-3.45, 12.1). Transposing this relation to the difference <span class="math inline">\(\hat{\theta} - \theta\)</span>, it seems that <span class="math inline">\(\hat{\theta}\)</span> can underestimate <span class="math inline">\(\theta\)</span> up to 3.45 cm or overestimate it up to 12.1 cm. In other words, the interval for <span class="math inline">\(\theta\)</span> would be (14.6 - 12.1, 14.6 + 3.45), which corresponds to the basic interval obtained in R (2.50, 18.05).</p>
+<p>The basic interval and the percentile interval differ when the distribution of <span class="math inline">\(\hat{\theta}^*\)</span> is skewed, as is the case here. The basic interval, unlike the percentile interval, implicitly performs a correction of the bias.</p>
+<p>While the principle seems reasonable, the basic interval is not realistic in our example, since the lower limit (2.5 cm) is well below the sampling threshold for the DBH. The calculation does not take into account the fact that the distribution of <span class="math inline">\((\hat{\theta} - \theta)\)</span> depends on the value of <span class="math inline">\(\hat{\theta}\)</span> itself, so a simple transposition of the interval is not optimal.</p>
+</div>
+<div id="studentized-interval" class="section level3">
+<h3>Studentized interval</h3>
+<p>The studentized interval is based on the same principle as the basic interval, but the difference <span class="math inline">\(\hat{\theta}^* - \hat{\theta}_0\)</span> is normalized by the standard deviation of <span class="math inline">\(\hat{\theta}^*\)</span>:</p>
+<p><span class="math display">\[ t^* = \frac{\hat{\theta}^* - \hat{\theta}}{s_{\hat{\theta}^*}} \]</span></p>
+<p>This is the same transformation used to calculate Student’s <span class="math inline">\(t\)</span> statistic from a normally distributed variable, hence the name of the interval.</p>
+<p>The studentized interval corrects one of the shortcomings of the basic interval, taking into account the fact that the standard error of <span class="math inline">\(\hat{\theta}\)</span> is not constant.</p>
+<p>This interval is not included in our example. R warns us that the computation of the studentized interval requires an estimate of the bootstrap variances <span class="math inline">\(s_{\hat{\theta}^*}\)</span>. This variance must be estimated for each value of <span class="math inline">\(\hat{\theta}^*\)</span>. This can be done by performing a second bootstrap of each bootstrap sample, but there are cheaper alternatives from a computational point of view.</p>
+</div>
+<div id="bias-corrected-and-accelerated-interval-bca" class="section level3">
+<h3>Bias-corrected and accelerated interval (BCa)</h3>
+<p>The last interval calculated by <code>boot.ci</code> is the BCa (bias-corrected and accelerated) interval. This interval is similar to the percentile interval, except that instead of choosing fixed quantiles (e.g. 2.5% and 97.5% for a 95% interval), the BCa method chooses different quantiles taking into account the bias and asymmetry of the distribution. We will not discuss the details of this calculation in this course. For our example, the BCa interval is very close to the percentile interval, with a slight downward shift.</p>
+<p>The BCa interval and the studentized interval are the two most accurate methods in theory. Since it ultimately chooses quantiles of the <span class="math inline">\(\hat{\theta}^*\)</span> distribution rather than a transformation of <span class="math inline">\(\hat{\theta}^*\)</span>, the BCa interval will never exceed the range of the observed data, which may be an advantage; in our example, it ensures that the bounds of the interval constitute possible DBH values for this inventory.</p>
+<p>The BCa interval is the most recommended in practice, but also requires more bootstrap samples to be estimated correctly. It can be numerically unstable in some cases, so it is advisable to repeat the bootstrap and increase the number of samples if necessary.</p>
+</div>
+</div>
+<div id="applying-the-bootstrap-to-a-regression" class="section level1">
+<h1>Applying the bootstrap to a regression</h1>
+<p>Suppose we fit a linear regression to a data set containing a response variable <span class="math inline">\(y\)</span> and predictor variables <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>.</p>
+<table>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(y\)</span></th>
+<th><span class="math inline">\(x_1\)</span></th>
+<th><span class="math inline">\(x_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>21</td>
+<td>0.5</td>
+<td>15</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td>0.6</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>39</td>
+<td>1.7</td>
+<td>12</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td>0.8</td>
+<td>17</td>
+</tr>
+<tr class="odd">
+<td>37</td>
+<td>0.9</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p>If the assumptions of the linear model are not fully respected (e.g.: non-normally distributed residuals, presence of extreme values), the theoretical confidence intervals of the coefficients, based on the <span class="math inline">\(t\)</span> distribution, will be inaccurate and most often too optimistic. In this case, the bootstrap allows us to obtain more realistic confidence intervals.</p>
+<p>To apply the bootstrap to a regression, we can resample either the observations or the residuals of the model. We compare these two strategies below.</p>
+<div id="resampling-the-observations" class="section level2">
+<h2>Resampling the observations</h2>
+<p>If the rows in the dataset represent individuals that were randomly and independently sampled from the population, then we can create bootstrap samples by sampling with replacement from these rows. For example, here are the first rows of a sample obtained from the previous table, where the 2nd observation has been selected twice while the 4th observation is absent.</p>
+<table>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(y\)</span></th>
+<th><span class="math inline">\(x_1\)</span></th>
+<th><span class="math inline">\(x_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>21</td>
+<td>0.5</td>
+<td>15</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td>0.6</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>27</td>
+<td>0.6</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>39</td>
+<td>1.7</td>
+<td>12</td>
+</tr>
+<tr class="odd">
+<td>37</td>
+<td>0.9</td>
+<td>13</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p>We then just need to estimate the model’s coefficients for each bootstrap sample.</p>
+</div>
+<div id="resampling-the-residuals" class="section level2">
+<h2>Resampling the residuals</h2>
+<p>In this approach, we first fit the regression model to the data, which allows us to express the response <span class="math inline">\(y\)</span> as the sum of a mean response <span class="math inline">\(\hat{y}\)</span> determined by the predictors and a random residual <span class="math inline">\(\hat{epsilon}\)</span>:</p>
+<p><span class="math display">\[y = \hat{\beta_0} + \hat{\beta_1} x_1 + \hat{\beta_2} x_2 + \hat{\epsilon} = \hat{y} + \hat{\epsilon}\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(y\)</span></th>
+<th><span class="math inline">\(x_1\)</span></th>
+<th><span class="math inline">\(x_2\)</span></th>
+<th><span class="math inline">\(\hat{y}\)</span></th>
+<th><span class="math inline">\(\hat{\epsilon}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>21</td>
+<td>0.5</td>
+<td>15</td>
+<td>25.3</td>
+<td>-4.3</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td>0.6</td>
+<td>10</td>
+<td>26.2</td>
+<td>0.8</td>
+</tr>
+<tr class="odd">
+<td>39</td>
+<td>1.7</td>
+<td>12</td>
+<td>41.0</td>
+<td>-2.0</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td>0.8</td>
+<td>17</td>
+<td>29.9</td>
+<td>0.1</td>
+</tr>
+<tr class="odd">
+<td>37</td>
+<td>0.9</td>
+<td>13</td>
+<td>31.3</td>
+<td>5.7</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p>Then, we resample only the residuals <span class="math inline">\(\hat{\epsilon}\)</span>, then add these residuals to the <span class="math inline">\(\hat{y}\)</span> to get the bootstrap sample of <span class="math inline">\(y\)</span>.</p>
+<table>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(y\)</span></th>
+<th><span class="math inline">\(x_1\)</span></th>
+<th><span class="math inline">\(x_2\)</span></th>
+<th><span class="math inline">\(\hat{y}\)</span></th>
+<th><span class="math inline">\(\hat{\epsilon}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>23.2</strong></td>
+<td>0.5</td>
+<td>15</td>
+<td>25.3</td>
+<td><strong>-2.1</strong></td>
+</tr>
+<tr class="even">
+<td><strong>22.9</strong></td>
+<td>0.6</td>
+<td>10</td>
+<td>26.2</td>
+<td><strong>-3.3</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>45.1</strong></td>
+<td>1.7</td>
+<td>12</td>
+<td>41.0</td>
+<td><strong>4.1</strong></td>
+</tr>
+<tr class="even">
+<td><strong>33.3</strong></td>
+<td>0.8</td>
+<td>17</td>
+<td>29.9</td>
+<td><strong>3.4</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>33.2</strong></td>
+<td>0.9</td>
+<td>13</td>
+<td>31.3</td>
+<td><strong>1.9</strong></td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p>As before, the model is adjusted for each bootstrap sample according to the new values of the response and the predictors (the latter remain the same in this case).</p>
+<p>Confidence intervals based on this method tend to be narrower than those based on resampling the observations. However, the validity of this approach requires that certain criteria be met. Predictor values must be fixed (which is often the case for an experimental design) and the regression model must accurately represent the relationship between predictors and response. The residuals do not need to follow a particular distribution (e.g. normal), but they should be independent and follow the same distribution. In particular, residuals cannot be resampled if their variance is not homogeneous.</p>
+</div>
+<div id="parametric-bootstrap" class="section level2">
+<h2>Parametric bootstrap</h2>
+<p>The bootstrap technique seen in this class is said to be <em>non-parametric</em> because it does not require a parametric statistical model of the observations.</p>
+<p>The <em>parametric bootstrap</em> is a method where the bootstrap samples are not drawn from the original data, but simulated from the parametric model fitted to the data. This method is therefore more similar to the Monte Carlo simulation presented above. It is applied when we can assume that the data come from a precise distribution, but we do not know the distribution of the statistic of interest.</p>
+</div>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<ul>
+<li><p>Monte Carlo methods allow us to approximate the distribution of a statistic from simulations.</p></li>
+<li><p>The (non-parametric) bootstrap is a resampling technique: virtual samples are created by sampling with replacement from the values in the observed sample.</p></li>
+<li><p>The distribution of an estimator for these virtual samples, relative to its value calculated for the original sample, is used to approximate the distribution of the estimator relative to the value of the parameter in the population. From this distribution, we can determine the bias, variance and confidence interval of this estimator.</p></li>
+<li><p>The resampling must be representative of how the original sample was obtained.</p></li>
+<li><p>To apply the bootstrap to regression parameter estimation, resampling of observations and resampling of residuals are two accepted methods; the choice of one or the other depends on the assumptions that can be made in a particular case.</p></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
