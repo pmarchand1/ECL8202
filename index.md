@@ -14,3 +14,5 @@ title: ECL8202 - Analyses des données complexes
 ## Exercices
 
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01R-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
+
+Labo évalué: [Tests de randomisation et bootstrap](labos/E02-Tests_randomisation.html) ([PDF](labos/E02-Tests_randomisation.pdf)) - Données: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_plots.csv](donnees/portal_plots.csv)
