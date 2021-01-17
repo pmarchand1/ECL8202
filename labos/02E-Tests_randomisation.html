@@ -11,7 +11,7 @@
 
 
 
-<title>Tests de randomisation</title>
+<title>Randomization tests</title>
 
 <script src="libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -176,12 +176,12 @@ summary {
 
 
 
-<h1 class="title toc-ignore">Tests de randomisation</h1>
+<h1 class="title toc-ignore">Randomization tests</h1>
 
 </div>
 
 
-<p>Le fichier <a href="../donnees/sablefish.csv">sablefish.csv</a> contient des données de Kimura (1988) sur le nombre de prises de charbonnier par unité d’effort (<em>catch</em>) dans quatre localités d’Alaska (<em>location</em>) pour chacune des six années entre 1978 et 1983.</p>
+<p>The file <a href="../donnees/sablefish.csv">sablefish.csv</a> contains data from Kimura (1988) on the number of sablefish caught per unit effort (<em>catch</em>) in four Alaskan locations for each of the six years between 1978 and 1983.</p>
 <pre class="r"><code>sable &lt;- read.csv(&quot;../donnees/sablefish.csv&quot;)
 head(sable)</code></pre>
 <pre><code>##   year location catch
@@ -192,9 +192,9 @@ head(sable)</code></pre>
 ## 5 1979 Shumagin 0.140
 ## 6 1979 Chirikof 0.202</code></pre>
 <ol style="list-style-type: lower-alpha">
-<li><p>Ajustez un modèle linéaire des prises en fonction de la localité seulement. Quelle est l’interprétation du coefficient <code>locationYakutat</code> de ce modèle?</p></li>
-<li><p>Effectuez un test de permutation pour calculer la valeur <span class="math inline">\(p\)</span> correspondant à la différence moyenne de prises entre les localités Kodiak et Chirikof. Cette valeur est-elle cohérente avec la valeur correspondante du modèle linéaire?</p></li>
-<li><p>En utilisant le package <em>permuco</em>, déterminez la valeur <span class="math inline">\(p\)</span> pour cette même différence pour un modèle incluant les effets additifs de l’année et de la localité. <em>Note</em>: Nous considérons l’année comme une variable catégorielle ici, donc elle doit être convertie en facteur. La valeur <span class="math inline">\(p\)</span> diffère-t-elle entre le test de permutation et le modèle paramétrique?</p></li>
+<li><p>Fit a linear model of catch as a function of location only. What is the interpretation of the <code>locationYakutat</code> coefficient of this model?</p></li>
+<li><p>Perform a permutation test to calculate the <span class="math inline">\(p\)</span>-value corresponding to the mean difference in catch between the Kodiak and Chirikof locations. Is this value consistent with the corresponding value in the linear model?</p></li>
+<li><p>Using the <em>permuco</em> package, determine the <span class="math inline">\(p\)</span>-value for the same difference, for a model including the additive effects of year and location. <em>Note</em>: We consider the year as a categorical variable here, so it must be converted to a factor. Does the <span class="math inline">\(p\)</span>-value differ between the permutation test and the parametric model?</p></li>
 </ol>
 
 

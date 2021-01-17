@@ -1,0 +1,25 @@
+---
+title: "Randomization tests"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+---
+    
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The file [sablefish.csv](../donnees/sablefish.csv) contains data from Kimura (1988) on the number of sablefish caught per unit effort (*catch*) in four Alaskan locations for each of the six years between 1978 and 1983.
+
+```{r}
+sable <- read.csv("../donnees/sablefish.csv")
+head(sable)
+```
+
+a) Fit a linear model of catch as a function of location only. What is the interpretation of the `locationYakutat` coefficient of this model?
+
+b) Perform a permutation test to calculate the $p$-value corresponding to the mean difference in catch between the Kodiak and Chirikof locations. Is this value consistent with the corresponding value in the linear model?
+
+c) Using the *permuco* package, determine the $p$-value for the same difference, for a model including the additive effects of year and location. *Note*: We consider the year as a categorical variable here, so it must be converted to a factor. Does the $p$-value differ between the permutation test and the parametric model?

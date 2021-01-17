@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Randomization tests - Solutions</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Randomization tests - Solutions</h1>
+
+</div>
+
+
+<p>The file <a href="../donnees/sablefish.csv">sablefish.csv</a> contains data from Kimura (1988) on the number of sablefish caught per unit effort (<em>catch</em>) in four Alaskan locations for each of the six years between 1978 and 1983.</p>
+<pre class="r"><code>sable &lt;- read.csv(&quot;../donnees/sablefish.csv&quot;)
+head(sable)</code></pre>
+<pre><code>##   year location catch
+## 1 1978 Shumagin 0.236
+## 2 1978 Chirikof 0.204
+## 3 1978   Kodiak 0.241
+## 4 1978  Yakutat 0.232
+## 5 1979 Shumagin 0.140
+## 6 1979 Chirikof 0.202</code></pre>
+<ol style="list-style-type: lower-alpha">
+<li>Fit a linear model of catch as a function of location only. What is the interpretation of the <code>locationYakutat</code> coefficient of this model?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>lm_sable &lt;- lm(catch ~ location, sable)
+summary(lm_sable)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = catch ~ location, data = sable)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.17033 -0.09683 -0.04983  0.09471  0.24267 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       0.33100    0.05483   6.037 6.69e-06 ***
+## locationKodiak    0.06733    0.07754   0.868    0.396    
+## locationShumagin -0.03483    0.07754  -0.449    0.658    
+## locationYakutat  -0.01167    0.07754  -0.150    0.882    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.1343 on 20 degrees of freedom
+## Multiple R-squared:  0.08762,    Adjusted R-squared:  -0.04924 
+## F-statistic: 0.6402 on 3 and 20 DF,  p-value: 0.598</code></pre>
+<p>The coefficient <code>locationYakutat</code> gives the mean difference in catch between Yakutat and the reference location (Chirikof).</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Perform a permutation test to calculate the <span class="math inline">\(p\)</span>-value corresponding to the mean difference in catch between the Kodiak and Chirikof locations. Is this value consistent with the corresponding value in the linear model?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>set.seed(8202)
+
+diff_perm &lt;- function() {
+   sable_perm &lt;- sable
+   sable_perm$location &lt;- sample(sable$location) 
+   mean(sable_perm$catch[sable_perm$location == &quot;Kodiak&quot;]) -
+       mean(sable_perm$catch[sable_perm$location == &quot;Chirikof&quot;])
+}
+
+nperm &lt;- 9999
+
+diff_null &lt;- replicate(nperm, diff_perm())
+
+diff_obs &lt;- mean(sable$catch[sable$location == &quot;Kodiak&quot;]) -
+            mean(sable$catch[sable$location == &quot;Chirikof&quot;])
+
+(sum(abs(diff_null) &gt;= abs(diff_obs)) + 1) / (nperm + 1)</code></pre>
+<pre><code>## [1] 0.3823</code></pre>
+<p>Yes, the value is close to the <span class="math inline">\(p\)</span>-value for the <code>locationKodiak</code> coefficient of the model in a).</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Using the <em>permuco</em> package, determine the <span class="math inline">\(p\)</span>-value for the same difference, for a model including the additive effects of year and location. <em>Note</em>: We consider the year as a categorical variable here, so it must be converted to a factor. Does the <span class="math inline">\(p\)</span>-value differ between the permutation test and the parametric model?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(permuco)
+sable$year &lt;- as.factor(sable$year)
+lmperm(catch ~ year + location, sable)</code></pre>
+<pre><code>## Table of marginal t-test of the betas
+## Permutation test using freedman_lane to handle nuisance variables and 5000 permutations.
+##                  Estimate Std. Error t value parametric Pr(&gt;|t|)
+## (Intercept)       0.22304    0.03849  5.7944           3.537e-05
+## year1979         -0.01875    0.04445 -0.4218           6.791e-01
+## year1980          0.06300    0.04445  1.4174           1.768e-01
+## year1981          0.10725    0.04445  2.4130           2.908e-02
+## year1982          0.30450    0.04445  6.8508           5.499e-06
+## year1983          0.19175    0.04445  4.3141           6.142e-04
+## locationKodiak    0.06733    0.03629  1.8554           8.330e-02
+## locationShumagin -0.03483    0.03629 -0.9598           3.524e-01
+## locationYakutat  -0.01167    0.03629 -0.3215           7.523e-01
+##                  permutation Pr(&lt;t) permutation Pr(&gt;t) permutation Pr(&gt;|t|)
+## (Intercept)                                                                
+## year1979                     0.3286             0.6716               0.6778
+## year1980                     0.9044             0.0958               0.1828
+## year1981                     0.9890             0.0112               0.0236
+## year1982                     1.0000             0.0002               0.0002
+## year1983                     0.9996             0.0006               0.0006
+## locationKodiak               0.9642             0.0360               0.0794
+## locationShumagin             0.1824             0.8178               0.3476
+## locationYakutat              0.3836             0.6166               0.7520</code></pre>
+<p>The <span class="math inline">\(p\)</span>-value is about 0.08 for both the parametric model and the permutation test.</p>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

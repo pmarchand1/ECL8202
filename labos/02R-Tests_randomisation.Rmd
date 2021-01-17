@@ -1,5 +1,5 @@
 ---
-title: "Tests de randomisation"
+title: "Tests de randomisation - Solutions"
 output:
     html_document:
         self_contained: false
@@ -20,6 +20,49 @@ head(sable)
 
 a) Ajustez un modèle linéaire des prises en fonction de la localité seulement. Quelle est l'interprétation du coefficient `locationYakutat` de ce modèle?
 
+**Solution**
+
+```{r}
+lm_sable <- lm(catch ~ location, sable)
+summary(lm_sable)
+```
+
+Le coefficient `locationYakutat` donne la différence moyenne de `catch` entre la localité Yakutat et la localité de référence (Chirikof).
+
 b) Effectuez un test de permutation pour calculer la valeur $p$ correspondant à la différence moyenne de prises entre les localités Kodiak et Chirikof. Cette valeur est-elle cohérente avec la valeur correspondante du modèle linéaire?
 
+**Solution**
+
+```{r}
+set.seed(8202)
+
+diff_perm <- function() {
+   sable_perm <- sable
+   sable_perm$location <- sample(sable$location) 
+   mean(sable_perm$catch[sable_perm$location == "Kodiak"]) -
+       mean(sable_perm$catch[sable_perm$location == "Chirikof"])
+}
+
+nperm <- 9999
+
+diff_null <- replicate(nperm, diff_perm())
+
+diff_obs <- mean(sable$catch[sable$location == "Kodiak"]) -
+            mean(sable$catch[sable$location == "Chirikof"])
+
+(sum(abs(diff_null) >= abs(diff_obs)) + 1) / (nperm + 1)
+```
+
+Oui, la valeur s'approche de la valeur $p$ pour le coefficient `locationKodiak` du modèle en a).
+
 c) En utilisant le package *permuco*, déterminez la valeur $p$ pour cette même différence pour un modèle incluant les effets additifs de l'année et de la localité. *Note*: Nous considérons l'année comme une variable catégorielle ici, donc elle doit être convertie en facteur. La valeur $p$ diffère-t-elle entre le test de permutation et le modèle paramétrique?
+
+**Solution**
+
+```{r}
+library(permuco)
+sable$year <- as.factor(sable$year)
+lmperm(catch ~ year + location, sable)
+```
+
+La valeur $p$ est d'environ 0.08 pour le modèle paramétrique et le test de permutation.
