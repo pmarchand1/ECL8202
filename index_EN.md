@@ -10,6 +10,8 @@ title: ECL8202 - Analyses des données complexes
 
 2. [Randomization tests](notes_cours/02E-Tests_randomisation.html) ([PDF](notes_cours/02E-Tests_randomisation.pdf)) - Data: [sphagnum_cover.csv](donnees/sphagnum_cover.csv), [environment.csv](donnees/environment.csv)
 
+3. [Maximum likelihood](notes_cours/03E-Maximum_vraisemblance.html) ([PDF](notes_cours/03E-Maximum_vraisemblance.pdf)) - Données: [galapagos.csv](donnees/galapagos.csv)
+
 
 ## Exercises
 
@@ -18,3 +20,5 @@ title: ECL8202 - Analyses des données complexes
 2. [Randomization tests](labos/02E-Tests_randomisation.html) ([PDF](labos/02E-Tests_randomisation.pdf)) - Données: [sablefish.csv](donnees/sablefish.csv)
 
 Graded lab: [Randomization tests and bootstrap](labos/E02E-Tests_randomisation.html) ([PDF](labos/E02E-Tests_randomisation.pdf)) - Data: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_plots.csv](donnees/portal_plots.csv)
+
+3. [Maximum likelihood](labos/03E-Maximum_vraisemblance.html) ([PDF](labos/03E-Maximum_vraisemblance.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
