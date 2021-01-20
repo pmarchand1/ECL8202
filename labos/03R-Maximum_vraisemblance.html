@@ -11,7 +11,7 @@
 
 
 
-<title>Maximum de vraisemblance</title>
+<title>Maximum de vraisemblance - Solutions</title>
 
 <script src="libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -252,7 +252,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Maximum de vraisemblance</h1>
+<h1 class="title toc-ignore">Maximum de vraisemblance - Solutions</h1>
 
 </div>
 
@@ -282,20 +282,67 @@ head(therm)</code></pre>
 <li><p>Le nombre d’oeufs semble-t-il atteindre un maximum avec une décroissance symétrique des deux côtés de ce maximum, tel que prévu par l’équation ci-dessus?</p></li>
 <li><p>La variance entre les réplicats semble-t-elle homogène?</p></li>
 </ul>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) + 
+    geom_point()</code></pre>
+<p><img src="03R-Maximum_vraisemblance_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Le nombre d’oeufs semble atteindre un maximum autour de 25 degrés. La variance ne semble pas homogène, étant plus grande pour les températures où le nombre d’oeufs est plus grand.</p>
 <ol start="2" style="list-style-type: lower-alpha">
 <li>Pour modéliser ces données, nous utiliserons une distribution de Poisson, dont la moyenne <span class="math inline">\(\lambda\)</span> correspond au <span class="math inline">\(N\)</span> calculé selon l’équation ci-dessus.</li>
 </ol>
 <p>Pourquoi est-il préférable ici d’utiliser une distribution de Poisson plutôt qu’une distribution normale pour représenter la variation aléatoire du nombre d’oeufs autour de la valeur moyenne prédite?</p>
+<p><strong>Solution</strong></p>
+<p>Il s’agit de données de comptage (nombres entiers &gt; 0) et leur variance semble augmenter avec la moyenne, comme le prévoit la distribution de Poisson.</p>
 <ol start="3" style="list-style-type: lower-alpha">
-<li><p>Créez une fonction en R pour calculer l’opposé de la log-vraisemblance du nombre d’oeufs observé en fonction des paramètres du modèle <span class="math inline">\(N_o\)</span>, <span class="math inline">\(T_o\)</span> et <span class="math inline">\(\sigma_T\)</span>. <em>Note</em>: La fonction <code>dpois(y, lambda, log = TRUE)</code> permet de calculer le log de la probabilité d’un vecteur de données <code>y</code> suivant une distribution de Poisson avec des valeurs moyennes <code>lambda</code>.</p></li>
-<li><p>Utilisez la fonction <code>mle2</code> pour estimer les trois paramètres du modèle selon le maximum de vraisemblance.</p></li>
+<li>Créez une fonction en R pour calculer l’opposé de la log-vraisemblance du nombre d’oeufs observé en fonction des paramètres du modèle <span class="math inline">\(N_o\)</span>, <span class="math inline">\(T_o\)</span> et <span class="math inline">\(\sigma_T\)</span>. <em>Note</em>: La fonction <code>dpois(y, lambda, log = TRUE)</code> permet de calculer le log de la probabilité d’un vecteur de données <code>y</code> suivant une distribution de Poisson avec des valeurs moyennes <code>lambda</code>.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>temp_nll &lt;- function(N_o, T_o, sigma_T) {
+    mu &lt;- N_o * exp(-((therm$t-T_o)/sigma_T)^2)
+    -sum(dpois(therm$num_eggs, lambda = mu, log = TRUE))
+}</code></pre>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Utilisez la fonction <code>mle2</code> pour estimer les trois paramètres du modèle selon le maximum de vraisemblance.</li>
 </ol>
 <p>Pour ce problème, il est nécessaire de spécifier des bornes pour chaque paramètre, afin d’éviter que l’optimisateur ne s’éloigne trop des valeurs plausibles. Dans la fonction <code>mle2</code>, les bornes inférieures et supérieures sont données par les argument <code>lower</code> et <code>upper</code>, ex.: <code>mle2(..., start = list(...), lower = c(no = 1, to = 5, s_t = 1), upper = c(...)</code>. Notez que ces arguments sont spécifiés par un vecteur <code>c(...)</code> tandis que <code>start</code> (les valeurs initiales) sont spécifiées par une liste.</p>
 <p>Vous pouvez essayer différentes valeurs pour les bornes, cependant les bornes inférieures de <span class="math inline">\(N_o\)</span> et <span class="math inline">\(\sigma_T\)</span> devraient être au moins 1, la borne supérieure de <span class="math inline">\(\sigma_T\)</span> ne devrait pas trop dépasser l’étendue (max-min) des températures testées; de même, les bornes pour <span class="math inline">\(T_o\)</span> devraient être des valeurs réalistes de la température.</p>
 <p><em>Note</em>: Vous pouvez ignorer l’avertissement <em>Warning: bounds can only be used with method L-BFGS-B (or Brent)</em>. Cependant, si vous obtenez une erreur, ré-essayez en ajustant les bornes des paramètres.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(bbmle)</code></pre>
+<pre><code>## Loading required package: stats4</code></pre>
+<pre class="r"><code>res &lt;- mle2(temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 2),
+            lower = c(N_o = 1, T_o = 0, sigma_T = 1), 
+            upper = c(N_o = 1000, T_o = 50, sigma_T = 20))</code></pre>
+<pre><code>## Warning in optim(par = c(N_o = 50, T_o = 20, sigma_T = 2), fn = function (p) :
+## bounds can only be used with method L-BFGS-B (or Brent)</code></pre>
+<pre class="r"><code>res</code></pre>
+<pre><code>## 
+## Call:
+## mle2(minuslogl = temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 2), 
+##     lower = c(N_o = 1, T_o = 0, sigma_T = 1), upper = c(N_o = 1000, 
+##         T_o = 50, sigma_T = 20))
+## 
+## Coefficients:
+##        N_o        T_o    sigma_T 
+## 125.254248  23.862510   6.702089 
+## 
+## Log-likelihood: -232.92</code></pre>
 <ol start="5" style="list-style-type: lower-alpha">
-<li><p>Visualisez la vraisemblance profilée pour chacun des paramètres et calculez les intervalles de confiance à 95%. Croyez-vous que l’approximation quadratique serait bonne pour ces paramètres?</p></li>
-<li><p>Comparons maintenant les prédictions du modèle aux données.</p></li>
+<li>Visualisez la vraisemblance profilée pour chacun des paramètres et calculez les intervalles de confiance à 95%. Croyez-vous que l’approximation quadratique serait bonne pour ces paramètres?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>pro &lt;- profile(res)
+plot(pro)</code></pre>
+<p><img src="03R-Maximum_vraisemblance_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>confint(pro)</code></pre>
+<pre><code>##              2.5 %     97.5 %
+## N_o     118.725387 132.059041
+## T_o      23.643472  24.088414
+## sigma_T   6.456217   6.970186</code></pre>
+<p>L’approximation quadratique serait bonne car la vraisemblance profilée pour chaque paramètre (après transformation racine carrée) suit une droite.</p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Comparons maintenant les prédictions du modèle aux données.</li>
 </ol>
 <ul>
 <li><p>Ajoutez une colonne au jeu de données pour les prédictions moyennes du modèle (les <span class="math inline">\(\lambda\)</span> du modèle de Poisson pour chaque observation), obtenues en remplaçant les estimés du maximum de vraisemblance dans l’équation de <span class="math inline">\(N\)</span> ci-dessus.</p></li>
@@ -307,6 +354,21 @@ head(therm)</code></pre>
 <li>À ce point-ci, en plus de <code>temp</code> et <code>num_eggs</code>, votre jeu de données contient trois colonnes représentant respectivement les prédictions moyennes, ainsi que les bornes inférieures et supérieures de l’intervalle de prédiction à 95% pour chaque observation. Ajoutez la prédiction moyenne et l’intervalle au graphique de <em>num_eggs</em> vs. <em>temp</em>. Ex.: Avec <code>ggplot</code>, vous pouvez ajouter <code>geom_line(aes(y = moy))</code> au graphique pour ajouter une ligne représentant la colonne <code>moy</code> des prédictions moyennes, même chose pour les deux lignes de l’intervalle.</li>
 </ul>
 <p>À partir des résultats, pouvez-vous dire que le modèle représente bien la tendance générale des données ainsi que leur variation aléatoire autour de cette tendance?</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code># Insertion des estimés obtenus en (d)
+therm$mu &lt;- 125.3 * exp(-((therm$t-23.9)/6.7)^2)
+therm_sim &lt;- replicate(1000, rpois(36, therm$mu))
+therm$min &lt;- apply(therm_sim, 1, quantile, prob = 0.025)
+therm$max &lt;- apply(therm_sim, 1, quantile, prob = 0.975)
+
+library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) +
+    geom_point() +
+    geom_line(aes(y = mu)) +
+    geom_line(aes(y = min), linetype = &quot;dashed&quot;) +
+    geom_line(aes(y = max), linetype = &quot;dashed&quot;)</code></pre>
+<p><img src="03R-Maximum_vraisemblance_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Le modèle représente bien la tendance générale, mais sous-estime la variabilité. L’intervalle de prédiction à 95% contient à peine ~70% des observations (25/36).</p>
 </div>
 <div id="modèle-binomial-négatif" class="section level2">
 <h2>2. Modèle binomial négatif</h2>
@@ -320,10 +382,61 @@ head(therm)</code></pre>
 <li><p>Utilisez une borne inférieure de 0 pour le paramètre <code>k</code> dans <code>mle2</code>; la borne supérieure devrait être inférieure à 100.</p></li>
 <li><p>Pour simuler les données, remplacez <code>rpois</code> par <code>rnbinom</code> et spécifiez les argument <code>mu</code> (prédiction moyenne) et <code>size = 1/k</code>.</p></li>
 </ul>
+<p><strong>Solution</strong></p>
+<pre class="r"><code># Fonction de vraisemblance, estimés et intervalles
+temp_nll &lt;- function(a, s, m, k) {
+    mu &lt;- a * exp(-((therm$t-m)/s)^2)
+    -sum(dnbinom(therm$num_eggs, size = 1/k, mu = mu, log = TRUE))
+}
+
+res &lt;- mle2(temp_nll, start = list(a = 50, m = 20, s = 1, k = 1),
+            lower = c(a = 1, m = 0, s = 1, k = 0), 
+            upper = c(a = 1000, m = 50, s = 20, k = 10))
+res</code></pre>
+<pre><code>## 
+## Call:
+## mle2(minuslogl = temp_nll, start = list(a = 50, m = 20, s = 1, 
+##     k = 1), lower = c(a = 1, m = 0, s = 1, k = 0), upper = c(a = 1000, 
+##     m = 50, s = 20, k = 10))
+## 
+## Coefficients:
+##          a          s          m          k 
+## 123.188369   6.821416  23.884264   0.102698 
+## 
+## Log-likelihood: -143.93</code></pre>
+<pre class="r"><code>plot(profile(res))</code></pre>
+<p><img src="03R-Maximum_vraisemblance_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>confint(profile(res))</code></pre>
+<pre><code>##          2.5 %      97.5 %
+## a 104.20709233 147.2176826
+## s   6.33138839   7.4248342
+## m  23.37301405  24.5051418
+## k   0.05916351   0.1855639</code></pre>
+<p>La vraisemblance profilée des paramètres s’approche de l’approximation quadratique, sauf pour <span class="math inline">\(k\)</span> où elle est non-quadratique et asymétrique.</p>
+<pre class="r"><code># Prédictions selon les paramètres estimés
+therm$mu &lt;- 123.2 * exp(-((therm$t-23.9)/6.82)^2)
+therm_sim &lt;- replicate(1000, rnbinom(36, mu = therm$mu, size = 1/0.103))
+therm$min &lt;- apply(therm_sim, 1, quantile, prob = 0.025)
+therm$max &lt;- apply(therm_sim, 1, quantile, prob = 0.975)
+
+library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) +
+    geom_point() +
+    geom_line(aes(y = mu)) +
+    geom_line(aes(y = min), linetype = &quot;dashed&quot;) +
+    geom_line(aes(y = max), linetype = &quot;dashed&quot;)</code></pre>
+<p><img src="03R-Maximum_vraisemblance_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>Ici l’intervalle de prédiction à 95% contient 35/36 points (97%).</p>
 <ol start="2" style="list-style-type: lower-alpha">
-<li><p>Serait-il correct d’utiliser le test du rapport de vraisemblance pour comparer le modèle de Poisson du numéro précédent au modèle binomial négatif?</p></li>
-<li><p>Que vous répondiez oui ou non à (b), les résultats montrent-ils clairement si un modèle binomial négatif est justifié ou non (par rapport au modèle plus simple de Poisson) pour ces données?</p></li>
+<li>Serait-il correct d’utiliser le test du rapport de vraisemblance pour comparer le modèle de Poisson du numéro précédent au modèle binomial négatif?</li>
 </ol>
+<p><strong>Solution</strong></p>
+<p>Le test du rapport de vraisemblance ne s’applique pas lorsque l’hypothèse nulle correspond à une limite des valeurs possibles du paramètre. Ici, le modèle de Poisson correspond au modèle binomial négatif avec <span class="math inline">\(k = 0\)</span>, qui est à la limite des valeurs possibles pour ce paramètre.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Que vous répondiez oui ou non à (b), les résultats montrent-ils clairement si un modèle binomial négatif est justifié ou non (par rapport au modèle plus simple de Poisson) pour ces données?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<p>Oui, les prédictions du modèle sont plus en accord avec les observations et la log-vraisemblance du modèle binomial négatif (-144) est beaucoup plus élevée que celle du modèle de Poisson (-233).</p>
 </div>
 
 

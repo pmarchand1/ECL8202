@@ -1,5 +1,5 @@
 ---
-title: "Maximum de vraisemblance"
+title: "Maximum de vraisemblance - Solutions"
 output:
     html_document:
         self_contained: false
@@ -8,7 +8,7 @@ output:
         toc: true
         toc_float: true
 ---
-
+    
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -37,13 +37,36 @@ a) Produisez un graphique de *num_eggs* vs. *temp* pour ce jeu de données. En v
 
 - La variance entre les réplicats semble-t-elle homogène?
 
+**Solution**
+
+```{r}
+library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) + 
+    geom_point()
+```
+
+Le nombre d'oeufs semble atteindre un maximum autour de 25 degrés. La variance ne semble pas homogène, étant plus grande pour les températures où le nombre d'oeufs est plus grand.
+
 
 b) Pour modéliser ces données, nous utiliserons une distribution de Poisson, dont la moyenne $\lambda$ correspond au $N$ calculé selon l'équation ci-dessus.
 
 Pourquoi est-il préférable ici d'utiliser une distribution de Poisson plutôt qu'une distribution normale pour représenter la variation aléatoire du nombre d'oeufs autour de la valeur moyenne prédite?
 
+**Solution**
+
+Il s'agit de données de comptage (nombres entiers > 0) et leur variance semble augmenter avec la moyenne, comme le prévoit la distribution de Poisson.
+
 
 c) Créez une fonction en R pour calculer l'opposé de la log-vraisemblance du nombre d'oeufs observé en fonction des paramètres du modèle $N_o$, $T_o$ et $\sigma_T$. *Note*: La fonction `dpois(y, lambda, log = TRUE)` permet de calculer le log de la probabilité d'un vecteur de données `y` suivant une distribution de Poisson avec des valeurs moyennes `lambda`.
+
+**Solution**
+
+```{r}
+temp_nll <- function(N_o, T_o, sigma_T) {
+    mu <- N_o * exp(-((therm$t-T_o)/sigma_T)^2)
+    -sum(dpois(therm$num_eggs, lambda = mu, log = TRUE))
+}
+```
 
 
 d) Utilisez la fonction `mle2` pour estimer les trois paramètres du modèle selon le maximum de vraisemblance. 
@@ -54,8 +77,28 @@ Vous pouvez essayer différentes valeurs pour les bornes, cependant les bornes i
 
 *Note*: Vous pouvez ignorer l'avertissement *Warning: bounds can only be used with method L-BFGS-B (or Brent)*. Cependant, si vous obtenez une erreur, ré-essayez en ajustant les bornes des paramètres.
 
+**Solution**
+
+```{r}
+library(bbmle)
+res <- mle2(temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 2),
+            lower = c(N_o = 1, T_o = 0, sigma_T = 1), 
+            upper = c(N_o = 1000, T_o = 50, sigma_T = 20))
+res
+```
+
 
 e) Visualisez la vraisemblance profilée pour chacun des paramètres et calculez les intervalles de confiance à 95%. Croyez-vous que l'approximation quadratique serait bonne pour ces paramètres?
+
+**Solution**
+
+```{r, message = FALSE, warning = FALSE}
+pro <- profile(res)
+plot(pro)
+confint(pro)
+```
+
+L'approximation quadratique serait bonne car la vraisemblance profilée pour chaque paramètre (après transformation racine carrée) suit une droite.
 
 
 f) Comparons maintenant les prédictions du modèle aux données. 
@@ -72,12 +115,31 @@ f) Comparons maintenant les prédictions du modèle aux données.
 
 À partir des résultats, pouvez-vous dire que le modèle représente bien la tendance générale des données ainsi que leur variation aléatoire autour de cette tendance?
 
+**Solution**
+
+```{r}
+# Insertion des estimés obtenus en (d)
+therm$mu <- 125.3 * exp(-((therm$t-23.9)/6.7)^2)
+therm_sim <- replicate(1000, rpois(36, therm$mu))
+therm$min <- apply(therm_sim, 1, quantile, prob = 0.025)
+therm$max <- apply(therm_sim, 1, quantile, prob = 0.975)
+
+library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) +
+    geom_point() +
+    geom_line(aes(y = mu)) +
+    geom_line(aes(y = min), linetype = "dashed") +
+    geom_line(aes(y = max), linetype = "dashed")
+```
+
+Le modèle représente bien la tendance générale, mais sous-estime la variabilité. L'intervalle de prédiction à 95% contient à peine ~70% des observations (25/36).
+
 
 ## 2. Modèle binomial négatif
 
 a) Répétez les parties (c) à (f) du numéro précédent en utilisant une distribution binomiale négative au lieu de la distribution de Poisson pour la portion aléatoire du modèle. 
 
-*Rappel*: Dans la distribution de Poisson, la moyenne et la variance sont égales à $\lambda$. Dans la distribution binomiale négative, la moyenne est égale à $\mu$ et la variance égale à $\mu + \mu^2/\theta$. Pour ce numéro, nous utiliserons $k = 1/\theta$ comme paramètre. Si $\theta > 0$, $k$ quant à lui doit prendre une valeur supérieure ou égale à 0. Puisque la variance en fonction de $k$ est $\mu + k \mu^2$, la distribution de Poisson correspond au cas $k = 0$.
+*Rappel*: Dans la distribution de Poisson, la moyenne et la variance sont égales à $\lambda$. Dans la distribution binomiale négative, la moyenne est égale à $\mu$ et la variance égale à $\mu + \mu^2/\theta$. Pour ce numéro, nous utiliserons $k = 1/\theta$ comme paramètre. Si $\theta > 0$, $k$ quant à lui doit prendre une valeur supérieure ou égale à 0. Puisque la variance en fonction de $k$ est $\mu + k \mu^2$, la distribution de Poisson correspond au cas $k = 0$. 
 
 Voici les principaux changements à apporter pour remplacer le modèle de Poisson par le modèle binomiale négatif:
 
@@ -87,8 +149,55 @@ Voici les principaux changements à apporter pour remplacer le modèle de Poisso
 
 - Pour simuler les données, remplacez `rpois` par `rnbinom` et spécifiez les argument `mu` (prédiction moyenne) et `size = 1/k`.
 
+**Solution**
 
-b) Serait-il correct d'utiliser le test du rapport de vraisemblance pour comparer le modèle de Poisson du numéro précédent au modèle binomial négatif? 
+```{r, warning = FALSE, message = FALSE}
+# Fonction de vraisemblance, estimés et intervalles
+temp_nll <- function(a, s, m, k) {
+    mu <- a * exp(-((therm$t-m)/s)^2)
+    -sum(dnbinom(therm$num_eggs, size = 1/k, mu = mu, log = TRUE))
+}
+
+res <- mle2(temp_nll, start = list(a = 50, m = 20, s = 1, k = 1),
+            lower = c(a = 1, m = 0, s = 1, k = 0), 
+            upper = c(a = 1000, m = 50, s = 20, k = 10))
+res
+
+plot(profile(res))
+confint(profile(res))
+```
+
+La vraisemblance profilée des paramètres s'approche de l'approximation quadratique, sauf pour $k$ où elle est non-quadratique et asymétrique.
+
+```{r}
+# Prédictions selon les paramètres estimés
+therm$mu <- 123.2 * exp(-((therm$t-23.9)/6.82)^2)
+therm_sim <- replicate(1000, rnbinom(36, mu = therm$mu, size = 1/0.103))
+therm$min <- apply(therm_sim, 1, quantile, prob = 0.025)
+therm$max <- apply(therm_sim, 1, quantile, prob = 0.975)
+
+library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) +
+    geom_point() +
+    geom_line(aes(y = mu)) +
+    geom_line(aes(y = min), linetype = "dashed") +
+    geom_line(aes(y = max), linetype = "dashed")
+```
+
+Ici l'intervalle de prédiction à 95% contient 35/36 points (97%). 
+
+
+b) Serait-il correct d'utiliser le test du rapport de vraisemblance pour comparer le modèle de Poisson du numéro précédent au modèle binomial négatif?
+
+**Solution**
+
+Le test du rapport de vraisemblance ne s'applique pas lorsque l'hypothèse nulle correspond à une limite des valeurs possibles du paramètre. Ici, le modèle de Poisson correspond au modèle binomial négatif avec $k = 0$, qui est à la limite des valeurs possibles pour ce paramètre.
+
 
 c) Que vous répondiez oui ou non à (b), les résultats montrent-ils clairement si un modèle binomial négatif est justifié ou non (par rapport au modèle plus simple de Poisson) pour ces données?
+
+**Solution**
+
+Oui, les prédictions du modèle sont plus en accord avec les observations et la log-vraisemblance du modèle binomial négatif (-144) est beaucoup plus élevée que celle du modèle de Poisson (-233).
+
 
