@@ -1,6 +1,7 @@
 ---
 title: "Modèles linéaires généralisés à effets mixtes 2"
 output:
+    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -13,6 +14,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
+theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Contenu du cours
@@ -39,7 +42,7 @@ Selon cette définition, si nous avons un processus où chaque observation suit 
 La distribution binomiale négative notée $\text{NB}(\mu, \theta)$ dépend des paramètre $\mu$ (moyenne) et $\theta$ (paramètre de dispersion). La variance de la distribution est $\mu + \mu^2 / \theta$, donc un $\theta$ plus petit signifie une variance plus grande. Ci-dessous, nous comparons la distribution de Poisson avec $\lambda$ = 10 à des distributions binomiales négatives avec $\mu$ = 10 et $\theta$ = 1 ou 3.
 
 ```{r, echo = FALSE}
-ggplot(NULL, aes(x = 0:35)) +
+ggplot(data.frame(x = 0:35), aes(x = x)) +
     labs(x = "y", y = "P(y)") +
     stat_function(fun = dnbinom, args = list(mu = 10, size = 1), geom = "bar", n = 36,
                   aes(fill = "NB(10, 1)"), alpha = 0.7) +
@@ -174,6 +177,8 @@ plot(emmeans(acer_nb, ~ origin | stand), comparisons = TRUE)
 ```
 
 Dans ce graphique, l'axe horizontal `emmean` montre l'effet moyen de chaque traitement sur l'échelle du prédicteur linéaire (donc le logarithme du nombre moyen de semis). Les aires ombragées montrent l'intervalle de confiance à 95% pour chaque moyenne, tandis que les flèches rouges (obtenues en spécifiant `comparisons = TRUE` dans `plot`) indiquent quels effets sont significativement différents. La différence entre deux traitements n'est pas significative si les flèches se chevauchent.
+
+*Attention*: En spécifiant, `~ origin | stand` dans `emmeans`, on effectue une correction (de type Tukey) pour les comparaisons multiples entre les origines pour chaque type de forêt, mais on ne peut pas comparer les moyennes entre types de forêts. On pourrait spécifier `~ origin * stand` pour faire les comparaisons entre toutes les combinaisons des deux variables, mais dans ce cas les flèches seraient plus longues en raison du nombre de comparaisons supplémentaires.
 
 
 # Modèles pour les taux

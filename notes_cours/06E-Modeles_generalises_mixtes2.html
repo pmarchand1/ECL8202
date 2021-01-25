@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Generalized linear mixed models 2</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Generalized linear mixed models 2</h1>
+
+</div>
+
+
+<div id="contents" class="section level1">
+<h1>Contents</h1>
+<p>In this class, we will present different models for processing count data where the Poisson distribution does not exactly apply. In particular:</p>
+<ul>
+<li><p>overdispersed data (negative binomial model);</p></li>
+<li><p>data expressed as rates (counts per unit of time, space, etc.); and</p></li>
+<li><p>zero-inflated data.</p></li>
+</ul>
+</div>
+<div id="negative-binomial-model" class="section level1">
+<h1>Negative binomial model</h1>
+<div id="negative-binomial-distribution" class="section level2">
+<h2>Negative binomial distribution</h2>
+<p>Like the Poisson distribution, the negative binomial distribution makes it possible to represent count data, i.e. integers <span class="math inline">\(\ge 0\)</span>.</p>
+<p>Historically, the name “negative binomial” comes from the fact that this distribution represents the number of failures before obtaining a certain number of successes in a binomial experiment. However, in order to use this distribution in a regression model, a more general definition of the distribution is more appropriate.</p>
+<p>According to this definition, if we have a process where each observation follows a Poisson distribution with its own mean <span class="math inline">\(\lambda\)</span> and these <span class="math inline">\(\lambda\)</span> values vary randomly from one observation to another according to a gamma distribution, then the distribution obtained corresponds to the negative binomial distribution. In practice, we will not model this variation at two levels, but this view of the binomial distribution explains why it represents well the overdispersion of count data.</p>
+<p>The negative binomial distribution noted <span class="math inline">\(\text{NB}(\mu, \theta)\)</span> depends on the parameters <span class="math inline">\(\mu\)</span> (mean) and <span class="math inline">\(\theta\)</span>. The variance of the distribution is <span class="math inline">\(\mu + \mu^2 / \theta\)</span>, so a smaller <span class="math inline">\(\theta\)</span> means a larger variance. Below, we compare the Poisson distribution with <span class="math inline">\(\lambda\)</span> = 10 to negative binomial distributions with <span class="math inline">\(\mu\)</span> = 10 and <span class="math inline">\(\theta\)</span> = 1 or 3.</p>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>In the context of a regression model (GLM or GLMM), the mean <span class="math inline">\(\mu\)</span> is generally related to the linear predictor by a logarithmic link, as in Poisson regression.</p>
+<p><span class="math display">\[y \sim \text{NB}(\mu, \theta)\]</span></p>
+<p><span class="math display">\[\log \mu  = \beta_0 + \sum_{i=1}^m \beta_i x_i\]</span></p>
+<p>Technically, this model is a GLM only if <span class="math inline">\(\theta\)</span> is known. If we wish to estimate <span class="math inline">\(\theta\)</span> from the data, we can proceed by iteration. Starting from an initial value chosen for <span class="math inline">\(\theta\)</span>, we fit the other parameters as for a GLM, then we use the residual variance to estimate <span class="math inline">\(\theta\)</span>, and repeat these steps until the estimates converge to stable values. In R, this method is implemented by the functions <code>glm.nb</code> of the <em>MASS</em> package (for models without random effects) and <code>glmer.nb</code> of the <em>lme4</em> package (for GLMM).</p>
+</div>
+<div id="example-local-adaptation-of-maple" class="section level2">
+<h2>Example: Local adaptation of maple</h2>
+<p>The <a href="../data/acer_transplant.csv">acer_transplant.csv</a> dataset contains data from an experiment to compare the germination of sugar maple seeds from different geographic origins in three forest types (boreal, mixed and temperate).</p>
+<blockquote>
+<p>Solarik, K.A.,Messier, C., Ouimet, R., Bergeron, Y., Gravel, D. (2018). Local adaptation of trees at the range margins impact range shifts in the face of climate change. Global Ecology and Biogeography, <a href="DOI:10.1111/geb.12829" class="uri">DOI:10.1111/geb.12829</a>.</p>
+</blockquote>
+<pre class="r"><code>acer &lt;- read.csv(&quot;../donnees/acer_transplant.csv&quot;)
+str(acer)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    216 obs. of  6 variables:
+##  $ stand   : chr  &quot;Boreal&quot; &quot;Boreal&quot; &quot;Boreal&quot; &quot;Boreal&quot; ...
+##  $ site    : chr  &quot;Ashuapmushuan&quot; &quot;Ashuapmushuan&quot; &quot;Ashuapmushuan&quot; &quot;Ashuapmushuan&quot; ...
+##  $ origin  : chr  &quot;N1&quot; &quot;S1&quot; &quot;C2&quot; &quot;S2&quot; ...
+##  $ first   : num  28 0 1 0 6 ...
+##  $ second  : num  18 0 0 0 2 ...
+##  $ survival: num  0.643 0 0 0 0.333 ...</code></pre>
+<p>The treatments are therefore <em>origin</em> (original population) and <em>stand</em> (forest type). Four sites were studied in each forest type with 3 replicates per site, so we expect a random effect of <em>site</em>. Finally, the response of interest is <em>first</em>, which is the number of seedlings counted the first year after the plots were seeded.</p>
+<p>By making a histogram of the number of seedlings in all treatments combined, it appears that the dataset contains several values close to 0 as well as some very large values (&gt; 50). This could suggest over-dispersion, but it is important to assess this from the model residuals, not the raw response.</p>
+<pre class="r"><code>ggplot(acer, aes(x = first)) +
+    geom_histogram(color = &quot;white&quot;) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Here are the values of the response for each combination of an origin and a forest type. There still appears to be overdispersion.</p>
+<pre class="r"><code>ggplot(data = acer, aes(x = origin, y = first, color = stand)) +
+    geom_point(position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.4)) +
+    scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Note the use of <code>position_jitterdodge</code> in <code>ggplot</code>. The <code>dodge.width</code> part (between 0 and 1) controls the horizontal spacing between dots of different colors, while <code>jitter.width</code> controls the random horizontal movement of the dots of each color, to distinguish repeated values.</p>
+</div>
+<div id="poisson-regression" class="section level2">
+<h2>Poisson regression</h2>
+<p>We first estimate the parameters of the Poisson GLMM, including the interaction between the population of origin and forest type, as well as the random effect of the site. We also choose the BOBYQA optimizer because of a convergence problem with the default optimizer.</p>
+<pre class="r"><code>library(lme4)
+acer_p &lt;- glmer(first ~ stand * origin + (1 | site), data = acer, family = poisson,
+                control = glmerControl(optimizer = &quot;bobyqa&quot;))</code></pre>
+<p>The <span class="math inline">\(\chi^2\)</span> test shows an important and statistically significant overdispersion.</p>
+<pre class="r"><code>chi2 &lt;- sum(residuals(acer_p, &quot;pearson&quot;)^2)
+chi2 / df.residual(acer_p)</code></pre>
+<pre><code>## [1] 11.0047</code></pre>
+<pre class="r"><code>1 - pchisq(chi2, df = df.residual(acer_p))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>This overdispersion is also apparent when simulating from the fitted model to produce 95% prediction intervals, which are much too narrow compared to the observed data.</p>
+<pre class="r"><code>sim_acer_p &lt;- simulate(acer_p, nsim = 1000, re.form = NULL)
+acer_pred &lt;- mutate(acer, pred = predict(acer_p, type = &quot;response&quot;),
+                    q025 = apply(sim_acer_p, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_acer_p, 1, quantile, probs = 0.975)) %&gt;%
+    arrange(pred)
+
+ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = first))</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><em>Note</em>: In the code above, we called <code>predict</code> and <code>simulate</code> without providing a <code>newdata</code> dataset. In this case, the predictions are made from the rows of the original dataset. The function <code>arrange(pred)</code> orders the dataset according to the predicted values, which helps in visualization; for this graph, the <span class="math inline">\(x\)</span>-axis represents only the position of each row in the ordered dataset.</p>
+</div>
+<div id="negative-binomial-regression" class="section level2">
+<h2>Negative binomial regression</h2>
+<p>Here is the corresponding negative binomial model with <code>glmer.nb</code>. Note that the code is identical to the Poisson model, except for the <code>family</code> argument, which is not necessary because the <code>glmer.nb</code> function implies a negative binomial distribution.</p>
+<pre class="r"><code>acer_nb &lt;- glmer.nb(first ~ stand * origin + (1 | site), acer,
+                    control = glmerControl(optimizer = &quot;bobyqa&quot;))</code></pre>
+<p>In this model, the residuals follow the expected dispersion.</p>
+<pre class="r"><code>chi2 &lt;- sum(residuals(acer_nb, &quot;pearson&quot;)^2)
+chi2/df.residual(acer_nb)</code></pre>
+<pre><code>## [1] 1.108141</code></pre>
+<pre class="r"><code>1-pchisq(chi2, df = df.residual(acer_nb))</code></pre>
+<pre><code>## [1] 0.1428505</code></pre>
+<p>We use the same method as above to illustrate the prediction intervals for each observation in the dataset.</p>
+<pre class="r"><code>sim_acer_nb &lt;- simulate(acer_nb, nsim = 1000, re.form = NULL)
+acer_pred &lt;- mutate(acer, pred = predict(acer_nb, type = &quot;response&quot;),
+                    q025 = apply(sim_acer_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_acer_nb, 1, quantile, probs = 0.975)) %&gt;%
+    arrange(pred)
+
+ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = first))</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Knowing that the fit of the model is good, we can now inspect the coefficient estimates. Note that in the second line of the summary, <code>Negative Binomial(0.9232)</code> tells us the estimated <span class="math inline">\(\theta\)</span> value for this model (0.9232). This is a rather small <span class="math inline">\(\theta\)</span>, so the variance of the counts is large.</p>
+<pre class="r"><code>summary(acer_nb)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(0.9232)  ( log )
+## Formula: first ~ stand * origin + (1 | site)
+##    Data: acer
+## Control: glmerControl(optimizer = &quot;bobyqa&quot;)
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   1370.5   1438.0   -665.2   1330.5      196 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.9296 -0.7008 -0.3281  0.3474  4.7128 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  site   (Intercept) 0.6169   0.7854  
+## Number of obs: 216, groups:  site, 12
+## 
+## Fixed effects:
+##                         Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)               1.7753     0.5130   3.461 0.000538 ***
+## standMixed               -1.1572     0.7461  -1.551 0.120921    
+## standTemperate            1.2487     0.7163   1.743 0.081291 .  
+## originC2                  0.2932     0.4661   0.629 0.529253    
+## originN1                 -0.2226     0.4671  -0.476 0.633740    
+## originN2                  0.4228     0.4594   0.920 0.357337    
+## originS1                 -2.8949     0.6301  -4.594 4.34e-06 ***
+## originS2                 -0.6121     0.5116  -1.196 0.231533    
+## standMixed:originC2       1.5574     0.6917   2.252 0.024354 *  
+## standTemperate:originC2  -0.6146     0.6403  -0.960 0.337133    
+## standMixed:originN1       1.4179     0.6862   2.066 0.038808 *  
+## standTemperate:originN1   0.2509     0.6469   0.388 0.698078    
+## standMixed:originN2       0.3708     0.6887   0.538 0.590266    
+## standTemperate:originN2  -0.1115     0.6334  -0.176 0.860280    
+## standMixed:originS1       3.0669     0.8132   3.771 0.000162 ***
+## standTemperate:originS1   2.6444     0.7677   3.444 0.000572 ***
+## standMixed:originS2       0.6308     0.7253   0.870 0.384462    
+## standTemperate:originS2   0.4570     0.6736   0.678 0.497458    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre><code>## 
+## Correlation matrix not shown by default, as p = 18 &gt; 12.
+## Use print(x, correlation=TRUE)  or
+##     vcov(x)        if you need it</code></pre>
+<p>Since we have the interaction of two categorical predictors, the coefficients give us the differences between the values of the linear predictor (thus the log of the mean number of seedlings) between each combination of treatments and the reference values (here, <code>originC1</code> and <code>standBoreal</code>). In order to quickly compare the different treatments, the <em>emmeans</em> package can be useful. This package performs multiple comparisons, similar to the Tukey test seen for the ANOVA, but is applicable to different types of models, including GLMM.</p>
+<p>In the example below, <code>emmeans(acer_nb, ~ origin | stand)</code> tells the function to compare the mean effects of different origins within each forest type. These comparisons are displayed with the <code>plot</code> function.</p>
+<pre class="r"><code>library(emmeans)
+plot(emmeans(acer_nb, ~ origin | stand), comparisons = TRUE)</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>In this graph, the horizontal <code>emmean</code> axis shows the average effect of each treatment on the linear predictor scale (i.e. the logarithm of the average number of seedlings). The shaded areas show the 95% confidence interval for each mean, while the red arrows (obtained by specifying <code>comparisons = TRUE</code> in <code>plot</code>) indicate which effects are significantly different. The difference between two treatments is not significant if the arrows overlap.</p>
+<p><em>Note</em>: Specifying <code>~ origin | stand</code> in <code>emmeans</code> performs a correction (of the Tukey type) for multiple comparisons between origins for each forest type, but you cannot compare means between forest types. We could specify <code>~ origin * stand</code> to make comparisons between all combinations of the two variables, but in this case the arrows would be longer because of the number of additional comparisons.</p>
+</div>
+</div>
+<div id="models-for-rates" class="section level1">
+<h1>Models for rates</h1>
+<p>Suppose that we want to analyze data on the abundance (number of individuals) of a species on different plots. However, plot sizes differ, so it is expected that at the same population density, abundance will increase in proportion to plot size.</p>
+<p>In this case, the population density could be modeled directly (individuals / m<span class="math inline">\(^2\)</span>). However, this method has several drawbacks. We lose count information, which prevents us from using the Poisson or negative binomial distribution. In addition, this method would consider the presence of 3 individuals in 1 m<span class="math inline">\(^2\)</span> as equivalent to the presence of 12 individuals in 4 m<span class="math inline">\(^2\)</span>, even though these two results are not statistically equivalent due to a different sample size.</p>
+<p>A better solution is to adapt the Poisson regression model.</p>
+<p>For example, suppose that the number of individuals <span class="math inline">\(y\)</span> in a plot follows a Poisson distribution of mean <span class="math inline">\(\lambda = \rho A\)</span>, where <span class="math inline">\(\rho\)</span> is the population density and <span class="math inline">\(A\)</span> is the plot area. In this case, if we want to model <span class="math inline">\(\log \rho\)</span> according to the <span class="math inline">\(x_i\)</span> predictors:</p>
+<p><span class="math display">\[\log \rho = \beta_0 + \beta_1 x_1 + ...\]</span></p>
+<p>We can rewrite <span class="math inline">\(\rho\)</span> as the ratio <span class="math inline">\(\lambda / A\)</span> and use the properties of logarithms:</p>
+<p><span class="math display">\[\log \rho  = \log(\lambda / A) = \log \lambda - \log A \]</span></p>
+<p><span class="math display">\[\log \lambda  = \log A + \beta_0 + \beta_1 x_1 + ...\]</span></p>
+<p>Thus, the model can be represented as a Poisson regression, as long as we add a <span class="math inline">\(\log A\)</span> term, called <em>offset</em>, to the linear predictor. This term is different from the other predictors, because we do not estimate a <span class="math inline">\(\beta\)</span> coefficient. In a sense, it is a predictor with a coefficient set to 1, to express the assumption that the mean count is proportional to <span class="math inline">\(A\)</span>.</p>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>The <em>Owls</em> dataset of the <em>glmmTMB</em> package presents the results of a study on the behaviour of barn owls nestlings.</p>
+<blockquote>
+<p>Roulin et Bersier (2007) “Nestling barn owls beg more intensely in the presence of their mother than in the presence of their father.” Animal Behaviour 74: 1099-1110.</p>
+</blockquote>
+<pre class="r"><code>library(glmmTMB)
+data(Owls)
+str(Owls)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    599 obs. of  8 variables:
+##  $ Nest              : Factor w/ 27 levels &quot;AutavauxTV&quot;,&quot;Bochet&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ FoodTreatment     : Factor w/ 2 levels &quot;Deprived&quot;,&quot;Satiated&quot;: 1 2 1 1 1 1 1 2 1 2 ...
+##  $ SexParent         : Factor w/ 2 levels &quot;Female&quot;,&quot;Male&quot;: 2 2 2 2 2 2 2 1 2 1 ...
+##  $ ArrivalTime       : num  22.2 22.4 22.5 22.6 22.6 ...
+##  $ SiblingNegotiation: int  4 0 2 2 2 2 18 4 18 0 ...
+##  $ BroodSize         : int  5 5 5 5 5 5 5 5 5 5 ...
+##  $ NegPerChick       : num  0.8 0 0.4 0.4 0.4 0.4 3.6 0.8 3.6 0 ...
+##  $ logBroodSize      : num  1.61 1.61 1.61 1.61 1.61 ...</code></pre>
+<p>The response variable, <em>SiblingNegotiation</em>, represents the number of cries made by nestlings waiting for food in a given nest, as a function of their level of hunger (<em>FoodTreatment</em>), the sex of the parent out foraging (<em>SexParent</em>), and the arrival time of that parent (<em>ArrivalTime</em>). Because repeated measurements were taken on each nest, <em>Nest</em> is a random effect. Finally, since the number of nestlings (<em>BroodSize</em>) varies in each nest, this variable will be used as <em>offset</em> to model the number of calls per nestling.</p>
+<p>Here is the distribution of the response variable. Note that more than 25% of the observations are 0.</p>
+<pre class="r"><code>ggplot(Owls, aes(x = SiblingNegotiation)) +
+    geom_histogram(color = &quot;white&quot;) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>We start by fitting a Poisson GLMM with an offset:</p>
+<pre class="r"><code>owls_p &lt;- glmer(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                    (1|Nest) + offset(logBroodSize), data = Owls, family = poisson)
+
+chi2 &lt;- sum(residuals(owls_p, type = &quot;pearson&quot;)^2)
+chi2 / df.residual(owls_p)</code></pre>
+<pre><code>## [1] 5.447361</code></pre>
+<pre class="r"><code>1 - pchisq(chi2, df = df.residual(owls_p))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<p>Since the <span class="math inline">\(\chi^2\)</span> test shows important overdispersion, we then try a negative binomial model.</p>
+<pre class="r"><code>owls_nb &lt;- glmer.nb(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                        (1|Nest) + offset(logBroodSize), data = Owls)
+chi2 &lt;- sum(residuals(owls_nb, type = &quot;pearson&quot;)^2)
+chi2 / df.residual(owls_nb)</code></pre>
+<pre><code>## [1] 0.8518262</code></pre>
+<p>In this case, the coefficient of dispersion is slightly less than 1. Looking at the model summary, we note that <em>FoodTreatment</em> and <em>ArrivalTime</em> have significant effects. Note the estimate <span class="math inline">\(\theta = 0.8847\)</span> in the second row.</p>
+<pre class="r"><code>summary(owls_nb)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(0.8847)  ( log )
+## Formula: SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +  
+##     (1 | Nest) + offset(logBroodSize)
+##    Data: Owls
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   3477.5   3508.3  -1731.8   3463.5      592 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -0.9069 -0.7794 -0.2060  0.4465  5.5441 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  Nest   (Intercept) 0.1095   0.3309  
+## Number of obs: 599, groups:  Nest, 27
+## 
+## Fixed effects:
+##                                     Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                          3.50710    0.63229   5.547 2.91e-08 ***
+## FoodTreatmentSatiated               -0.76653    0.16109  -4.758 1.95e-06 ***
+## SexParentMale                       -0.01044    0.14213  -0.073    0.941    
+## ArrivalTime                         -0.11515    0.02513  -4.583 4.58e-06 ***
+## FoodTreatmentSatiated:SexParentMale  0.17349    0.20099   0.863    0.388    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) FdTrtS SxPrnM ArrvlT
+## FdTrtmntStt -0.135                     
+## SexParentMl -0.120  0.550              
+## ArrivalTime -0.979  0.011 -0.021       
+## FdTrtmS:SPM  0.109 -0.743 -0.668 -0.017</code></pre>
+<p>Here are the 95% prediction intervals for that model:</p>
+<pre class="r"><code>sim_owls_nb &lt;- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+owls_pred &lt;- mutate(Owls, pred = predict(owls_nb, type = &quot;response&quot;),
+                    q025 = apply(sim_owls_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_owls_nb, 1, quantile, probs = 0.975)) %&gt;%
+    arrange(pred)
+
+ggplot(owls_pred, aes(x = 1:nrow(owls_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = SiblingNegotiation))</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>Although the interval contains most of the data, note that it appears to be too narrow on the left side of the graph and too wide on the right (when the mean is high).</p>
+<p>Now let’s check whether the negative binomial model can reproduce the number of zeros observed in the dataset. The code below calculates for each simulation (each column of <code>sim_owls_nb</code>) the number of zeros present (<code>sum(x == 0)</code> counts 1 each time the expression <code>x == 0</code> is true). We predict a number of zeros between 90 and 125 for 95% of the model realizations.</p>
+<pre class="r"><code>nb_zeros &lt;- apply(sim_owls_nb, 2, function(x) sum(x == 0))
+c(quantile(nb_zeros, probs = 0.025), quantile(nb_zeros, probs = 0.975))</code></pre>
+<pre><code>##  2.5% 97.5% 
+##    88   125</code></pre>
+<p>In comparison, the data contain 156 zeros.</p>
+<pre class="r"><code>sum(Owls$SiblingNegotiation == 0)</code></pre>
+<pre><code>## [1] 156</code></pre>
+</div>
+</div>
+<div id="zero-inflated-models" class="section level1">
+<h1>Zero-inflated models</h1>
+<p>The previous example shows that an excess of zeros poses a different problem than overdispersion. Overdispersion produces more low and high counts compared to the expected distribution. In the presence of too many zeros, if these extra zeros were removed, we would retrieve the assumed distribution.</p>
+<p>To model a response <span class="math inline">\(y\)</span> with an excess of zeros, a two-part model is created:</p>
+<ul>
+<li><p>with a probability of <span class="math inline">\(p_0\)</span>, we have a “structural zero”, i.e. <span class="math inline">\(y = 0\)</span> for sure;</p></li>
+<li><p>with the remaining probability <span class="math inline">\((1 - p_0)\)</span>, <span class="math inline">\(y\)</span> follows a negative Poisson or binomial distribution; of course, this distribution can also occasionally produce zeros.</p></li>
+</ul>
+<p>The resulting model is called <em>zero-inflated Poisson</em> or <em>zero-inflated negative binomial</em>, depending on the distribution used for the second part.</p>
+<p>For example, a species may be completely absent from a site, which would be a structural zero (we would get a zero for each observation). If present, the number of individuals observed on a given plot varies according to a Poisson distribution, which can also produce zeros.</p>
+<p>In the zero-inflated model, the second component (counting model) generally follows a Poisson or negative binomial distribution with a log link, for example <span class="math inline">\(\log \lambda = \beta_0 + \beta_1 x_1 + ...\)</span> (Poisson)</p>
+<p>As for the probability of obtaining a structural zero, <span class="math inline">\(p_0\)</span>, it is modelled by a logit link, as in a logistic regression: <span class="math inline">\(\text{logit}(p_0) = \gamma_0 + \gamma_1 z_1 + ...\)</span>.</p>
+<p>We chose different letters to emphasize that the predictors appearing in the model for <span class="math inline">\(\lambda\)</span> and for <span class="math inline">\(p_0\)</span> are not necessarily the same. In particular, we can estimate a constant <span class="math inline">\(p_0\)</span>, independent of the predictors; in this case, only the intercept would appear in the model.</p>
+<div id="exemple" class="section level2">
+<h2>Exemple</h2>
+<p>From the <code>Owls</code> dataset seen in the previous section, we estimate again a negative binomial GLMM, this time from the <code>glmmTMB</code> function of the <em>glmmTMB</em> package. This function allows us to fit some models not included in <em>lme4</em>, including zero-inflated models. Note that <code>family = nbinom2</code> corresponds to the negative binomial distribution as seen previously.</p>
+<pre class="r"><code>owls_nb &lt;- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime + 
+                       (1|Nest) + offset(logBroodSize), family = nbinom2, data=Owls)</code></pre>
+<p>Here is now a zero-inflated version of this model. The model for <span class="math inline">\(p_0\)</span> is given by the <code>ziformula</code> argument of <code>glmmTMB</code>. In our example, <code>ziformula = ~1</code> indicates that we only estimate the intercept, so <span class="math inline">\(p_0\)</span> is constant.</p>
+<pre class="r"><code>owls_zinb &lt;- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                         (1|Nest)+offset(logBroodSize), 
+                     family = nbinom2, ziformula = ~1, data=Owls)
+summary(owls_zinb)</code></pre>
+<pre><code>##  Family: nbinom2  ( log )
+## Formula:          
+## SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +  
+##     (1 | Nest) + offset(logBroodSize)
+## Zero inflation:                      ~1
+## Data: Owls
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   3416.4   3451.5  -1700.2   3400.4      591 
+## 
+## Random effects:
+## 
+## Conditional model:
+##  Groups Name        Variance Std.Dev.
+##  Nest   (Intercept) 0.06092  0.2468  
+## Number of obs: 599, groups:  Nest, 27
+## 
+## Overdispersion parameter for nbinom2 family (): 2.31 
+## 
+## Conditional model:
+##                                     Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                          2.87588    0.49394   5.822  5.8e-09 ***
+## FoodTreatmentSatiated               -0.40500    0.13480  -3.004  0.00266 ** 
+## SexParentMale                       -0.07360    0.10255  -0.718  0.47290    
+## ArrivalTime                         -0.08294    0.01980  -4.189  2.8e-05 ***
+## FoodTreatmentSatiated:SexParentMale  0.15878    0.16235   0.978  0.32807    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Zero-inflation model:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)   -1.276      0.122  -10.46   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Note that the <span class="math inline">\(\theta\)</span> parameter of the negative binomial model is 2.31, compared to 0.89 for the <code>owls_nb</code> model. This is due to the fact that when accounting for zero-inflation separately, there isn’t as much overdispersion.</p>
+<p>The results of the <span class="math inline">\(p_0\)</span> model are given in the last section. The intercept of -1.276 is equivalent to the logit of <span class="math inline">\(p_0\)</span>. The corresponding probability can be obtained with the function <code>plogis</code>.</p>
+<pre class="r"><code>plogis(-1.276)</code></pre>
+<pre><code>## [1] 0.2182319</code></pre>
+<p>We thus have a probability of around 22% of getting a structural zero.</p>
+<p>The zero-inflated model is a better fit according to AIC.</p>
+<pre class="r"><code>AIC(owls_nb)</code></pre>
+<pre><code>## [1] 3477.534</code></pre>
+<pre class="r"><code>AIC(owls_zinb)</code></pre>
+<pre><code>## [1] 3416.383</code></pre>
+<p>We can also compare both models’ predictions on the same graph.</p>
+<pre class="r"><code>sim_owls_nb &lt;- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+sim_owls_zi &lt;- simulate(owls_zinb, nsim = 1000, re.form = NULL, newdata = Owls)
+owls_pred &lt;- mutate(Owls, pred = predict(owls_nb, type = &quot;response&quot;),
+                    q025 = apply(sim_owls_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_owls_nb, 1, quantile, probs = 0.975),
+                    pred_zi = predict(owls_zinb, type = &quot;response&quot;),
+                    q025_zi = apply(sim_owls_zi, 1, quantile, probs = 0.025),
+                    q975_zi = apply(sim_owls_zi, 1, quantile, probs = 0.975)) %&gt;%
+    arrange(pred)
+
+ggplot(owls_pred, aes(x = 1:nrow(owls_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.5, fill = &quot;#1b9e77&quot;) +
+    geom_ribbon(aes(ymin = q025_zi, ymax = q975_zi), alpha = 0.3, fill = &quot;#d95f02&quot;) +
+    geom_line(color = &quot;#1b9e77&quot;, size = 1) +
+    geom_line(aes(y = pred_zi), color = &quot;#d95f02&quot;, size = 1) +
+    geom_point(aes(y = SiblingNegotiation), alpha = 0.5)</code></pre>
+<p><img src="06E-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p>We notice that the zero-inflated model (in orange) better represents the range of the data, with the maximum of the interval higher on the left and lower on the right. Here, the data are ordered on the <span class="math inline">\(x\)</span>-axis according to the predictions of the model without zero inflation.</p>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
