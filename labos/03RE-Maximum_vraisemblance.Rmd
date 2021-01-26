@@ -120,8 +120,11 @@ From the results, can you tell whether the model represents the general trend of
 **Solution**
 
 ```{r}
-# Inserting the estimates from (d)
-therm$mu <- 125.3 * exp(-((therm$t-23.9)/6.7)^2)
+# The coef function returns the parameter values
+coef_pois <- coef(res)
+coef_pois
+
+therm$mu <- coef_pois["N_o"] * exp(-((therm$t-coef_pois["T_o"])/coef_pois["sigma_T"])^2)
 therm_sim <- replicate(1000, rpois(36, therm$mu))
 therm$min <- apply(therm_sim, 1, quantile, prob = 0.025)
 therm$max <- apply(therm_sim, 1, quantile, prob = 0.975)
@@ -154,14 +157,14 @@ Here are the main changes to be made to replace the Poisson model with the negat
 
 ```{r, warning = FALSE, message = FALSE}
 # Likelihood function, estimates and intervals
-temp_nll <- function(a, s, m, k) {
-    mu <- a * exp(-((therm$t-m)/s)^2)
+temp_nll <- function(N_o, T_o, sigma_T, k) {
+    mu <- N_o * exp(-((therm$t-T_o)/sigma_T)^2)
     -sum(dnbinom(therm$num_eggs, size = 1/k, mu = mu, log = TRUE))
 }
 
-res <- mle2(temp_nll, start = list(a = 50, m = 20, s = 1, k = 1),
-            lower = c(a = 1, m = 0, s = 1, k = 0), 
-            upper = c(a = 1000, m = 50, s = 20, k = 10))
+res <- mle2(temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 1, k = 1),
+            lower = c(N_o = 1, T_o = 0, sigma_T = 1, k = 0), 
+            upper = c(N_o = 1000, T_o = 50, sigma_T = 20, k = 10))
 res
 
 plot(profile(res))
@@ -172,8 +175,9 @@ The profile likelihood of the parameters is close to the quadratic approximation
 
 ```{r}
 # Predictions according to the parameter estimates
-therm$mu <- 123.2 * exp(-((therm$t-23.9)/6.82)^2)
-therm_sim <- replicate(1000, rnbinom(36, mu = therm$mu, size = 1/0.103))
+coef_nb <- coef(res)
+therm$mu <- coef_nb["N_o"] * exp(-((therm$t-coef_nb["T_o"])/coef_nb["sigma_T"])^2)
+therm_sim <- replicate(1000, rnbinom(36, mu = therm$mu, size = 1/coef_nb["k"]))
 therm$min <- apply(therm_sim, 1, quantile, prob = 0.025)
 therm$max <- apply(therm_sim, 1, quantile, prob = 0.975)
 

@@ -355,8 +355,12 @@ plot(pro)</code></pre>
 </ul>
 <p>À partir des résultats, pouvez-vous dire que le modèle représente bien la tendance générale des données ainsi que leur variation aléatoire autour de cette tendance?</p>
 <p><strong>Solution</strong></p>
-<pre class="r"><code># Insertion des estimés obtenus en (d)
-therm$mu &lt;- 125.3 * exp(-((therm$t-23.9)/6.7)^2)
+<pre class="r"><code># La fonction coef donne les estimés des paramètres
+coef_pois &lt;- coef(res)
+coef_pois</code></pre>
+<pre><code>##        N_o        T_o    sigma_T 
+## 125.254248  23.862510   6.702089</code></pre>
+<pre class="r"><code>therm$mu &lt;- coef_pois[&quot;N_o&quot;] * exp(-((therm$t-coef_pois[&quot;T_o&quot;])/coef_pois[&quot;sigma_T&quot;])^2)
 therm_sim &lt;- replicate(1000, rpois(36, therm$mu))
 therm$min &lt;- apply(therm_sim, 1, quantile, prob = 0.025)
 therm$max &lt;- apply(therm_sim, 1, quantile, prob = 0.975)
@@ -384,38 +388,39 @@ ggplot(therm, aes(x = temp, y = num_eggs)) +
 </ul>
 <p><strong>Solution</strong></p>
 <pre class="r"><code># Fonction de vraisemblance, estimés et intervalles
-temp_nll &lt;- function(a, s, m, k) {
-    mu &lt;- a * exp(-((therm$t-m)/s)^2)
+temp_nll &lt;- function(N_o, T_o, sigma_T, k) {
+    mu &lt;- N_o * exp(-((therm$t-T_o)/sigma_T)^2)
     -sum(dnbinom(therm$num_eggs, size = 1/k, mu = mu, log = TRUE))
 }
 
-res &lt;- mle2(temp_nll, start = list(a = 50, m = 20, s = 1, k = 1),
-            lower = c(a = 1, m = 0, s = 1, k = 0), 
-            upper = c(a = 1000, m = 50, s = 20, k = 10))
+res &lt;- mle2(temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 1, k = 1),
+            lower = c(N_o = 1, T_o = 0, sigma_T = 1, k = 0), 
+            upper = c(N_o = 1000, T_o = 50, sigma_T = 20, k = 10))
 res</code></pre>
 <pre><code>## 
 ## Call:
-## mle2(minuslogl = temp_nll, start = list(a = 50, m = 20, s = 1, 
-##     k = 1), lower = c(a = 1, m = 0, s = 1, k = 0), upper = c(a = 1000, 
-##     m = 50, s = 20, k = 10))
+## mle2(minuslogl = temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 1, 
+##     k = 1), lower = c(N_o = 1, T_o = 0, sigma_T = 1, k = 0), 
+##     upper = c(N_o = 1000, T_o = 50, sigma_T = 20, k = 10))
 ## 
 ## Coefficients:
-##          a          s          m          k 
-## 123.188369   6.821416  23.884264   0.102698 
+##        N_o        T_o    sigma_T          k 
+## 123.188369  23.884264   6.821416   0.102698 
 ## 
 ## Log-likelihood: -143.93</code></pre>
 <pre class="r"><code>plot(profile(res))</code></pre>
 <p><img src="03R-Maximum_vraisemblance_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code>confint(profile(res))</code></pre>
-<pre><code>##          2.5 %      97.5 %
-## a 104.20709233 147.2176826
-## s   6.33138839   7.4248342
-## m  23.37301405  24.5051418
-## k   0.05916351   0.1855639</code></pre>
+<pre><code>##                2.5 %      97.5 %
+## N_o     104.20709233 147.2176826
+## T_o      23.37301405  24.5051418
+## sigma_T   6.33138839   7.4248342
+## k         0.05916351   0.1855639</code></pre>
 <p>La vraisemblance profilée des paramètres s’approche de l’approximation quadratique, sauf pour <span class="math inline">\(k\)</span> où elle est non-quadratique et asymétrique.</p>
 <pre class="r"><code># Prédictions selon les paramètres estimés
-therm$mu &lt;- 123.2 * exp(-((therm$t-23.9)/6.82)^2)
-therm_sim &lt;- replicate(1000, rnbinom(36, mu = therm$mu, size = 1/0.103))
+coef_nb &lt;- coef(res)
+therm$mu &lt;- coef_nb[&quot;N_o&quot;] * exp(-((therm$t-coef_nb[&quot;T_o&quot;])/coef_nb[&quot;sigma_T&quot;])^2)
+therm_sim &lt;- replicate(1000, rnbinom(36, mu = therm$mu, size = 1/coef_nb[&quot;k&quot;]))
 therm$min &lt;- apply(therm_sim, 1, quantile, prob = 0.025)
 therm$max &lt;- apply(therm_sim, 1, quantile, prob = 0.975)
 

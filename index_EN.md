@@ -23,6 +23,6 @@ title: ECL8202 - Analyses des données complexes
 
 Graded lab: [Randomization tests and bootstrap](labos/E02E-Tests_randomisation.html) ([PDF](labos/E02E-Tests_randomisation.pdf)) - Data: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_plots.csv](donnees/portal_plots.csv)
 
-3. [Maximum likelihood](labos/03E-Maximum_vraisemblance.html) ([PDF](labos/03E-Maximum_vraisemblance.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
+3. [Maximum likelihood](labos/03RE-Maximum_vraisemblance.html) ([PDF](labos/03RE-Maximum_vraisemblance.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
 
 4. Graded lab: [Robust regression](labos/E04E-Regression_robuste.html) ([PDF](labos/E04E-Regression_robuste.pdf))
