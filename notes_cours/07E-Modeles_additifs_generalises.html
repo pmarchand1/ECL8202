@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Generalized additive models</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Generalized additive models</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Generalized additive models (GAMs) provide a flexible method for describing a non-linear relationship between predictors and a response variable. Like generalized linear models, GAMs can be extended to include random effects to represent grouped data.</p>
+</div>
+<div id="contents" class="section level1">
+<h1>Contents</h1>
+<p>This class will present the following topics:</p>
+<ul>
+<li><p>smoothing splines, which are the basic components of a GAM;</p></li>
+<li><p>how to fit additive models and verify their fit;</p></li>
+<li><p>how to represent interactions between a numerical variable and a factor, or between two numerical variables, in an additive model;</p></li>
+<li><p>the use of generalized additive models for binary or count data;</p></li>
+<li><p>the use of additive mixed models for grouped data.</p></li>
+</ul>
+</div>
+<div id="smoothing-splines" class="section level1">
+<h1>Smoothing splines</h1>
+<p>Smoothing splines are formed by combining simple functions to approximate complex non-linear functional shapes.</p>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>The <code>airquality</code> dataset included with R presents the air ozone concentration measured in New York City daily for five months, as a function of solar radiation, wind speed and temperature.</p>
+<pre class="r"><code>data(airquality)
+str(airquality)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    153 obs. of  6 variables:
+##  $ Ozone  : int  41 36 12 18 NA 28 23 19 8 NA ...
+##  $ Solar.R: int  190 118 149 313 NA NA 299 99 19 194 ...
+##  $ Wind   : num  7.4 8 12.6 11.5 14.3 14.9 8.6 13.8 20.1 8.6 ...
+##  $ Temp   : int  67 72 74 62 56 66 65 59 61 69 ...
+##  $ Month  : int  5 5 5 5 5 5 5 5 5 5 ...
+##  $ Day    : int  1 2 3 4 5 6 7 8 9 10 ...</code></pre>
+<p>First notice that ozone concentration has a non-linear relationship with temperature.</p>
+<pre class="r"><code>aq_temp0 &lt;- ggplot(airquality, aes(x = Temp, y = Ozone)) +
+    geom_point()
+aq_temp0</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Such a relationship can be modelled in a linear regression framework with a polynomial, thus including not only the predictor <span class="math inline">\(x\)</span>, but also <span class="math inline">\(x^2\)</span>, <span class="math inline">\(x^3\)</span>, etc. in the regression. A disadvantage of this approach is that a polynomial of high degree (e.g. greater than 2) rarely produces a good fit for all values of the predictor.</p>
+<p>For example, here is the fit of polynomials of degree 1 to 4 for our example of ozone concentration as a function of temperature. The degree 4 polynomial seems to fit well up to a temperature of about 90 degrees F, where the curve decreases due to the shape of the polynomial, although this is not necessarily a realistic effect here.</p>
+<pre class="r"><code>aq_temp1 &lt;- aq_temp0 + geom_smooth(method = &quot;lm&quot;) + labs(title = &quot;y ~ x&quot;)
+aq_temp2 &lt;- aq_temp0 + geom_smooth(method = &quot;lm&quot;, formula = y ~ poly(x, 2)) +
+    labs(title = &quot;y ~ poly(x, 2)&quot;)
+aq_temp3 &lt;- aq_temp0 + geom_smooth(method = &quot;lm&quot;, formula = y ~ poly(x, 3)) +
+    labs(title = &quot;y ~ poly(x, 3)&quot;)
+aq_temp4 &lt;- aq_temp0 + geom_smooth(method = &quot;lm&quot;, formula = y ~ poly(x, 4)) +
+    labs(title = &quot;y ~ poly(x, 4)&quot;)
+plot_grid(aq_temp1, aq_temp2, aq_temp3, aq_temp4)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="mathematical-form-of-an-additive-model" class="section level2">
+<h2>Mathematical form of an additive model</h2>
+<p>In a linear regression, the response <span class="math inline">\(y\)</span> follows a normal distribution:</p>
+<p><span class="math display">\[y \sim N(\mu, \sigma^2)\]</span></p>
+<p>where the mean is a linear function of the predictors.</p>
+<p><span class="math display">\[\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ...\]</span></p>
+<p>In an additive model, <span class="math inline">\(y\)</span> still follows a normal distribution, but its mean is not constrained to vary linearly with each predictor. Instead, the effect of each predictor is represented by a non-linear function <span class="math inline">\(f(x_i)\)</span>.</p>
+<p><span class="math display">\[\mu = \beta_0 + f(x_1) + f(x_2) + ...\]</span></p>
+<p>In this type of model, the <span class="math inline">\(f(x_i)\)</span> comes from a class of functions called smoothing splines, which we will describe mathematically below.</p>
+</div>
+<div id="additive-model-with-one-predictor" class="section level2">
+<h2>Additive model with one predictor</h2>
+<p>The <code>gam</code> function of the <em>mgcv</em> package is used to fit additive models. In the example below, we specify a model where the ozone concentration is related to the temperature by a spline <code>s(Temp)</code>.</p>
+<pre class="r"><code>library(mgcv)
+o3_t &lt;- gam(Ozone ~ s(Temp), data = airquality)</code></pre>
+<p>The <code>plot</code> function applied to the result of <code>gam</code> displays the estimated curve with a 95% confidence interval. We choose to display the residuals (<code>residuals = TRUE</code>) with open points (symbol <code>pch = 1</code>).</p>
+<pre class="r"><code>plot(o3_t, residuals = TRUE, pch = 1)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="choice-of-basis-functions" class="section level2">
+<h2>Choice of basis functions</h2>
+<p>A smoothing spline is a linear combination of basis functions <span class="math inline">\(b\)</span> with weights <span class="math inline">\(\beta\)</span> estimated from the data. In the equation below, <span class="math inline">\(k\)</span> represents the number of basis functions used to form the spline.</p>
+<p><span class="math display">\[f(x_i) = \sum_{j=1}^k \beta_j b_j(x_i)\]</span></p>
+<p>By default, <code>gam</code> uses thin plate regression splines as basis functions, but other types of functions can be specified with the <code>bs</code> argument. The graph below shows the shape of these thin plate splines for values of <span class="math inline">\(k\)</span> ranging from 3 to 9. Notice that the number of basis functions and their complexity increases with <span class="math inline">\(k\)</span>, so that more and more complex splines can be produced.</p>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>We can set the number of basis functions with the <code>k</code> argument of the <code>s()</code> function.</p>
+<p>If we do not specify <span class="math inline">\(k\)</span>, the <code>gam</code> function defaults to <code>k = 10</code>. In our example, the curve estimated with <code>k = 3</code> is simpler, but those estimated with <code>k = 5</code> and <code>k = 7</code> seem equivalent, showing that 5 basic functions are sufficient for this problem.</p>
+<pre class="r"><code>par(mfrow = c(1, 3), cex = 1)
+plot(gam(Ozone ~ s(Temp, k = 3), data = airquality), residuals = TRUE, main = &quot;k = 3&quot;)
+plot(gam(Ozone ~ s(Temp, k = 5), data = airquality), residuals = TRUE, main = &quot;k = 5&quot;)
+plot(gam(Ozone ~ s(Temp, k = 7), data = airquality), residuals = TRUE, main = &quot;k = 7&quot;)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="smoothing-parameter" class="section level2">
+<h2>Smoothing parameter</h2>
+<p>In practice, it is not optimal to control the complexity of the curve by varying <code>k</code>. It is preferable to choose a larger <code>k</code> than necessary, to ensure that the number of basis functions is not the “limiting factor” for fitting the model. However, this causes a risk of overfitting if we have, for example, 10 adjustable parameters for each predictor in the model.</p>
+<p>To avoid overfitting, the spline parameters <span class="math inline">\(f(x_i)\)</span> are estimated by maximizing a modified version of the log-likelihood <span class="math inline">\(l\)</span>, adding a penalty proportional to the “roughness” of the spline, measured by its second derivative.</p>
+<p><span class="math display">\[2l - \sum_i \lambda_i \int f&#39;&#39;(x_i)^2 dx_i\]</span></p>
+<p>The square of the second derivative of <span class="math inline">\(f(x_i)\)</span>, <span class="math inline">\(f&#39;&#39;(x_i)^2\)</span>, takes a higher value at points where the spline changes direction rapidly. The integral in the equation below therefore calculates the average “roughness” of the spline. The importance of this penalty is proportional to a smoothing parameter <span class="math inline">\(\lambda_i\)</span> chosen separately for each spline composing the model.</p>
+<p>As shown below, the higher <span class="math inline">\(\lambda_i\)</span> is, the smoother the resulting curve is (close to a straight line). This parameter therefore controls the trade-off between a close fit to the data and a simple shape of the curve.</p>
+<pre class="r"><code>par(mfrow = c(1, 3), cex = 1)
+plot(gam(Ozone ~ s(Temp, sp = 0.001), data = airquality), residuals = TRUE, main = &quot;sp = 0.001&quot;)
+plot(gam(Ozone ~ s(Temp, sp = 0.1), data = airquality), residuals = TRUE, main = &quot;sp = 0.1&quot;)
+plot(gam(Ozone ~ s(Temp, sp = 10), data = airquality), residuals = TRUE, main = &quot;sp = 10&quot;)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>The choice of an optimal value of <span class="math inline">\(\lambda\)</span> is made by one of the algorithms implemented by the <code>gam</code> function. Today, the restricted maximum likelihood (<code>method = "REML"</code>) is the most recommended algorithm.</p>
+<pre class="r"><code>o3_t &lt;- gam(Ozone ~ s(Temp), data = airquality, method = &quot;REML&quot;)</code></pre>
+<p>REML was also the algorithm used to estimate the variance of random effects in a mixed model. There is in fact a link between random effects and additive models. Without going into mathematical details here, note that just as the random effect makes a trade-off between an effect estimated independently for each group and a common effect across all groups, the spline makes a trade-off between a straight line and an irregular function that would pass through all points.</p>
+</div>
+<div id="why-an-additive-model" class="section level2">
+<h2>Why an additive model?</h2>
+<p>Additive models have the advantage of offering a lot of flexibility in the representation of the relationship between predictors and response variables. Nevertheless, the fact that the response is an additive function makes it possible to isolate the effect of each of these predictors. In this sense, GAMs are more easily interpretable than other very flexible models (such as random forests).</p>
+<p>On the other hand, as the spline does not have a simple parametric equation, only a visualization of the function makes it possible to understand the estimated effects. Also, since we estimate <span class="math inline">\(k\)</span> parameters per predictor, GAMs require a significant amount of computing time for complex models.</p>
+</div>
+</div>
+<div id="fitting-additive-models" class="section level1">
+<h1>Fitting additive models</h1>
+<p>The following model includes splines for the three predictors (temperature, wind speed and solar radiation).</p>
+<pre class="r"><code>mod_o3 &lt;- gam(Ozone ~ s(Temp) + s(Wind) + s(Solar.R), 
+              data = airquality, method = &quot;REML&quot;)</code></pre>
+<p><em>Note</em>: If the effects of all predictors are represented by splines in this example, we can also combine smoothing splines <code>s()</code> for some predictors and linear effects for others in a GAM.</p>
+<p>The <code>plot</code> command now produces a graph for each estimated spline. The splines are estimated with a mean of zero. Thus:</p>
+<ul>
+<li><p>the intercept of the model represents the mean value of the response;</p></li>
+<li><p>the effects represented by each spline represent the variation of the response around this mean as a function of the value of the predictor.</p></li>
+</ul>
+<pre class="r"><code>par(mfrow = c(1, 3), cex = 1)
+plot(mod_o3, residuals = TRUE)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>We can also perform a translation of each spline equal to the intercept (<code>shift = coef(mod_o3)[1]</code>); in this case, the graphs show the mean of the response as a function of the predictor, rather than a difference from its mean. This version may be easier to interpret.</p>
+<pre class="r"><code>par(mfrow = c(1, 3), cex = 1)
+plot(mod_o3, shift = coef(mod_o3)[1], seWithMean = TRUE, residuals = TRUE)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Also, the argument <code>seWithMean = TRUE</code> includes the uncertainty on the mean response (the intercept) in the confidence interval of the splines. Comparing the two graphs, this has the effect of slightly widening the interval, especially in the middle of the graph.</p>
+<p>We can consult the coefficients of the model with the function `coef’: these include the intercept and 9 coefficients for each spline.</p>
+<pre class="r"><code>coef(mod_o3)</code></pre>
+<pre><code>##  (Intercept)    s(Temp).1    s(Temp).2    s(Temp).3    s(Temp).4    s(Temp).5 
+##  42.09909910 -12.08591563   8.40378528  -0.43034237   0.63812808  -0.05397508 
+##    s(Temp).6    s(Temp).7    s(Temp).8    s(Temp).9    s(Wind).1    s(Wind).2 
+##  -0.64836948  -0.47596943  -3.94323347   2.55758901  -6.32106628  -5.34319449 
+##    s(Wind).3    s(Wind).4    s(Wind).5    s(Wind).6    s(Wind).7    s(Wind).8 
+##   2.43199369   5.31801099   1.28624165  -5.40270159  -0.55172226 -32.22412238 
+##    s(Wind).9 s(Solar.R).1 s(Solar.R).2 s(Solar.R).3 s(Solar.R).4 s(Solar.R).5 
+## -13.15942337   1.93993397  -0.74784376   0.28873326  -0.45574360   0.25027309 
+## s(Solar.R).6 s(Solar.R).7 s(Solar.R).8 s(Solar.R).9 
+##   0.62997910   0.01586162   2.86340308   4.00836972</code></pre>
+<p>The smoothing parameter for each spline is contained in the <code>sp</code> element of the result.</p>
+<pre class="r"><code>mod_o3$sp</code></pre>
+<pre><code>##    s(Temp)    s(Wind) s(Solar.R) 
+##  0.2236120  0.2258963  4.5972792</code></pre>
+<div id="diagnosis-of-fit" class="section level2">
+<h2>Diagnosis of fit</h2>
+<p>The <code>gam.check</code> function produces the diagnostic graphs of the model, as well as the results of a goodness of fit test, which we will discuss below.</p>
+<pre class="r"><code>par(mfrow = c(2, 2))
+gam.check(mod_o3)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre><code>## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 5 iterations.
+## Gradient range [-8.990922e-05,0.0003184666]
+## (score 473.6277 &amp; scale 312.3537).
+## Hessian positive definite, eigenvalue range [0.03296797,53.55641].
+## Model rank =  28 / 28 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##              k&#39;  edf k-index p-value    
+## s(Temp)    9.00 3.42    0.77  &lt;2e-16 ***
+## s(Wind)    9.00 3.38    1.04    0.58    
+## s(Solar.R) 9.00 1.67    0.94    0.26    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>As with a linear model, the plot of residuals vs. predicted values (top right) should not show a trend, the variance of the residuals should be homogeneous, and the quantile-quantile plot should approach a straight line (normalization of the residuals). Here we observe some extreme values on the right side of the distribution. In addition, the variance of the residuals seems to increase with the predicted value.</p>
+<p>The results of the printed test <code>Basis dimension (k) checking results</code> indicate the number of effective degrees of freedom of the model (<em>edf</em>) with respect to the value chosen for <span class="math inline">\(k\)</span>. The effective degrees of freedom estimate the “complexity” of the spline: for example, the relationship between solar radiation and ozone concentration is between a straight line (degree 1) and a quadratic curve (degree 2), while the other two splines have a degree between 3 and 4.</p>
+<p>The <span class="math inline">\(p\)</span>-value in the last column is intended to detect a non-random distribution of residuals. In general, a significant value can mean that the model underfits the data, especially if <em>edf</em> is close to the number of basis functions <span class="math inline">\(k\)</span>. In this case, it is useful to repeat the fit by increasing <span class="math inline">\(k\)</span>.</p>
+<p>Here, <em>edf</em> is well below <span class="math inline">\(k\)</span>, so the poor fit may be due to the non-homogeneous variance of the residuals noticed on the diagnostic graphs.</p>
+<p>By applying a logarithmic transformation to the ozone concentration, the fit is improved, even if the variance is not quite homogeneous; the transformation seems to have “overcompensated” by producing more extreme values on the left.</p>
+<pre class="r"><code>mod_lo3 &lt;- gam(log(Ozone) ~ s(Temp) + s(Wind) + s(Solar.R), 
+               data = airquality, method = &quot;REML&quot;)
+par(mfrow = c(2, 2))
+gam.check(mod_lo3)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<pre><code>## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 5 iterations.
+## Gradient range [-4.834294e-06,3.917609e-05]
+## (score 86.02355 &amp; scale 0.2337533).
+## Hessian positive definite, eigenvalue range [0.05712074,53.52062].
+## Model rank =  28 / 28 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##              k&#39;  edf k-index p-value  
+## s(Temp)    9.00 1.95    0.96   0.365  
+## s(Wind)    9.00 2.46    0.86   0.055 .
+## s(Solar.R) 9.00 2.16    1.01   0.535  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Here are the results from the model of <code>log(Ozone)</code>. Note that the number of effective degrees of freedom is indicated on each <span class="math inline">\(y\)</span>-axis (e.g.: <code>s(Temp, 1.95)</code>).</p>
+<pre class="r"><code>par(mfrow = c(1, 3))
+plot(mod_lo3, residuals = TRUE)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>As with other model types, the <code>summary</code> command displays a summary of the fit. The first lines indicate that this is a model with a normal (`gaussian’) distribution of residuals and no link function. This is followed by estimates of the model’s parametric terms, here only the intercept, and then a table of the significance of each spline. Briefly, a spline is significant if we cannot draw a horizontal line within its confidence interval, which would represent the absence of effect of the predictor.</p>
+<pre class="r"><code>summary(mod_lo3)</code></pre>
+<pre><code>## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## log(Ozone) ~ s(Temp) + s(Wind) + s(Solar.R)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  3.41593    0.04589   74.44   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Approximate significance of smooth terms:
+##              edf Ref.df      F  p-value    
+## s(Temp)    1.953  2.450 21.106  &lt; 2e-16 ***
+## s(Wind)    2.462  3.121  6.470  0.00042 ***
+## s(Solar.R) 2.158  2.719  9.679 3.43e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## R-sq.(adj) =  0.688   Deviance explained = 70.7%
+## -REML = 86.024  Scale est. = 0.23375   n = 111</code></pre>
+<p>Finally, the model explains about 69% of the variance of the response according to the adjusted <span class="math inline">\(R^2\)</span>. The explained deviance is a pseudo-<span class="math inline">\(R^2\)</span> that can be used instead of the <span class="math inline">\(R^2\)</span> when it is a generalized additive model.</p>
+</div>
+<div id="concurvity" class="section level2">
+<h2>Concurvity</h2>
+<p>In multiple linear regression, collinearity between predictors (the correlation between one predictor and a combination of the others) could limit our ability to estimate the effect of each predictor separately. For an additive model, concurvity measures a similar problem; due to spline fitting, even non-linear correlation can lead to confounding the effects of two predictors.</p>
+<pre class="r"><code>concurvity(mod_lo3)</code></pre>
+<pre><code>##                  para   s(Temp)   s(Wind) s(Solar.R)
+## worst    2.213704e-24 0.5929964 0.5600026  0.3969107
+## observed 2.213704e-24 0.4607831 0.3684667  0.2880898
+## estimate 2.213704e-24 0.4507423 0.2971714  0.2507011</code></pre>
+<p>The <code>concurvity</code> function gives several estimates of concurvity for each predictor. This is analogous to the <span class="math inline">\(R^2\)</span> of the model predicting one predictor from the others; thus, a value &gt;0.9 would be equivalent to a VIF &gt; 10 for the collinearity of a linear model.</p>
+<p>Here, the concurvity is less than 0.6 in the worst case, so there is no reason to omit a predictor. Note that the highest correlation is between temperature and wind speed, as we can see on the graph below.</p>
+<pre class="r"><code>ggplot(airquality, aes(x = Temp, y = Wind)) + 
+  geom_point()</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</div>
+</div>
+<div id="modelling-interactions" class="section level1">
+<h1>Modelling interactions</h1>
+<p>In this section, we will begin to model the interaction between a non-linear effect and a factor (categorical variable), or between two non-linear effects.</p>
+<p>We will use the <code>CanWeather</code> dataset from the <em>gamair</em> package, which contains temperature (<em>T</em>) measurements for each day (<em>time</em>) of a year for 35 Canadian cities (<em>place</em>). The latitude of each city is included and these cities are grouped into four regions (Arctic, Atlantic, Continental and Pacific).</p>
+<pre class="r"><code>library(gamair)
+data(canWeather)
+str(CanWeather)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    12775 obs. of  5 variables:
+##  $ time    : num  1 2 3 4 5 6 7 8 9 10 ...
+##  $ T       : num  -3.6 -3.1 -3.4 -4.4 -2.9 -4.5 -5.5 -3.1 -4 -5 ...
+##  $ region  : Factor w/ 4 levels &quot;Arctic&quot;,&quot;Atlantic&quot;,..: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ latitude: num  47.3 47.3 47.3 47.3 47.3 ...
+##  $ place   : Factor w/ 35 levels &quot;Arvida&quot;,&quot;Bagottville&quot;,..: 24 24 24 24 24 24 24 24 24 24 ...</code></pre>
+<p>The following graph shows the observed temperature curve for each city, color-coded as a function of latitude.</p>
+<pre class="r"><code>ggplot(CanWeather, aes(x = time, y = T, color = latitude, group = place)) +
+    geom_line(alpha = 0.5)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>We first fit a model without interaction, where the temperature is predicted by the sum of a non-linear function of the day of the year and a constant effect of the region.</p>
+<pre class="r"><code>mod_t &lt;- gam(T ~ s(time, k = 20) + region, data = CanWeather, method = &quot;REML&quot;)</code></pre>
+<p><em>Notes</em>:</p>
+<ul>
+<li><p>Categorical variables should be coded as factors. Unlike other functions like <code>lm</code>, <code>gam</code> does not automatically convert text variables into factors.</p></li>
+<li><p>Here we chose <code>k = 20</code> for <code>s(time)</code> after getting an underfit result with the default value of <span class="math inline">\(k\)</span>.</p></li>
+</ul>
+<p>To represent both splines and parametric coefficients, we need to specify <code>all.terms = TRUE</code> in <code>plot</code>. The argument <code>pages = 1</code> tells the function to combine the graphs into a single multi-panel graph.</p>
+<pre class="r"><code>plot(mod_t, all.terms = TRUE, pages = 1, shift = coef(mod_t)[1])</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>Note that the confidence intervals for both spline and regional effects are very narrow, due to the large amount of data. Here, the intercept represents the mean temperature for the Arctic region. Since we used the <code>shift</code> argument, the spline shown here represents the prediction of the temperature for each day of the year in the Arctic. For the other regions, the prediction would be equal to this same spline shifted upwards according to the regional coefficient shown in the graph on the right.</p>
+<p>Here is a summary of the results of this model:</p>
+<pre class="r"><code>summary(mod_t)</code></pre>
+<pre><code>## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## T ~ s(time, k = 20) + region
+## 
+## Parametric coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       -11.8037     0.1389  -85.00   &lt;2e-16 ***
+## regionAtlantic     16.3814     0.1521  107.69   &lt;2e-16 ***
+## regionContinental  11.2448     0.1552   72.43   &lt;2e-16 ***
+## regionPacific      19.6375     0.1756  111.80   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Approximate significance of smooth terms:
+##           edf Ref.df    F p-value    
+## s(time) 15.45  17.55 4029  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## R-sq.(adj) =  0.871   Deviance explained = 87.2%
+## -REML =  37642  Scale est. = 21.114    n = 12775</code></pre>
+<p>Here are the diagnostic graphs:</p>
+<pre class="r"><code>par(mfrow = c(2, 2))
+gam.check(mod_t)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<pre><code>## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 8 iterations.
+## Gradient range [-5.649263e-05,5.186556e-05]
+## (score 37641.65 &amp; scale 21.11364).
+## Hessian positive definite, eigenvalue range [7.735162,6385.008].
+## Model rank =  23 / 23 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##           k&#39;  edf k-index p-value
+## s(time) 19.0 15.5    1.02    0.90</code></pre>
+<p>Even if there is not too strong a trend in the residuals, we know that the temperature variation during the year is not the same for each region (e.g. seasonal variations of <span class="math inline">\(T\)</span> are smaller on the Pacific coast than in the middle of the continent). The following model attempts to reproduce this effect.</p>
+<div id="interaction-between-a-spline-and-a-factor" class="section level2">
+<h2>Interaction between a spline and a factor</h2>
+<p>In the model below, <code>s(time, by = region)</code> means that a spline of <span class="math inline">\(T\)</span> as a function of time must be estimated separately for each of the four regions. It is therefore an interaction between the region and the day of the year. Since each spline has a mean of 0, the separate term <code>+ region</code> must still be included to represent the differences in mean temperature between the regions.</p>
+<p>We have also replaced the <code>gam</code> function by <code>bam</code>: it uses a different algorithm to save memory and computation time when we have a complex model with a large dataset. However, it is less efficient than <code>gam</code> for a small dataset.</p>
+<pre class="r"><code>mod_t_by &lt;- bam(T ~ s(time, k = 20, by = region) + region, 
+                data = CanWeather, method = &quot;REML&quot;)</code></pre>
+<p>The resulting splines show the difference in annual temperature variability by region. Remember that except for the Arctic region, the constant region effect (last graph) must be added to each curve to obtain the temperature predictions for this region.</p>
+<pre class="r"><code>plot(mod_t_by, pages = 1, all.terms = TRUE, shift = coef(mod_t_by)[1])</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p>The resulting model now explains 91% of the variation in <span class="math inline">\(T\)</span>.</p>
+<pre class="r"><code>summary(mod_t_by)</code></pre>
+<pre><code>## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## T ~ s(time, k = 20, by = region) + region
+## 
+## Parametric coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)       -11.8353     0.1149  -103.0   &lt;2e-16 ***
+## regionAtlantic     16.3862     0.1258   130.2   &lt;2e-16 ***
+## regionContinental  11.2358     0.1284    87.5   &lt;2e-16 ***
+## regionPacific      19.6500     0.1453   135.3   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Approximate significance of smooth terms:
+##                             edf Ref.df      F p-value    
+## s(time):regionArctic      13.13  15.57  962.1  &lt;2e-16 ***
+## s(time):regionAtlantic    14.52  16.82 2264.6  &lt;2e-16 ***
+## s(time):regionContinental 15.62  17.67 2896.4  &lt;2e-16 ***
+## s(time):regionPacific      9.86  12.08  418.0  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## R-sq.(adj) =  0.912   Deviance explained = 91.2%
+## -REML =  35279  Scale est. = 14.441    n = 12775</code></pre>
+<p>There is another type of interaction between a spline and a factor, called a <em>factor-smooth interaction</em> (fs). In this case, <code>gam</code> estimates a separate spline for each level of the factor, but the splines must have the same smoothing parameter. Each of the splines can also have a mean different from 0, so there is no need to add a separate region effect.</p>
+<pre class="r"><code>mod_t_fs &lt;- bam(T ~ s(time, region, bs = &quot;fs&quot;), data = CanWeather, method = &quot;REML&quot;)
+plot(mod_t_fs, shift = coef(mod_t_fs)[1])</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p>For this type of interaction, the <code>plot</code> command displays all splines on the same graph. Unfortunately, it is not easy to display a legend to associate each spline with a factor value.</p>
+<p>The use of <code>bs = "fs"</code> versus <code>by = ...</code> is especially recommended when the factor has several levels and there may not be enough data per level to estimate each smoothing parameter independently. Here, the results are about the same due to the large amount of data and the version with <code>by</code>, which is a bit more flexible, gets a better AIC.</p>
+<pre class="r"><code>AIC(mod_t)</code></pre>
+<pre><code>## [1] 75238.21</code></pre>
+<pre class="r"><code>AIC(mod_t_by)</code></pre>
+<pre><code>## [1] 70424.59</code></pre>
+<pre class="r"><code>AIC(mod_t_fs)</code></pre>
+<pre><code>## [1] 70453.95</code></pre>
+</div>
+<div id="interaction-between-numerical-variables" class="section level2">
+<h2>Interaction between numerical variables</h2>
+<p>Now suppose that we want to model how the temperature versus time curve varies with latitude. The function <code>te</code> (<em>tensor product</em>) defines a spline in several dimensions, where the smoothing parameter is chosen separately for each dimension.</p>
+<pre class="r"><code>mod_t_lat &lt;- bam(T ~ te(time, latitude) + region, data = CanWeather, method = &quot;REML&quot;)</code></pre>
+<p><em>Note</em>: You can also define a multi-dimensional spline with <code>s(x1, x2)</code>, in which case the same smoothing parameter is used for both dimensions. This version is mainly used in cases where both variables are expressed in the same units, such as X and Y coordinates in spatial data modeling.</p>
+<p>For a 2D spline, <code>plot</code> represents contours with a margin of error (1 standard deviation on either side).</p>
+<pre class="r"><code>plot(mod_t_lat)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<p>Other visualization options are possible by changing the <code>scheme</code> argument. For example, <code>scheme = 2</code> adds colors representing the response variable (a <em>heatmap</em>).</p>
+<pre class="r"><code>plot(mod_t_lat, scheme = 2)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p>The model’s diagnostics suggest underfitting. However, even if <em>edf</em> approaches <span class="math inline">\(k\)</span>, increasing the value of <span class="math inline">\(k\)</span> takes a lot of computational time without really fixing the problem. In fact, the misfit could be due to the fact that the relationship between temperature and latitude varies by region. (Vancouver is more “northern” in latitude than Rouyn-Noranda!)</p>
+<pre class="r"><code>par(mfrow = c(2, 2))
+gam.check(mod_t_lat)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<pre><code>## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 7 iterations.
+## Gradient range [-0.001258148,0.001141736]
+## (score 33013.51 &amp; scale 10.17519).
+## Hessian positive definite, eigenvalue range [3.181735,6384.01].
+## Model rank =  28 / 28 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##                     k&#39;  edf k-index p-value    
+## te(time,latitude) 24.0 23.6    0.22  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+</div>
+<div id="summary-interactions" class="section level2">
+<h2>Summary: Interactions</h2>
+<ul>
+<li><p><code>y ~ s(x, by = z) + z</code>: Independent spline fit of <span class="math inline">\(y\)</span> vs. <span class="math inline">\(x\)</span> for each level of the <span class="math inline">\(z\)</span> factor.</p></li>
+<li><p><code>y ~ s(x, z, bs = "fs")</code>: Fitting a spline of <span class="math inline">\(y\)</span> vs. <span class="math inline">\(x\)</span> for each level of factor <span class="math inline">\(z\)</span>, with a common smoothing parameter.</p></li>
+<li><p><code>y ~ s(x1, x2)</code>: Two-dimensional spline with single smoothing parameter.</p></li>
+<li><p><code>y ~ te(x1, x2)</code>: Two-dimensional spline with different smoothing parameter in each dimension.</p></li>
+</ul>
+</div>
+</div>
+<div id="generalized-additive-models" class="section level1">
+<h1>Generalized additive models</h1>
+<p>Like linear models, additive models can be generalized by modifying the distribution of the response (e.g., binomial, Poisson) and linking the additive predictor to the mean response by a link function <span class="math inline">\(g\)</span>.</p>
+<p><span class="math display">\[g(\mu) = \beta_0 + f(x_1) + f(x_2) + ...\]</span></p>
+<div id="example-1" class="section level2">
+<h2>Example</h2>
+<p>To illustrate this type of model, we will use the <code>Wells</code> dataset from the <em>carData</em> package, which presents data from a survey of 3020 households in Bangladesh. The wells used by these households had arsenic concentrations (<code>arsenic</code> variable, in multiples of <span class="math inline">\(100 per g/L\)</span>) above the safe level. The binary response <code>switch</code> indicates whether the household changed wells. In addition to the arsenic concentration, the table contains other predictors, including the distance to the nearest safe well (<code>distance</code> in meters).</p>
+<pre class="r"><code>library(carData)
+data(Wells)
+str(Wells)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    3020 obs. of  5 variables:
+##  $ switch     : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 2 2 1 2 2 2 2 2 2 2 ...
+##  $ arsenic    : num  2.36 0.71 2.07 1.15 1.1 3.9 2.97 3.24 3.28 2.52 ...
+##  $ distance   : num  16.8 47.3 21 21.5 40.9 ...
+##  $ education  : int  0 0 10 12 14 9 4 10 0 0 ...
+##  $ association: Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 1 1 2 2 2 1 2 2 ...</code></pre>
+<p>As in the case of a GLM, we represent a binary response by a binomial distribution with a logit link. The following model thus represents non-linear and additive effects of arsenic concentration and distance on <span class="math inline">\(\text{logit}(p) = \log \frac{p}{1-p}\)</span>, where <span class="math inline">\(p\)</span> is the probability of changing wells.</p>
+<pre class="r"><code>mod_wells &lt;- gam(switch ~ s(arsenic) + s(distance), data = Wells, 
+                 family = binomial, method = &quot;REML&quot;)</code></pre>
+<p>The summary of results indicates significant effects of both predictors, even though the pseudo-<span class="math inline">\(R^2\)</span> (% of deviance explained) is very small, indicating that these factors explain only a small part of the variability in individual decisions.</p>
+<pre class="r"><code>summary(mod_wells)</code></pre>
+<pre><code>## 
+## Family: binomial 
+## Link function: logit 
+## 
+## Formula:
+## switch ~ s(arsenic) + s(distance)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  0.32521    0.03834   8.482   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Approximate significance of smooth terms:
+##               edf Ref.df Chi.sq p-value    
+## s(arsenic)  4.345  5.356 161.60  &lt;2e-16 ***
+## s(distance) 2.172  2.790  86.61  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## R-sq.(adj) =  0.0699   Deviance explained = 5.41%
+## -REML = 1961.4  Scale est. = 1         n = 3020</code></pre>
+<p>The graphs produced with <code>plot</code> show the effect of the predictors on the scale of the link function (the logit of <span class="math inline">\(p\)</span>). We will see later how to visualize the predictions for <span class="math inline">\(p\)</span>.</p>
+<pre class="r"><code>plot(mod_wells, pages = 1)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p>Note that spline uncertainty increases significantly for large arsenic and distance values due to the lack of data at these predictor levels. The vertical bars at the bottom of the graph (called <em>rug plot</em>) show the position of the observations on the scale of each predictor. These observations become rare for arsenic &gt; 6 and distance &gt; 200.</p>
+</div>
+<div id="diagnostics" class="section level2">
+<h2>Diagnostics</h2>
+<p>The usual diagnostic graphs are less useful for a binary response, because the residuals are always in two groups: negative residuals if the response was 1, positive residuals if it was 0.</p>
+<pre class="r"><code>par(mfrow = c(2, 2))
+gam.check(mod_wells)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<pre><code>## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 4 iterations.
+## Gradient range [-0.001839484,-5.380839e-05]
+## (score 1961.362 &amp; scale 1).
+## Hessian positive definite, eigenvalue range [0.03238313,1.045585].
+## Model rank =  19 / 19 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##               k&#39;  edf k-index p-value  
+## s(arsenic)  9.00 4.35    1.01    0.66  
+## s(distance) 9.00 2.17    0.97    0.08 .
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>In this case, it is preferable to evaluate the fit of the model by grouping the residuals. The <code>binnedplot</code> function of the <em>arm</em> package orders the observations in ascending order of predicted values, then groups observations with similar predictions. It then produces a graph of the mean residual per group as a function of the mean prediction, with a 95% prediction interval.</p>
+<pre class="r"><code>library(arm)
+binnedplot(fitted(mod_wells), residuals(mod_wells, type = &quot;response&quot;))</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
+<p>For example, if a group of households had a mean prediction of 60% and 55% of them changed wells, the residual is -0.05. Here we do not see a trend among the grouped residuals and 94% of them (48/51) are within the 95% prediction interval.</p>
+</div>
+<div id="visualizing-the-effects-with-predict" class="section level2">
+<h2>Visualizing the effects with <em>predict</em></h2>
+<p>Because of the shape of the logit link, the additive effects on the logit scale are no longer additive on the scale of the predicted probability <span class="math inline">\(p\)</span>. In this case, to visualize the effects of the predictors on <span class="math inline">\(p\)</span>, it is preferable to create a grid of values and apply the <code>predict</code> function. Here is an overview of the method to follow:</p>
+<ul>
+<li><p>Create a dataset with different combinations of predictor values.</p></li>
+<li><p>Calculate for each row of this dataset the model predictions and their standard errors on the logit scale (<code>type = "link"</code>, the default option in <code>predict</code>).</p></li>
+<li><p>Compute the 95% confidence interval on the logit scale, i.e. <span class="math inline">\(\pm 1.96\)</span> standard errors on either side of the mean prediction, then bring back the mean predictions and intervals on the scale of <span class="math inline">\(p\)</span> with <code>plogis</code>.</p></li>
+</ul>
+<p><em>Note</em>: The distribution of estimates is closer to a normal distribution on the logit scale, rather than on the scale of <span class="math inline">\(p\)</span>. This is why the intervals must be computed before transforming, rather than computing the interval with the results of <code>predict(... type = response)</code>.</p>
+<pre class="r"><code># Create the prediction grid
+pred_df &lt;- expand.grid(arsenic = seq(0, 8, 0.5), distance = c(25, 50, 100, 200))
+# Predictions and standard errors on the logit scale
+pred_se &lt;- predict(mod_wells, pred_df, se = TRUE)
+# Transform the mean and the interval limits with plogis
+pred_df$pred &lt;- plogis(pred_se$fit)
+pred_df$lo &lt;- plogis(pred_se$fit - 1.96 * pred_se$se.fit) 
+pred_df$hi &lt;- plogis(pred_se$fit + 1.96 * pred_se$se.fit)</code></pre>
+<p>The following graph illustrates the predicted effects with their confidence intervals. Note again that the uncertainty increases for high values of distance or arsenic concentration.</p>
+<pre class="r"><code>ggplot(pred_df, aes(x = arsenic, y = pred, ymin = lo, ymax = hi)) +
+  geom_ribbon(aes(fill = as.factor(distance)), alpha = 0.3) +
+  geom_line(aes(color = as.factor(distance))) +
+  scale_color_brewer(palette = &quot;Dark2&quot;) +
+  scale_fill_brewer(palette = &quot;Dark2&quot;) +
+  labs(y = &quot;p(switch)&quot;, color = &quot;distance&quot;, fill = &quot;distance&quot;)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
+</div>
+</div>
+<div id="additive-mixed-effects-models" class="section level1">
+<h1>Additive mixed effects models</h1>
+<p>Finally, we will give a brief example of adding random effects to an additive model, to produce a Generalized Additive Mixed Effects Model (GAMM). For more information and examples on this topic, you can consult the excellent article by Pedersen et al. (2019) included in the references at the end of these notes.</p>
+<div id="example-2" class="section level2">
+<h2>Example</h2>
+<p>The <code>CO2</code> dataset included with R presents data on the rate of CO2 absorption (<em>uptake</em>) by different plants as a function of the ambient CO2 concentration (<em>conc</em>). The plants come from two different sources (<code>Type</code>, Quebec or Mississippi) and have undergone one of two treatments (<code>Treatment</code> taking the value “chilled” or “nonchilled”).</p>
+<pre class="r"><code>data(CO2)
+CO2$Plant &lt;- factor(CO2$Plant)
+head(CO2)</code></pre>
+<pre><code>## Grouped Data: uptake ~ conc | Plant
+##   Plant   Type  Treatment conc uptake
+## 1   Qn1 Quebec nonchilled   95   16.0
+## 2   Qn1 Quebec nonchilled  175   30.4
+## 3   Qn1 Quebec nonchilled  250   34.8
+## 4   Qn1 Quebec nonchilled  350   37.2
+## 5   Qn1 Quebec nonchilled  500   35.3
+## 6   Qn1 Quebec nonchilled  675   39.2</code></pre>
+<p>Let’s first adjust an additive model of the (non-linear) effect of CO2 concentration on absorption, plus a constant difference between treatments. We therefore ignore for the moment the fact that repeated measurements have been made on each plant.</p>
+<pre class="r"><code>mod_co2 &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + Treatment, 
+               data = CO2, method = &quot;REML&quot;)</code></pre>
+<p><em>Note</em>:</p>
+<ul>
+<li><p>After testing both options, the CO2 concentration and absorption were log-transformed to obtain a better normality and variance homogeneity of the residuals.</p></li>
+<li><p>We reduce the number of basis functions to 5 because the variable <em>conc</em> has only 7 levels and <span class="math inline">\(k\)</span> cannot exceed the number of distinct values of the predictor.</p></li>
+</ul>
+<p>Here is the graph of the estimated effects for this model.</p>
+<pre class="r"><code>plot(mod_co2, all.terms = TRUE, pages = 1, residuals = TRUE, pch = 1,
+     shift = coef(mod_co2)[1], seWithMean = TRUE)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+</div>
+<div id="random-effects-on-the-intercept" class="section level2">
+<h2>Random effects on the intercept</h2>
+<p>To include a random effect of plant identity on the intercept, we add a term <code>s(Plant, bs = "re")</code>. Here, “re” means <em>random effect</em>, so it is not a spline, but a random effect, equivalent to <code>(1 | Plant)</code> for the syntax used by the <em>lme4</em> package. This effect shifts the absorption vs. concentration curve from one plant to another, but the shape of this curve does not change.</p>
+<pre class="r"><code>mod_co2_re &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + s(Plant, bs = &quot;re&quot;) + Treatment, 
+                  data = CO2, method = &quot;REML&quot;)</code></pre>
+<p>Here are the graphs of the estimated effects. The random effect of the plants is shown on a quantile-quantile plot, which at the same time allows us to verify the normality of these random effects.</p>
+<pre class="r"><code>par(mfrow = c(1, 3))
+plot(mod_co2_re, all.terms = TRUE, residuals = TRUE, pch = 1, 
+     shift = coef(mod_co2_re)[1], seWithMean = TRUE)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-48-1.png" width="672" /></p>
+<p>Note that the inclusion of a random effect makes it possible to more accurately estimate the absoprtion vs. concentration curve. Also, the difference between treatments is no longer significant (the confidence interval includes 0), because the treatment is constant per plant and the previous model did not take into account the non-independence of measurements taken on the same plant.</p>
+</div>
+</div>
+<div id="random-effects-on-the-shape-of-a-spline" class="section level1">
+<h1>Random effects on the shape of a spline</h1>
+<p>The interaction between spline and factor (<code>bs = "fs"</code>) is one way to model a random group effect on the shape of a spline, as shown below.</p>
+<pre class="r"><code>mod_co2_fs &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + 
+                    s(log(conc), Plant, k = 5, bs = &quot;fs&quot;) + 
+                    Treatment, data = CO2, method = &quot;REML&quot;)</code></pre>
+<p>Here, the first spline represents the effect of <em>conc</em> on the “average plant”, while the second spline (with <code>bs = "fs"</code>) represents the deviations of this spline for each plant. This second term is analogous to the random effect of a factor on a slope estimated in a linear mixed model (i.e. <code>(1 + log(conc) | Plant</code>).</p>
+<p>Here is a graph of these random effects relative to the mean spline. Note that the <code>shift</code> argument has been omitted here, as it is easier to interpret random effects (middle graph) as deviations from the mean.</p>
+<pre class="r"><code>par(mfrow = c(1, 3))
+plot(mod_co2_fs, all.terms = TRUE, residuals = TRUE, pch = 1)</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-50-1.png" width="672" /></p>
+<p>We can also use <code>predict</code> to visualize the estimated splines for each plant.</p>
+<pre class="r"><code>CO2_pred &lt;- mutate(CO2, pred = predict(mod_co2_fs))
+ggplot(CO2_pred, aes(x = log(conc), y = log(uptake), color = Plant)) +
+  geom_point() +
+  geom_line(aes(y = pred))</code></pre>
+<p><img src="07E-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-51-1.png" width="672" /></p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li><p>Pedersen, E.J. et al. (2019) Hierarchical generalized additive models in ecology: an introduction with mgcv. PeerJ 7:e6876.</p></li>
+<li><p>“GAMs in R” online course by Noam Ross (<a href="https://noamross.github.io/gams-in-r-course/" class="uri">https://noamross.github.io/gams-in-r-course/</a>)</p></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -337,9 +302,10 @@ aq_temp3 &lt;- aq_temp0 + geom_smooth(method = &quot;lm&quot;, formula = y ~ pol
 aq_temp4 &lt;- aq_temp0 + geom_smooth(method = &quot;lm&quot;, formula = y ~ poly(x, 4)) +
     labs(title = &quot;y ~ poly(x, 4)&quot;)
 plot_grid(aq_temp1, aq_temp2, aq_temp3, aq_temp4)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 </div>
-<div id="forme-dun-modele-additif" class="section level2">
+<div id="forme-dun-modèle-additif" class="section level2">
 <h2>Forme d’un modèle additif</h2>
 <p>Dans une régression linéaire, la réponse <span class="math inline">\(y\)</span> suit une distribution normale:</p>
 <p><span class="math display">\[y \sim N(\mu, \sigma^2)\]</span></p>
@@ -349,18 +315,11 @@ plot_grid(aq_temp1, aq_temp2, aq_temp3, aq_temp4)</code></pre>
 <p><span class="math display">\[\mu = \beta_0 + f(x_1) + f(x_2) + ...\]</span></p>
 <p>Dans ce type de modèle, les <span class="math inline">\(f(x_i)\)</span> proviennent d’une classe de fonctions appelées splines de lissage (<em>smoothing splines</em>), que nous décrirons mathématiquement un peu plus loin.</p>
 </div>
-<div id="modele-additif-a-une-variable" class="section level2">
-<h2>Modèle additif à une variable</h2>
+<div id="modèle-additif-à-un-prédicteur" class="section level2">
+<h2>Modèle additif à un prédicteur</h2>
 <p>La fonction <code>gam</code> du package <em>mgcv</em> permet d’ajuster des modèles additifs. Dans l’exemple ci-dessous, nous spécifions un modèle où la concentration d’ozone est reliée à la température par une spline <code>s(Temp)</code>.</p>
-<pre class="r"><code>library(mgcv)</code></pre>
-<pre><code>## Loading required package: nlme</code></pre>
-<pre><code>## 
-## Attaching package: &#39;nlme&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
-## 
-##     collapse</code></pre>
-<pre><code>## This is mgcv 1.8-28. For overview type &#39;help(&quot;mgcv-package&quot;)&#39;.</code></pre>
-<pre class="r"><code>o3_t &lt;- gam(Ozone ~ s(Temp), data = airquality)</code></pre>
+<pre class="r"><code>library(mgcv)
+o3_t &lt;- gam(Ozone ~ s(Temp), data = airquality)</code></pre>
 <p>La fonction <code>plot</code> appliquée au résultat de <code>gam</code> affiche la courbe estimée avec un intervalle de confiance à 95%. Nous choisissons d’afficher les résidus (<code>residuals = TRUE</code>) avec des points ouverts (symbole <code>pch = 1</code>).</p>
 <pre class="r"><code>plot(o3_t, residuals = TRUE, pch = 1)</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
@@ -378,7 +337,7 @@ plot(gam(Ozone ~ s(Temp, k = 5), data = airquality), residuals = TRUE, main = &q
 plot(gam(Ozone ~ s(Temp, k = 7), data = airquality), residuals = TRUE, main = &quot;k = 7&quot;)</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 </div>
-<div id="parametre-de-lissage" class="section level2">
+<div id="paramètre-de-lissage" class="section level2">
 <h2>Paramètre de lissage</h2>
 <p>En pratique, il n’est pas optimal de contrôler la complexité de la courbe en variant <code>k</code>. Il est préférable de choisir un <code>k</code> plus grand que nécessaire, pour assurer que le nombre de fonctions de base ne soit pas le “facteur limitant” pour l’ajustement du modèle. Cela cause cependant un risque de surajustement si nous avons, par exemple, 10 paramètres ajustables pour chaque prédicteur du modèle.</p>
 <p>Pour éviter le surajustement, les paramètres des splines <span class="math inline">\(f(x_i)\)</span> sont estimés en maximisant une version modifiée de la log-vraisemblance <span class="math inline">\(l\)</span>, en ajoutant une pénalité proportionnelle à la “rugosité” de la spline, mesurée par sa dérivée seconde.</p>
@@ -394,13 +353,13 @@ plot(gam(Ozone ~ s(Temp, sp = 10), data = airquality), residuals = TRUE, main = 
 <pre class="r"><code>o3_t &lt;- gam(Ozone ~ s(Temp), data = airquality, method = &quot;REML&quot;)</code></pre>
 <p>Le REML était aussi l’algorithme utilisé pour estimer la variance des effets aléatoires dans un modèle mixte. Il existe en fait un lien entre les effets aléatoires et les modèles additifs. Sans entrer dans les détails mathématiques ici, notons que comme l’effet aléatoire fait un compromis entre un effet estimé indépendamment pour chaque groupe et un effet commun dans tous les groupes, la spline fait un compromis entre une droite et une fonction irrégulière qui passerait par tous les points.</p>
 </div>
-<div id="pourquoi-un-modele-additif" class="section level2">
+<div id="pourquoi-un-modèle-additif" class="section level2">
 <h2>Pourquoi un modèle additif?</h2>
 <p>Les modèles additifs ont l’avantage d’offrir beaucoup de flexibilité dans la représentation du lien entre prédicteurs et variable réponse. Néanmoins, le fait que la réponse soit une fonction additive permet d’isoler l’effet de chacun de ces prédicteurs. En ce sens, les GAM sont plus facilement interprétables que d’autres modèles très flexibles (comme les forêts aléatoires).</p>
 <p>En contrepartie, comme la spline n’a pas d’équation paramétrique simple, seule une visualisation de la fonction permet de comprendre les effets estimés. Aussi, puisqu’on estime <span class="math inline">\(k\)</span> paramètres par prédicteur, les GAM demandent un temps de calcul important pour les modèles complexes.</p>
 </div>
 </div>
-<div id="ajustement-des-modele-additifs" class="section level1">
+<div id="ajustement-des-modèle-additifs" class="section level1">
 <h1>Ajustement des modèle additifs</h1>
 <p>Le modèle suivant inclut des splines pour les trois prédicteurs (température, vitesse du vent et radiation solaire).</p>
 <pre class="r"><code>mod_o3 &lt;- gam(Ozone ~ s(Temp) + s(Wind) + s(Solar.R), 
@@ -408,31 +367,29 @@ plot(gam(Ozone ~ s(Temp, sp = 10), data = airquality), residuals = TRUE, main = 
 <p><em>Note</em>: Si les effets de tous les prédicteurs sont représentés par des splines ici, on peut aussi combiner splines de lissage <code>s()</code> pour certains prédicteurs et effets linéaires pour d’autres dans un GAM.</p>
 <p>La commande <code>plot</code> produit maintenant un graphique pour chaque spline estimée. Les splines sont estimées avec une moyenne de zéro. Ainsi:</p>
 <ul>
-<li><p>l’ordonnée à l’origine du modèle représente la valeur moyenne de la réponse lorsque tous les prédicteurs sont à leur valeur moyenne;</p></li>
-<li><p>les effets représentés par chaque spline représentent les différences avec cette moyenne en fonction de la valeur du prédicteur.</p></li>
+<li><p>l’ordonnée à l’origine du modèle représente la valeur moyenne de la réponse;</p></li>
+<li><p>les effets représentés par chaque spline représentent la variation de la réponse par rapport à cette moyenne en fonction de la valeur du prédicteur.</p></li>
 </ul>
 <pre class="r"><code>par(mfrow = c(1, 3), cex = 1)
 plot(mod_o3, residuals = TRUE)</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-<p>Nous pouvons aussi effectuer une translation de chaque spline égale à l’ordonnée à l’origine (<code>shift = coef(mod_o3)[1]</code>); dans ce cas, les graphiques montrent la valeur de la réponse, plutôt qu’une différence, en fonction du prédicteur représenté si les autres prédicteurs demeurent à leur valeur moyenne. Cette version peut être plus facile à interpréter.</p>
+<p>Nous pouvons aussi effectuer une translation de chaque spline égale à l’ordonnée à l’origine (<code>shift = coef(mod_o3)[1]</code>); dans ce cas, les graphiques montrent la moyenne de la réponse en fonction du prédicteur, plutôt qu’une différence par rapport à sa moyenne. Cette version peut être plus facile à interpréter.</p>
 <pre class="r"><code>par(mfrow = c(1, 3), cex = 1)
 plot(mod_o3, shift = coef(mod_o3)[1], seWithMean = TRUE, residuals = TRUE)</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>Aussi, l’argument <code>seWithMean = TRUE</code> inclut l’incertitude sur la réponse moyenne (l’ordonnée à l’origine) dans l’intervalle de confiance des splines. En comparant les deux graphiques, cela a pour effet d’élargir légèrement l’intervalle, surtout au milieu du graphique.</p>
 <p>Nous pouvons consulter les coefficients du modèle avec la fonction <code>coef</code>: ceux-ci incluent l’ordonnée à l’origine et 9 coefficients pour chaque spline.</p>
 <pre class="r"><code>coef(mod_o3)</code></pre>
-<pre><code>##  (Intercept)    s(Temp).1    s(Temp).2    s(Temp).3    s(Temp).4 
-##  42.09909910 -12.08591563   8.40378528  -0.43034237   0.63812808 
-##    s(Temp).5    s(Temp).6    s(Temp).7    s(Temp).8    s(Temp).9 
-##  -0.05397508  -0.64836948  -0.47596943  -3.94323347   2.55758901 
-##    s(Wind).1    s(Wind).2    s(Wind).3    s(Wind).4    s(Wind).5 
-##  -6.32106628  -5.34319449   2.43199369   5.31801099   1.28624165 
-##    s(Wind).6    s(Wind).7    s(Wind).8    s(Wind).9 s(Solar.R).1 
-##  -5.40270159  -0.55172226 -32.22412238 -13.15942337   1.93993397 
-## s(Solar.R).2 s(Solar.R).3 s(Solar.R).4 s(Solar.R).5 s(Solar.R).6 
-##  -0.74784376   0.28873326  -0.45574360   0.25027309   0.62997910 
-## s(Solar.R).7 s(Solar.R).8 s(Solar.R).9 
-##   0.01586162   2.86340308   4.00836972</code></pre>
+<pre><code>##  (Intercept)    s(Temp).1    s(Temp).2    s(Temp).3    s(Temp).4    s(Temp).5 
+##  42.09909910 -12.08591563   8.40378528  -0.43034237   0.63812808  -0.05397508 
+##    s(Temp).6    s(Temp).7    s(Temp).8    s(Temp).9    s(Wind).1    s(Wind).2 
+##  -0.64836948  -0.47596943  -3.94323347   2.55758901  -6.32106628  -5.34319449 
+##    s(Wind).3    s(Wind).4    s(Wind).5    s(Wind).6    s(Wind).7    s(Wind).8 
+##   2.43199369   5.31801099   1.28624165  -5.40270159  -0.55172226 -32.22412238 
+##    s(Wind).9 s(Solar.R).1 s(Solar.R).2 s(Solar.R).3 s(Solar.R).4 s(Solar.R).5 
+## -13.15942337   1.93993397  -0.74784376   0.28873326  -0.45574360   0.25027309 
+## s(Solar.R).6 s(Solar.R).7 s(Solar.R).8 s(Solar.R).9 
+##   0.62997910   0.01586162   2.86340308   4.00836972</code></pre>
 <p>Le paramètre de lissage pour chaque spline est contenu dans l’élément <code>sp</code> du résultat.</p>
 <pre class="r"><code>mod_o3$sp</code></pre>
 <pre><code>##    s(Temp)    s(Wind) s(Solar.R) 
@@ -454,10 +411,10 @@ gam.check(mod_o3)</code></pre>
 ## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
 ## indicate that k is too low, especially if edf is close to k&#39;.
 ## 
-##              k&#39;  edf k-index p-value   
-## s(Temp)    9.00 3.42    0.77    0.01 **
-## s(Wind)    9.00 3.38    1.04    0.62   
-## s(Solar.R) 9.00 1.67    0.94    0.26   
+##              k&#39;  edf k-index p-value    
+## s(Temp)    9.00 3.42    0.77  &lt;2e-16 ***
+## s(Wind)    9.00 3.38    1.04    0.58    
+## s(Solar.R) 9.00 1.67    0.94    0.26    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Comme pour un modèle linéaire, le graphique des résidus vs. valeurs prédites (en haut à droite) ne devrait pas présenter de tendance, la variance des résidus devrait être homogène et le graphique quantile-quantile devrait s’approche d’une droite (normalité des résidus). Ici, nous observons quelques valeurs extrêmes à droite de la distribution. De plus, la variance des résidus semble augmenter avec la valeur prédite.</p>
@@ -482,9 +439,9 @@ gam.check(mod_lo3)</code></pre>
 ## indicate that k is too low, especially if edf is close to k&#39;.
 ## 
 ##              k&#39;  edf k-index p-value  
-## s(Temp)    9.00 1.95    0.96    0.34  
-## s(Wind)    9.00 2.46    0.86    0.05 *
-## s(Solar.R) 9.00 2.16    1.01    0.44  
+## s(Temp)    9.00 1.95    0.96   0.365  
+## s(Wind)    9.00 2.46    0.86   0.055 .
+## s(Solar.R) 9.00 2.16    1.01   0.535  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Voici les résultats du modèle pour <code>log(Ozone)</code>. Remarquez que le nombre de degrés de liberté effectifs est indiqué sur chaque axe des <span class="math inline">\(y\)</span> (ex.: <code>s(Temp, 1.95)</code>).</p>
@@ -508,9 +465,9 @@ plot(mod_lo3, residuals = TRUE)</code></pre>
 ## 
 ## Approximate significance of smooth terms:
 ##              edf Ref.df      F  p-value    
-## s(Temp)    1.953  2.450 21.106 1.88e-09 ***
-## s(Wind)    2.462  3.121  6.470 0.000407 ***
-## s(Solar.R) 2.158  2.719  9.679 2.69e-05 ***
+## s(Temp)    1.953  2.450 21.106  &lt; 2e-16 ***
+## s(Wind)    2.462  3.121  6.470  0.00042 ***
+## s(Solar.R) 2.158  2.719  9.679 3.43e-05 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -518,7 +475,7 @@ plot(mod_lo3, residuals = TRUE)</code></pre>
 ## -REML = 86.024  Scale est. = 0.23375   n = 111</code></pre>
 <p>Finalement, le modèle explique environ 69% de la variance de la réponse selon le <span class="math inline">\(R^2\)</span> ajusté. La déviance expliquée est un pseudo-<span class="math inline">\(R^2\)</span> qui peut être utilisée à la place du <span class="math inline">\(R^2\)</span> lorsqu’il s’agit d’un modèle additif généralisé.</p>
 </div>
-<div id="concurvite" class="section level2">
+<div id="concurvité" class="section level2">
 <h2>Concurvité</h2>
 <p>Dans une régression linéaire multiple, la collinéarité entre les prédicteurs (corrélation entre un prédicteur et une combinaison des autres) pouvait limiter notre capacité d’estimer séparément l’effet de chaque prédicteur. Pour un modèle additif, la concurvité mesure un problème similaire; en raison de l’ajustement de splines, une corrélation même non-linéaire pour mener à confondre les effets de deux prédicteurs.</p>
 <pre class="r"><code>concurvity(mod_lo3)</code></pre>
@@ -533,9 +490,9 @@ plot(mod_lo3, residuals = TRUE)</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
 </div>
 </div>
-<div id="modeliser-les-interactions" class="section level1">
+<div id="modéliser-les-interactions" class="section level1">
 <h1>Modéliser les interactions</h1>
-<p>Dans cette section, nous verrons commencer modéliser l’interaction entre un effet non-linéaire et un facteur (variable catégorielle), ou entre deux prédicteurs linéaires.</p>
+<p>Dans cette section, nous verrons commencer modéliser l’interaction entre un effet non-linéaire et un facteur (variable catégorielle), ou entre deux effets non-linéaires.</p>
 <p>Nous utiliserons le jeu de données <code>CanWeather</code> du package <em>gamair</em>, qui contient des mesures de température <em>T</em> à chaque jour (<em>time</em>) d’une année pour 35 villes canadiennes (<em>place</em>). La latitude de chaque ville est incluse et ces villes sont groupées en quatre régions (Arctique, Atlantique, Continentale et Pacifique).</p>
 <pre class="r"><code>library(gamair)
 data(canWeather)
@@ -603,7 +560,7 @@ gam.check(mod_t)</code></pre>
 ## indicate that k is too low, especially if edf is close to k&#39;.
 ## 
 ##           k&#39;  edf k-index p-value
-## s(time) 19.0 15.5    1.02    0.94</code></pre>
+## s(time) 19.0 15.5    1.02    0.90</code></pre>
 <p>Même s’il n’y a pas de tendance trop forte au niveau des résidus, nous savons que la variation de température durant l’année n’est pas la même pour chaque région (ex.: les variations saisonnières de <span class="math inline">\(T\)</span> sont moins prononcées sur la côte Pacifique qu’au milieu du continent). Le modèle suivant tente de reproduire cet effet.</p>
 <div id="interaction-entre-spline-et-facteur" class="section level2">
 <h2>Interaction entre spline et facteur</h2>
@@ -656,7 +613,7 @@ plot(mod_t_fs, shift = coef(mod_t_fs)[1])</code></pre>
 <pre class="r"><code>AIC(mod_t_fs)</code></pre>
 <pre><code>## [1] 70453.95</code></pre>
 </div>
-<div id="interaction-entre-variables-numeriques" class="section level2">
+<div id="interaction-entre-variables-numériques" class="section level2">
 <h2>Interaction entre variables numériques</h2>
 <p>Supposons maintenant que nous souhaitons modéliser comment la courbe de température en fonction du temps varie selon la latitude. La fonction <code>te</code> (<em>tensor product</em>) définit une spline en plusieurs dimensions, où le paramètre de lissage est choisi séparément pour chaque dimension.</p>
 <pre class="r"><code>mod_t_lat &lt;- bam(T ~ te(time, latitude) + region, data = CanWeather, method = &quot;REML&quot;)</code></pre>
@@ -683,11 +640,11 @@ gam.check(mod_t_lat)</code></pre>
 ## indicate that k is too low, especially if edf is close to k&#39;.
 ## 
 ##                     k&#39;  edf k-index p-value    
-## te(time,latitude) 24.0 23.6    0.23  &lt;2e-16 ***
+## te(time,latitude) 24.0 23.6    0.22  &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
-<div id="resume-interactions" class="section level2">
+<div id="résumé-interactions" class="section level2">
 <h2>Résumé: Interactions</h2>
 <ul>
 <li><p><code>y ~ s(x, by = z) + z</code>: ajustement indépendant d’une spline de <span class="math inline">\(y\)</span> vs. <span class="math inline">\(x\)</span> pour chaque niveau du facteur <span class="math inline">\(z\)</span>.</p></li>
@@ -697,7 +654,7 @@ gam.check(mod_t_lat)</code></pre>
 </ul>
 </div>
 </div>
-<div id="modeles-additifs-generalises" class="section level1">
+<div id="modèles-additifs-généralisés" class="section level1">
 <h1>Modèles additifs généralisés</h1>
 <p>Comme les modèles linéaires, les modèles additifs peuvent être généralisés en modifiant la distribution de la réponse (ex.: binomiale, Poisson) et en reliant le prédicteur additif à la réponse moyenne par une fonction de lien <span class="math inline">\(g\)</span>.</p>
 <p><span class="math display">\[g(\mu) = \beta_0 + f(x_1) + f(x_2) + ...\]</span></p>
@@ -764,33 +721,12 @@ gam.check(mod_wells)</code></pre>
 ## 
 ##               k&#39;  edf k-index p-value  
 ## s(arsenic)  9.00 4.35    1.01    0.66  
-## s(distance) 9.00 2.17    0.97    0.03 *
+## s(distance) 9.00 2.17    0.97    0.08 .
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Dans ce cas, il est préférable d’évaluer l’ajustement du modèle en groupant les résidus. La fonction <code>binnedplot</code> du package <em>arm</em> ordonne les observations en ordre croissant de valeurs prédites, puis groupe les observations avec prédictions similaires. Elle produit ensuite un graphique du résidu moyen par groupe en fonction de la prédiction moyenne, avec intervalle de prédiction à 95%.</p>
-<pre class="r"><code>library(arm)</code></pre>
-<pre><code>## Loading required package: MASS</code></pre>
-<pre><code>## 
-## Attaching package: &#39;MASS&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
-## 
-##     select</code></pre>
-<pre><code>## Loading required package: Matrix</code></pre>
-<pre><code>## 
-## Attaching package: &#39;Matrix&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
-## 
-##     expand, pack, unpack</code></pre>
-<pre><code>## Loading required package: lme4</code></pre>
-<pre><code>## 
-## Attaching package: &#39;lme4&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:nlme&#39;:
-## 
-##     lmList</code></pre>
-<pre><code>## 
-## arm (Version 1.10-1, built: 2018-4-12)</code></pre>
-<pre><code>## Working directory is Z:/cours/ECL8202/notes_cours</code></pre>
-<pre class="r"><code>binnedplot(fitted(mod_wells), residuals(mod_wells, type = &quot;response&quot;))</code></pre>
+<pre class="r"><code>library(arm)
+binnedplot(fitted(mod_wells), residuals(mod_wells, type = &quot;response&quot;))</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-41-1.png" width="672" /></p>
 <p>Par exemple, si un groupe de ménages avait une prédiction moyenne de 60% et que 55% d’eux ont changer de puits, le résidu est de -0.05. Ici, nous ne percevons pas de tendance parmi les résidus groupés et 94% d’entre eux (48/51) se retrouvent dans l’intervalle de prédiction à 95%.</p>
 </div>
@@ -821,7 +757,7 @@ pred_df$hi &lt;- plogis(pred_se$fit + 1.96 * pred_se$se.fit)</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
 </div>
 </div>
-<div id="modeles-additifs-a-effets-mixtes" class="section level1">
+<div id="modèles-additifs-à-effets-mixtes" class="section level1">
 <h1>Modèles additifs à effets mixtes</h1>
 <p>Finalement, nous donnerons un bref exemple de l’ajout d’effets aléatoire à un modèle additif, pour produire un modèle additif généralisés à effets mixtes (GAMM). Pour plus d’informations et d’exemples à ce sujet, vous pouvez consulter l’excellent article de Pedersen et al. (2019) inclus dans les références à la fin de ces notes.</p>
 <div id="exemple-2" class="section level2">
@@ -851,7 +787,7 @@ head(CO2)</code></pre>
      shift = coef(mod_co2)[1], seWithMean = TRUE)</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
 </div>
-<div id="effets-aleatoires-sur-lordonnee-a-lorigine" class="section level2">
+<div id="effets-aléatoires-sur-lordonnée-à-lorigine" class="section level2">
 <h2>Effets aléatoires sur l’ordonnée à l’origine</h2>
 <p>Pour inclure un effet aléatoire de l’identité de la plante sur l’ordonnée à l’origine, nous ajoutons un terme <code>s(Plant, bs = "re")</code>. Ici, “re” signifie <em>random effect</em>, donc il ne s’agit pas d’une spline, mais bien d’un effet aléatoire, équivalent à <code>(1 | Plant)</code> selon la syntaxe utilisée par le package <em>lme4</em>. Cet effet décale la courbe d’absorption vs. concentration d’une plante à l’autre, mais la forme de cette courbe ne change pas.</p>
 <pre class="r"><code>mod_co2_re &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + s(Plant, bs = &quot;re&quot;) + Treatment, 
@@ -864,7 +800,7 @@ plot(mod_co2_re, all.terms = TRUE, residuals = TRUE, pch = 1,
 <p>Notez que l’inclusion d’un effet aléatoire permet d’estimer plus précisément la courbe absoprtion vs. concentration. Aussi, la différence entre les traitements n’est plus significative (l’intervalle de confiance inclut 0), car le traitement est constant par plante et le modèle précédent ne tenait pas compte de la non-indépendance des mesures prises sur la même plante.</p>
 </div>
 </div>
-<div id="effets-aleatoires-sur-la-forme-dune-spline" class="section level1">
+<div id="effets-aléatoires-sur-la-forme-dune-spline" class="section level1">
 <h1>Effets aléatoires sur la forme d’une spline</h1>
 <p>L’interaction entre spline et facteur (<code>bs = "fs"</code>) constitue une façon de modéliser un effet aléatoire de groupe sur la forme d’une spline, tel que démontré ci-dessous.</p>
 <pre class="r"><code>mod_co2_fs &lt;- gam(log(uptake) ~ s(log(conc), k = 5) + 
@@ -882,7 +818,7 @@ ggplot(CO2_pred, aes(x = log(conc), y = log(uptake), color = Plant)) +
   geom_line(aes(y = pred))</code></pre>
 <p><img src="07-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-51-1.png" width="672" /></p>
 </div>
-<div id="references" class="section level1">
+<div id="références" class="section level1">
 <h1>Références</h1>
 <ul>
 <li><p>Pedersen, E.J. et al. (2019) Hierarchical generalized additive models in ecology: an introduction with mgcv. PeerJ 7:e6876.</p></li>
@@ -908,6 +844,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
