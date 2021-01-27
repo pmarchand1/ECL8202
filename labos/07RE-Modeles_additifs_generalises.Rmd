@@ -1,0 +1,151 @@
+---
+title: "Generalized additive models - Solutions"
+output:
+    pdf_document:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+
+The [dendro_wa082.csv](../donnees/dendro_wa082.csv) dataset, based on the *wa082* dataset included in the *dplR* package, contains dendrochronological series of 23 Pacific silver firs (*Abies amabilis*) sampled in the state of Washington (northwestern USA). The first column represents the year and each other column represents the annual basal area increment (BAI) of a tree, as determined by tree rings. Missing values (`NA`) represent years prior to the formation of the first tree ring.
+
+```{r}
+wa <- read.csv("../donnees/dendro_wa082.csv")
+wa[1:5, 1:8]
+```
+
+## 1. Data preparation
+
+(a) Use the `pivot_longer` function of the *tidyr* package to transform `wa` in a table with three columns: year, tree and basal area increment (bai).
+
+**Solution**
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyr)
+wa <- pivot_longer(wa, cols = c(-year), names_to = "tree", values_to = "bai",
+                   values_drop_na = TRUE)
+head(wa)
+```
+
+
+(b) Add columns to represent the age and basal area (cumulative growth) for each tree-year pair. With the *dplyr* package, you can sort the data by tree and year, group the data by tree, then calculate the age with `row_number` and the basal area with `cumsum` (cumulative sum).
+
+**Solution**
+
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+wa <- arrange(wa, tree, year) %>%
+    group_by(tree) %>%
+    mutate(age = row_number(), ba = cumsum(bai))
+head(wa)
+```
+
+
+(c) Illustrate the growth series of each tree. It is recommended to show the logarithm of the basal area increment.
+
+**Solution**
+
+```{r, warning = FALSE, message = FALSE}
+library(ggplot2)
+ggplot(wa, aes(x = year, y = log(bai), color = tree)) +
+    geom_line()
+```
+
+
+## 2. Growth according to age and basal area
+
+The annual growth of a tree depends on both intrinsic (e.g. age and current size of the tree) and extrinsic factors, including climatic conditions. In order to isolate the effect of climate on growth, it is therefore necessary to remove from the growth series the trend due to the age and size of each tree. Here we will use a GAM to estimate this trend, with a form of the model similar to that proposed in the study by Girardin et al. (2016).
+
+(a) Fit an additive model with the formula `log(bai) ~ log(ba) + s(age)`, where *bai* is the basal area increment of the year and *ba* is the basal area. Make sure that the $k$ parameter of the spline is high enough. How do you interpret the coefficient of `log(ba)`? How do you (briefly) describe the effect of age?
+
+**Solution**
+
+```{r, message = FALSE, warning = FALSE}
+library(mgcv)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age), data = wa)
+gam.check(wa_gam)
+```
+
+The $k$ diagnostic test gives a significant result with an `edf` close to the chosen $k$. In this case, it is useful to increase the value of $k$ so that the test is no longer significant.
+
+```{r, message = FALSE, warning = FALSE}
+wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa)
+gam.check(wa_gam)
+```
+
+```{r}
+plot(wa_gam, pages = 1)
+```
+
+The growth rate decreases with the age of the tree.
+
+(b) Now add a random effect of the tree on the intercept of the model in (a). Check the fit of the model, including the normality of the random effects. What is the fraction of the variance of `log(bai)` explained by this model?
+
+**Solution**
+
+```{r, message = FALSE, warning = FALSE}
+wa$tree <- as.factor(wa$tree)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = "re"), data = wa)
+gam.check(wa_gam)
+```
+
+Except for the portion to the left of -0.6 on the $x$ axis, the residuals approximately follow a normal distribution.
+
+```{r}
+plot(wa_gam, pages = 1)
+```
+
+Random effects deviate slightly from normal for the smallest values (bottom left).
+
+```{r}
+summary(wa_gam)
+```
+
+According to the adjusted $R^2$, about 87% of the variance of the BAI is explained by this model.
+
+
+(c) Compare two ways of including interannual growth variation in the model in (b): (1) a spline by year (with year as a numerical variable) or (2) a random effect of year (with year as a factor) on the intercept. What are the differences between the assumptions of the two versions of the model?
+
+**Solution**
+
+```{r}
+wa$year_fac <- as.factor(wa$year)
+wa_gam2 <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year) + 
+                   s(tree, bs = "re"), data = wa)
+plot(wa_gam2, pages = 1)
+wa_gam3 <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year_fac, bs = "re") +
+                   s(tree, bs = "re"), data = wa)
+plot(wa_gam3, pages = 1)
+```
+
+The term `s(year)` indicates that the average growth varies continuously and non-linearly with the year of the ring, so it cannot vary "abruptly" from one year to the next.
+
+A random year effect (taken as a factor) means that the interannual variations come from a normal distribution, but there is no constraint that years close together have a similar effect.
+
+(d) With the function `predict(..., type = "terms")`, we can obtain the contribution of each term in the model to the predicted response. Use this method to illustrate the random year effects estimated for the second model in (c).
+
+**Solution**
+
+```{r}
+wa_pred <- as.data.frame(predict(wa_gam3, type = "terms"))
+head(wa_pred)
+
+wa_pred$year <- wa$year
+ggplot(wa_pred, aes(x = year, y = `s(year_fac)`)) +
+    geom_line()
+```
+
+
+## References
+
+Girardin, M.P. et al. (2016) No growth stimulation of Canada’s boreal forest under half-century of combined warming and CO2 fertilization. PNAS 113, E8406-E8414.
+

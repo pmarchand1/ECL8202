@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
 
-<title>Modèles additifs généralisés</title>
+<title>Modèles additifs généralisés - Exercices en classe</title>
 
 <script src="libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -287,43 +252,44 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Modèles additifs généralisés</h1>
+<h1 class="title toc-ignore">Modèles additifs généralisés - Exercices en classe</h1>
 
 </div>
 
 
-<p>Ce laboratoire doit être remis le 26 février à 17h sur Moodle.</p>
-<div id="donnees" class="section level2">
+<div id="données" class="section level2">
 <h2>Données</h2>
-<p>Le fichier <a href="../donnees/portal_ot.csv">portal_ot.csv</a> est un sous-ensemble de la base de données Portal (utilisée pour les labos 2 et 5) qui contient le nombre d’individus (<em>n</em>) observés de l’espèce <em>Onychomys torridus</em> (souris sauterelle du sud) dans chaque parcelle pour les années 1988 à 2002. Chaque parcelle était soumise à un traitement (<em>plot_type</em>) visant à exclure une partie ou l’ensemble des rongeurs de la parcelle.</p>
-<pre class="r"><code>portal_ot &lt;- read.csv(&quot;../donnees/portal_ot.csv&quot;)
-head(portal_ot)</code></pre>
-<pre><code>##   species_id plot_id year n         plot_type
-## 1         OT       1 1988 0 Spectab exclosure
-## 2         OT       1 1989 9 Spectab exclosure
-## 3         OT       1 1990 2 Spectab exclosure
-## 4         OT       1 1991 3 Spectab exclosure
-## 5         OT       1 1992 3 Spectab exclosure
-## 6         OT       1 1993 1 Spectab exclosure</code></pre>
+<p>Le fichier <a href="../donnees/dendro_wa082.csv">dendro_wa082.csv</a>, basé sur le jeu de données <em>wa082</em> inclus dans le package <em>dplR</em>, contient des séries dendrochronologiques de 23 sapins gracieux (<em>Abies amabilis</em>) échantillonnés dans l’état du Washington (nord-ouest américain). La première colonne représente l’année et chaque autre colonne représente la croissance annuelle de la surface terrière d’un arbre, telle que déterminée par les cernes de croissance. Les valeurs manquantes <code>NA</code> représentent des années antérieures à la formation du premier cerne de l’arbre.</p>
+<pre class="r"><code>wa &lt;- read.csv(&quot;../donnees/dendro_wa082.csv&quot;)
+wa[1:5, 1:8]</code></pre>
+<pre><code>##   year X712011 X712012 X712021 X712022 X712031 X712032 X712041
+## 1 1698      NA      NA      NA      NA      NA      NA      NA
+## 2 1699      NA      NA      NA      NA      NA      NA      NA
+## 3 1700      NA      NA      NA      NA      NA      NA      NA
+## 4 1701      NA      NA      NA      NA      NA      NA      NA
+## 5 1702      NA      NA      NA      NA      NA      NA      NA</code></pre>
 </div>
-<div id="estimation-de-la-tendance-demographique-globale" class="section level2">
-<h2>1. Estimation de la tendance démographique globale</h2>
-<p>Pour toutes les questions de cette partie, vous devez ajuster un modèle additif généralisé pour estimer la tendance démographique de l’espèce en tenant compte de l’effet des traitements: <code>n ~ plot_type + s(year)</code>. Pour l’instant, nous ignorerons le groupement des mesures par placettes.</p>
+<div id="préparation-des-données" class="section level2">
+<h2>1. Préparation des données</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>Ajustez d’abord un GAM où les observations suivent une distribution de Poisson. De façon brève, décrivez comment le nombre d’individus varie en fonction de l’année et des traitements. En considérant la fonction de lien utilisée pour ce modèle, que signifie l’additivité des effets <code>plot_type</code> et <code>s(year)</code>?</p></li>
-<li><p>Est-ce que la valeur par défaut du nombre de fonctions de base <span class="math inline">\(k\)</span> est suffisante pour représenter <code>s(year)</code> dans le modèle en (a)? Si nécessaire, réajustez le modèle avec un <span class="math inline">\(k\)</span> plus élevé. Quelle est la valeur maximale de <span class="math inline">\(k\)</span> que vous pouvez utiliser ici?</p></li>
-<li><p>Les données sont-elles surdispersées par rapport à votre modèle?</p></li>
-<li><p>Ajustez un nouveau GAM avec la distribution binomiale négative, spécifiée comme <code>family = "nb"</code> dans la fonction <code>gam</code>. Quel est l’estimé du paramètre <span class="math inline">\(\theta\)</span> pour ce modèle? L’ajustement semble-t-il meilleur que pour le modèle de Poisson? Y a-t-il encore des problèmes d’ajustement?</p></li>
+<li><p>Utilisez la fonction <code>pivot_longer</code> du package <em>tidyr</em> pour transformer <code>wa</code> en un tableau avec trois colonnes: l’année, l’arbre et la croissance.</p></li>
+<li><p>Ajoutez des colonnes pour représenter l’âge et la surface terrière (croissance cumulative) correspondant à chaque paire arbre-année. Avec le package <em>dplyr</em>, vous pouvez trier les données par arbre et année, grouper les données par arbre, puis calculer l’âge avec <code>row_number</code> et la surface terrière avec <code>cumsum</code> (somme cumulative).</p></li>
+<li><p>Illustrez les séries de croissance de chaque arbre. Il est recommandé de représenter le logarithme de la croissance en surface terrière.</p></li>
 </ol>
 </div>
-<div id="ajout-des-effets-aleatoires-de-placettes" class="section level2">
-<h2>2. Ajout des effets aléatoires de placettes</h2>
+<div id="croissance-en-fonction-de-lâge-et-de-la-surface-terrière" class="section level2">
+<h2>2. Croissance en fonction de l’âge et de la surface terrière</h2>
+<p>La croissance annuelle d’un arbre dépend de facteurs intrinsèques (ex.: âge et taille actuelle de l’arbre) et extrinsèques, notamment les conditions climatiques. Afin d’isoler l’effet du climat sur la croissance, il est donc nécessaire de retirer des séries de croissance la tendance due à l’âge et la taille de chaque arbre. Nous utiliserons ici un GAM pour estimer cette tendance, avec une forme du modèle semblable à celle proposée dans l’étude de Girardin et al. (2016).</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>À partir du modèle binomial négatif en 1(d), incluez un effet aléatoire des placettes sur l’ordonnée à l’origine. Vérifiez l’ajustement du modèle, incluant la normalité des effets aléatoires et la présence ou l’absence de surdispersion.</p></li>
-<li><p>Ajustez maintenant un modèle avec un effet aléatoire des placettes sur la tendance démographique moyenne <code>s(year)</code>, en utilisant un terme de type <code>bs = "fs"</code> tel que vu dans le cours. Comparez ce modèle au modèle en (a) avec l’AIC. <em>Note</em>: Le package <em>AICcmodavg</em> n’est pas compatible avec les GAM, mais vous pouvez calculer l’AIC pour chaque modèle avec la fonction <code>AIC</code>.</p></li>
-<li><p>Quelle est la fraction de la déviance expliquée par le meilleur modèle déterminé en (b)?</p></li>
-<li><p>Finalement, illustrez la tendance démographique estimée pour cette espèce dans chaque placette. Pour ce faire, ajoutez au jeu de données <code>portal_ot</code> les valeurs prédites par le meilleur modèle en (b) ainsi qu’un intervalle de confiance à 95%, puis représentez dans un même graphique les données observées, les tendances temporelles estimées et leur intervalle de confiance pour chaque placette.</p></li>
+<li><p>Ajustez un modèle additif avec la formule <code>log(bai) ~ log(ba) + s(age)</code>, où <em>bai</em> (basal area increment) est la croissance en surface terrière de l’année et <em>ba</em> est la surface terrière. Assurez-vous que le paramètre <span class="math inline">\(k\)</span> de la spline est assez élevé. Comment interprétez-vous le coefficient de <code>log(ba)</code>? Comment décrivez-vous (brièvement) l’effet de l’âge?</p></li>
+<li><p>Ajoutez maintenant un effet aléatoire de l’arbre sur l’ordonnée à l’origine du modèle en (a). Vérifiez l’ajustement du modèle, incluant la normalité des effets aléatoires. Quelle est la fraction de la variance de <code>log(bai)</code> expliquée par ce modèle?</p></li>
+<li><p>Comparez deux façons d’inclure la variation de la croissance d’une année à l’autre au modèle en (b): (1) une spline selon l’année (considérée comme variable numérique) ou (2) un effet aléatoire de l’année (considérée comme facteur) sur l’ordonnée à l’origine du modèle. Quelles sont les différences entre les suppositions des deux versions du modèle?</p></li>
+<li><p>Avec la fonction <code>predict(..., type = "terms")</code>, nous pouvons obtenir la contribution de chaque terme du modèle à la réponse prédite. Utilisez cette méthode pour illustrer les effets aléatoires de l’année estimés pour le deuxième modèle en (c).</p></li>
 </ol>
+</div>
+<div id="références" class="section level2">
+<h2>Références</h2>
+<p>Girardin, M.P. et al. (2016) No growth stimulation of Canada’s boreal forest under half-century of combined warming and CO2 fertilization. PNAS 113, E8406-E8414.</p>
 </div>
 
 
@@ -344,6 +310,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

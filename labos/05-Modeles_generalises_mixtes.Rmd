@@ -60,7 +60,7 @@ plots$plot_type[grepl("Krat", plots$plot_type)] <- "Krat Exclosure"
 
 ## 2. Modéliser l'abondance d'une espèce
 
-Pour cette partie, nous nous limitons aux données de l'espèce *Dipodomys ordii* (DO).
+Pour cette partie, nous nous limitons aux données de l'espèce *Dipodomys ordii* (DO), le rat-kangourou d'Ord.
 
 ![](../images/d_ordii.png)
 
@@ -68,7 +68,7 @@ a) Visualisez la distribution du nombre d'individus de l'espèce DO en fonction 
 
 b) Ajoutez maintenant au modèle en (a) des effets aléatoires de la parcelle et de l'année. Laquelle de ces deux variables de groupement a-t-elle le plus grand effet sur la réponse? Expliquez comment et pourquoi les erreurs-types des effets fixes changent entre ce modèle et celui de la question précédente.
 
-c) Vérifiez si les suppositions du modèle en (b) sont respectées. S'il y a surdispersion, estimez le coefficient de dispersion.
+c) Vérifiez si les suppositions du modèle en (b) sont respectées, en particularité la dispersion des résidus et la normalité des effets aléatoires. S'il y a surdispersion, estimez le coefficient de dispersion.
 
 
 ## 3. Modéliser plusieurs espèces
@@ -81,7 +81,14 @@ b) Ajustez un modèle équivalent à celui en (a), sauf que l'espèce est un eff
 
 *Note*: Si le GLMM a du mal à converger, nous pouvons spécifier l'argument `control` de `glmer` pour augmenter le nombre maximal d'itérations ou pour changer d'optimisateur. Dans ce cas-ci, changer l'optimisateur à `bobyqa` avec `control = glmerControl(optimizer = "bobyqa")` devrait régler le problème.
 
-c) Créez un nouveau jeu de données contenant toutes les combinaisons de traitement et d'espèce, puis calculez pour chaque combinaison l'abondance de l'espèce DO prévue selon chacun des modèles en (a) et (b), à l'aide de la fonction `predict`. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?
+c) Avec la fonction `expand.grid`, créez un jeu de données pour les prédictions qui contient toutes les combinaisons de traitement et d'espèce.
+
+```{r, eval = FALSE}
+pred_df <- expand.grid(plot_type = unique(abond$plot_type),
+                       species_id = unique(abond$species_id))
+```
+
+Calculez pour chaque combinaison l'abondance prévue selon chacun des modèles en (a) et (b), à l'aide de la fonction `predict`. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?
 
 *Note*: Par défaut, les prédictions d'un GLM(M) sont sur l'échelle du prédicteur linéaire. Pour des prédictions sur l'échelle de la réponse, spécifiez l'argument `type = "response"`.
 

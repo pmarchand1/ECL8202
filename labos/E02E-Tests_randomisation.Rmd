@@ -28,7 +28,7 @@ surveys <- read.csv("../donnees/portal_surveys.csv")
 str(surveys)
 ```
 
-The [portal_plots.csv](../data/portal_plots.csv) dataset indicates the type of treatment applied to each plot. The treatments are designed to exclude different types of rodents: "Control" = no fence, no exclusion; "Rodent Exclusion" = fence, all rodents excluded; "Krat Exclusion" = fence with a gate for small rodents, but not for kangaroo rats. These treatments were randomly assigned after setting up the plots.
+The [portal_plots.csv](../donnees/portal_plots.csv) dataset indicates the type of treatment applied to each plot. The treatments are designed to exclude different types of rodents: "Control" = no fence, no exclusion; "Rodent Exclusion" = fence, all rodents excluded; "Krat Exclusion" = fence with a gate for small rodents, but not for kangaroo rats. These treatments were randomly assigned after setting up the plots.
 
 ```{r}
 plots <- read.csv("../donnees/portal_plots.csv")
@@ -47,7 +47,7 @@ a) First, we must prepare the data for analysis:
 plots$plot_type[!(plots$plot_type %in% c("Control", "Rodent Exclosure"))] <- "Krat Exclosure"
 ```
 
-- Finally, join the `surveys` and `plots` data frames to find out which plot treatment is related to each observation. You can use the `merge` function in R or the `inner_join` function, which requires the *dplyr* package. Name the resulting array `surveys_plots`.
+- Finally, join the `surveys` and `plots` data frames to find out which plot treatment is related to each observation. You can use the `merge` function in R or the `inner_join` function, which requires the *dplyr* package. Name the resulting data frame `surveys_plots`.
 
 Next, view the distribution of the weight (in grams) of the individuals according to the treatment `plot_type`. You can use boxplots, for example. From this graph, why would it be useful to use a non-parametric method to compare the effects of these treatments?
 

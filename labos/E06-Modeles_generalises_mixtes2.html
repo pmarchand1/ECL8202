@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -292,8 +257,8 @@ div.tocify {
 </div>
 
 
-<p>Ce laboratoire doit être remis le 12 février à 17h sur Moodle.</p>
-<div id="donnees" class="section level2">
+<p>Ce laboratoire doit être remis le 24 février à 17h sur Moodle.</p>
+<div id="données" class="section level2">
 <h2>Données</h2>
 <p>Le jeu de données <a href="../donnees/aiv_ducks.csv">aiv_ducks.csv</a> contient une partie des données de l’étude de Papp et al. (2017) sur la présence de la grippe aviaire (AIV pour <em>avian influenza virus</em>) dans les populations de différentes espèces de canards dans l’est du Canada.</p>
 <blockquote>
@@ -302,11 +267,11 @@ div.tocify {
 <pre class="r"><code>aiv &lt;- read.csv(&quot;../donnees/aiv_ducks.csv&quot;)
 str(aiv)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    8967 obs. of  10 variables:
-##  $ Species           : Factor w/ 7 levels &quot;ABDU&quot;,&quot;AGWT&quot;,..: 5 5 5 5 5 5 4 5 5 5 ...
-##  $ Age               : Factor w/ 2 levels &quot;AHY&quot;,&quot;HY&quot;: 2 2 2 1 1 1 1 2 1 2 ...
-##  $ Sex               : Factor w/ 2 levels &quot;F&quot;,&quot;M&quot;: 2 1 1 2 2 2 1 2 2 2 ...
+##  $ Species           : chr  &quot;MALL&quot; &quot;MALL&quot; &quot;MALL&quot; &quot;MALL&quot; ...
+##  $ Age               : chr  &quot;HY&quot; &quot;HY&quot; &quot;HY&quot; &quot;AHY&quot; ...
+##  $ Sex               : chr  &quot;M&quot; &quot;F&quot; &quot;F&quot; &quot;M&quot; ...
 ##  $ AIV               : int  1 0 1 1 1 0 1 1 1 0 ...
-##  $ Site              : Factor w/ 72 levels &quot;Allisary&quot;,&quot;Amherst Point&quot;,..: 2 70 70 67 67 67 1 70 67 1 ...
+##  $ Site              : chr  &quot;Amherst Point&quot; &quot;White Birch&quot; &quot;White Birch&quot; &quot;Tower Goose&quot; ...
 ##  $ Latitude          : num  45.8 46 46 46 46 ...
 ##  $ Longitude         : num  -64.2 -64.3 -64.3 -64.3 -64.3 ...
 ##  $ Year              : int  2005 2005 2005 2005 2005 2005 2005 2005 2005 2005 ...
@@ -325,17 +290,17 @@ str(aiv)</code></pre>
 <li><em>Population_Density</em>: Densité de population de canards (toutes espèces confondues) estimée pour le site et l’année</li>
 </ul>
 </div>
-<div id="ajustement-du-modele" class="section level2">
+<div id="ajustement-du-modèle" class="section level2">
 <h2>1. Ajustement du modèle</h2>
 <ol style="list-style-type: lower-alpha">
 <li><p>Estimez les paramètres d’un modèle complet visant à prédire la présence/absence de l’AIV, incluant: les effets fixes de l’âge et du sexe des canards, de la température et de la densité de population du site; ainsi que les effets aléatoires de l’espèce, du site, de l’année et de l’interaction site x année (cette dernière est notée <code>(1 | Site:Year)</code> dans le modèle). Faut-il vérifier s’il y a surdispersion pour ce modèle?</p></li>
 <li><p>Quelle est la raison d’inclure chacun des effets aléatoires du modèle en (a)? Vérifiez si ces effets aléatoires suivent une distribution normale.</p></li>
-<li><p>Produisez un graphique de la probabilité de présence de l’AIV prédite par le modèle en (a) en fonction de la température pour chacune des quatre catégories d’âge et de sexe (HY/F, HY/M, AHY/F, AHY/M), en fixant la densité de population à sa valeur moyenne.</p></li>
+<li><p>Produisez un graphique de la probabilité de présence de l’AIV prédite par le modèle en (a) en fonction de la température pour chacune des quatre catégories d’âge et de sexe (HY/F, HY/M, AHY/F, AHY/M). La densité de population n’apparaîtra pas dans le graphique, mais vous pouvez la fixer à sa valeur moyenne pour les prédictions.</p></li>
 <li><p>À partir du modèle complet, utilisez l’AIC pour déterminer s’il est préférable d’inclure ou non chacun des effets suivants: température, densité de population, ainsi que l’effet aléatoire pour l’interaction site x année.</p></li>
 <li><p>Les auteurs de l’étude originale ont déterminé un effet significatif de la densité de population en ajustant un modèle avec effets aléatoires du site et de l’année, mais sans leur interaction. Pour quelle raison les conclusions de votre modèle pourraient-elles différer de ce résultat?</p></li>
 </ol>
 </div>
-<div id="predictions-du-modele" class="section level2">
+<div id="prédictions-du-modèle" class="section level2">
 <h2>2. Prédictions du modèle</h2>
 <ol style="list-style-type: lower-alpha">
 <li><p>Ajoutez au jeu de données original des colonnes représentant la prédiction de la probabilité de présence de l’AIV (1) en fonction seulement des effets fixes du modèle; (2) en fonction des effets fixes et aléatoires. Utilisez le meilleur modèle identifié dans la partie précédente.</p></li>
@@ -362,6 +327,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

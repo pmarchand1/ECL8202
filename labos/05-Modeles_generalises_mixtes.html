@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -292,7 +257,7 @@ div.tocify {
 </div>
 
 
-<div id="donnees" class="section level2">
+<div id="données" class="section level2">
 <h2>Données</h2>
 <p>Nous utiliserons pour ce laboratoire la base de données Portal, déjà présentée lors du laboratoire 2, qui contient des données de suivi à long terme de plusieurs espèces de rongeurs sur un site d’étude en Arizona.</p>
 <blockquote>
@@ -333,7 +298,7 @@ str(plots)</code></pre>
 ##  $ plot_id  : int  1 2 3 4 5 6 7 8 9 10 ...
 ##  $ plot_type: chr  &quot;Spectab exclosure&quot; &quot;Control&quot; &quot;Long-term Krat Exclosure&quot; &quot;Control&quot; ...</code></pre>
 </div>
-<div id="preparation-des-donnees" class="section level2">
+<div id="préparation-des-données" class="section level2">
 <h2>1. Préparation des données</h2>
 <ol style="list-style-type: lower-alpha">
 <li><p>À partir du tableau <code>surveys</code>, conservez les individus observés depuis 1988 qui correspondent à des rongeurs (<code>taxa == "Rodent"</code> dans le tableau <code>species</code>).</p></li>
@@ -343,17 +308,17 @@ str(plots)</code></pre>
 <pre class="r"><code>plots$plot_type[grepl(&quot;Krat&quot;, plots$plot_type)] &lt;- &quot;Krat Exclosure&quot;</code></pre>
 <p><em>Note</em>: La fonction <code>grepl(pattern, x)</code> retourne <code>TRUE</code> ou <code>FALSE</code> dépendamment si la variable <code>x</code> contient ou non le motif de texte <code>pattern</code>.</p>
 </div>
-<div id="modeliser-labondance-dune-espece" class="section level2">
+<div id="modéliser-labondance-dune-espèce" class="section level2">
 <h2>2. Modéliser l’abondance d’une espèce</h2>
-<p>Pour cette partie, nous nous limitons aux données de l’espèce <em>Dipodomys ordii</em> (DO).</p>
+<p>Pour cette partie, nous nous limitons aux données de l’espèce <em>Dipodomys ordii</em> (DO), le rat-kangourou d’Ord.</p>
 <p><img src="../images/d_ordii.png" /></p>
 <ol style="list-style-type: lower-alpha">
 <li><p>Visualisez la distribution du nombre d’individus de l’espèce DO en fonction du type de traitement. Quel type de modèle serait approprié pour modéliser cette relation? (Ignorez les effets des autres variables pour l’instant.) Estimez les paramètres du modèle et vérifiez si les coefficients obtenus correspondent qualitativement aux effets prévus de chaque traitement.</p></li>
 <li><p>Ajoutez maintenant au modèle en (a) des effets aléatoires de la parcelle et de l’année. Laquelle de ces deux variables de groupement a-t-elle le plus grand effet sur la réponse? Expliquez comment et pourquoi les erreurs-types des effets fixes changent entre ce modèle et celui de la question précédente.</p></li>
-<li><p>Vérifiez si les suppositions du modèle en (b) sont respectées. S’il y a surdispersion, estimez le coefficient de dispersion.</p></li>
+<li><p>Vérifiez si les suppositions du modèle en (b) sont respectées, en particularité la dispersion des résidus et la normalité des effets aléatoires. S’il y a surdispersion, estimez le coefficient de dispersion.</p></li>
 </ol>
 </div>
-<div id="modeliser-plusieurs-especes" class="section level2">
+<div id="modéliser-plusieurs-espèces" class="section level2">
 <h2>3. Modéliser plusieurs espèces</h2>
 <p>Prenons maintenant le jeu de données complet produit dans la partie 1, soit les 15 espèces les plus abondantes.</p>
 <ol style="list-style-type: lower-alpha">
@@ -362,8 +327,11 @@ str(plots)</code></pre>
 </ol>
 <p><em>Note</em>: Si le GLMM a du mal à converger, nous pouvons spécifier l’argument <code>control</code> de <code>glmer</code> pour augmenter le nombre maximal d’itérations ou pour changer d’optimisateur. Dans ce cas-ci, changer l’optimisateur à <code>bobyqa</code> avec <code>control = glmerControl(optimizer = "bobyqa")</code> devrait régler le problème.</p>
 <ol start="3" style="list-style-type: lower-alpha">
-<li>Créez un nouveau jeu de données contenant toutes les combinaisons de traitement et d’espèce, puis calculez pour chaque combinaison l’abondance de l’espèce DO prévue selon chacun des modèles en (a) et (b), à l’aide de la fonction <code>predict</code>. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?</li>
+<li>Avec la fonction <code>expand.grid</code>, créez un jeu de données pour les prédictions qui contient toutes les combinaisons de traitement et d’espèce.</li>
 </ol>
+<pre class="r"><code>pred_df &lt;- expand.grid(plot_type = unique(abond$plot_type),
+                       species_id = unique(abond$species_id))</code></pre>
+<p>Calculez pour chaque combinaison l’abondance prévue selon chacun des modèles en (a) et (b), à l’aide de la fonction <code>predict</code>. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?</p>
 <p><em>Note</em>: Par défaut, les prédictions d’un GLM(M) sont sur l’échelle du prédicteur linéaire. Pour des prédictions sur l’échelle de la réponse, spécifiez l’argument <code>type = "response"</code>.</p>
 <ol start="4" style="list-style-type: lower-alpha">
 <li><p>Ajoutez les effets aléatoires de la placette et de l’année au modèle en (b) et vérifiez l’ajustement du modèle.</p></li>
@@ -390,6 +358,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

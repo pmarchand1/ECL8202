@@ -24,21 +24,21 @@ Cette base de données est formée de trois tableaux de données:
 - [portal_surveys.csv](../donnees/portal_surveys.csv) contient les informations sur chaque individu capturé.
 
 ```{r}
-surveys <- read.csv("../donnees/portal_surveys.csv", stringsAsFactors = FALSE)
+surveys <- read.csv("../donnees/portal_surveys.csv")
 str(surveys)
 ```
 
 - [portal_species.csv](../donnees/portal_species.csv) indique le nom de genre, d'espèce et le groupe taxonomique correspondant à chaque code d'espèce.
 
 ```{r}
-species <- read.csv("../donnees/portal_species.csv", stringsAsFactors = FALSE)
+species <- read.csv("../donnees/portal_species.csv")
 str(species)
 ```
 
 - [portal_plots.csv](../donnees/portal_plots.csv) indique le type de traitement appliqué à chaque parcelle: "Control" = témoin; "Rodent Exclosure" = clôture pour exclure tous les rongeurs; "Long-term Krat Exclosure" ou "Short-term Krat Exclosure" = clôture avec porte pour exclure les rats-kangourous du genre *Dipodomys*. "Spectab exclosure" = clôture avec porte pour exclure seulement l'espèce *Dipodomys spectabilis*.
 
 ```{r}
-plots <- read.csv("../donnees/portal_plots.csv", stringsAsFactors = FALSE)
+plots <- read.csv("../donnees/portal_plots.csv")
 str(plots)
 ```
 
@@ -99,7 +99,7 @@ str(abond)
 
 ## 2. Modéliser l'abondance d'une espèce
 
-Pour cette partie, nous nous limitons aux données de l'espèce *Dipodomys ordii* (DO).
+Pour cette partie, nous nous limitons aux données de l'espèce *Dipodomys ordii* (DO), le rat-kangourou d'Ord.
 
 ![](../images/d_ordii.png)
 
@@ -111,7 +111,7 @@ a) Visualisez la distribution du nombre d'individus de l'espèce DO en fonction 
 abond_do <- filter(abond, species_id == "DO")
 
 library(ggplot2)
-# Voici une option avec des histogrammes
+# Voici une option avec des boîtes à moustaches
 ggplot(abond_do, aes(x = plot_type, y = n)) +
     geom_boxplot()
 ```
@@ -123,7 +123,7 @@ do_glm <- glm(n ~ plot_type, data = abond_do, family = poisson)
 summary(do_glm)
 ```
 
-L'effet négatif des traitement "Rodent Exclosure" et "Krat Exclosure" est attendu puisqu'il s'agit d'une espèce de rat-kangouru qui devrait être exclue par ces deux traitements. L'effet positif de "Spectab Exclosure" pourrait être dû au fait que ce traitement exclut une autre espèce de rat-kangourou qui compétitionne avec celle-ci.
+L'effet négatif des traitement "Rodent Exclosure" et "Krat Exclosure" est attendu puisqu'il s'agit d'une espèce de rat-kangourou qui devrait être exclue par ces deux traitements. L'effet positif de "Spectab Exclosure" pourrait être dû au fait que ce traitement exclut une autre espèce de rat-kangourou qui compétitionne avec celle-ci.
 
 
 b) Ajoutez maintenant au modèle en (a) des effets aléatoires de la parcelle et de l'année. Laquelle de ces deux variables de groupement a-t-elle le plus grand effet sur la réponse? Expliquez comment et pourquoi les erreurs-types des effets fixes changent entre ce modèle et celui de la question précédente.
@@ -141,7 +141,7 @@ L'écart-type de la variation entre placettes (1.63) est supérieur à celui de 
 
 Les erreurs-types des effets fixes sont plus grandes que celles du modèle sans effets aléatoires; cela est dû au fait que le modèle mixte tient compte du fait que les observations d'une même placette sont corrélées, ce qui confère moins de puissance statistique qu'un échantillonnage tout à fait indépendant, surtout lorsque le traitement est appliqué au niveau de la placette.
 
-c) Vérifiez si les suppositions du modèle en (b) sont respectées. S'il y a surdispersion, estimez le coefficient de dispersion.
+c) Vérifiez si les suppositions du modèle en (b) sont respectées, en particularité la dispersion des résidus et la normalité des effets aléatoires. S'il y a surdispersion, estimez le coefficient de dispersion.
 
 **Réponse**
 
@@ -196,13 +196,18 @@ glmm_sp <- glmer(n ~ plot_type + (1 + plot_type | species_id),
 summary(glmm_sp)
 ```
 
-c) Créez un nouveau jeu de données contenant toutes les combinaisons de traitement et d'espèce, puis calculez pour chaque combinaison l'abondance prévue selon chacun des modèles en (a) et (b), à l'aide de la fonction `predict`. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?
+c) Avec la fonction `expand.grid`, créez un jeu de données pour les prédictions qui contient toutes les combinaisons de traitement et d'espèce.
+
+```{r}
+pred_df <- expand.grid(plot_type = unique(abond$plot_type),
+                       species_id = unique(abond$species_id))
+```
+
+Calculez pour chaque combinaison l'abondance prévue selon chacun des modèles en (a) et (b), à l'aide de la fonction `predict`. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?
 
 *Note*: Par défaut, les prédictions d'un GLM(M) sont sur l'échelle du prédicteur linéaire. Pour des prédictions sur l'échelle de la réponse, spécifiez l'argument `type = "response"`.
 
 **Réponse**
-
-Nous utilisons `expand.grid` pour obtenir toutes les combinaisons de valeurs uniques du traitement et de l'espèce.
 
 ```{r}
 pred_df <- expand.grid(plot_type = unique(abond$plot_type),

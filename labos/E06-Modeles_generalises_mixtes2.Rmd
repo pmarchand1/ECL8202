@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Ce laboratoire doit être remis le 12 février à 17h sur Moodle.
+Ce laboratoire doit être remis le 24 février à 17h sur Moodle.
 
 ## Données
 
@@ -45,7 +45,7 @@ a) Estimez les paramètres d'un modèle complet visant à prédire la présence/
 
 b) Quelle est la raison d'inclure chacun des effets aléatoires du modèle en (a)? Vérifiez si ces effets aléatoires suivent une distribution normale.
 
-c) Produisez un graphique de la probabilité de présence de l'AIV prédite par le modèle en (a) en fonction de la température pour chacune des quatre catégories d'âge et de sexe (HY/F, HY/M, AHY/F, AHY/M), en fixant la densité de population à sa valeur moyenne. 
+c) Produisez un graphique de la probabilité de présence de l'AIV prédite par le modèle en (a) en fonction de la température pour chacune des quatre catégories d'âge et de sexe (HY/F, HY/M, AHY/F, AHY/M). La densité de population n'apparaîtra pas dans le graphique, mais vous pouvez la fixer à sa valeur moyenne pour les prédictions.
 
 d) À partir du modèle complet, utilisez l'AIC pour déterminer s'il est préférable d'inclure ou non chacun des effets suivants: température, densité de population, ainsi que l'effet aléatoire pour l'interaction site x année.
 
