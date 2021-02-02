@@ -1,5 +1,5 @@
 ---
-title: "Generalized linear mixed models - Solutions"
+title: "Generalized linear mixed models"
 output:
     html_document:
         self_contained: false
