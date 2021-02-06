@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
 
-<title>Tests de randomisation et bootstrap</title>
+<title>Tests de randomisation</title>
 
 <script src="libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,9 +19,6 @@
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="libs/navigation-1.1/tabsets.js"></script>
 <link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="libs/highlightjs-9.12.0/highlight.js"></script>
@@ -86,7 +83,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +144,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,106 +157,8 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
-
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
 
 
 
@@ -271,92 +170,35 @@ div.tocify {
 <div class="container-fluid main-container">
 
 
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
-
-
 
 
 <div class="fluid-row" id="header">
 
 
 
-<h1 class="title toc-ignore">Tests de randomisation et bootstrap</h1>
+<h1 class="title toc-ignore">Tests de randomisation</h1>
 
 </div>
 
 
-<div id="donnees" class="section level2">
-<h2>Données</h2>
-<p>Ce laboratoire utilise la base de données Portal, qui contient des données de suivi à long terme de plusieurs espèces de rongeurs sur un site d’étude en Arizona.</p>
-<blockquote>
-<p>Ernest, M., Brown, J., Valone, T. and White, E.P. (2018) <em>Portal Project Teaching Database</em>. <a href="https://figshare.com/articles/Portal_Project_Teaching_Database/1314459">https://figshare.com/articles/Portal_Project_Teaching_Database/1314459</a>.</p>
-</blockquote>
-<p>Le tableau de données <a href="../donnees/portal_surveys.csv">portal_surveys.csv</a> contient une rangée par individu capturé. Les variables incluent la date (jour, mois, année), le numéro de parcelle, le code d’espèce, le sexe, la longueur de patte arrière et le poids des individus.</p>
-<pre class="r"><code>surveys &lt;- read.csv(&quot;../donnees/portal_surveys.csv&quot;, stringsAsFactors = FALSE)
-str(surveys)</code></pre>
-<pre><code>## &#39;data.frame&#39;:    35549 obs. of  9 variables:
-##  $ record_id      : int  1 2 3 4 5 6 7 8 9 10 ...
-##  $ month          : int  7 7 7 7 7 7 7 7 7 7 ...
-##  $ day            : int  16 16 16 16 16 16 16 16 16 16 ...
-##  $ year           : int  1977 1977 1977 1977 1977 1977 1977 1977 1977 1977 ...
-##  $ plot_id        : int  2 3 2 7 3 1 2 1 1 6 ...
-##  $ species_id     : chr  &quot;NL&quot; &quot;NL&quot; &quot;DM&quot; &quot;DM&quot; ...
-##  $ sex            : chr  &quot;M&quot; &quot;M&quot; &quot;F&quot; &quot;M&quot; ...
-##  $ hindfoot_length: int  32 33 37 36 35 14 NA 37 34 20 ...
-##  $ weight         : int  NA NA NA NA NA NA NA NA NA NA ...</code></pre>
-<p>Le tableau de données <a href="../donnees/portal_plots.csv">portal_plots.csv</a> indique le type de traitement appliqué à chaque parcelle. Les traitements visent à exclure différents types de rongeurs: “Control” = aucune clôture, pas d’exclusion; “Rodent Exclosure” = clôture, tous les rongeurs exclus; “Krat Exclosure” = clôture avec porte laissant passer les petits rongeurs, pas pas les rats-kangourous. Ces traitements ont été assignés aléatoirement après délimitation des parcelles.</p>
-<pre class="r"><code>plots &lt;- read.csv(&quot;../donnees/portal_plots.csv&quot;, stringsAsFactors = FALSE)
-str(plots)</code></pre>
-<pre><code>## &#39;data.frame&#39;:    24 obs. of  2 variables:
-##  $ plot_id  : int  1 2 3 4 5 6 7 8 9 10 ...
-##  $ plot_type: chr  &quot;Spectab exclosure&quot; &quot;Control&quot; &quot;Long-term Krat Exclosure&quot; &quot;Control&quot; ...</code></pre>
-</div>
-<div id="tests-de-randomisation" class="section level2">
-<h2>1. Tests de randomisation</h2>
+<p>Le fichier <a href="../donnees/sablefish.csv">sablefish.csv</a> contient des données de Kimura (1988) sur le nombre de prises de charbonnier par unité d’effort (<em>catch</em>) dans quatre localités d’Alaska (<em>location</em>) pour chacune des six années entre 1978 et 1983.</p>
+<pre class="r"><code>sable &lt;- read.csv(&quot;../donnees/sablefish.csv&quot;)
+head(sable)</code></pre>
+<pre><code>##   year location catch
+## 1 1978 Shumagin 0.236
+## 2 1978 Chirikof 0.204
+## 3 1978   Kodiak 0.241
+## 4 1978  Yakutat 0.232
+## 5 1979 Shumagin 0.140
+## 6 1979 Chirikof 0.202</code></pre>
 <ol style="list-style-type: lower-alpha">
-<li>Tout d’abord, nous devons préparer les données pour l’analyse:</li>
+<li><p>Ajustez un modèle linéaire des prises en fonction de la localité seulement. Quelle est l’interprétation du coefficient <code>locationYakutat</code> de ce modèle?</p></li>
+<li><p>Effectuez un test de permutation pour calculer la valeur <span class="math inline">\(p\)</span> correspondant à la différence moyenne de prises entre les localités Kodiak et Chirikof. Cette valeur est-elle cohérente avec la valeur correspondante du modèle linéaire?</p></li>
+<li><p>En utilisant le package <em>permuco</em>, déterminez la valeur <span class="math inline">\(p\)</span> pour cette même différence pour un modèle incluant les effets additifs de l’année et de la localité. <em>Note</em>: Nous considérons l’année comme une variable catégorielle ici, donc elle doit être convertie en facteur. La valeur <span class="math inline">\(p\)</span> diffère-t-elle entre le test de permutation et le modèle paramétrique?</p></li>
 </ol>
-<ul>
-<li><p>Dans le tableau <code>surveys</code>, conservez uniquement les observations de l’année 2002 où le poids n’est pas manquant. <em>Rappel</em>: La fonction <code>is.na(x)</code> vérifie si <code>x</code> est une valeur manquante.</p></li>
-<li><p>Pour simplifier les données, nous allons grouper les traitements autres que “Control” et “Rodent Exclosure” sous le nom “Krat Exclosure”. Voici l’instruction pour effectuer cette transformation.</p></li>
-</ul>
-<pre class="r"><code>plots$plot_type[!(plots$plot_type %in% c(&quot;Control&quot;, &quot;Rodent Exclosure&quot;))] &lt;- &quot;Krat Exclosure&quot;</code></pre>
-<ul>
-<li>Finalement, joignez les tableaux <code>surveys</code> et <code>plots</code> pour connaître les traitements des parcelles liés à chaque observation. Vous pouvez utiliser la fonction <code>merge</code> dans R ou la fonction <code>inner_join</code>, qui requiet le package <em>dplyr</em>. Nommez le tableau résultant <code>surveys_plots</code>.</li>
-</ul>
-<p>Ensuite, visualisez la distribution du poids (<code>weight</code>, en grammes) des individus selon le traitement <code>plot_type</code>. Vous pouvez utiliser des boîtes à moustaches, par exemple. D’après ce graphique, pour quelle raison serait-il utile d’appliquer une méthode non-paramétrique pour comparer les effets de ces traitements?</p>
-<ol start="2" style="list-style-type: lower-alpha">
-<li>Nous utiliserons un test de randomisation basé sur l’ANOVA pour déterminer si la masse des individus capturés varie selon le traitement. Pour ce faire, nous écrirons une fonction qui randomise les types de traitement dans le tableau de données <code>plots</code>, avant de joindre ce nouveau tableau à <code>surveys</code> et d’exécuter l’ANOVA.</li>
-</ol>
-<ul>
-<li>Pourquoi procéder de cette façon, plutôt que de simplement randomiser la colonne <code>plot_type</code> dans le tableau de données déjà combiné en (a)? (Pour répondre à cette question, pensez à la justification du test de randomisation dans le contexte de ce plan d’expérience.)</li>
-</ul>
-<ol start="3" style="list-style-type: lower-alpha">
-<li><p>Créez la fonction décrite en (b), qui effectue une randomisation de <code>plots</code>, joint ce tableau à <code>surveys</code>, exécute une ANOVA du poids des individus en fonction du traitement, puis retourne la valeur <span class="math inline">\(F\)</span>. Déterminez la distribution de cette statistique pour l’hypothèse nulle avec 4999 permutations. Quelle est la valeur <span class="math inline">\(p\)</span> pour la valeur <span class="math inline">\(F\)</span> observée si les traitements n’ont aucun effet sur la masse des individus capturés?</p></li>
-<li><p>Effectuez un test de permutation semblable à c) pour l’hypothèse nulle selon laquelle la médiane du poids est la même pour les traitements “Control” et “Krat Exclosure”. Quelle est l’écart-type de la statistique du test sous l’hypothèse nulle?</p></li>
-<li><p>Quelle est la valeur <span class="math inline">\(p\)</span> pour le test en d)? La différence est-elle significative avec un seuil <span class="math inline">\(\alpha = 0.01\)</span>?</p></li>
-</ol>
-</div>
-<div id="bootstrap" class="section level2">
-<h2>2. Bootstrap</h2>
-<ol style="list-style-type: lower-alpha">
-<li><p>Utilisez la méthode du bootstrap avec 10 000 réplicats pour calculer la différence de la médiane du poids des individus capturés, entre les traitements “Krat Exclosure” et “Control”. Effectuez une correction du biais et rapportez la différence corrigée avec son erreur-type.</p></li>
-<li><p>Calculez l’intervalle de confiance à 99% pour la différence estimée en a).</p></li>
-<li><p>L’intervalle de confiance obtenu en b) est-il cohérent avec le résultat du test en 1.e)? Est-ce que le bootstrap représente bien le processus d’échantillonnage pour ce problème?</p></li>
-</ol>
-</div>
 
 
 
-</div>
-</div>
 
 </div>
 
@@ -372,6 +214,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

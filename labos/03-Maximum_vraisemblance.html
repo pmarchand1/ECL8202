@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -292,7 +257,7 @@ div.tocify {
 </div>
 
 
-<div id="donnees" class="section level2">
+<div id="données" class="section level2">
 <h2>Données</h2>
 <p>Le tableau de données <a href="../donnees/thermal_range.csv">thermal_range.csv</a> représente le résultat d’une expérience visant à déterminer l’effet de la température (<em>temp</em>) sur le nombre d’oeufs (<em>num_eggs</em>) produits par une espèce de moustique. Trois réplicats ont été mesurés pour des valeurs de température entre 10 et 32 degrés Celsius.</p>
 <pre class="r"><code>therm &lt;- read.csv(&quot;../donnees/thermal_range.csv&quot;)
@@ -305,7 +270,7 @@ head(therm)</code></pre>
 ## 5   12        4
 ## 6   12        6</code></pre>
 </div>
-<div id="modele-de-poisson" class="section level2">
+<div id="modèle-de-poisson" class="section level2">
 <h2>1. Modèle de Poisson</h2>
 <p>Nous supposons que le nombre moyen d’oeufs produits suit une fonction gaussienne centrée sur une température optimale. (Cette fonction a la même forme qu’une distribution normale, mais il ne s’agit pas d’une probabilité).</p>
 <p><span class="math display">\[N = N_o \exp \left( - \frac{(T - T_o)^2}{\sigma_T^2} \right)  \]</span></p>
@@ -343,12 +308,12 @@ head(therm)</code></pre>
 </ul>
 <p>À partir des résultats, pouvez-vous dire que le modèle représente bien la tendance générale des données ainsi que leur variation aléatoire autour de cette tendance?</p>
 </div>
-<div id="modele-binomial-negatif" class="section level2">
+<div id="modèle-binomial-négatif" class="section level2">
 <h2>2. Modèle binomial négatif</h2>
 <ol style="list-style-type: lower-alpha">
 <li>Répétez les parties (c) à (f) du numéro précédent en utilisant une distribution binomiale négative au lieu de la distribution de Poisson pour la portion aléatoire du modèle.</li>
 </ol>
-<p><em>Rappel</em>: Dans la distribution de Poisson, la moyenne et la variance sont égales à <span class="math inline">\(\lambda\)</span>. Dans la distribution binomiale négative, la moyenne est égale à <span class="math inline">\(\mu\)</span> et la variance égale à <span class="math inline">\(\mu + \mu^2/\theta\)</span>. Pour ce numéro, nous utiliserons <span class="math inline">\(k = 1/\theta\)</span> comme paramètre. Comme <span class="math inline">\(\theta\)</span>, <span class="math inline">\(k\)</span> doit prendre une valeur supérieure ou égale à 0. Mais puisque la variance en fonction de <span class="math inline">\(k\)</span> est <span class="math inline">\(\mu + k \mu^2\)</span>, la distribution de Poisson correspond au cas <span class="math inline">\(k = 0\)</span>.</p>
+<p><em>Rappel</em>: Dans la distribution de Poisson, la moyenne et la variance sont égales à <span class="math inline">\(\lambda\)</span>. Dans la distribution binomiale négative, la moyenne est égale à <span class="math inline">\(\mu\)</span> et la variance égale à <span class="math inline">\(\mu + \mu^2/\theta\)</span>. Pour ce numéro, nous utiliserons <span class="math inline">\(k = 1/\theta\)</span> comme paramètre. Si <span class="math inline">\(\theta &gt; 0\)</span>, <span class="math inline">\(k\)</span> quant à lui doit prendre une valeur supérieure ou égale à 0. Puisque la variance en fonction de <span class="math inline">\(k\)</span> est <span class="math inline">\(\mu + k \mu^2\)</span>, la distribution de Poisson correspond au cas <span class="math inline">\(k = 0\)</span>.</p>
 <p>Voici les principaux changements à apporter pour remplacer le modèle de Poisson par le modèle binomiale négatif:</p>
 <ul>
 <li><p>Ajoutez le paramètre <span class="math inline">\(k\)</span> à la fonction de log-vraisemblance. Remplacez l’appel à <code>dpois</code> par <code>dnbinom(y, mu, size = 1/k, log = TRUE)</code> où <code>mu</code> est la prédiction moyenne, donc équivalente au <code>lambda</code> de <code>dpois</code>.</p></li>
@@ -379,6 +344,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

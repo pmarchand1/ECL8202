@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Introduction
@@ -87,11 +88,11 @@ $$\mu = \beta_0 + f(x_1) + f(x_2) + ...$$
 
 Dans ce type de modèle, les $f(x_i)$ proviennent d'une classe de fonctions appelées splines de lissage (*smoothing splines*), que nous décrirons mathématiquement un peu plus loin.
 
-## Modèle additif à une variable
+## Modèle additif à un prédicteur
 
 La fonction `gam` du package *mgcv* permet d'ajuster des modèles additifs. Dans l'exemple ci-dessous, nous spécifions un modèle où la concentration d'ozone est reliée à la température par une spline `s(Temp)`.
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(mgcv)
 o3_t <- gam(Ozone ~ s(Temp), data = airquality)
 ```
@@ -110,7 +111,7 @@ $$f(x_i) = \sum_{j=1}^k \beta_j b_j(x_i)$$
 
 Par défaut, `gam` utilise des splines en plaque mince (*thin plate regression spline*) comme fonctions de base, mais d'autres types de fonctions peuvent être spécifiés avec l'argument `bs`. Le graphique ci-dessous montre la forme de ces splines en plaque mince pour des valeurs de $k$ allant de 3 à 9. Remarquez que le nombre de fonctions de base et leur complexité augmente avec $k$, ce qui permet de produire des splines de plus en plus complexes.
 
-```{r, echo = FALSE, warning = FALSE}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 library(gratia)
 b3 <- draw(basis(s(Temp, k = 3), data = airquality))
 b5 <- draw(basis(s(Temp, k = 5), data = airquality))
@@ -177,16 +178,16 @@ mod_o3 <- gam(Ozone ~ s(Temp) + s(Wind) + s(Solar.R),
 
 La commande `plot` produit maintenant un graphique pour chaque spline estimée. Les splines sont estimées avec une moyenne de zéro. Ainsi:
 
-- l'ordonnée à l'origine du modèle représente la valeur moyenne de la réponse lorsque tous les prédicteurs sont à leur valeur moyenne;
+- l'ordonnée à l'origine du modèle représente la valeur moyenne de la réponse;
 
-- les effets représentés par chaque spline représentent les différences avec cette moyenne en fonction de la valeur du prédicteur.
+- les effets représentés par chaque spline représentent la variation de la réponse par rapport à cette moyenne en fonction de la valeur du prédicteur.
 
 ```{r}
 par(mfrow = c(1, 3), cex = 1)
 plot(mod_o3, residuals = TRUE)
 ```
 
-Nous pouvons aussi effectuer une translation de chaque spline égale à l'ordonnée à l'origine (`shift = coef(mod_o3)[1]`); dans ce cas, les graphiques montrent la valeur de la réponse, plutôt qu'une différence, en fonction du prédicteur représenté si les autres prédicteurs demeurent à leur valeur moyenne. Cette version peut être plus facile à interpréter.
+Nous pouvons aussi effectuer une translation de chaque spline égale à l'ordonnée à l'origine (`shift = coef(mod_o3)[1]`); dans ce cas, les graphiques montrent la moyenne de la réponse en fonction du prédicteur, plutôt qu'une différence par rapport à sa moyenne. Cette version peut être plus facile à interpréter.
 
 ```{r}
 par(mfrow = c(1, 3), cex = 1)
@@ -268,11 +269,11 @@ ggplot(airquality, aes(x = Temp, y = Wind)) +
 
 # Modéliser les interactions
 
-Dans cette section, nous verrons commencer modéliser l'interaction entre un effet non-linéaire et un facteur (variable catégorielle), ou entre deux prédicteurs linéaires.
+Dans cette section, nous verrons commencer modéliser l'interaction entre un effet non-linéaire et un facteur (variable catégorielle), ou entre deux effets non-linéaires.
 
 Nous utiliserons le jeu de données `CanWeather` du package *gamair*, qui contient des mesures de température *T* à chaque jour (*time*) d'une année pour 35 villes canadiennes (*place*). La latitude de chaque ville est incluse et ces villes sont groupées en quatre régions (Arctique, Atlantique, Continentale et Pacifique).
 
-```{r, warning = FALSE}
+```{r, warning = FALSE, message = FALSE}
 library(gamair)
 data(canWeather)
 str(CanWeather)
@@ -410,7 +411,7 @@ $$g(\mu) = \beta_0 + f(x_1) + f(x_2) + ...$$
 
 Pour illuster ce type de modèle, nous utiliserons le jeu de données `Wells` du package *carData*, qui présente les données d'une étude menée auprès de 3020 ménages au Bangladesh. Les puits utilisés par ces ménages avaient une concentration d'arsenic (variable `arsenic`, en multiples de 100 $\mu g/L$) supérieure au niveau jugé sûr. La réponse binaire `switch` indique si le ménage a changé de puits. En plus de la concentration d'arsenic, le tableau contient d'autres prédicteurs, dont la distance vers le puits sûr le plus près (`distance` en mètres).
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(carData)
 data(Wells)
 str(Wells)
@@ -448,7 +449,7 @@ gam.check(mod_wells)
 
 Dans ce cas, il est préférable d'évaluer l'ajustement du modèle en groupant les résidus. La fonction `binnedplot` du package *arm* ordonne les observations en ordre croissant de valeurs prédites, puis groupe les observations avec prédictions similaires. Elle produit ensuite un graphique du résidu moyen par groupe en fonction de la prédiction moyenne, avec intervalle de prédiction à 95%. 
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(arm)
 binnedplot(fitted(mod_wells), residuals(mod_wells, type = "response"))
 ```

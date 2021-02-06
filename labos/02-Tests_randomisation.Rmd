@@ -1,69 +1,25 @@
 ---
-title: "Tests de randomisation et bootstrap"
+title: "Tests de randomisation"
 output:
     html_document:
         self_contained: false
         lib_dir: libs
         theme: spacelab
-        toc: true
-        toc_float: true
 ---
-
+    
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Données
-
-Ce laboratoire utilise la base de données Portal, qui contient des données de suivi à long terme de plusieurs espèces de rongeurs sur un site d'étude en Arizona.
-
-> Ernest, M., Brown, J., Valone, T. and White, E.P. (2018) *Portal Project Teaching Database*. [https://figshare.com/articles/Portal_Project_Teaching_Database/1314459](https://figshare.com/articles/Portal_Project_Teaching_Database/1314459).
-
-Le tableau de données [portal_surveys.csv](../donnees/portal_surveys.csv) contient une rangée par individu capturé. Les variables incluent la date (jour, mois, année), le numéro de parcelle, le code d'espèce, le sexe, la longueur de patte arrière et le poids des individus. 
+Le fichier [sablefish.csv](../donnees/sablefish.csv) contient des données de Kimura (1988) sur le nombre de prises de charbonnier par unité d'effort (*catch*) dans quatre localités d'Alaska (*location*) pour chacune des six années entre 1978 et 1983.
 
 ```{r}
-surveys <- read.csv("../donnees/portal_surveys.csv", stringsAsFactors = FALSE)
-str(surveys)
+sable <- read.csv("../donnees/sablefish.csv")
+head(sable)
 ```
 
-Le tableau de données [portal_plots.csv](../donnees/portal_plots.csv) indique le type de traitement appliqué à chaque parcelle. Les traitements visent à exclure différents types de rongeurs: "Control" = aucune clôture, pas d'exclusion; "Rodent Exclosure" = clôture, tous les rongeurs exclus; "Krat Exclosure" = clôture avec porte laissant passer les petits rongeurs, pas pas les rats-kangourous. Ces traitements ont été assignés aléatoirement après délimitation des parcelles.
+a) Ajustez un modèle linéaire des prises en fonction de la localité seulement. Quelle est l'interprétation du coefficient `locationYakutat` de ce modèle?
 
-```{r}
-plots <- read.csv("../donnees/portal_plots.csv", stringsAsFactors = FALSE)
-str(plots)
-```
+b) Effectuez un test de permutation pour calculer la valeur $p$ correspondant à la différence moyenne de prises entre les localités Kodiak et Chirikof. Cette valeur est-elle cohérente avec la valeur correspondante du modèle linéaire?
 
-## 1. Tests de randomisation
-
-a) Tout d'abord, nous devons préparer les données pour l'analyse:
-
-- Dans le tableau `surveys`, conservez uniquement les observations de l'année 2002 où le poids n'est pas manquant. *Rappel*: La fonction `is.na(x)` vérifie si `x` est une valeur manquante.
-
-- Pour simplifier les données, nous allons grouper les traitements autres que "Control" et "Rodent Exclosure" sous le nom "Krat Exclosure". Voici l'instruction pour effectuer cette transformation.
-
-```{r, eval = FALSE}
-plots$plot_type[!(plots$plot_type %in% c("Control", "Rodent Exclosure"))] <- "Krat Exclosure"
-```
-
-- Finalement, joignez les tableaux `surveys` et `plots` pour connaître les traitements des parcelles liés à chaque observation. Vous pouvez utiliser la fonction `merge` dans R ou la fonction `inner_join`, qui requiet le package *dplyr*. Nommez le tableau résultant `surveys_plots`.
-
-Ensuite, visualisez la distribution du poids (`weight`, en grammes) des individus selon le traitement `plot_type`. Vous pouvez utiliser des boîtes à moustaches, par exemple. D'après ce graphique, pour quelle raison serait-il utile d'appliquer une méthode non-paramétrique pour comparer les effets de ces traitements?
-
-b) Nous utiliserons un test de randomisation basé sur l'ANOVA pour déterminer si la masse des individus capturés varie selon le traitement. Pour ce faire, nous écrirons une fonction qui randomise les types de traitement dans le tableau de données `plots`, avant de joindre ce nouveau tableau à `surveys` et d'exécuter l'ANOVA. 
-
-- Pourquoi procéder de cette façon, plutôt que de simplement randomiser la colonne `plot_type` dans le tableau de données déjà combiné en (a)? (Pour répondre à cette question, pensez à la justification du test de randomisation dans le contexte de ce plan d'expérience.)
-
-c) Créez la fonction décrite en (b), qui effectue une randomisation de `plots`, joint ce tableau à `surveys`, exécute une ANOVA du poids des individus en fonction du traitement, puis retourne la valeur $F$. Déterminez la distribution de cette statistique pour l'hypothèse nulle avec 4999 permutations. Quelle est la valeur $p$ pour la valeur $F$ observée si les traitements n'ont aucun effet sur la masse des individus capturés?
-
-d) Effectuez un test de permutation semblable à c) pour l'hypothèse nulle selon laquelle la médiane du poids est la même pour les traitements "Control" et "Krat Exclosure". Quelle est l'écart-type de la statistique du test sous l'hypothèse nulle?
-
-e) Quelle est la valeur $p$ pour le test en d)? La différence est-elle significative avec un seuil $\alpha = 0.01$? 
-
-
-## 2. Bootstrap
-
-a) Utilisez la méthode du bootstrap avec 10 000 réplicats pour calculer la différence de la médiane du poids des individus capturés, entre les traitements "Krat Exclosure" et "Control". Effectuez une correction du biais et rapportez la différence corrigée avec son erreur-type.
-
-b) Calculez l'intervalle de confiance à 99% pour la différence estimée en a).
-
-c) L'intervalle de confiance obtenu en b) est-il cohérent avec le résultat du test en 1.e)? Est-ce que le bootstrap représente bien le processus d'échantillonnage pour ce problème?
+c) En utilisant le package *permuco*, déterminez la valeur $p$ pour cette même différence pour un modèle incluant les effets additifs de l'année et de la localité. *Note*: Nous considérons l'année comme une variable catégorielle ici, donc elle doit être convertie en facteur. La valeur $p$ diffère-t-elle entre le test de permutation et le modèle paramétrique?

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Generalized linear mixed models - Solutions</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Generalized linear mixed models - Solutions</h1>
+
+</div>
+
+
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>For this laboratory we will use the Portal database, already presented in Lab 2, which contains long-term monitoring data for several rodent species at a study site in Arizona.</p>
+<blockquote>
+<p>Ernest, M., Brown, J., Valone, T. and White, E.P. (2018) <em>Portal Project Teaching Database</em>. <a href="https://figshare.com/articles/Portal_Project_Teaching_Database/1314459">https://figshare.com/articles/Portal_Project_Teaching_Database/1314459</a>.</p>
+</blockquote>
+<p>This database consists of three data tables:</p>
+<ul>
+<li><a href="../donnees/portal_surveys.csv">portal_surveys.csv</a> contains information on each captured individual.</li>
+</ul>
+<pre class="r"><code>surveys &lt;- read.csv(&quot;../donnees/portal_surveys.csv&quot;)
+str(surveys)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    35549 obs. of  9 variables:
+##  $ record_id      : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ month          : int  7 7 7 7 7 7 7 7 7 7 ...
+##  $ day            : int  16 16 16 16 16 16 16 16 16 16 ...
+##  $ year           : int  1977 1977 1977 1977 1977 1977 1977 1977 1977 1977 ...
+##  $ plot_id        : int  2 3 2 7 3 1 2 1 1 6 ...
+##  $ species_id     : chr  &quot;NL&quot; &quot;NL&quot; &quot;DM&quot; &quot;DM&quot; ...
+##  $ sex            : chr  &quot;M&quot; &quot;M&quot; &quot;F&quot; &quot;M&quot; ...
+##  $ hindfoot_length: int  32 33 37 36 35 14 NA 37 34 20 ...
+##  $ weight         : int  NA NA NA NA NA NA NA NA NA NA ...</code></pre>
+<ul>
+<li><a href="../donnees/portal_species.csv">portal_species.csv</a> gives the genus, species and taxonomic group corresponding to each species ID.</li>
+</ul>
+<pre class="r"><code>species &lt;- read.csv(&quot;../donnees/portal_species.csv&quot;)
+str(species)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    54 obs. of  4 variables:
+##  $ species_id: chr  &quot;AB&quot; &quot;AH&quot; &quot;AS&quot; &quot;BA&quot; ...
+##  $ genus     : chr  &quot;Amphispiza&quot; &quot;Ammospermophilus&quot; &quot;Ammodramus&quot; &quot;Baiomys&quot; ...
+##  $ species   : chr  &quot;bilineata&quot; &quot;harrisi&quot; &quot;savannarum&quot; &quot;taylori&quot; ...
+##  $ taxa      : chr  &quot;Bird&quot; &quot;Rodent&quot; &quot;Bird&quot; &quot;Rodent&quot; ...</code></pre>
+<ul>
+<li><a href="../donnees/portal_plots.csv">portal_plots.csv</a> indicates the type of treatment applied to each plot: “Control” = control, no fence; “Rodent Exclosure” = fence to exclude all rodents; “Long-term Krat Exclosure” or “Short-term Krat Exclosure” = fence with gate to exclude kangaroo rats of the genus <em>Dipodomys</em>. “Spectab exclosure” = fence with gate to exclude only the species <em>Dipodomys spectabilis</em>.</li>
+</ul>
+<pre class="r"><code>plots &lt;- read.csv(&quot;../donnees/portal_plots.csv&quot;)
+str(plots)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    24 obs. of  2 variables:
+##  $ plot_id  : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ plot_type: chr  &quot;Spectab exclosure&quot; &quot;Control&quot; &quot;Long-term Krat Exclosure&quot; &quot;Control&quot; ...</code></pre>
+</div>
+<div id="preparation-of-data" class="section level2">
+<h2>1. Preparation of data</h2>
+<ol style="list-style-type: lower-alpha">
+<li>From the <code>surveys</code> table, only keep individuals observed since 1988 that correspond to rodents (<code>taxa == "Rodent"</code> in the <code>species</code> table).</li>
+</ol>
+<p><strong>Solution</strong></p>
+<p>The <code>surveys</code> and <code>species</code> tables must be joined before applying a filter for the year and taxonomic group.</p>
+<pre class="r"><code>library(dplyr)
+surveys &lt;- inner_join(surveys, species) %&gt;%
+    filter(year &gt;= 1988, taxa == &quot;Rodent&quot;)</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Select the 15 most abundant species from the data frame obtained in (a), then count the number of individuals for each of these species, by year and plot. Include a count of 0 for plots and years where the species is absent.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<ul>
+<li>First, we count the number of observations in <code>surveys</code> by species with <code>count</code> (which produces a table with 2 columns, <code>species_id</code> and <code>n</code>), then we keep the 15 most abundant with <code>top_n</code>. Then <code>semi_join</code> keeps only the rows of <code>surveys</code> that correspond to one of the species in the top 15; unlike <code>inner_join</code>, <code>semi_join</code> does not attach new columns to <code>surveys</code>.</li>
+</ul>
+<pre class="r"><code>compte_esp &lt;- count(surveys, species_id) %&gt;%
+    top_n(15, wt = n) # wt = n means to take the top 15 according to n
+
+surveys &lt;- semi_join(surveys, compte_esp)</code></pre>
+<pre><code>## Joining, by = &quot;species_id&quot;</code></pre>
+<ul>
+<li>We then use the <code>count</code> function to count the number of individuals by species, plot and year. Finally, we apply the <code>complete</code> function of the <code>tidyr</code> package to add the zeros in the <code>n</code> column for the combinations of species, plot and year without observations.</li>
+</ul>
+<pre class="r"><code>abond &lt;- count(surveys, species_id, plot_id, year)
+
+library(tidyr)
+abond &lt;- complete(abond, species_id, plot_id, year, fill = list(n = 0))
+
+str(abond)</code></pre>
+<pre><code>## tibble [5,400 x 4] (S3: tbl_df/tbl/data.frame)
+##  $ species_id: chr [1:5400] &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; ...
+##  $ plot_id   : int [1:5400] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ year      : int [1:5400] 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 ...
+##  $ n         : num [1:5400] 0 0 0 1 0 0 0 0 0 0 ...</code></pre>
+<p>Note that the number of rows in <code>abond</code> is equal to the product of the number of species, plots and years (15 x 24 x 15 = 5400).</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Recode the two treatments “Long-term Krat Exclosure” and “Short-term Krat Exclosure” into one treatment, “Krat Exclosure”, and join the <code>plot</code> data frame to the data frame obtained in (b).</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>plots$plot_type[grepl(&quot;Krat&quot;, plots$plot_type)] &lt;- &quot;Krat Exclosure&quot;
+
+abond &lt;- inner_join(abond, plots)</code></pre>
+<pre><code>## Joining, by = &quot;plot_id&quot;</code></pre>
+<pre class="r"><code>str(abond)</code></pre>
+<pre><code>## tibble [5,400 x 5] (S3: tbl_df/tbl/data.frame)
+##  $ species_id: chr [1:5400] &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; ...
+##  $ plot_id   : int [1:5400] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ year      : int [1:5400] 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 ...
+##  $ n         : num [1:5400] 0 0 0 1 0 0 0 0 0 0 ...
+##  $ plot_type : chr [1:5400] &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; ...</code></pre>
+<p><em>Note</em>: The function <code>grepl(pattern, x)</code> returns <code>TRUE</code> or <code>FALSE</code> depending on whether or not the variable <code>x</code> contains the given text <code>pattern</code>.</p>
+</div>
+<div id="modeling-the-abundance-of-a-species" class="section level2">
+<h2>2. Modeling the abundance of a species</h2>
+<p>For this part, we limit ourselves to the data of the species <em>Dipodomys ordii</em> (DO), Ord’s kangaroo rat.</p>
+<p><img src="../images/d_ordii.png" /></p>
+<ol style="list-style-type: lower-alpha">
+<li>Visualize the distribution of the number of individuals of species DO according to the type of treatment. What type of model would be appropriate to model this relationship? (Ignore the effects of other variables at this point.) Estimate the model parameters and check whether the resulting coefficients qualitatively match the expected effects of each treatment.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>abond_do &lt;- filter(abond, species_id == &quot;DO&quot;)
+
+library(ggplot2)
+# Here&#39;s one option with boxplots
+ggplot(abond_do, aes(x = plot_type, y = n)) +
+    geom_boxplot()</code></pre>
+<p><img src="05RE-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>These are count data with several zeros (especially for “Krat Exclosure” and “Rodent Exclosure”) and a variance that increases with the mean, so Poisson regression would potentially be appropriate.</p>
+<pre class="r"><code>do_glm &lt;- glm(n ~ plot_type, data = abond_do, family = poisson)
+summary(do_glm)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = n ~ plot_type, family = poisson, data = abond_do)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -5.6214  -1.7272  -1.0954  -0.3422  11.0933  
+## 
+## Coefficients:
+##                            Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                 2.21375    0.03018  73.355   &lt;2e-16 ***
+## plot_typeKrat Exclosure    -1.81386    0.08061 -22.503   &lt;2e-16 ***
+## plot_typeRodent Exclosure  -2.72458    0.13939 -19.547   &lt;2e-16 ***
+## plot_typeSpectab exclosure  0.54626    0.05496   9.939   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 4900.6  on 359  degrees of freedom
+## Residual deviance: 3154.8  on 356  degrees of freedom
+## AIC: 3715.1
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<p>The negative effect of the “Rodent Exclosure” and “Krat Exclosure” treatments is expected since it is a species of kangaroo rat that should be excluded by these two treatments. The positive effect of “Spectab Exclosure” could be due to the fact that this treatment excludes another kangaroo rat species that competes with it.</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Now add to the model in (a) random effects of plot and year. Which of these two grouping variables has the greatest effect on the response? Explain how and why the standard errors of the fixed effects changed between this model and the model in the previous question.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(lme4)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<pre class="r"><code>do_glmm &lt;- glmer(n ~ plot_type + (1 | plot_id) + (1 | year),
+                 data = abond_do, family = poisson)
+summary(do_glmm)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: n ~ plot_type + (1 | plot_id) + (1 | year)
+##    Data: abond_do
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##   2023.4   2046.7  -1005.7   2011.4      354 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.0898 -0.9805 -0.3705  0.0488  8.4756 
+## 
+## Random effects:
+##  Groups  Name        Variance Std.Dev.
+##  plot_id (Intercept) 2.6616   1.6314  
+##  year    (Intercept) 0.4198   0.6479  
+## Number of obs: 360, groups:  plot_id, 24; year, 15
+## 
+## Fixed effects:
+##                            Estimate Std. Error z value Pr(&gt;|z|)   
+## (Intercept)                  1.3761     0.6072   2.266  0.02344 * 
+## plot_typeKrat Exclosure     -2.8076     0.8561  -3.280  0.00104 **
+## plot_typeRodent Exclosure   -2.6221     0.9108  -2.879  0.00399 **
+## plot_typeSpectab exclosure   1.0017     1.2941   0.774  0.43891   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) plt_KE plt_RE
+## plt_typKrtE -0.650              
+## plt_typRdnE -0.613  0.439       
+## plt_typSpce -0.433  0.305  0.288</code></pre>
+<p>The standard deviation of the variation between plots (1.63) is greater than the standard deviation of the variance between years (0.65).</p>
+<p>The standard errors of the fixed effects are larger than those of the model without random effects; this is because the mixed model accounts for the fact that observations from the same plot are correlated, which gives less statistical power than a completely independent sample, especially when the treatment is applied at the plot level.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Check that the model assumptions in (b) are met, especially the dispersion of residuals and the normality of random effects. If overdispersion occurs, estimate the coefficient of dispersion.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<p>There is a significant overdispersion (coefficient of 3.59).</p>
+<pre class="r"><code>chi2 &lt;- sum(residuals(do_glmm, type = &quot;pearson&quot;)^2)
+1 - pchisq(chi2, df = df.residual(do_glmm))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>chi2 / df.residual(do_glmm)</code></pre>
+<pre><code>## [1] 3.591732</code></pre>
+<p>Random effects of plot and year follow a normal distribution except for some extreme values.</p>
+<pre class="r"><code>re &lt;- ranef(do_glmm)
+qqnorm(re$plot_id$`(Intercept)`)
+qqline(re$plot_id$`(Intercept)`)</code></pre>
+<p><img src="05RE-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>qqnorm(re$year$`(Intercept)`)
+qqline(re$year$`(Intercept)`)</code></pre>
+<p><img src="05RE-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
+</div>
+<div id="modeling-several-species" class="section level2">
+<h2>3. Modeling several species</h2>
+<p>Now let’s take the complete dataset produced in Part 1, the 15 most abundant species.</p>
+<ol style="list-style-type: lower-alpha">
+<li>Use a model without random effects to estimate abundance by species, type of treatment and their interaction. Based on the description of the experiment, why is it important to include the interaction here?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<p>The interaction means that the effect of treatments varies from one species to another. It is important to consider it because the treatments were designed to exclude different species.</p>
+<pre class="r"><code>glm_sp &lt;- glm(n ~ plot_type * species_id, data = abond, family = poisson)</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Fit a model equivalent to (a), except that the species is a random rather than a fixed effect. Name one advantage and one disadvantage of this choice.</li>
+</ol>
+<p><em>Note</em>: If the GLMM is having trouble converging, we can specify the <code>control</code> argument to <code>glmer</code> to increase the maximum number of iterations or to change the optimizer. In this case, changing the optimizer to <code>bobyqa</code> with <code>control = glmerControl(optimizer = "bobyqa")</code> should fix the problem.</p>
+<p><strong>Solution</strong></p>
+<p>By including a random effect of the species on the intercept and the treatment coefficients, we obtain the equivalent of an interaction.</p>
+<p>The GLMM uses information from all species to estimate the effect of treatments on each species. This can be advantageous to compensate for the lack of observations of rare species. However, for very different species, it may not be reasonable to assume that their response to treatments comes from the same normal distribution.</p>
+<pre class="r"><code>glmm_sp &lt;- glmer(n ~ plot_type + (1 + plot_type | species_id), 
+                 data = abond, family = poisson, 
+                 control = glmerControl(optimizer = &quot;bobyqa&quot;))
+summary(glmm_sp)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: n ~ plot_type + (1 + plot_type | species_id)
+##    Data: abond
+## Control: glmerControl(optimizer = &quot;bobyqa&quot;)
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  39024.6  39116.9 -19498.3  38996.6     5386 
+## 
+## Scaled residuals: 
+##    Min     1Q Median     3Q    Max 
+## -5.829 -1.241 -0.792  0.137 32.183 
+## 
+## Random effects:
+##  Groups     Name                       Variance Std.Dev. Corr             
+##  species_id (Intercept)                1.4864   1.2192                    
+##             plot_typeKrat Exclosure    2.7669   1.6634   -0.31            
+##             plot_typeRodent Exclosure  3.5819   1.8926   -0.35  0.84      
+##             plot_typeSpectab exclosure 0.3055   0.5527    0.27  0.08  0.18
+## Number of obs: 5400, groups:  species_id, 15
+## 
+## Fixed effects:
+##                            Estimate Std. Error z value Pr(&gt;|z|)   
+## (Intercept)                  0.8500     0.3147   2.701  0.00692 **
+## plot_typeKrat Exclosure     -0.3842     0.4259  -0.902  0.36692   
+## plot_typeRodent Exclosure   -1.3993     0.4899  -2.856  0.00428 **
+## plot_typeSpectab exclosure  -0.3077     0.1532  -2.009  0.04457 * 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) plt_KE plt_RE
+## plt_typKrtE -0.309              
+## plt_typRdnE -0.338  0.810       
+## plt_typSpce  0.242  0.079  0.168</code></pre>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>With the <code>expand.grid</code> function, create a data set for predictions that contains all combinations of treatment and species.</li>
+</ol>
+<pre class="r"><code>pred_df &lt;- expand.grid(plot_type = unique(abond$plot_type),
+                       species_id = unique(abond$species_id))</code></pre>
+<p>Calculate for each combination the predicted abundance according to the models in (a) and (b), using the <code>predict</code> function. Visualize the predicted values. Is there shrinkage of the estimates for the mixed model?</p>
+<p><em>Note</em>: By default, the predictions of a GLM(M) are on the scale of the linear predictor. For predictions on the scale of the response, specify the argument <code>type = "response"</code>.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>pred_df &lt;- expand.grid(plot_type = unique(abond$plot_type),
+                       species_id = unique(abond$species_id))
+pred_df$pred_glm &lt;- predict(glm_sp, newdata = pred_df)
+pred_df$pred_glmm &lt;- predict(glmm_sp, newdata = pred_df)
+
+ggplot(pred_df, aes(x = species_id)) +
+    labs(y = &quot;log(abondance)&quot;) +
+    geom_point(aes(y = pred_glm), color = &quot;red&quot;) +
+    geom_point(aes(y = pred_glmm), color = &quot;darkblue&quot;) +
+    facet_wrap(~ plot_type)</code></pre>
+<p><img src="05RE-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>On the scale of the linear predictor (thus the logarithm of abundance), we see that the predictions of the mixed model (in blue) are shrunk towards the mean, especially for the rarer species DS, SH and SS. This effect is less obvious on the scale of the response (graph below) because both values are close to 0.</p>
+<pre class="r"><code>pred_df$pred_glm &lt;- predict(glm_sp, newdata = pred_df, type = &quot;response&quot;)
+pred_df$pred_glmm &lt;- predict(glmm_sp, newdata = pred_df, type = &quot;response&quot;)
+
+ggplot(pred_df, aes(x = species_id)) +
+    labs(y = &quot;abondance&quot;) +
+    geom_point(aes(y = pred_glm), color = &quot;red&quot;) +
+    geom_point(aes(y = pred_glmm), color = &quot;darkblue&quot;) +
+    facet_wrap(~ plot_type)</code></pre>
+<p><img src="05RE-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Add the random effects of plot and year on the model in (b) and verify the goodness of fit.</li>
+</ol>
+<pre class="r"><code>glmm_sp2 &lt;- glmer(n ~ plot_type + (1 + plot_type | species_id) + (1 | plot_id) + (1 | year), 
+                 data = abond, family = poisson, 
+                 control = glmerControl(optimizer = &quot;bobyqa&quot;))</code></pre>
+<p>The model is overdispersed.</p>
+<pre class="r"><code>chi2 &lt;- sum(residuals(glmm_sp2, type = &quot;pearson&quot;)^2)
+1 - pchisq(chi2, df = df.residual(glmm_sp2))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>chi2 / df.residual(glmm_sp2)</code></pre>
+<pre><code>## [1] 6.713591</code></pre>
+<p>For this model, there are 6 random effects (plot, year, and species with each of the 4 treatments).</p>
+<pre class="r"><code>re &lt;- ranef(glmm_sp2)
+
+par(mfrow = c(3,2))
+
+qqnorm(re$plot_id$`(Intercept)`, main = &quot;(1 | plot_id)&quot;)
+qqline(re$plot_id$`(Intercept)`)
+qqnorm(re$year$`(Intercept)`, main = &quot;(1 | year)&quot;)
+qqline(re$year$`(Intercept)`)
+qqnorm(re$species_id$`(Intercept)`, main = &quot;(1 | species_id)&quot;)
+qqline(re$species_id$`(Intercept)`)
+qqnorm(re$species_id$`plot_typeKrat Exclosure`, main = &quot;(Krat Exclosure | species_id)&quot;)
+qqline(re$species_id$`plot_typeKrat Exclosure`)
+qqnorm(re$species_id$`plot_typeRodent Exclosure`, main = &quot;(Rodent Exclosure | species_id)&quot;)
+qqline(re$species_id$`plot_typeRodent Exclosure`)
+qqnorm(re$species_id$`plot_typeSpectab exclosure`, main = &quot;(Spectab exclosure | species_id)&quot;)
+qqline(re$species_id$`plot_typeSpectab exclosure`)</code></pre>
+<p><img src="05RE-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Finally, use a strategy similar to (c) to obtain predictions of the mean abundance of each species in the control plots as a function of year.</li>
+</ol>
+<p><em>Note</em>: By default, <code>predict</code> takes into account all random effects. To consider only some effects but not others, specify the <code>re.form</code> argument to <code>predict</code>. For example, <code>re.form = ~(1 | year)</code> considers the effect of the year only. To ignore all random effects in predictions, write <code>re.form = ~0</code>.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code># We take all combinations of species and year
+# then add constant columns for the treatment and plot
+pred_df2 &lt;- expand.grid(species_id = unique(abond$species_id),
+                        year = unique(abond$year))
+pred_df2$plot_type &lt;- &quot;Control&quot;
+pred_df2$plot_id &lt;- NA # no known plot ID
+
+# For predictions, we ignore the plot effect
+pred_df2$pred &lt;- predict(glmm_sp2, newdata = pred_df2,
+                         re.form = ~ (1 + plot_type | species_id) + (1 | year))
+
+ggplot(pred_df2, aes(x = year, y = pred)) +
+    labs(y = &quot;log(abundance)&quot;) +
+    geom_point() +
+    facet_wrap(~ species_id)</code></pre>
+<p><img src="05RE-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p><em>Note</em>: Here, all trends are parallel, because in this model, the effect of year and species are additive on the log (abundance) scale.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

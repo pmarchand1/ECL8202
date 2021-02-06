@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -292,7 +257,7 @@ div.tocify {
 </div>
 
 
-<div id="donnees" class="section level2">
+<div id="données" class="section level2">
 <h2>Données</h2>
 <p>Nous utiliserons pour ce laboratoire la base de données Portal, déjà présentée lors du laboratoire 2, qui contient des données de suivi à long terme de plusieurs espèces de rongeurs sur un site d’étude en Arizona.</p>
 <blockquote>
@@ -302,7 +267,7 @@ div.tocify {
 <ul>
 <li><a href="../donnees/portal_surveys.csv">portal_surveys.csv</a> contient les informations sur chaque individu capturé.</li>
 </ul>
-<pre class="r"><code>surveys &lt;- read.csv(&quot;../donnees/portal_surveys.csv&quot;, stringsAsFactors = FALSE)
+<pre class="r"><code>surveys &lt;- read.csv(&quot;../donnees/portal_surveys.csv&quot;)
 str(surveys)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    35549 obs. of  9 variables:
 ##  $ record_id      : int  1 2 3 4 5 6 7 8 9 10 ...
@@ -317,7 +282,7 @@ str(surveys)</code></pre>
 <ul>
 <li><a href="../donnees/portal_species.csv">portal_species.csv</a> indique le nom de genre, d’espèce et le groupe taxonomique correspondant à chaque code d’espèce.</li>
 </ul>
-<pre class="r"><code>species &lt;- read.csv(&quot;../donnees/portal_species.csv&quot;, stringsAsFactors = FALSE)
+<pre class="r"><code>species &lt;- read.csv(&quot;../donnees/portal_species.csv&quot;)
 str(species)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    54 obs. of  4 variables:
 ##  $ species_id: chr  &quot;AB&quot; &quot;AH&quot; &quot;AS&quot; &quot;BA&quot; ...
@@ -327,13 +292,13 @@ str(species)</code></pre>
 <ul>
 <li><a href="../donnees/portal_plots.csv">portal_plots.csv</a> indique le type de traitement appliqué à chaque parcelle: “Control” = témoin; “Rodent Exclosure” = clôture pour exclure tous les rongeurs; “Long-term Krat Exclosure” ou “Short-term Krat Exclosure” = clôture avec porte pour exclure les rats-kangourous du genre <em>Dipodomys</em>. “Spectab exclosure” = clôture avec porte pour exclure seulement l’espèce <em>Dipodomys spectabilis</em>.</li>
 </ul>
-<pre class="r"><code>plots &lt;- read.csv(&quot;../donnees/portal_plots.csv&quot;, stringsAsFactors = FALSE)
+<pre class="r"><code>plots &lt;- read.csv(&quot;../donnees/portal_plots.csv&quot;)
 str(plots)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    24 obs. of  2 variables:
 ##  $ plot_id  : int  1 2 3 4 5 6 7 8 9 10 ...
 ##  $ plot_type: chr  &quot;Spectab exclosure&quot; &quot;Control&quot; &quot;Long-term Krat Exclosure&quot; &quot;Control&quot; ...</code></pre>
 </div>
-<div id="preparation-des-donnees" class="section level2">
+<div id="préparation-des-données" class="section level2">
 <h2>1. Préparation des données</h2>
 <ol style="list-style-type: lower-alpha">
 <li>À partir du tableau <code>surveys</code>, conservez les individus observés depuis 1988 qui correspondent à des rongeurs (<code>taxa == "Rodent"</code> dans le tableau <code>species</code>).</li>
@@ -364,11 +329,11 @@ library(tidyr)
 abond &lt;- complete(abond, species_id, plot_id, year, fill = list(n = 0))
 
 str(abond)</code></pre>
-<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    5400 obs. of  4 variables:
-##  $ species_id: chr  &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; ...
-##  $ plot_id   : int  1 1 1 1 1 1 1 1 1 1 ...
-##  $ year      : int  1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 ...
-##  $ n         : num  0 0 0 1 0 0 0 0 0 0 ...</code></pre>
+<pre><code>## tibble [5,400 x 4] (S3: tbl_df/tbl/data.frame)
+##  $ species_id: chr [1:5400] &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; ...
+##  $ plot_id   : int [1:5400] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ year      : int [1:5400] 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 ...
+##  $ n         : num [1:5400] 0 0 0 1 0 0 0 0 0 0 ...</code></pre>
 <p>Notez que le nombre de rangées dans <code>abond</code> est égal au produit du nombre d’espèces, de placettes et d’années (15 x 24 x 15 = 5400).</p>
 <ol start="3" style="list-style-type: lower-alpha">
 <li>Recodez les deux traitements “Long-term Krat Exclosure” et “Short-term Krat Exclosure” en un seul traitement, “Krat Exclosure”, puis joignez le tableau de données <code>plots</code> au tableau obtenu en (b).</li>
@@ -379,17 +344,17 @@ str(abond)</code></pre>
 abond &lt;- inner_join(abond, plots)</code></pre>
 <pre><code>## Joining, by = &quot;plot_id&quot;</code></pre>
 <pre class="r"><code>str(abond)</code></pre>
-<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    5400 obs. of  5 variables:
-##  $ species_id: chr  &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; ...
-##  $ plot_id   : int  1 1 1 1 1 1 1 1 1 1 ...
-##  $ year      : int  1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 ...
-##  $ n         : num  0 0 0 1 0 0 0 0 0 0 ...
-##  $ plot_type : chr  &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; ...</code></pre>
+<pre><code>## tibble [5,400 x 5] (S3: tbl_df/tbl/data.frame)
+##  $ species_id: chr [1:5400] &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; &quot;AH&quot; ...
+##  $ plot_id   : int [1:5400] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ year      : int [1:5400] 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 ...
+##  $ n         : num [1:5400] 0 0 0 1 0 0 0 0 0 0 ...
+##  $ plot_type : chr [1:5400] &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; &quot;Spectab exclosure&quot; ...</code></pre>
 <p><em>Note</em>: La fonction <code>grepl(pattern, x)</code> retourne <code>TRUE</code> ou <code>FALSE</code> dépendamment si la variable <code>x</code> contient ou non le motif de texte <code>pattern</code>.</p>
 </div>
-<div id="modeliser-labondance-dune-espece" class="section level2">
+<div id="modéliser-labondance-dune-espèce" class="section level2">
 <h2>2. Modéliser l’abondance d’une espèce</h2>
-<p>Pour cette partie, nous nous limitons aux données de l’espèce <em>Dipodomys ordii</em> (DO).</p>
+<p>Pour cette partie, nous nous limitons aux données de l’espèce <em>Dipodomys ordii</em> (DO), le rat-kangourou d’Ord.</p>
 <p><img src="../images/d_ordii.png" /></p>
 <ol style="list-style-type: lower-alpha">
 <li>Visualisez la distribution du nombre d’individus de l’espèce DO en fonction du type de traitement. Quel type de modèle serait approprié pour modéliser cette relation? (Ignorez les effets des autres variables pour l’instant.) Estimez les paramètres du modèle et vérifiez si les coefficients obtenus correspondent qualitativement aux effets prévus de chaque traitement.</li>
@@ -398,7 +363,7 @@ abond &lt;- inner_join(abond, plots)</code></pre>
 <pre class="r"><code>abond_do &lt;- filter(abond, species_id == &quot;DO&quot;)
 
 library(ggplot2)
-# Voici une option avec des histogrammes
+# Voici une option avec des boîtes à moustaches
 ggplot(abond_do, aes(x = plot_type, y = n)) +
     geom_boxplot()</code></pre>
 <p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
@@ -429,7 +394,7 @@ summary(do_glm)</code></pre>
 ## AIC: 3715.1
 ## 
 ## Number of Fisher Scoring iterations: 7</code></pre>
-<p>L’effet négatif des traitement “Rodent Exclosure” et “Krat Exclosure” est attendu puisqu’il s’agit d’une espèce de rat-kangouru qui devrait être exclue par ces deux traitements. L’effet positif de “Spectab Exclosure” pourrait être dû au fait que ce traitement exclut une autre espèce de rat-kangourou qui compétitionne avec celle-ci.</p>
+<p>L’effet négatif des traitement “Rodent Exclosure” et “Krat Exclosure” est attendu puisqu’il s’agit d’une espèce de rat-kangourou qui devrait être exclue par ces deux traitements. L’effet positif de “Spectab Exclosure” pourrait être dû au fait que ce traitement exclut une autre espèce de rat-kangourou qui compétitionne avec celle-ci.</p>
 <ol start="2" style="list-style-type: lower-alpha">
 <li>Ajoutez maintenant au modèle en (a) des effets aléatoires de la parcelle et de l’année. Laquelle de ces deux variables de groupement a-t-elle le plus grand effet sur la réponse? Expliquez comment et pourquoi les erreurs-types des effets fixes changent entre ce modèle et celui de la question précédente.</li>
 </ol>
@@ -480,7 +445,7 @@ summary(do_glmm)</code></pre>
 <p>L’écart-type de la variation entre placettes (1.63) est supérieur à celui de la variance entre année (0.65).</p>
 <p>Les erreurs-types des effets fixes sont plus grandes que celles du modèle sans effets aléatoires; cela est dû au fait que le modèle mixte tient compte du fait que les observations d’une même placette sont corrélées, ce qui confère moins de puissance statistique qu’un échantillonnage tout à fait indépendant, surtout lorsque le traitement est appliqué au niveau de la placette.</p>
 <ol start="3" style="list-style-type: lower-alpha">
-<li>Vérifiez si les suppositions du modèle en (b) sont respectées. S’il y a surdispersion, estimez le coefficient de dispersion.</li>
+<li>Vérifiez si les suppositions du modèle en (b) sont respectées, en particularité la dispersion des résidus et la normalité des effets aléatoires. S’il y a surdispersion, estimez le coefficient de dispersion.</li>
 </ol>
 <p><strong>Réponse</strong></p>
 <p>Il y a une surdispersion significative (coefficient de 3.59).</p>
@@ -498,7 +463,7 @@ qqline(re$plot_id$`(Intercept)`)</code></pre>
 qqline(re$year$`(Intercept)`)</code></pre>
 <p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
 </div>
-<div id="modeliser-plusieurs-especes" class="section level2">
+<div id="modéliser-plusieurs-espèces" class="section level2">
 <h2>3. Modéliser plusieurs espèces</h2>
 <p>Prenons maintenant le jeu de données complet produit dans la partie 1, soit les 15 espèces les plus abondantes.</p>
 <ol style="list-style-type: lower-alpha">
@@ -555,11 +520,13 @@ summary(glmm_sp)</code></pre>
 ## plt_typRdnE -0.338  0.810       
 ## plt_typSpce  0.242  0.079  0.168</code></pre>
 <ol start="3" style="list-style-type: lower-alpha">
-<li>Créez un nouveau jeu de données contenant toutes les combinaisons de traitement et d’espèce, puis calculez pour chaque combinaison l’abondance prévue selon chacun des modèles en (a) et (b), à l’aide de la fonction <code>predict</code>. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?</li>
+<li>Avec la fonction <code>expand.grid</code>, créez un jeu de données pour les prédictions qui contient toutes les combinaisons de traitement et d’espèce.</li>
 </ol>
+<pre class="r"><code>pred_df &lt;- expand.grid(plot_type = unique(abond$plot_type),
+                       species_id = unique(abond$species_id))</code></pre>
+<p>Calculez pour chaque combinaison l’abondance prévue selon chacun des modèles en (a) et (b), à l’aide de la fonction <code>predict</code>. Visualisez les valeurs attendues. Y a-t-il une contraction des estimés dans le cas du modèle mixte?</p>
 <p><em>Note</em>: Par défaut, les prédictions d’un GLM(M) sont sur l’échelle du prédicteur linéaire. Pour des prédictions sur l’échelle de la réponse, spécifiez l’argument <code>type = "response"</code>.</p>
 <p><strong>Réponse</strong></p>
-<p>Nous utilisons <code>expand.grid</code> pour obtenir toutes les combinaisons de valeurs uniques du traitement et de l’espèce.</p>
 <pre class="r"><code>pred_df &lt;- expand.grid(plot_type = unique(abond$plot_type),
                        species_id = unique(abond$species_id))
 pred_df$pred_glm &lt;- predict(glm_sp, newdata = pred_df)
@@ -570,7 +537,7 @@ ggplot(pred_df, aes(x = species_id)) +
     geom_point(aes(y = pred_glm), color = &quot;red&quot;) +
     geom_point(aes(y = pred_glmm), color = &quot;darkblue&quot;) +
     facet_wrap(~ plot_type)</code></pre>
-<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 <p>Sur l’échelle du prédicteur linéaire (donc le logarithme de l’abondance), on voit que les prédictions du modèle mixte (en bleu) sont contractées vers la moyenne, surtout pour les espèces plus rares DS, SH et SS. Cet effet est moins évident sur l’échelle de la réponse (graphique ci-dessous) car les deux valeurs sont près de 0.</p>
 <pre class="r"><code>pred_df$pred_glm &lt;- predict(glm_sp, newdata = pred_df, type = &quot;response&quot;)
 pred_df$pred_glmm &lt;- predict(glmm_sp, newdata = pred_df, type = &quot;response&quot;)
@@ -580,7 +547,7 @@ ggplot(pred_df, aes(x = species_id)) +
     geom_point(aes(y = pred_glm), color = &quot;red&quot;) +
     geom_point(aes(y = pred_glmm), color = &quot;darkblue&quot;) +
     facet_wrap(~ plot_type)</code></pre>
-<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <ol start="4" style="list-style-type: lower-alpha">
 <li>Ajoutez les effets aléatoires de la placette et de l’année au modèle en (b) et vérifiez l’ajustement du modèle.</li>
 </ol>
@@ -610,7 +577,7 @@ qqnorm(re$species_id$`plot_typeRodent Exclosure`, main = &quot;(Rodent Exclosure
 qqline(re$species_id$`plot_typeRodent Exclosure`)
 qqnorm(re$species_id$`plot_typeSpectab exclosure`, main = &quot;(Spectab exclosure | species_id)&quot;)
 qqline(re$species_id$`plot_typeSpectab exclosure`)</code></pre>
-<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
 <ol start="5" style="list-style-type: lower-alpha">
 <li>Finalement, utilisez une stratégie semblable à (c) pour obtenir des prédictions de l’abondance moyenne de chaque espèce dans les placettes témoin en fonction de l’année.</li>
 </ol>
@@ -631,7 +598,7 @@ ggplot(pred_df2, aes(x = year, y = pred)) +
     labs(y = &quot;log(abondance)&quot;) +
     geom_point() +
     facet_wrap(~ species_id)</code></pre>
-<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p><img src="05R-Modeles_generalises_mixtes_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 <p><em>Note</em>: Ici, toutes les tendances sont parallèles, car dans ce modèle, l’effet de l’année et de l’espèce sont additifs sur l’échelle de log(abondance).</p>
 </div>
 
@@ -653,6 +620,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

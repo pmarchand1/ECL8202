@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Randomization tests and bootstrap</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Randomization tests and bootstrap</h1>
+
+</div>
+
+
+<p>This assignment must be submitted before <strong>January 27th at 5pm</strong> on Moodle.</p>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>This lab uses the Portal database, which contains long-term monitoring data for several rodent species at a study site in Arizona.</p>
+<blockquote>
+<p>Ernest, M., Brown, J., Valone, T. and White, E.P. (2018) <em>Portal Project Teaching Database</em>. <a href="https://figshare.com/articles/Portal_Project_Teaching_Database/1314459">https://figshare.com/articles/Portal_Project_Teaching_Database/1314459</a>.</p>
+</blockquote>
+<p>The <a href="../donnees/portal_surveys.csv">portal_surveys.csv</a> dataset contains one row per captured individual. Variables include the capture date (day, month, year), plot number, species code, sex, hindfoot length and weight of individuals.</p>
+<pre class="r"><code>surveys &lt;- read.csv(&quot;../donnees/portal_surveys.csv&quot;)
+str(surveys)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    35549 obs. of  9 variables:
+##  $ record_id      : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ month          : int  7 7 7 7 7 7 7 7 7 7 ...
+##  $ day            : int  16 16 16 16 16 16 16 16 16 16 ...
+##  $ year           : int  1977 1977 1977 1977 1977 1977 1977 1977 1977 1977 ...
+##  $ plot_id        : int  2 3 2 7 3 1 2 1 1 6 ...
+##  $ species_id     : chr  &quot;NL&quot; &quot;NL&quot; &quot;DM&quot; &quot;DM&quot; ...
+##  $ sex            : chr  &quot;M&quot; &quot;M&quot; &quot;F&quot; &quot;M&quot; ...
+##  $ hindfoot_length: int  32 33 37 36 35 14 NA 37 34 20 ...
+##  $ weight         : int  NA NA NA NA NA NA NA NA NA NA ...</code></pre>
+<p>The <a href="../donnees/portal_plots.csv">portal_plots.csv</a> dataset indicates the type of treatment applied to each plot. The treatments are designed to exclude different types of rodents: “Control” = no fence, no exclusion; “Rodent Exclusion” = fence, all rodents excluded; “Krat Exclusion” = fence with a gate for small rodents, but not for kangaroo rats. These treatments were randomly assigned after setting up the plots.</p>
+<pre class="r"><code>plots &lt;- read.csv(&quot;../donnees/portal_plots.csv&quot;)
+str(plots)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    24 obs. of  2 variables:
+##  $ plot_id  : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ plot_type: chr  &quot;Spectab exclosure&quot; &quot;Control&quot; &quot;Long-term Krat Exclosure&quot; &quot;Control&quot; ...</code></pre>
+</div>
+<div id="randomization-tests" class="section level2">
+<h2>1. Randomization tests</h2>
+<ol style="list-style-type: lower-alpha">
+<li>First, we must prepare the data for analysis:</li>
+</ol>
+<ul>
+<li><p>In the <code>surveys</code> table, keep only the observations from the year 2002 where the weight is not missing. <em>Reminder</em>: The function <code>is.na(x)</code> checks if <code>x</code> is a missing value.</p></li>
+<li><p>To simplify the data, we will group treatments other than “Control” and “Rodent Exclosure” under the name “Krat Exclosure”. Here is the statement to perform this transformation.</p></li>
+</ul>
+<pre class="r"><code>plots$plot_type[!(plots$plot_type %in% c(&quot;Control&quot;, &quot;Rodent Exclosure&quot;))] &lt;- &quot;Krat Exclosure&quot;</code></pre>
+<ul>
+<li>Finally, join the <code>surveys</code> and <code>plots</code> data frames to find out which plot treatment is related to each observation. You can use the <code>merge</code> function in R or the <code>inner_join</code> function, which requires the <em>dplyr</em> package. Name the resulting array <code>surveys_plots</code>.</li>
+</ul>
+<p>Next, view the distribution of the weight (in grams) of the individuals according to the treatment <code>plot_type</code>. You can use boxplots, for example. From this graph, why would it be useful to use a non-parametric method to compare the effects of these treatments?</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>We will use a randomization test based on ANOVA to determine if the weight of captured individuals varies with the treatment. To do this, we will write a function that randomizes the types of treatment in the <code>plots</code> data table, before joining this new table to <code>surveys</code> and running the ANOVA.</li>
+</ol>
+<ul>
+<li>Why do this, rather than simply randomizing the <code>plot_type</code> column in the combined data frame produced by a)? (To answer this question, consider the rationale for randomization testing in the context of this experimental design).</li>
+</ul>
+<ol start="3" style="list-style-type: lower-alpha">
+<li><p>Create the function described in (b), which performs a randomization of <code>plot_types</code>, joins this table to <code>surveys</code>, performs an ANOVA of the weight of individuals as a function of treatment, and then returns the value <span class="math inline">\(F\)</span>. Determine the distribution of this statistic for the null hypothesis with 4999 permutations. What is the <span class="math inline">\(p\)</span> value for the observed <span class="math inline">\(F\)</span> value if the treatments have no effect on the mass of individuals captured?</p></li>
+<li><p>Perform a randomized test similar to c) for the null hypothesis that the median weight is the same for the “Control” and “Krat Exclosure” treatments. What is the standard deviation of the test statistic under the null hypothesis?</p></li>
+<li><p>What is the <span class="math inline">\(p\)</span> value for the test in d)? Is the difference significant with a threshold <span class="math inline">\(\alpha = 0.01\)</span>?</p></li>
+</ol>
+</div>
+<div id="bootstrap" class="section level2">
+<h2>2. Bootstrap</h2>
+<ol style="list-style-type: lower-alpha">
+<li><p>Use the bootstrap method with 10,000 replicates to calculate the difference in the median weight of individuals caught between the “Krat Exclosure” and “Control” treatments. Perform a bias correction and report the corrected difference with its standard error.</p></li>
+<li><p>Calculate the 99% confidence interval for the difference estimated in a).</p></li>
+<li><p>Is the confidence interval obtained in b) consistent with the test result in 1.e)? Does the bootstrap accurately represent the sampling process for this problem?</p></li>
+</ol>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

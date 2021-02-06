@@ -13,6 +13,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
+theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Introduction
@@ -89,7 +91,7 @@ Dans le cas de l'estimation de la moyenne $\mu$, le théorème de la limite cent
 Par exemple, supposons que $\mu = 20$ et $\sigma_ {\bar{x}} = 2$. Le graphique ci-dessous montre la distribution de probabilité de $\bar{x}$. En retirant le 2.5% de valeurs extrêmes de chaque côté de cette distribution, on obtient un intervalle (en rouge) dans lequel se trouve $\bar{x}$ pour 95% des échantillons possibles.
 
 ```{r echo = FALSE}
-ggplot(NULL, aes(x = c(13, 27))) +
+ggplot(NULL) + xlim(13, 27) +
     labs(x = expression(bar(x)), y = expression(f(bar(x)))) +
     stat_function(fun = function(x) dnorm(x, mean = 20, sd = 2)) +
     stat_function(fun = function(x) ifelse(pnorm(x, mean = 20, sd = 2) > 0.025 & pnorm(x, mean = 20, sd = 2) < 0.975, dnorm(x, mean = 20, sd = 2), NA), geom = "area", fill = "#d3492a") +
@@ -331,7 +333,7 @@ $$(\hat{\theta}_0 + t_{(n-1)0.025} s_{\hat{\theta}}, \hat{\theta_0} + t_{(n-1)0.
 
 où $s_{\hat{\theta}}$ est l'erreur-type estimée par le bootstrap, $n$ est la taille de l'échantillon et $t_{(n-1)q}$ est le quantile $q$ de la distribution $t$ avec $n - 1$ degrés de liberté. 
 
-Puisque le bootstrap est souvent utilisé lorsqu'on ne peut pas présumer que la statistique suit une distribution normale, l'intervalle normal a une utilité limitée. Dans notre exemple, la limite inférieure (5.53 cm) n'est pas réaliste, se situant sous le DHP minimum d'échantillonnage. 
+Puisque le bootstrap est souvent utilisé lorsqu'on ne peut pas présumer que la statistique suit une distribution normale, l'intervalle normal a une utilité limitée. Dans notre exemple, la limite inférieure (5.59 cm) n'est pas réaliste, se situant sous le DHP minimum d'échantillonnage. 
 
 ### Intervalle des quantiles
 
@@ -373,7 +375,7 @@ Cet intervalle n'est pas inclus dans notre exemple. R nous avertit que le calcul
 
 ### Intervalle avec correction du biais et de l'accélération (BCa)
 
-Le dernier intervalle calculé par `boot.ci` est l'intervalle BCa (pour *bias-corrected and accelerated*). Cette intervalle est semblable à l'intervalle des quantiles, sauf qu'au lieu de choisir des quantiles fixes (ex. 2.5% et 97.5% pour un interalle à 95%), la méthode BCa choisit différents quantiles en tenant compte du biais et de l'asymétrie de la distribution. Nous ne discuterons pas des détails de ce calcul dans ce cours. Pour notre exemple, l'intervalle BCa est très proche de l'intervalle des quantiles, avec un léger décalage vers le bas.
+Le dernier intervalle calculé par `boot.ci` est l'intervalle BCa (pour *bias-corrected and accelerated*). Cette intervalle est semblable à l'intervalle des quantiles, sauf qu'au lieu de choisir des quantiles fixes (ex. 2.5% et 97.5% pour un intervalle à 95%), la méthode BCa choisit différents quantiles en tenant compte du biais et de l'asymétrie de la distribution. Nous ne discuterons pas des détails de ce calcul dans ce cours. Pour notre exemple, l'intervalle BCa est très proche de l'intervalle des quantiles, avec un léger décalage vers le bas.
 
 L'intervalle BCa et l'intervalle studentisé sont les deux méthodes les plus précises en théorie. Puisqu'il choisit ultimement des quantiles de la distribution de $\hat{\theta}^*$ plutôt que d'une transformation de $\hat{\theta}^*$, l'intervalle BCa ne va jamais dépasser l'étendue des données observées, ce qui peut être un avantage; dans notre exemple, les limites de l'intervalle demeureront des valeurs de DHP possibles pour cet inventaire. 
 
@@ -459,4 +461,4 @@ Le *bootstrap paramétrique* est une méthode où les échantillons bootstrap ne
 
 - Le ré-échantillonnage doit être représentatif de la façon dont l'échantillon original a été obtenu.
 
-- Pour appliquer le bootstrap à l'estimation des paramètres d'une régression, le ré-échantillonnage des observations et le ré-échantillonnage des résultats sont deux méthodes acceptées; le choix d'une ou de l'autre dépend des suppositions qu'on peut faire dans un cas particulier.
+- Pour appliquer le bootstrap à l'estimation des paramètres d'une régression, le ré-échantillonnage des observations et le ré-échantillonnage des résidus sont deux méthodes acceptées; le choix d'une ou de l'autre dépend des suppositions qu'on peut faire dans un cas particulier.

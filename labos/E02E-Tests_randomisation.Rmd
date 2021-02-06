@@ -1,0 +1,71 @@
+---
+title: "Randomization tests and bootstrap"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This assignment must be submitted before **January 27th at 5pm** on Moodle.
+
+## Data
+
+This lab uses the Portal database, which contains long-term monitoring data for several rodent species at a study site in Arizona.
+
+> Ernest, M., Brown, J., Valone, T. and White, E.P. (2018) *Portal Project Teaching Database*. [https://figshare.com/articles/Portal_Project_Teaching_Database/1314459](https://figshare.com/articles/Portal_Project_Teaching_Database/1314459).
+
+The [portal_surveys.csv](../donnees/portal_surveys.csv) dataset contains one row per captured individual. Variables include the capture date (day, month, year), plot number, species code, sex, hindfoot length and weight of individuals.
+
+```{r}
+surveys <- read.csv("../donnees/portal_surveys.csv")
+str(surveys)
+```
+
+The [portal_plots.csv](../donnees/portal_plots.csv) dataset indicates the type of treatment applied to each plot. The treatments are designed to exclude different types of rodents: "Control" = no fence, no exclusion; "Rodent Exclusion" = fence, all rodents excluded; "Krat Exclusion" = fence with a gate for small rodents, but not for kangaroo rats. These treatments were randomly assigned after setting up the plots.
+
+```{r}
+plots <- read.csv("../donnees/portal_plots.csv")
+str(plots)
+```
+
+## 1. Randomization tests
+
+a) First, we must prepare the data for analysis:
+
+- In the `surveys` table, keep only the observations from the year 2002 where the weight is not missing. *Reminder*: The function `is.na(x)` checks if `x` is a missing value.
+
+- To simplify the data, we will group treatments other than "Control" and "Rodent Exclosure" under the name "Krat Exclosure". Here is the statement to perform this transformation.
+
+```{r, eval = FALSE}
+plots$plot_type[!(plots$plot_type %in% c("Control", "Rodent Exclosure"))] <- "Krat Exclosure"
+```
+
+- Finally, join the `surveys` and `plots` data frames to find out which plot treatment is related to each observation. You can use the `merge` function in R or the `inner_join` function, which requires the *dplyr* package. Name the resulting data frame `surveys_plots`.
+
+Next, view the distribution of the weight (in grams) of the individuals according to the treatment `plot_type`. You can use boxplots, for example. From this graph, why would it be useful to use a non-parametric method to compare the effects of these treatments?
+
+b) We will use a randomization test based on ANOVA to determine if the weight of captured individuals varies with the treatment. To do this, we will write a function that randomizes the types of treatment in the `plots` data table, before joining this new table to `surveys` and running the ANOVA. 
+
+- Why do this, rather than simply randomizing the `plot_type` column in the combined data frame produced by a)? (To answer this question, consider the rationale for randomization testing in the context of this experimental design).
+
+c) Create the function described in (b), which performs a randomization of `plot_types`, joins this table to `surveys`, performs an ANOVA of the weight of individuals as a function of treatment, and then returns the value $F$. Determine the distribution of this statistic for the null hypothesis with 4999 permutations. What is the $p$ value for the observed $F$ value if the treatments have no effect on the mass of individuals captured?
+
+d) Perform a randomized test similar to c) for the null hypothesis that the median weight is the same for the "Control" and "Krat Exclosure" treatments. What is the standard deviation of the test statistic under the null hypothesis?
+
+e) What is the $p$ value for the test in d)? Is the difference significant with a threshold $\alpha = 0.01$? 
+
+
+## 2. Bootstrap
+
+a) Use the bootstrap method with 10,000 replicates to calculate the difference in the median weight of individuals caught between the "Krat Exclosure" and "Control" treatments. Perform a bias correction and report the corrected difference with its standard error.
+
+b) Calculate the 99% confidence interval for the difference estimated in a).
+
+c) Is the confidence interval obtained in b) consistent with the test result in 1.e)? Does the bootstrap accurately represent the sampling process for this problem?

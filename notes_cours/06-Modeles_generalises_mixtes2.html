@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -301,9 +266,9 @@ div.tocify {
 <li><p>les données avec excès de zéros.</p></li>
 </ul>
 </div>
-<div id="modele-binomial-negatif" class="section level1">
+<div id="modèle-binomial-négatif" class="section level1">
 <h1>Modèle binomial négatif</h1>
-<div id="distribution-binomiale-negative" class="section level2">
+<div id="distribution-binomiale-négative" class="section level2">
 <h2>Distribution binomiale négative</h2>
 <p>Comme la distribution de Poisson, la distribution binomiale négative permetde représenter des données de comptage, c’est à dire des entiers <span class="math inline">\(\ge 0\)</span>.</p>
 <p>Historiquement, le nom “binomiale négative” vient du fait que cette distribution représente le nombre d’échecs avant d’obtenir un certain nombre de succès dans une expérience binomiale. Cependant, afin d’utiliser cette distribution dans un modèle de régression, une définition plus générale de la distribution est davantage appropriée.</p>
@@ -315,7 +280,7 @@ div.tocify {
 <p><span class="math display">\[\log \mu  = \beta_0 + \sum_{i=1}^m \beta_i x_i\]</span></p>
 <p>Ce modèle constitue un GLM à proprement dit seulement si <span class="math inline">\(\theta\)</span> est connu. Si on souhaite estimer <span class="math inline">\(\theta\)</span> à partir des données, on peut procéder par itération. À partir d’une valeur initiale choisie pour <span class="math inline">\(\theta\)</span>, on ajuste les autres paramètres comme pour un GLM, puis on utilise la variance résiduelle pour estimer <span class="math inline">\(\theta\)</span> et ainsi de suite jusqu’à ce que les estimés convergent vers des valeurs stables. Dans R, cette méthode est implémentée par les fonctions <code>glm.nb</code> du package <em>MASS</em> (pour des modèles sans effet aléatoires) et <code>glmer.nb</code> du package <em>lme4</em> (pour des GLMM).</p>
 </div>
-<div id="exemple-adaptation-locale-de-lerable" class="section level2">
+<div id="exemple-adaptation-locale-de-lérable" class="section level2">
 <h2>Exemple: Adaptation locale de l’érable</h2>
 <p>Le jeu de données <a href="../donnees/acer_transplant.csv">acer_transplant.csv</a> contient des données d’une expérience visant à comparer la germination de semences d’érable à sucre provenant de différentes origines géographiques dans trois types de forêt (boréale, mixte et tempérée).</p>
 <blockquote>
@@ -324,9 +289,9 @@ div.tocify {
 <pre class="r"><code>acer &lt;- read.csv(&quot;../donnees/acer_transplant.csv&quot;)
 str(acer)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    216 obs. of  6 variables:
-##  $ stand   : Factor w/ 3 levels &quot;Boreal&quot;,&quot;Mixed&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ site    : Factor w/ 12 levels &quot;Ashuapmushuan&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ origin  : Factor w/ 6 levels &quot;C1&quot;,&quot;C2&quot;,&quot;N1&quot;,..: 3 5 2 6 1 3 4 5 6 1 ...
+##  $ stand   : chr  &quot;Boreal&quot; &quot;Boreal&quot; &quot;Boreal&quot; &quot;Boreal&quot; ...
+##  $ site    : chr  &quot;Ashuapmushuan&quot; &quot;Ashuapmushuan&quot; &quot;Ashuapmushuan&quot; &quot;Ashuapmushuan&quot; ...
+##  $ origin  : chr  &quot;N1&quot; &quot;S1&quot; &quot;C2&quot; &quot;S2&quot; ...
 ##  $ first   : num  28 0 1 0 6 ...
 ##  $ second  : num  18 0 0 0 2 ...
 ##  $ survival: num  0.643 0 0 0 0.333 ...</code></pre>
@@ -343,7 +308,7 @@ str(acer)</code></pre>
 <p><img src="06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Notez l’utilisation de <code>position_jitterdodge</code> dans <code>ggplot</code>. La partie <code>dodge.width</code> (entre 0 et 1) contrôle l’espacement horizontal entre les points de différentes couleurs, tandis que <code>jitter.width</code> contrôle le déplacement horizontal aléatoire des points de chaque couleur, afin de distinguer les valeurs répétées.</p>
 </div>
-<div id="regression-de-poisson" class="section level2">
+<div id="régression-de-poisson" class="section level2">
 <h2>Régression de Poisson</h2>
 <p>Nous estimons d’abord les paramètres du GLMM de Poisson, incluant l’interaction entre population d’origine et type de forêt, ainsi que l’effet aléatoire du site. Nous choisissons aussi l’optimiseur BOBYQA en raison d’un problème de convergence avec l’optimisateur par défaut.</p>
 <pre class="r"><code>library(lme4)
@@ -369,7 +334,7 @@ ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)
 <p><img src="06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p><em>Note</em>: Dans le code ci-dessus, nous avons appelé <code>predict</code> et <code>simulate</code> sans fournir de jeu de données <code>newdata</code>. Dans ce cas, les prédictions sont réalisés à partir des rangées du jeu de données original. La fonction <code>arrange(pred)</code> ordonne le jeu de données en fonction des valeurs prédites, ce qui aide à la visualisation; pour le graphique, l’axe des <span class="math inline">\(x\)</span> représente seulement la position de chaque rangée dans le jeu de données ainsi ordonné.</p>
 </div>
-<div id="regression-binomiale-negative" class="section level2">
+<div id="régression-binomiale-négative" class="section level2">
 <h2>Régression binomiale négative</h2>
 <p>Voici le modèle binomial négatif correspondant avec <code>glmer.nb</code>. Notez que le code est identique au modèle de Poisson, sauf pour l’argument <code>family</code>, qui n’est pas nécessaire car la fonction <code>glmer.nb</code> implique une distribution binomiale négative.</p>
 <pre class="r"><code>acer_nb &lt;- glmer.nb(first ~ stand * origin + (1 | site), acer,
@@ -445,9 +410,10 @@ ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)
 plot(emmeans(acer_nb, ~ origin | stand), comparisons = TRUE)</code></pre>
 <p><img src="06-Modeles_generalises_mixtes2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>Dans ce graphique, l’axe horizontal <code>emmean</code> montre l’effet moyen de chaque traitement sur l’échelle du prédicteur linéaire (donc le logarithme du nombre moyen de semis). Les aires ombragées montrent l’intervalle de confiance à 95% pour chaque moyenne, tandis que les flèches rouges (obtenues en spécifiant <code>comparisons = TRUE</code> dans <code>plot</code>) indiquent quels effets sont significativement différents. La différence entre deux traitements n’est pas significative si les flèches se chevauchent.</p>
+<p><em>Attention</em>: En spécifiant, <code>~ origin | stand</code> dans <code>emmeans</code>, on effectue une correction (de type Tukey) pour les comparaisons multiples entre les origines pour chaque type de forêt, mais on ne peut pas comparer les moyennes entre types de forêts. On pourrait spécifier <code>~ origin * stand</code> pour faire les comparaisons entre toutes les combinaisons des deux variables, mais dans ce cas les flèches seraient plus longues en raison du nombre de comparaisons supplémentaires.</p>
 </div>
 </div>
-<div id="modeles-pour-les-taux" class="section level1">
+<div id="modèles-pour-les-taux" class="section level1">
 <h1>Modèles pour les taux</h1>
 <p>Supposons que nous voulons analyser des données sur l’abondance (nombre d’individus) d’une espèce sur différentes parcelles. Cependant, la taille des placettes diffère, donc on s’attend à ce qu’à densité de population égale, l’abondance augmente proportionnellement à la taille des placettes.</p>
 <p>Dans ce cas, on pourrait modéliser directement la densité de population (individus / m<span class="math inline">\(^2\)</span>). Cependant, cette méthode comporte plusieurs inconvénients. Nous perdons l’information sur les comptages, ce qui nous empêche d’utiliser la distribution de Poisson ou binomiale négative. De plus, cette méthode considérerait la présence de 3 individus sur 1 m<span class="math inline">\(^2\)</span> comme équivalente à celle de 12 individus sur 4 m<span class="math inline">\(^2\)</span>, même si ces deux résultats ne sont pas statistiquement équivalents en raison d’une différente de taille d’échantillon.</p>
@@ -519,18 +485,12 @@ chi2 / df.residual(owls_nb)</code></pre>
 ## Number of obs: 599, groups:  Nest, 27
 ## 
 ## Fixed effects:
-##                                     Estimate Std. Error z value Pr(&gt;|z|)
-## (Intercept)                          3.50710    0.63229   5.547 2.91e-08
-## FoodTreatmentSatiated               -0.76653    0.16109  -4.758 1.95e-06
-## SexParentMale                       -0.01044    0.14213  -0.073    0.941
-## ArrivalTime                         -0.11515    0.02513  -4.583 4.58e-06
-## FoodTreatmentSatiated:SexParentMale  0.17349    0.20099   0.863    0.388
-##                                        
-## (Intercept)                         ***
-## FoodTreatmentSatiated               ***
-## SexParentMale                          
-## ArrivalTime                         ***
-## FoodTreatmentSatiated:SexParentMale    
+##                                     Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                          3.50710    0.63229   5.547 2.91e-08 ***
+## FoodTreatmentSatiated               -0.76653    0.16109  -4.758 1.95e-06 ***
+## SexParentMale                       -0.01044    0.14213  -0.073    0.941    
+## ArrivalTime                         -0.11515    0.02513  -4.583 4.58e-06 ***
+## FoodTreatmentSatiated:SexParentMale  0.17349    0.20099   0.863    0.388    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -563,7 +523,7 @@ c(quantile(nb_zeros, probs = 0.025), quantile(nb_zeros, probs = 0.975))</code></
 <pre><code>## [1] 156</code></pre>
 </div>
 </div>
-<div id="modeles-avec-exces-de-zeros" class="section level1">
+<div id="modèles-avec-excès-de-zéros" class="section level1">
 <h1>Modèles avec excès de zéros</h1>
 <p>L’exemple précédent montre qu’un excès de zéros pose un problème différent de celui des données surdispersées. La surdispersion produit plus de comptages faibles et élevés par rapport à la distribution prévue. En présence d’un excès de zéros, si ces zéros supplémentaires étaient retirés, on retrouverait la distribution supposée.</p>
 <p>Pour modéliser une réponse <span class="math inline">\(y\)</span> avec un excès de zéros, on crée un modèle en deux parties:</p>
@@ -606,18 +566,12 @@ summary(owls_zinb)</code></pre>
 ## Overdispersion parameter for nbinom2 family (): 2.31 
 ## 
 ## Conditional model:
-##                                     Estimate Std. Error z value Pr(&gt;|z|)
-## (Intercept)                          2.87588    0.49394   5.822  5.8e-09
-## FoodTreatmentSatiated               -0.40500    0.13480  -3.004  0.00266
-## SexParentMale                       -0.07360    0.10255  -0.718  0.47290
-## ArrivalTime                         -0.08294    0.01980  -4.189  2.8e-05
-## FoodTreatmentSatiated:SexParentMale  0.15878    0.16235   0.978  0.32807
-##                                        
-## (Intercept)                         ***
-## FoodTreatmentSatiated               ** 
-## SexParentMale                          
-## ArrivalTime                         ***
-## FoodTreatmentSatiated:SexParentMale    
+##                                     Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                          2.87588    0.49394   5.822  5.8e-09 ***
+## FoodTreatmentSatiated               -0.40500    0.13480  -3.004  0.00266 ** 
+## SexParentMale                       -0.07360    0.10255  -0.718  0.47290    
+## ArrivalTime                         -0.08294    0.01980  -4.189  2.8e-05 ***
+## FoodTreatmentSatiated:SexParentMale  0.15878    0.16235   0.978  0.32807    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -676,6 +630,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

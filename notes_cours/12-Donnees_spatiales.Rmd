@@ -277,7 +277,7 @@ Un aspect central de la géostatistique est l'estimation du variogramme $\gamma_
 
 $$\gamma_z(h) = \frac{1}{2} \text{E} \left[ \left( z(x_i, y_i) - z(x_j, y_j) \right)^2 \right]_{d_{ij} = h}$$
 
-Dans cette équation, la fonction $\text{E}$ avec l'indice $d_{ij}=h$ désigne l'espérance statistique (autrement dit, la moyenne) de l'écart au carré entre les valeurs de $z$ pour les points séparée par une distance $h$.
+Dans cette équation, la fonction $\text{E}$ avec l'indice $d_{ij}=h$ désigne l'espérance statistique (autrement dit, la moyenne) de l'écart au carré entre les valeurs de $z$ pour les points séparés par une distance $h$.
 
 Si on préfère exprimer l'autocorrélation $\rho_z(h)$ entre mesures de $z$ séparées par une distance $h$, celle-ci est reliée au variogramme par l'équation:
 
@@ -285,7 +285,7 @@ $$\gamma_z = \sigma_z^2(1 - \rho_z)$$ ,
 
 où $\sigma_z^2$ est la variance globale de $z$. 
 
-Notez que $\gamma_z = \sigma_z^2$ si nous sommes à une distance ou les mesures de $z$ sont indépendantes, donc $\rho_z = 0$. Dans ce cas, on voit bien que $\gamma_z$ s'apparente à une variance, même s'il est parfois appelé "semivariogramme" ou "semivariance" en raison du facteur 1/2 dans l'équation ci-dessus.
+Notez que $\gamma_z = \sigma_z^2$ si nous sommes à une distance où les mesures de $z$ sont indépendantes, donc $\rho_z = 0$. Dans ce cas, on voit bien que $\gamma_z$ s'apparente à une variance, même s'il est parfois appelé "semivariogramme" ou "semivariance" en raison du facteur 1/2 dans l'équation ci-dessus.
 
 ## Modèles théoriques du variogramme
 
@@ -503,7 +503,7 @@ Une option serait d'appliquer les méthodes géostatistiques vues précédemment
 
 Une autre option, qui est davantage privilégiée pour les données aréales, consiste à définir un réseau où chaque région est connectée aux régions voisines par un lien. On suppose ensuite que les variables sont directement corrélées entre régions voisines seulement. (Comme nous avons vu dans le cas des séries temporelles, les corrélations directes entre voisins immédiats génèrent aussi des corrélations indirectes pour une chaîne de voisins.)
 
-Dans ce type de modèle, la corrélation n'est pas nécessairement la même d'un lien à un autre. Dans ce cas, chaque lien du réseau peut être associé à un *poids* représentant son importance pour la corrélation spatiale. Nous représentons ces poids par une matrice $W$ où $w_{ij}$ est le poids du lien entre les régions $i$ et $j$. Une région n'a pas de lien avec elle-même, donc $w_{ii}$.
+Dans ce type de modèle, la corrélation n'est pas nécessairement la même d'un lien à un autre. Dans ce cas, chaque lien du réseau peut être associé à un *poids* représentant son importance pour la corrélation spatiale. Nous représentons ces poids par une matrice $W$ où $w_{ij}$ est le poids du lien entre les régions $i$ et $j$. Une région n'a pas de lien avec elle-même, donc $w_{ii} = 0$.
 
 Un choix simple pour $W$ consiste à assigner un poids égal à 1 si les régions sont voisines, sinon 0 (poids binaires).
 

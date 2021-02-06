@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Maximum likelihood - Solutions</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Maximum likelihood - Solutions</h1>
+
+</div>
+
+
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>The dataset <a href="../data/thermal_range.csv">thermal_range.csv</a> is the result of an experiment to determine the effect of temperature (<em>temp</em>) on the number of eggs (<em>num_eggs</em>) produced by a species of mosquito. Three replicates were measured for temperature values between 10 and 32 degrees Celsius.</p>
+<pre class="r"><code>therm &lt;- read.csv(&quot;../donnees/thermal_range.csv&quot;)
+head(therm)</code></pre>
+<pre><code>##   temp num_eggs
+## 1   10        1
+## 2   10        1
+## 3   10        2
+## 4   12        4
+## 5   12        4
+## 6   12        6</code></pre>
+</div>
+<div id="poisson-model" class="section level2">
+<h2>1. Poisson model</h2>
+<p>We assume that the mean number of eggs produced follows a Gaussian function centered on an optimal temperature. (This function has the same shape as a normal distribution, but it is not a probability.)</p>
+<p><span class="math display">\[N = N_o \exp \left( - \frac{(T - T_o)^2}{\sigma_T^2} \right)  \]</span></p>
+<p>In this equation, <span class="math inline">\(N\)</span> is the mean number of eggs produced at <span class="math inline">\(T\)</span>, <span class="math inline">\(T_o\)</span> is the optimum temperature, <span class="math inline">\(N_o\)</span> is the number of eggs produced at <span class="math inline">\(T_o\)</span> and <span class="math inline">\(\sigma_T\)</span> represents the tolerance (the larger <span class="math inline">\(\sigma_T\)</span> is, the slower the production decreases around the optimum).</p>
+<ol style="list-style-type: lower-alpha">
+<li>Produce a graph of <em>num_eggs</em> vs. <em>temp</em> for this dataset. Using this graph, answer the following questions.</li>
+</ol>
+<ul>
+<li><p>Does the number of eggs appear to reach a maximum with a symmetrical decrease on both sides of the maximum as predicted by the equation above?</p></li>
+<li><p>Does the variance between replicates appear to be homogeneous?</p></li>
+</ul>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) + 
+    geom_point()</code></pre>
+<p><img src="03RE-Maximum_vraisemblance_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>The number of eggs seems to reach a maximum around 25 degrees. The variance does not seem homogeneous, being greater for temperatures where the number of eggs is greater.</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>To model these data, we will use a Poisson distribution, where the mean <span class="math inline">\(\lambda\)</span> corresponds to the <span class="math inline">\(N\)</span> calculated according to the above equation.</li>
+</ol>
+<p>Why is it preferable here to use a Poisson distribution rather than a normal distribution to represent the random variation in the number of eggs around the predicted mean value?</p>
+<p><strong>Solution</strong></p>
+<p>These are count data (integers &gt; 0) and their variance appears to increase with the mean, as predicted by the Poisson distribution.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Create an R function to calculate the negative log-likelihood of the observed number of eggs as a function of the model parameters <span class="math inline">\(N_o\)</span>, <span class="math inline">\(T_o\)</span> and <span class="math inline">\(\sigma_T\)</span>. <em>Note</em>: The function <code>dpois(y, lambda, log = TRUE)</code> is used to compute the log of the probability of a vector of data <code>y</code> following a Poisson distribution with a vector of means <code>lambda</code>.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>temp_nll &lt;- function(N_o, T_o, sigma_T) {
+    mu &lt;- N_o * exp(-((therm$t-T_o)/sigma_T)^2)
+    -sum(dpois(therm$num_eggs, lambda = mu, log = TRUE))
+}</code></pre>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Use the <code>mle2</code> function to estimate the three parameters of the model according to maximum likelihood.</li>
+</ol>
+<p>For this problem, it is necessary to specify bounds for each parameter, to prevent the optimizer from moving too far away from plausible values. In the function <code>mle2</code>, the lower and upper bounds are given by the arguments <code>lower</code> and <code>upper</code>, e.g.: <code>mle2(..., start = list(...), lower = c(no = 1, to = 5, s_t = 1), upper = c(...)</code>. Note that these arguments are specified by a vector <code>c(...)</code> whereas <code>start</code> (the initial values) are specified by a list.</p>
+<p>You can try different values for the bounds, however the lower bounds of <span class="math inline">\(N_o\)</span> and <span class="math inline">\(\sigma_T\)</span> should be at least 1, the upper bound of <span class="math inline">\(\sigma_T\)</span> should not exceed the range (max-min) of temperatures tested; likewise, the bounds for <span class="math inline">\(T_o\)</span> should be realistic values of temperature.</p>
+<p><em>Note</em>: You can ignore the warning <em>Warning: bounds can only be used with method L-BFGS-B (or Brent)</em>. However, if you get an error, try again by adjusting the parameter bounds.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(bbmle)</code></pre>
+<pre><code>## Loading required package: stats4</code></pre>
+<pre class="r"><code>res &lt;- mle2(temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 2),
+            lower = c(N_o = 1, T_o = 0, sigma_T = 1), 
+            upper = c(N_o = 1000, T_o = 50, sigma_T = 20))</code></pre>
+<pre><code>## Warning in optim(par = c(N_o = 50, T_o = 20, sigma_T = 2), fn = function (p) :
+## bounds can only be used with method L-BFGS-B (or Brent)</code></pre>
+<pre class="r"><code>res</code></pre>
+<pre><code>## 
+## Call:
+## mle2(minuslogl = temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 2), 
+##     lower = c(N_o = 1, T_o = 0, sigma_T = 1), upper = c(N_o = 1000, 
+##         T_o = 50, sigma_T = 20))
+## 
+## Coefficients:
+##        N_o        T_o    sigma_T 
+## 125.254248  23.862510   6.702089 
+## 
+## Log-likelihood: -232.92</code></pre>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Visualize the profile likelihood for each parameter and calculate the 95% confidence intervals. Do you think the quadratic approximation would be good for these parameters?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>pro &lt;- profile(res)
+plot(pro)</code></pre>
+<p><img src="03RE-Maximum_vraisemblance_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>confint(pro)</code></pre>
+<pre><code>##              2.5 %     97.5 %
+## N_o     118.725387 132.059041
+## T_o      23.643472  24.088414
+## sigma_T   6.456217   6.970186</code></pre>
+<p>The quadratic approximation would be good because the profile likelihood for each parameter (after square root transformation) follows a straight line.</p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Let us now compare the model predictions with the data.</li>
+</ol>
+<ul>
+<li><p>Add a column to the dataset for the model mean predictions (the <span class="math inline">\(\lambda\)</span> of the Poisson model for each observation), obtained by replacing the maximum likelihood estimates in the <span class="math inline">\(N\)</span> equation above.</p></li>
+<li><p>Simulate 1000 data sets from the Poisson distribution with the estimated <span class="math inline">\(\lambda\)</span> values. To generate a dataset, use <code>rpois(n, lambda)</code> where <span class="math inline">\(n\)</span> is the number of observations (the number of rows in the original dataset) and <span class="math inline">\(\lambda\)</span> is the column of mean predictions. To generate 1000 datasets, use <code>replicate</code>. The result of <code>replicate</code> should be a matrix of <span class="math inline">\(n\)</span> rows and 1000 columns (1 column per simulation).</p></li>
+<li><p>To obtain a 95% prediction interval for each observation, calculate the appropriate quantiles for each row of the matrix of simulations with <code>apply</code>. For example, <code>apply(sim_mat, 1, quantile, prob = 0.025)</code> applies the <code>quantile</code> function to each row of <code>sim_mat</code>, with the <code>prob</code> argument of <code>quantile</code> set to 0.025. Do the same for the quantile at <span class="math inline">\(p = 0.975\)</span> and you will get two vectors for the lower and upper bounds of the interval, which you can add to the dataset.</p></li>
+</ul>
+<p><em>Note</em>: These prediction intervals assume that the parameter estimates are exact and therefore ignore their uncertainty.</p>
+<ul>
+<li>At this point, in addition to <code>temp</code> and <code>num_eggs</code>, your dataset contains three columns respectively representing the mean predictions, and the lower and upper bounds of the 95% prediction interval for each observation. Add the mean prediction and the interval to the graph of <em>num_eggs</em> vs. <em>temp</em>, e.g. with <code>ggplot</code>, you can add <code>geom_line(aes(y = mean_pred))</code> to the graph to add a line representing the <code>mean_pred</code> column of mean predictions, same for the lower and upper bounds of the interval.</li>
+</ul>
+<p>From the results, can you tell whether the model represents the general trend of the data and the random variation around that trend?</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code># The coef function returns the parameter values
+coef_pois &lt;- coef(res)
+coef_pois</code></pre>
+<pre><code>##        N_o        T_o    sigma_T 
+## 125.254248  23.862510   6.702089</code></pre>
+<pre class="r"><code>therm$mu &lt;- coef_pois[&quot;N_o&quot;] * exp(-((therm$t-coef_pois[&quot;T_o&quot;])/coef_pois[&quot;sigma_T&quot;])^2)
+therm_sim &lt;- replicate(1000, rpois(36, therm$mu))
+therm$min &lt;- apply(therm_sim, 1, quantile, prob = 0.025)
+therm$max &lt;- apply(therm_sim, 1, quantile, prob = 0.975)
+
+library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) +
+    geom_point() +
+    geom_line(aes(y = mu)) +
+    geom_line(aes(y = min), linetype = &quot;dashed&quot;) +
+    geom_line(aes(y = max), linetype = &quot;dashed&quot;)</code></pre>
+<p><img src="03RE-Maximum_vraisemblance_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>The model represents the general trend well, but underestimates the variability. The 95% prediction interval contains only ~70% of the observations (25/36).</p>
+</div>
+<div id="negative-binomial-model" class="section level2">
+<h2>2. Negative binomial model</h2>
+<ol style="list-style-type: lower-alpha">
+<li>Repeat parts (c) to (f) of the previous number using a negative binomial distribution instead of the Poisson distribution for the random portion of the model.</li>
+</ol>
+<p><em>Reminder</em>: In the Poisson distribution, the mean and variance are equal to <span class="math inline">\(\lambda\)</span>. In the negative binomial distribution, the mean is equal to <span class="math inline">\(\mu\)</span> and the variance is equal to <span class="math inline">\(\mu + \mu^2/\theta\)</span>. For this problem, we will use <span class="math inline">\(k = 1/\theta\)</span> as parameter. If <span class="math inline">\(\theta &gt; 0\)</span>, <span class="math inline">\(k\)</span> must take a value greater or equal to 0. Since the variance as a function of <span class="math inline">\(k\)</span> is <span class="math inline">\(\mu + k \mu^2\)</span>, the Poisson distribution corresponds to the case <span class="math inline">\(k = 0\)</span>. Here are the main changes to be made to replace the Poisson model with the negative binomial model:</p>
+<ul>
+<li><p>Add the parameter <span class="math inline">\(k\)</span> to the log-likelihood function. Replace the call to <code>dpois</code> with <code>dnbinom(y, mu, size = 1/k, log = TRUE)</code> where <code>mu</code> is the mean prediction, so it is equivalent to the <code>lambda</code> of <code>dpois</code>.</p></li>
+<li><p>Use a lower bound of 0 for the <code>k</code> parameter in <code>mle2</code>; the upper bound should be less than 100.</p></li>
+<li><p>To simulate the data, replace <code>rpois</code> with <code>rnbinom</code> and specify the arguments <code>mu</code> (mean prediction) and <code>size = 1/k</code>.</p></li>
+</ul>
+<p><strong>Solution</strong></p>
+<pre class="r"><code># Likelihood function, estimates and intervals
+temp_nll &lt;- function(N_o, T_o, sigma_T, k) {
+    mu &lt;- N_o * exp(-((therm$t-T_o)/sigma_T)^2)
+    -sum(dnbinom(therm$num_eggs, size = 1/k, mu = mu, log = TRUE))
+}
+
+res &lt;- mle2(temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 1, k = 1),
+            lower = c(N_o = 1, T_o = 0, sigma_T = 1, k = 0), 
+            upper = c(N_o = 1000, T_o = 50, sigma_T = 20, k = 10))
+res</code></pre>
+<pre><code>## 
+## Call:
+## mle2(minuslogl = temp_nll, start = list(N_o = 50, T_o = 20, sigma_T = 1, 
+##     k = 1), lower = c(N_o = 1, T_o = 0, sigma_T = 1, k = 0), 
+##     upper = c(N_o = 1000, T_o = 50, sigma_T = 20, k = 10))
+## 
+## Coefficients:
+##        N_o        T_o    sigma_T          k 
+## 123.188369  23.884264   6.821416   0.102698 
+## 
+## Log-likelihood: -143.93</code></pre>
+<pre class="r"><code>plot(profile(res))</code></pre>
+<p><img src="03RE-Maximum_vraisemblance_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>confint(profile(res))</code></pre>
+<pre><code>##                2.5 %      97.5 %
+## N_o     104.20709233 147.2176826
+## T_o      23.37301405  24.5051418
+## sigma_T   6.33138839   7.4248342
+## k         0.05916351   0.1855639</code></pre>
+<p>The profile likelihood of the parameters is close to the quadratic approximation, except for <span class="math inline">\(k\)</span> where it is non-quadratic and asymmetric.</p>
+<pre class="r"><code># Predictions according to the parameter estimates
+coef_nb &lt;- coef(res)
+therm$mu &lt;- coef_nb[&quot;N_o&quot;] * exp(-((therm$t-coef_nb[&quot;T_o&quot;])/coef_nb[&quot;sigma_T&quot;])^2)
+therm_sim &lt;- replicate(1000, rnbinom(36, mu = therm$mu, size = 1/coef_nb[&quot;k&quot;]))
+therm$min &lt;- apply(therm_sim, 1, quantile, prob = 0.025)
+therm$max &lt;- apply(therm_sim, 1, quantile, prob = 0.975)
+
+library(ggplot2)
+ggplot(therm, aes(x = temp, y = num_eggs)) +
+    geom_point() +
+    geom_line(aes(y = mu)) +
+    geom_line(aes(y = min), linetype = &quot;dashed&quot;) +
+    geom_line(aes(y = max), linetype = &quot;dashed&quot;)</code></pre>
+<p><img src="03RE-Maximum_vraisemblance_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>Here the 95% prediction interval contains ~97% of the points (35/36).</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Would it be correct to use the likelihood-ratio test to compare the Poisson model from the previous section to the negative binomial model?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<p>The likelihood-ratio test does not apply when the null hypothesis corresponds to a limit of the possible values of the parameter. Here, the Poisson model corresponds to the negative binomial model with <span class="math inline">\(k = 0\)</span>, which is at the limit of possible values for this parameter.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Whether or not you answer yes or no to (b), do the results clearly show whether or not a negative binomial model is justified (relative to the simpler Poisson model) for these data?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<p>Yes, the model’s predictions are more consistent with observations and the log-likelihood of the negative binomial model (-144) is much higher than that of the Poisson model (-233).</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

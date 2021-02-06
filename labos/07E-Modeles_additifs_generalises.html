@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Generalized additive models - Solutions</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Generalized additive models - Solutions</h1>
+
+</div>
+
+
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>The <a href="../donnees/dendro_wa082.csv">dendro_wa082.csv</a> dataset, based on the <em>wa082</em> dataset included in the <em>dplR</em> package, contains dendrochronological series of 23 Pacific silver firs (<em>Abies amabilis</em>) sampled in the state of Washington (northwestern USA). The first column represents the year and each other column represents the annual basal area increment (BAI) of a tree, as determined by tree rings. Missing values (<code>NA</code>) represent years prior to the formation of the first tree ring.</p>
+<pre class="r"><code>wa &lt;- read.csv(&quot;../donnees/dendro_wa082.csv&quot;)
+wa[1:5, 1:8]</code></pre>
+<pre><code>##   year X712011 X712012 X712021 X712022 X712031 X712032 X712041
+## 1 1698      NA      NA      NA      NA      NA      NA      NA
+## 2 1699      NA      NA      NA      NA      NA      NA      NA
+## 3 1700      NA      NA      NA      NA      NA      NA      NA
+## 4 1701      NA      NA      NA      NA      NA      NA      NA
+## 5 1702      NA      NA      NA      NA      NA      NA      NA</code></pre>
+</div>
+<div id="data-preparation" class="section level2">
+<h2>1. Data preparation</h2>
+<ol style="list-style-type: lower-alpha">
+<li><p>Use the <code>pivot_longer</code> function of the <em>tidyr</em> package to transform <code>wa</code> in a table with three columns: year, tree and basal area increment (bai).</p></li>
+<li><p>Add columns to represent the age and basal area (cumulative growth) for each tree-year pair. With the <em>dplyr</em> package, you can sort the data by tree and year, group the data by tree, then calculate the age with <code>row_number</code> and the basal area with <code>cumsum</code> (cumulative sum).</p></li>
+<li><p>Illustrate the growth series of each tree. It is recommended to show the logarithm of the basal area increment.</p></li>
+</ol>
+</div>
+<div id="growth-according-to-age-and-basal-area" class="section level2">
+<h2>2. Growth according to age and basal area</h2>
+<p>The annual growth of a tree depends on both intrinsic (e.g. age and current size of the tree) and extrinsic factors, including climatic conditions. In order to isolate the effect of climate on growth, it is therefore necessary to remove from the growth series the trend due to the age and size of each tree. Here we will use a GAM to estimate this trend, with a form of the model similar to that proposed in the study by Girardin et al. (2016).</p>
+<ol style="list-style-type: lower-alpha">
+<li><p>Fit an additive model with the formula <code>log(bai) ~ log(ba) + s(age)</code>, where <em>bai</em> is the basal area increment of the year and <em>ba</em> is the basal area. Make sure that the <span class="math inline">\(k\)</span> parameter of the spline is high enough. How do you interpret the coefficient of <code>log(ba)</code>? How do you (briefly) describe the effect of age?</p></li>
+<li><p>Now add a random effect of the tree on the intercept of the model in (a). Check the fit of the model, including the normality of the random effects. What is the fraction of the variance of <code>log(bai)</code> explained by this model?</p></li>
+<li><p>Compare two ways of including interannual growth variation in the model in (b): (1) a spline by year (with year as a numerical variable) or (2) a random effect of year (with year as a factor) on the intercept. What are the differences between the assumptions of the two versions of the model?</p></li>
+<li><p>With the function <code>predict(..., type = "terms")</code>, we can obtain the contribution of each term in the model to the predicted response. Use this method to illustrate the random year effects estimated for the second model in (c).</p></li>
+</ol>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Girardin, M.P. et al. (2016) No growth stimulation of Canada’s boreal forest under half-century of combined warming and CO2 fertilization. PNAS 113, E8406-E8414.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

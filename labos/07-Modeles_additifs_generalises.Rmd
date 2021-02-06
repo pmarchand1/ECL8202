@@ -1,5 +1,5 @@
 ---
-title: "Modèles additifs généralisés"
+title: "Modèles additifs généralisés - Exercices en classe"
 output:
     html_document:
         self_contained: false
@@ -13,37 +13,36 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Ce laboratoire doit être remis le 26 février à 17h sur Moodle.
-
 ## Données
 
-Le fichier [portal_ot.csv](../donnees/portal_ot.csv) est un sous-ensemble de la base de données Portal (utilisée pour les labos 2 et 5) qui contient le nombre d'individus (*n*) observés de l'espèce *Onychomys torridus* (souris sauterelle du sud) dans chaque parcelle pour les années 1988 à 2002. Chaque parcelle était soumise à un traitement (*plot_type*) visant à exclure une partie ou l'ensemble des rongeurs de la parcelle.
+Le fichier [dendro_wa082.csv](../donnees/dendro_wa082.csv), basé sur le jeu de données *wa082* inclus dans le package *dplR*, contient des séries dendrochronologiques de 23 sapins gracieux (*Abies amabilis*) échantillonnés dans l'état du Washington (nord-ouest américain). La première colonne représente l'année et chaque autre colonne représente la croissance annuelle de la surface terrière d'un arbre, telle que déterminée par les cernes de croissance. Les valeurs manquantes `NA` représentent des années antérieures à la formation du premier cerne de l'arbre.
 
 ```{r}
-portal_ot <- read.csv("../donnees/portal_ot.csv")
-head(portal_ot)
+wa <- read.csv("../donnees/dendro_wa082.csv")
+wa[1:5, 1:8]
 ```
 
+## 1. Préparation des données
 
-## 1. Estimation de la tendance démographique globale
+(a) Utilisez la fonction `pivot_longer` du package *tidyr* pour transformer `wa` en un tableau avec trois colonnes: l'année, l'arbre et la croissance. 
 
-Pour toutes les questions de cette partie, vous devez ajuster un modèle additif généralisé pour estimer la tendance démographique de l'espèce en tenant compte de l'effet des traitements: `n ~ plot_type + s(year)`. Pour l'instant, nous ignorerons le groupement des mesures par placettes.
+(b) Ajoutez des colonnes pour représenter l'âge et la surface terrière (croissance cumulative) correspondant à chaque paire arbre-année. Avec le package *dplyr*, vous pouvez trier les données par arbre et année, grouper les données par arbre, puis calculer l'âge avec `row_number` et la surface terrière avec `cumsum` (somme cumulative).
 
-(a) Ajustez d'abord un GAM où les observations suivent une distribution de Poisson. De façon brève, décrivez comment le nombre d'individus varie en fonction de l'année et des traitements. En considérant la fonction de lien utilisée pour ce modèle, que signifie l'additivité des effets `plot_type` et `s(year)`?
+(c) Illustrez les séries de croissance de chaque arbre. Il est recommandé de représenter le logarithme de la croissance en surface terrière. 
 
-(b) Est-ce que la valeur par défaut du nombre de fonctions de base $k$ est suffisante pour représenter `s(year)` dans le modèle en (a)? Si nécessaire, réajustez le modèle avec un $k$ plus élevé. Quelle est la valeur maximale de $k$ que vous pouvez utiliser ici? 
+## 2. Croissance en fonction de l'âge et de la surface terrière
 
-(c) Les données sont-elles surdispersées par rapport à votre modèle? 
+La croissance annuelle d'un arbre dépend de facteurs intrinsèques (ex.: âge et taille actuelle de l'arbre) et extrinsèques, notamment les conditions climatiques. Afin d'isoler l'effet du climat sur la croissance, il est donc nécessaire de retirer des séries de croissance la tendance due à l'âge et la taille de chaque arbre. Nous utiliserons ici un GAM pour estimer cette tendance, avec une forme du modèle semblable à celle proposée dans l'étude de Girardin et al. (2016).
 
-(d) Ajustez un nouveau GAM avec la distribution binomiale négative, spécifiée comme `family = "nb"` dans la fonction `gam`. Quel est l'estimé du paramètre $\theta$ pour ce modèle? L'ajustement semble-t-il meilleur que pour le modèle de Poisson? Y a-t-il encore des problèmes d'ajustement?
+(a) Ajustez un modèle additif avec la formule `log(bai) ~ log(ba) + s(age)`, où *bai* (basal area increment) est la croissance en surface terrière de l'année et *ba* est la surface terrière. Assurez-vous que le paramètre $k$ de la spline est assez élevé. Comment interprétez-vous le coefficient de `log(ba)`? Comment décrivez-vous (brièvement) l'effet de l'âge?
 
+(b) Ajoutez maintenant un effet aléatoire de l'arbre sur l'ordonnée à l'origine du modèle en (a). Vérifiez l'ajustement du modèle, incluant la normalité des effets aléatoires. Quelle est la fraction de la variance de `log(bai)` expliquée par ce modèle?
 
-## 2. Ajout des effets aléatoires de placettes
+(c) Comparez deux façons d'inclure la variation de la croissance d'une année à l'autre au modèle en (b): (1) une spline selon l'année (considérée comme variable numérique) ou (2) un effet aléatoire de l'année (considérée comme facteur) sur l'ordonnée à l'origine du modèle. Quelles sont les différences entre les suppositions des deux versions du modèle?
 
-(a) À partir du modèle binomial négatif en 1(d), incluez un effet aléatoire des placettes sur l'ordonnée à l'origine. Vérifiez l'ajustement du modèle, incluant la normalité des effets aléatoires et la présence ou l'absence de surdispersion.
+(d) Avec la fonction `predict(..., type = "terms")`, nous pouvons obtenir la contribution de chaque terme du modèle à la réponse prédite. Utilisez cette méthode pour illustrer les effets aléatoires de l'année estimés pour le deuxième modèle en (c).
 
-(b) Ajustez maintenant un modèle avec un effet aléatoire des placettes sur la tendance démographique moyenne `s(year)`, en utilisant un terme de type `bs = "fs"` tel que vu dans le cours. Comparez ce modèle au modèle en (a) avec l'AIC. *Note*: Le package *AICcmodavg* n'est pas compatible avec les GAM, mais vous pouvez calculer l'AIC pour chaque modèle avec la fonction `AIC`.
+## Références
 
-(c) Quelle est la fraction de la déviance expliquée par le meilleur modèle déterminé en (b)? 
+Girardin, M.P. et al. (2016) No growth stimulation of Canada’s boreal forest under half-century of combined warming and CO2 fertilization. PNAS 113, E8406-E8414.
 
-(d) Finalement, illustrez la tendance démographique estimée pour cette espèce dans chaque placette. Pour ce faire, ajoutez au jeu de données `portal_ot` les valeurs prédites par le meilleur modèle en (b) ainsi qu'un intervalle de confiance à 95%, puis représentez dans un même graphique les données observées, les tendances temporelles estimées et leur intervalle de confiance pour chaque placette. 

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -307,7 +272,7 @@ div.tocify {
 </ul>
 </div>
 </div>
-<div id="estimation-de-parametres" class="section level1">
+<div id="estimation-de-paramètres" class="section level1">
 <h1>Estimation de paramètres</h1>
 <p>L’histogramme ci-dessous représente les diamètres à hauteur de poitrine (DHP) de 90 pruches du Canada inventoriées dans un site du Parc national de Kejimkujik en Nouvelle-Écosse (source: données ouvertes de Parcs Canada). Seuls les arbres ayant un DHP <span class="math inline">\(\ge\)</span> 10 cm étaient inventoriés.</p>
 <pre class="r"><code># Charger les données
@@ -327,7 +292,7 @@ ggplot(pruche_bd, aes(x = dhp)) +
 <p><span class="math display">\[\hat{\mu} = \bar{x} = \frac{1}{n} \sum_{i = 1}^{n} x_i\]</span></p>
 <p><span class="math display">\[\hat{\sigma^2} = s^2 = \frac{1}{n - 1} \sum_{i = 1}^n \left( x_i - \bar{x} \right)^2  \]</span></p>
 <p>De façon plus générale, si <span class="math inline">\(\theta\)</span> représente un paramètre quelconque, son estimateur est noté <span class="math inline">\(\hat{\theta}\)</span>.</p>
-<div id="proprietes-des-estimateurs" class="section level2">
+<div id="propriétés-des-estimateurs" class="section level2">
 <h2>Propriétés des estimateurs</h2>
 <p>L’estimateur d’un paramètre est lui-même une variable aléatoire, avec une distribution définie par rapport à l’ensemble des échantillons possibles d’une population. En particulier, on peut définir sa moyenne <span class="math inline">\(\bar{\hat{\theta}}\)</span> et sa variance <span class="math inline">\(\sigma^2_{\hat{\theta}}\)</span>.</p>
 <p>Le <strong>biais</strong> d’un estimateur est la différence entre sa valeur moyenne et la valeur réelle du paramètre.</p>
@@ -350,13 +315,13 @@ ggplot(pruche_bd, aes(x = dhp)) +
 <p>Cet intervalle est nommé <em>intervalle de confiance</em> à 95% pour <span class="math inline">\(\mu\)</span>.</p>
 <p><em>Note</em>: En pratique, nous ne connaissons pas <span class="math inline">\(\sigma\)</span>, donc il faut remplacer cette valeur par son estimé <span class="math inline">\(s\)</span>, puis remplacer les quantiles de la distribution normale (<span class="math inline">\(\pm 1.96\)</span>) par ceux de la distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n-1\)</span> degrés de liberté.</p>
 </div>
-<div id="interpretation-de-lintervalle-de-confiance" class="section level2">
+<div id="interprétation-de-lintervalle-de-confiance" class="section level2">
 <h2>Interprétation de l’intervalle de confiance</h2>
 <p>La méthode utilisée pour produire un intervalle de confiance à 95% signifie que, si le modèle statistique présumé est bon, l’affirmation que <span class="math inline">\(\mu\)</span> se trouve dans l’intervalle de confiance sera correcte dans 95% des cas; pour 5% des échantillons possibles, nous aurons la malchance d’obtenir un <span class="math inline">\(\bar{x}\)</span> plus éloigné de <span class="math inline">\(\mu\)</span>.</p>
 <p>L’affirmation que “la moyenne a 95% de chances de se situer dans l’intervalle de confiance” n’est pas strictement exacte et peut porter à confusion, puisqu’elle laisse entendre que <span class="math inline">\(\mu\)</span> est une variable aléatoire, ce qui n’est pas le cas dans la théorie présentée ici. Le niveau de confiance (95%) est une propriété de l’estimateur et du plan d’échantillonnage, pas du paramètre estimé. L’intervalle de confiance obtenu avec un échantillon spécifique contient ou ne contient pas <span class="math inline">\(\mu\)</span>.</p>
 </div>
 </div>
-<div id="methodes-de-monte-carlo" class="section level1">
+<div id="méthodes-de-monte-carlo" class="section level1">
 <h1>Méthodes de Monte-Carlo</h1>
 <p>Les méthodes de Monte-Carlo (ou simulations de Monte-Carlo) tirent leur nom du célèbre lieu de jeux de hasard. Utilisées dans plusieurs domaines, il est difficile de leur donner une seule définition. Pour ce cours, nous considérerons qu’il s’agit d’une stratégie générale visant à estimer les propriétés d’une statistique en simulant des tirages aléatoires. Il s’agit en quelque sorte d’un “échantillonnage virtuel”.</p>
 <p>La popularité de ces méthodes est due à la capacité des ordinateurs de générer rapidement une grande quantité de nombres aléatoires (en fait, pseudo-aléatoires, comme nous verrons plus tard). Ainsi, il est possible d’approximer des propriétés statistiques qui sont difficiles à calculer à partir des formules exactes. L’erreur due à l’approximation d’une distribution par un échantillon virtuel peut être réduite à volonté en augmentant le nombre de tirages simulés.</p>
@@ -382,7 +347,7 @@ ggplot(NULL, aes(x = med)) +
 <p>Le graphique ci-dessous montre l’estimé du biais et de l’erreur-type de la même statistique (médiane de <span class="math inline">\(n = 20\)</span> observations avec <span class="math inline">\(\mu = 5\)</span> et <span class="math inline">\(\sigma = 2\)</span>) pour deux simulations de Monte-Carlo différentes, en fonction du nombre d’échantillons simulés. Chaque simulation produit des valeurs différentes, mais le biais et l’erreur-type convergent en autant que le nombre de réplicats <em>R</em> soit suffisant. Les résultats ne sont jamais tout à fait exacts. Dans ce cas-ci, les deux simulations montrent un léger biais positif, même si on sait par des résultats théoriques que cette statistique n’est pas biaisée.</p>
 <p><img src="01-Bootstrap_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Ces graphiques de convergence aident à déterminer combien de réplicats sont suffisants pour que la méthode de Monte-Carlo donne une estimation suffisamment précise. Le nombre de réplicats nécessaires varie en fonction de la distribution des données et de la statistique à estimer.</p>
-<div id="nombres-pseudo-aleatoires" class="section level2">
+<div id="nombres-pseudo-aléatoires" class="section level2">
 <h2>Nombres pseudo-aléatoires</h2>
 <p>Un générateur de nombres pseudo-aléatoires (utilisé par des fonctions comme <code>rnorm</code>) est un algorithme produisant une séquence de valeurs qui, bien que déterminée parfaitement par sa valeur initiale, est très difficile à distinguer d’un tirage aléatoire. La valeur initiale fournie à l’algorithme est nommée graine (<em>seed</em>). Par défaut, cette valeur est choisie par R en fonction de l’horloge interne de l’ordinateur.</p>
 <p>On peut aussi spécifier manuellement la graine au début d’un script avec la fonction <code>set.seed(N)</code>, où <code>N</code> est un nombre entier arbitraire. Dans ce cas, la séquence de nombres générés sera la même pour chaque exécution du script, ce qui peut être utile si on veut reproduire exactement les résultats d’une analyse, ou déboguer un script incluant des tirages aléatoires.</p>
@@ -452,15 +417,15 @@ mean(boot_res$t) - boot_res$t0</code></pre>
 sd(boot_res$t)</code></pre>
 <pre><code>## [1] 4.032191</code></pre>
 </div>
-<div id="points-a-considerer-lors-de-lapplication-du-bootstrap" class="section level2">
+<div id="points-à-considérer-lors-de-lapplication-du-bootstrap" class="section level2">
 <h2>Points à considérer lors de l’application du bootstrap</h2>
-<div id="validite-du-bootstrap" class="section level3">
+<div id="validité-du-bootstrap" class="section level3">
 <h3>Validité du bootstrap</h3>
 <p>Bien que le bootstrap ne requiert pas que les données suivent une distribution statistique précise, cela ne signifie pas que la méthode ne fait aucune supposition. En particulier, le ré-échantillonnage doit être représentatif de la façon dont l’échantillon original a été obtenu.</p>
 <p>Pour la méthode de base présentée ici, on suppose que les observations ont été tirées indépendamment et aléatoirement parmi l’ensemble de la population (échantillonnage aléatoire simple).</p>
 <p>Pour un échantillon stratifié, le bootstrap doit être stratifié de la même façon. L’argument <code>strata</code> de la fonction <code>boot</code> permet de spécifier la strate correspondant à chaque observation. Dans ce cas, le ré-échantillonnage se fait séparément dans chaque strate.</p>
 </div>
-<div id="sources-derreur-et-nombre-dechantillons" class="section level3">
+<div id="sources-derreur-et-nombre-déchantillons" class="section level3">
 <h3>Sources d’erreur et nombre d’échantillons</h3>
 <p>La méthode du bootstrap implique deux sources d’erreur: une erreur statistique et une erreur numérique.</p>
 <p>L’erreur statistique est liée à l’échantillonnage original, qui n’est jamais tout à fait représentatif de la population. Comme pour toutes les méthodes d’inférence statistique, cette erreur est moindre pour un échantillon de plus grande taille, bien que certains sources d’erreur peuvent induire un biais systématique.</p>
@@ -497,9 +462,9 @@ sd(boot_res$t)</code></pre>
 <div id="intervalle-normal" class="section level3">
 <h3>Intervalle normal</h3>
 <p>Cette méthode calcule l’intervalle à partir des quantiles de la distribution <span class="math inline">\(t\)</span>, comme si <span class="math inline">\(\hat{\theta}\)</span> suivait une distribution normale. Par exemple, l’intervalle de confiance à 95% est donné par:</p>
-<p><span class="math display">\[(\hat{\theta}_0 + t_{(n-1)0.025} s_{\hat{\theta}}, \hat{\theta} + t_{(n-1)0.975} s_{\hat{\theta}})\]</span></p>
+<p><span class="math display">\[(\hat{\theta}_0 + t_{(n-1)0.025} s_{\hat{\theta}}, \hat{\theta_0} + t_{(n-1)0.975} s_{\hat{\theta}})\]</span></p>
 <p>où <span class="math inline">\(s_{\hat{\theta}}\)</span> est l’erreur-type estimée par le bootstrap, <span class="math inline">\(n\)</span> est la taille de l’échantillon et <span class="math inline">\(t_{(n-1)q}\)</span> est le quantile <span class="math inline">\(q\)</span> de la distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(n - 1\)</span> degrés de liberté.</p>
-<p>Puisque le bootstrap est souvent utilisé lorsqu’on ne peut pas présumer que la statistique suit une distribution normale, l’intervalle normal a une utilité limitée. Dans notre exemple, la limite inférieure (5.53 cm) n’est pas réaliste, se situant sous le DHP minimum d’échantillonnage.</p>
+<p>Puisque le bootstrap est souvent utilisé lorsqu’on ne peut pas présumer que la statistique suit une distribution normale, l’intervalle normal a une utilité limitée. Dans notre exemple, la limite inférieure (5.59 cm) n’est pas réaliste, se situant sous le DHP minimum d’échantillonnage.</p>
 </div>
 <div id="intervalle-des-quantiles" class="section level3">
 <h3>Intervalle des quantiles</h3>
@@ -518,7 +483,7 @@ sd(boot_res$t)</code></pre>
 <p>L’intervalle de base et l’intervalle des quantiles diffèrent lorsque la distribution de <span class="math inline">\(\hat{\theta}^*\)</span> est asymétrique ou biaisée, comme c’est le cas ici. L’intervalle de base, contrairement à l’intervalle des quantiles, effectue implicitement une correction du biais.</p>
 <p>Si le principe semble raisonnable, l’intervalle de base n’est pas réaliste dans notre exemple, puisque la limite inférieure (2.5 cm) est bien en-deçà du seuil d’échantillonnage du DHP. Le calcul ne tient pas compte du fait que la distribution de <span class="math inline">\((\hat{\theta} - \theta)\)</span> dépend de la valeur de <span class="math inline">\(\hat{\theta}\)</span> lui-même, donc une simple transposition de l’intervalle n’est pas optimale.</p>
 </div>
-<div id="intervalle-studentise" class="section level3">
+<div id="intervalle-studentisé" class="section level3">
 <h3>Intervalle studentisé</h3>
 <p>L’intervalle studentisé (<em>studentized</em>) part du même principe que l’intervalle de base, mais la différence <span class="math inline">\(\hat{\theta}^* - \hat{\theta}_0\)</span> est normalisée par l’écart-type de <span class="math inline">\(\hat{\theta}^*\)</span>:</p>
 <p><span class="math display">\[ t^* = \frac{\hat{\theta}^* - \hat{\theta}}{s_{\hat{\theta}^*}} \]</span></p>
@@ -526,14 +491,14 @@ sd(boot_res$t)</code></pre>
 <p>L’intervalle studentisé corrige une des lacunes de l’intervalle de base, en tenant compte du fait que l’erreur-type de <span class="math inline">\(\hat{\theta}\)</span> n’est pas constante.</p>
 <p>Cet intervalle n’est pas inclus dans notre exemple. R nous avertit que le calcul de l’intervalle studentisé requiert un estimé des variances de bootstrap (<span class="math inline">\(s_{\hat{\theta}^*}\)</span>). Il faut estimer cette variance pour chaque valeur de <span class="math inline">\(\hat{\theta}^*\)</span>. Cela peut être fait en réalisant un deuxième bootstrap de chaque échantillon bootstrap, mais il existe des alternatives moins coûteuses du point de vue de calcul.</p>
 </div>
-<div id="intervalle-avec-correction-du-biais-et-de-lacceleration-bca" class="section level3">
+<div id="intervalle-avec-correction-du-biais-et-de-laccélération-bca" class="section level3">
 <h3>Intervalle avec correction du biais et de l’accélération (BCa)</h3>
-<p>Le dernier intervalle calculé par <code>boot.ci</code> est l’intervalle BCa (pour <em>bias-corrected and accelerated</em>). Cette intervalle est semblable à l’intervalle des quantiles, sauf qu’au lieu de choisir des quantiles fixes (ex. 2.5% et 97.5% pour un interalle à 95%), la méthode BCa choisit différents quantiles en tenant compte du biais et de l’asymétrie de la distribution. Nous ne discuterons pas des détails de ce calcul dans ce cours. Pour notre exemple, l’intervalle BCa est très proche de l’intervalle des quantiles, avec un léger décalage vers le bas.</p>
+<p>Le dernier intervalle calculé par <code>boot.ci</code> est l’intervalle BCa (pour <em>bias-corrected and accelerated</em>). Cette intervalle est semblable à l’intervalle des quantiles, sauf qu’au lieu de choisir des quantiles fixes (ex. 2.5% et 97.5% pour un intervalle à 95%), la méthode BCa choisit différents quantiles en tenant compte du biais et de l’asymétrie de la distribution. Nous ne discuterons pas des détails de ce calcul dans ce cours. Pour notre exemple, l’intervalle BCa est très proche de l’intervalle des quantiles, avec un léger décalage vers le bas.</p>
 <p>L’intervalle BCa et l’intervalle studentisé sont les deux méthodes les plus précises en théorie. Puisqu’il choisit ultimement des quantiles de la distribution de <span class="math inline">\(\hat{\theta}^*\)</span> plutôt que d’une transformation de <span class="math inline">\(\hat{\theta}^*\)</span>, l’intervalle BCa ne va jamais dépasser l’étendue des données observées, ce qui peut être un avantage; dans notre exemple, les limites de l’intervalle demeureront des valeurs de DHP possibles pour cet inventaire.</p>
 <p>L’intervalle BCa est le plus recommandé en pratique, mais requiert aussi plus d’échantillons bootstrap pour être estimé correctement. Il peut être numériquement instable dans certains cas, donc il est avisé de répéter le bootstrap et augmenter le nombre d’échantillons si nécessaire.</p>
 </div>
 </div>
-<div id="application-du-bootstrap-a-une-regression" class="section level1">
+<div id="application-du-bootstrap-à-une-régression" class="section level1">
 <h1>Application du bootstrap à une régression</h1>
 <p>Supposons que nous ajustons une régression linéaire à un jeu de données contenant une variable réponse <span class="math inline">\(y\)</span> et des variables prédictrices <span class="math inline">\(x_1\)</span> et <span class="math inline">\(x_2\)</span>.</p>
 <table>
@@ -579,7 +544,7 @@ sd(boot_res$t)</code></pre>
 </table>
 <p>Si les suppositions du modèle linéaire ne sont pas tout à fait respectées (ex.: résidus non normalement distribués, présence de valeurs extrêmes), les intervalles de confiance théoriques des coefficients, basés sur la distribution <span class="math inline">\(t\)</span>, seront inexacts et le plus souvent trop optimistes. Dans ce cas, le bootstrap nous permet d’obtenir des intervalles de confiance plus réalistes.</p>
 <p>Pour appliquer le bootstrap à une régression, nous pouvons ré-échantillonner soit les observations, soit les résidus du modèle. Nous comparons ces deux stratégies ci-dessous.</p>
-<div id="re-echantillonner-les-observations" class="section level2">
+<div id="ré-échantillonner-les-observations" class="section level2">
 <h2>Ré-échantillonner les observations</h2>
 <p>Si les rangées du jeu de données représentent des individus échantillonnés de façon aléatoire et indépendante à partir de la population, alors nous pouvons créer des échantillons bootstrap en réalisant un tirage avec remise de ces rangées. Voici par exemple les premières rangées d’un échantillon obtenu à partir du tableau précédent, où la 2e observation a été choisie à deux reprises tandis que la 4e observation est absente.</p>
 <table>
@@ -625,7 +590,7 @@ sd(boot_res$t)</code></pre>
 </table>
 <p>Il suffit ensuite d’estimer les coefficients du modèle pour chaque échantillon bootstrap.</p>
 </div>
-<div id="re-echantillonner-les-residus" class="section level2">
+<div id="ré-échantillonner-les-résidus" class="section level2">
 <h2>Ré-échantillonner les résidus</h2>
 <p>Dans cette approche, nous ajustons d’abord le modèle de régression aux données, ce qui permet d’exprimer la réponse <span class="math inline">\(y\)</span> comme la somme d’une réponse moyenne <span class="math inline">\(\hat{y}\)</span> déterminée par les prédicteurs et d’un résidu aléatoire <span class="math inline">\(\hat{\epsilon}\)</span>:</p>
 <p><span class="math display">\[y = \hat{\beta_0} + \hat{\beta_1} x_1 + \hat{\beta_2} x_2 + \hat{\epsilon} = \hat{y} + \hat{\epsilon}\]</span></p>
@@ -743,20 +708,20 @@ sd(boot_res$t)</code></pre>
 <p>Comme précédemment, le modèle est ajusté pour chaque échantillon bootstrap en fonction des nouvelles valeurs de la réponse et des prédicteurs (ces derniers restent identiques dans ce cas-ci).</p>
 <p>Les intervalles de confiance basés sur cette méthode tendent à être moins larges que ceux basés sur un ré-échantillonnage des observations. Toutefois, la validité de cette approche requiert que certains critères soient respectés. Les valeurs des prédicteurs doivent être fixes (ce qui est souvent le cas pour un dispositif expérimental) et le modèle de régression doit bien représenter la relation entre les prédicteurs et la réponse. Les résidus n’ont pas besoin de suivre une distribution particulière (ex.: normale), mais ils doivent être indépendants et suivre la même distribution. En particulier, les résidus ne peuvent pas être ré-échantillonnés si leur variance n’est pas homogène.</p>
 </div>
-<div id="bootstrap-parametrique" class="section level2">
+<div id="bootstrap-paramétrique" class="section level2">
 <h2>Bootstrap paramétrique</h2>
 <p>La technique du bootstrap vue dans ce cours est dite <em>non-paramétrique</em>, car elle ne requiert pas un modèle statistique paramétré des observations.</p>
 <p>Le <em>bootstrap paramétrique</em> est une méthode où les échantillons bootstrap ne sont pas obtenus par tirage à partir des données originales, mais simulés à partir du modèle paramétrique ajusté aux données. Cette méthode s’apparente donc davantage à la simulation de Monte-Carlo présentée plus tôt dans le cours. Elle s’applique lorsqu’on peut supposer que les données proviennent d’une distribution précise, mais qu’on ne connait pas la distribution de la statistique qui nous intéresse.</p>
 </div>
 </div>
-<div id="resume" class="section level1">
+<div id="résumé" class="section level1">
 <h1>Résumé</h1>
 <ul>
 <li><p>Les méthodes de Monte-Carlo permettent d’approximer la distribution d’une statistique à partir de simulations.</p></li>
 <li><p>Le bootstrap (non-paramétrique) est une technique de ré-échantillonage: on crée des échantillons virtuels à partir d’un tirage avec remise des valeurs de l’échantillon observé.</p></li>
 <li><p>La distribution d’un estimateur pour ces échantillons virtuels, par rapport à sa valeur calculée pour l’échantillon original, sert à approximer la distribution de l’estimateur par rapport à la valeur du paramètre dans la population. À partir de cette distribution, nous pouvons déterminer le biais, la variance et l’intervalle de confiance de cet estimateur.</p></li>
 <li><p>Le ré-échantillonnage doit être représentatif de la façon dont l’échantillon original a été obtenu.</p></li>
-<li><p>Pour appliquer le bootstrap à l’estimation des paramètres d’une régression, le ré-échantillonnage des observations et le ré-échantillonnage des résultats sont deux méthodes acceptées; le choix d’une ou de l’autre dépend des suppositions qu’on peut faire dans un cas particulier.</p></li>
+<li><p>Pour appliquer le bootstrap à l’estimation des paramètres d’une régression, le ré-échantillonnage des observations et le ré-échantillonnage des résidus sont deux méthodes acceptées; le choix d’une ou de l’autre dépend des suppositions qu’on peut faire dans un cas particulier.</p></li>
 </ul>
 </div>
 
@@ -778,6 +743,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

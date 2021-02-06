@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Maximum likelihood</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Maximum likelihood</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Maximum likelihood is a general method for estimating the parameters of a statistical model. For example, suppose we have a series of observations of a random variable <span class="math inline">\(y\)</span> and a potential statistical model for that variable. This model can include the dependence of <span class="math inline">\(y\)</span> on other predictor variables, as well as a statistical distribution for the unexplained portion of the variation in <span class="math inline">\(y\)</span>. In general, such a model contains various unknown parameters that must be fitted to the observed data.</p>
+<p>In the maximum likelihood method, the best estimates of the parameters of a model are those that maximize the probability of the observed values of the variable. This method can be applied regardless of the mathematical form of the model, allowing us to choose models that are most compatible with our understanding of natural processes, without being limited by models already implemented in statistical software. (The Bayesian methods we will see later in the course also have this versatility).</p>
+<p>While the general maximum likelihood method was not presented in the course prior to this one (ECL7102), some of the methods seen in that course were based on this principle:</p>
+<ul>
+<li><p>Model selection using AIC is based on the likelihood function.</p></li>
+<li><p>Parameter estimation in generalized linear models is performed by maximizing the likelihood.</p></li>
+<li><p>Parameter estimation in mixed linear models uses a modified version of the maximum likelihood (the restricted maximum likelihood or REML).</p></li>
+</ul>
+<div id="contents" class="section level2">
+<h2>Contents</h2>
+<ul>
+<li><p>Principle of maximum likelihood</p></li>
+<li><p>Application of the maximum likelihood in R</p></li>
+<li><p>Likelihood-ratio test</p></li>
+<li><p>Calculation of confidence intervals</p></li>
+<li><p>Estimation of several parameters: profiled likelihood and linear approximation</p></li>
+</ul>
+</div>
+</div>
+<div id="principle-of-maximum-likelihood" class="section level1">
+<h1>Principle of maximum likelihood</h1>
+<div id="likelihood-function" class="section level2">
+<h2>Likelihood function</h2>
+<p>Suppose we want to estimate the germination rate of a seed lot by germinating 20 of those seeds under the same conditions. If the variable <span class="math inline">\(y\)</span> represents the number of successfully germinated seeds for one run of the experiment, then <span class="math inline">\(y\)</span> follows a binomial distribution:</p>
+<p><span class="math display">\[f(y \vert p) = {n \choose y} p^y (1-p)^{n-y} \]</span></p>
+<p>where <span class="math inline">\(n = 20\)</span> is the number of attempts (number of seeds, in this case), <span class="math inline">\(p\)</span> is the germination probability for the population and <span class="math inline">\({n \choose y}\)</span> represents the number of ways to choose <span class="math inline">\(y\)</span> individuals among <span class="math inline">\(n\)</span>. We write <span class="math inline">\(f(y \vert p)\)</span> to specify that this distribution of <span class="math inline">\(y\)</span> is <em>conditional</em> on a specific value of the parameter <span class="math inline">\(p\)</span>.</p>
+<p>For example, here is the distribution of <span class="math inline">\(y\)</span> if <span class="math inline">\(p = 0.2\)</span>. The probability to get <span class="math inline">\(y = 6\)</span> in this case is approximately 0.11 (dotted line on the graph).</p>
+<pre class="r"><code>ggplot(data.frame(x = 0:20), aes(x)) +
+    labs(x = &quot;y&quot;, y = &quot;f(y|p=0.2)&quot;) +
+    stat_function(fun = dbinom, n = 21, args = list(size = 20, prob = 0.2),
+                  geom = &quot;bar&quot;, color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_segment(aes(x = 0, xend = 6, y = dbinom(6, 20, 0.2),
+                     yend = dbinom(6, 20, 0.2)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>If we have observed <span class="math inline">\(y = 6\)</span>, but do not know <span class="math inline">\(p\)</span>, the same equation allows us to calculate the probability of having obtained this <span class="math inline">\(y\)</span> for each possible value of <span class="math inline">\(p\)</span>. Viewed as a function of <span class="math inline">\(p\)</span>, rather than <span class="math inline">\(y\)</span>, this same equation corresponds to the <strong>likelihood</strong> function (noted <span class="math inline">\(L\)</span>) of <span class="math inline">\(p\)</span>.</p>
+<p><span class="math display">\[L(p) = f(y \vert p) = {n \choose y} p^y (1-p)^{n-y}\]</span></p>
+<p>Here is the shape of <span class="math inline">\(L(p)\)</span> for <span class="math inline">\(y = 6\)</span> and <span class="math inline">\(n = 20\)</span>:</p>
+<pre class="r"><code>ggplot(NULL) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = &quot;density&quot;) +
+    geom_segment(aes(x = 0, xend = 0.2, y = dbinom(6, 20, 0.2),
+                     yend = dbinom(6, 20, 0.2)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    geom_segment(aes(x = 0.2, xend = 0.2, y = 0, yend = dbinom(6, 20, 0.2)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>The likelihood of <span class="math inline">\(p = 0.2\)</span> for this observation of <span class="math inline">\(y\)</span> is therefore also 0.11. Note that while <span class="math inline">\(f(y \vert p)\)</span> was a discrete distribution, since <span class="math inline">\(p\)</span> is a continuous parameter, the likelihood <span class="math inline">\(L(p)\)</span> is defined for all real values between 0 and 1.</p>
+<p>More generally, suppose that <span class="math inline">\(y = (y_1, y_2, ..., y_n)\)</span> is a vector of observations and <span class="math inline">\(\theta = (\theta_1, ..., \theta_m)\)</span> is a vector of the adjustable parameters of the model proposed to explain these observations. In this case, the likelihood of a specific vector of values for <span class="math inline">\(\theta\)</span> corresponds to the joint probability of the observations of <span class="math inline">\(y\)</span>, conditional on those values of <span class="math inline">\(\theta\)</span>. We will see a specific example of the calculation of <span class="math inline">\(L\)</span> for a multi-parameter model (normal distribution) in the next section.</p>
+<p><span class="math display">\[L(\theta) = p(y | \theta)\]</span></p>
+<p><em>Note</em>: Even if the value of <span class="math inline">\(L(\theta)\)</span> for a given <span class="math inline">\(\theta\)</span> is a probability, the likelihood function is not a probability distribution, because in the theory seen here, <span class="math inline">\(\theta\)</span> is not a random variable. Also, the integral of a likelihood function (area under the curve of <span class="math inline">\(L(\theta)\)</span> vs. <span class="math inline">\(\theta\)</span>) is not always equal to 1, unlike that of a probability density.</p>
+</div>
+<div id="maximum-likelihood" class="section level2">
+<h2>Maximum likelihood</h2>
+<p>According to the principle of maximum likelihood, the best estimate of the model’s parameters according to our observations <span class="math inline">\(y\)</span> is the vector of <span class="math inline">\(\theta\)</span> values that maximizes the value of <span class="math inline">\(L(\theta)\)</span>.</p>
+<div id="example-binomial-distribution" class="section level3">
+<h3>Example: Binomial distribution</h3>
+<p>For the binomial model presented above, it is possible to demonstrate (see the calculation in Bolker’s textbook chapter cited in the references) that the maximum likelihood estimate of <span class="math inline">\(p\)</span> is given by:</p>
+<p><span class="math display">\[\hat{p} = \frac{y}{n}\]</span></p>
+<p>In other words, the proportion of successes in the sample is the best estimate of the probability of success in the population. With <span class="math inline">\(y = 6\)</span> and <span class="math inline">\(n = 20\)</span>, we see that the maximum of <span class="math inline">\(L(p)\)</span> is obtained for <span class="math inline">\(p = 0.3\)</span>.</p>
+<pre class="r"><code>ggplot(NULL) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = &quot;density&quot;) +
+    geom_segment(aes(x = 0, xend = 0.3, y = dbinom(6, 20, 0.3),
+                     yend = dbinom(6, 20, 0.3)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    geom_segment(aes(x = 0.3, xend = 0.3, y = 0, yend = dbinom(6, 20, 0.3)), 
+                 color = &quot;#b3452c&quot;, linetype = &quot;dashed&quot;, size = 1) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="example-linear-model" class="section level3">
+<h3>Example: Linear model</h3>
+<p>In the simple linear regression model, the response variable <span class="math inline">\(y\)</span> follows a normal distribution, with the mean linearly dependent on the predictor <span class="math inline">\(x\)</span>, and with a constant standard deviation <span class="math inline">\(\sigma\)</span>:</p>
+<p><span class="math display">\[y \sim N(\beta_0 + \beta_1 x, \sigma)\]</span></p>
+<p>This model includes three parameters to estimate: <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\sigma\)</span>. The probability density for an observation <span class="math inline">\(y\)</span> is thus given by:</p>
+<p><span class="math display">\[f(y \vert \beta_0, \beta_1, \sigma) = \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y - \beta_0 - \beta_1 x}{\sigma} \right)^2}\]</span></p>
+<p>If we perform <span class="math inline">\(n\)</span> independent observations of <span class="math inline">\(y\)</span> (each with a predictor value <span class="math inline">\(x\)</span>), their joint probability density is given by the product (noted <span class="math inline">\(\Pi\)</span>) of the individual probability densities. Viewed as a function of the parameters, the following equation thus gives the joint likelihood of <span class="math inline">\(\beta_0\)</span>, <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\sigma\)</span>:</p>
+<p><span class="math display">\[L(\beta_0, \beta_1, \sigma) = f(y_1, ..., y_n \vert \beta_0, \beta_1, \sigma) = \prod_{i=1}^n \frac{1}{\sigma \sqrt{2 \pi}} e^{-\frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2}\]</span></p>
+</div>
+<div id="log-likelihood" class="section level3">
+<h3>Log-likelihood</h3>
+<p>In practice, it is often easier to calculate the log-likelihood, i.e. <span class="math inline">\(l = \log L\)</span>. Since the log is a <em>monotonic</em> function – that is, if <span class="math inline">\(L\)</span> increases, <span class="math inline">\(\log L\)</span> increases too – then the value of the parameters that maximizes <span class="math inline">\(l\)</span> will also maximize <span class="math inline">\(L\)</span>.</p>
+<p>Since a logarithm transforms a product into a sum:</p>
+<p><span class="math display">\[ \log(xy) = \log(x) + \log(y)\]</span></p>
+<p>the log-likelihood for the linear regression problem above is given by:</p>
+<p><span class="math display">\[l(\beta_0, \beta_1, \sigma) = \sum_{i=1}^n \left( \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2} \left( \frac{y_i - \beta_0 - \beta_1 x_i}{\sigma} \right)^2 \right)\]</span></p>
+<p>or by simplifying further:</p>
+<p><span class="math display">\[l(\beta_0, \beta_1, \sigma) = n \log \left( \frac{1}{\sigma \sqrt{2 \pi}} \right) - \frac{1}{2 \sigma^2}  \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2\]</span></p>
+<p>Note that the <span class="math inline">\(\beta\)</span> coefficients appear only in the second term of the equation, which contains the sum of the squared model residuals. The more this term decreases, the more <span class="math inline">\(l\)</span> increases, which explains why the estimates of the <span class="math inline">\(\beta\)</span> coefficients by the method of least squares are the same as those obtained by the minimum likelihood method.</p>
+<p>For relatively simple functions, the position of the maximum can be determined by finding the value of each parameter where the derivative of <span class="math inline">\(l\)</span> according to this parameter is 0. In particular, for the variance of the residuals <span class="math inline">\(\sigma^2\)</span>, the following estimate is obtained:</p>
+<p><span class="math display">\[\hat{\sigma^2} = \frac{1}{n} \sum_{i=1}^n \left( y_i - \beta_0 - \beta_1 x_i \right)^2\]</span></p>
+<p>We know that this variance estimator is biased (an unbiased estimate would require $n - $1 in the denominator). The maximum likelihood does not guarantee an unbiased estimate, but the theory indicates that the bias becomes negligible for a large enough sample; in this example, the difference between <span class="math inline">\(n-1\)</span> and <span class="math inline">\(n\)</span> becomes less significant as <span class="math inline">\(n\)</span> increases.</p>
+</div>
+</div>
+</div>
+<div id="application-of-the-maximum-likelihood-in-r" class="section level1">
+<h1>Application of the maximum likelihood in R</h1>
+<div id="example-plants-of-the-galapagos-islands" class="section level2">
+<h2>Example: Plants of the Galapagos Islands</h2>
+<p>The file <a href="../donnees/galapagos.csv">galapagos.csv</a> contains a dataset on the plant species richness for 30 islands of the Galapagos Archipelago. (<em>Source</em>: Johnson, M.P. and Raven, P.H. 1973. Species number and endemism: The Galapagos Archipelago revisited. <em>Science</em> 179: 893–895.)</p>
+<pre class="r"><code>galap &lt;- read.csv(&quot;../donnees/galapagos.csv&quot;)
+str(galap)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    30 obs. of  8 variables:
+##  $ Name     : chr  &quot;Baltra&quot; &quot;Bartolome&quot; &quot;Caldwell&quot; &quot;Champion&quot; ...
+##  $ Species  : int  58 31 3 25 2 18 24 10 8 2 ...
+##  $ Endemics : int  23 21 3 9 1 11 0 7 4 2 ...
+##  $ Area     : num  25.09 1.24 0.21 0.1 0.05 ...
+##  $ Elevation: int  346 109 114 46 77 119 93 168 71 112 ...
+##  $ Nearest  : num  0.6 0.6 2.8 1.9 1.9 8 6 34.1 0.4 2.6 ...
+##  $ Scruz    : num  0.6 26.3 58.7 47.4 1.9 ...
+##  $ Adjacent : num  1.84 572.33 0.78 0.18 903.82 ...</code></pre>
+<p>We will model these data with a negative binomial distribution. This distribution is appropriate to represent count data with a variance greater than that predicted by the Poisson distribution.</p>
+<p>If a variable <span class="math inline">\(y\)</span> follows a Poisson distribution, then its mean and variance are both given by the same parameter <span class="math inline">\(\lambda\)</span> .</p>
+<p><span class="math display">\[y \sim \textrm{Pois}(\lambda)\]</span></p>
+<p>The negative binomial distribution has two parameters, <span class="math inline">\(\mu\)</span> et <span class="math inline">\(\theta\)</span>.</p>
+<p><span class="math display">\[y \sim \textrm{NB}(\mu, \theta)\]</span></p>
+<p>In this model, <span class="math inline">\(y\)</span> has a mean of <span class="math inline">\(\mu\)</span> and a variance of <span class="math inline">\(\mu + \frac{\mu^2}{\theta}\)</span>. The parameter <span class="math inline">\(\theta\)</span> is always positive. A small value of <span class="math inline">\(\theta\)</span> represents a more variable distribution, while if <span class="math inline">\(\theta\)</span> is very high, the second term is negligible and the distribution approaches the Poisson distribution.</p>
+<p>As in Poisson regression, the negative binomial model uses a logarithmic link to relate <span class="math inline">\(\mu\)</span> to a linear function of the predictors.</p>
+<p><span class="math display">\[\log\mu = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ...\]</span></p>
+<p>For this example, we will fit the model for the number of species (<em>Species</em>) according to the area of the island (<em>Area</em>, in km<span class="math inline">\(^2\)</span>) and the distance to the nearest island (<em>Nearest</em>, in km). We also take the logarithm of each predictor.</p>
+</div>
+<div id="using-the-bbmle-package" class="section level2">
+<h2>Using the <em>bbmle</em> package</h2>
+<p>Most models do not allow the location of the maximum likelihood to be derived analytically. In this case, we use optimization algorithms that numerically estimate the maximum value of the (log-)likelihood function and the value of each parameter corresponding to this maximum.</p>
+<p>In R, the <code>optim</code> function is a general tool for determining the minimum or maximum of a given function. However, there are also specialized functions for the maximum likelihood estimation problem: in this course, we will use the <code>mle2</code> function from the <em>bbmle</em> package.</p>
+<p>First, we need to write a function that calculates the negative log-likelihood for our problem. By convention, optimization algorithms require a function to be minimized, so instead of maximizing the log-likelihood, we minimize its opposite.</p>
+<pre class="r"><code>nll_galap &lt;- function(b_0, b_area, b_near, theta) {
+    mu_sp &lt;- exp(b_0 + b_area * log(galap$Area) + b_near * log(galap$Nearest))
+    -sum(dnbinom(galap$Species, mu = mu_sp, size = theta, log = TRUE))
+}</code></pre>
+<p>The function <code>nll_galap</code> above accepts four parameters that correspond to the three coefficients of the linear predictor and the <span class="math inline">\(\theta\)</span> parameter of the negative binomial distribution.</p>
+<ul>
+<li><p>The first line of the function calculates the linear predictor and takes its exponential to obtain the mean number of species <code>mu_sp</code>. <em>Reminder</em>: In R, most mathematical operations are performed in parallel on vectors. Thus, <code>mu_sp</code> contains 30 values, the first one calculated from the predictor values for island 1, the second one for island 2, and so on.</p></li>
+<li><p>The second line calculates the log-likelihood of each observation according to the binomial model with <code>dnbinom</code> (also in parallel), calculates their sum then takes the negative.</p></li>
+</ul>
+<p>Note that we specify <code>log = TRUE</code> in <code>dnbinom</code> to compute the log-likelihood. As seen previously, the log-likelihood of a set of observations is equal to the sum of their individual log-likelihoods, as long as the observations are independent.</p>
+<p>Finally, we load the <em>bbmle</em> package and call the function <code>mle2</code>. The first argument of that function is our function calculating the negative log-likelihood. We also need to specify for the <code>start</code> argument a list of the initial values of each parameter, which the algorithm will use to start the search for the maximum.</p>
+<p>The exact choice of the initial values does not matter in most cases, but it is recommended to give plausible (not too extreme) values of the parameters. We therefore choose a null value for each coefficient, but a positive value for <span class="math inline">\(\theta\)</span> which must be greater than zero.</p>
+<pre class="r"><code>library(bbmle)
+
+mle_galap &lt;- mle2(nll_galap, start = list(b_0 = 0, b_area = 0, b_near = 0, theta = 1))
+mle_galap</code></pre>
+<pre><code>## 
+## Call:
+## mle2(minuslogl = nll_galap, start = list(b_0 = 0, b_area = 0, 
+##     b_near = 0, theta = 1))
+## 
+## Coefficients:
+##        b_0     b_area     b_near      theta 
+##  3.3352151  0.3544290 -0.1042696  2.7144722 
+## 
+## Log-likelihood: -137.98</code></pre>
+<p>Executing the function produces several warnings in R, which are not shown here. These probably result from cases where the algorithm tries to assign a negative value to <code>theta</code> and produces an error. In this case, it simply tries a new value.</p>
+</div>
+<div id="interpreting-the-likelihood" class="section level2">
+<h2>Interpreting the likelihood</h2>
+<p>Notice that the maximum log-likelihood in the above result is -137.98, which is a very small value of the likelihood:</p>
+<pre class="r"><code>exp(-137.98)</code></pre>
+<pre><code>## [1] 1.191372e-60</code></pre>
+<p>The likelihood is the probability of obtaining exactly the values appearing in the dataset, according to the model. Considering the many possible values for an observation of the variable and the fact that these possibilities multiply for each subsequent observation, it is not surprising that this probability is very low and even lower for a large sample.</p>
+<p>The absolute value of the likelihood is not really interpretable. Rather, it is its relative value that makes it possible to compare the fit of different values of the parameters based on the same observed data.</p>
+<p>Nevertheless, it is difficult to work with numbers that are extremely close to zero; this is one of the reasons why the log-likelihood is used in practice.</p>
+</div>
+<div id="when-to-use-the-maximum-likelihood-method" class="section level2">
+<h2>When to use the maximum likelihood method?</h2>
+<p>For our example, we could have used the function <code>glm.nb</code> from the <em>MASS</em> package, which is specifically designed to estimate the parameters of a negative binomial regression. By fitting our model with this function, we can verify that the results match the application of <code>mle2</code>.</p>
+<pre class="r"><code>library(MASS)
+glm.nb(Species ~ log(Area) + log(Nearest), galap)</code></pre>
+<pre><code>## 
+## Call:  glm.nb(formula = Species ~ log(Area) + log(Nearest), data = galap, 
+##     init.theta = 2.714482206, link = log)
+## 
+## Coefficients:
+##  (Intercept)     log(Area)  log(Nearest)  
+##       3.3352        0.3544       -0.1043  
+## 
+## Degrees of Freedom: 29 Total (i.e. Null);  27 Residual
+## Null Deviance:       138.7 
+## Residual Deviance: 32.7  AIC: 284</code></pre>
+<p>The functions available in R and various packages already cover a number of common models, including linear models, generalized linear models, mixed models and other models. Also, many models that do not appear linear can be linearized with an appropriate transformation. For example, a power law between the number of species <span class="math inline">\(S\)</span> and the habitat area <span class="math inline">\(A\)</span>:</p>
+<p><span class="math display">\[S = cA^z\]</span></p>
+<p>can be transformed into a linear relationship by taking the logarithm on each side:</p>
+<p><span class="math display">\[\log(S) = \log(c) + z \log(A)\]</span></p>
+<p>When a specialized function is available to estimate the parameters of a model, it is simpler to use it rather than coding the model itself and applying the maximum likelihood method.</p>
+<p>However, there are cases where the assumed model for the data does not fit into a standard format. Here are some examples from forest ecology.</p>
+<p><strong>Fitting a dispersal kernel</strong> (e.g. Clark et al. 1999)</p>
+<p>One way to estimate the dispersal capacity of a plant species is to sample seeds falling into traps placed at different distances from parent plants. In particular, we are interested in estimating the dispersal kernel <span class="math inline">\(f(r)\)</span>, which corresponds to the probability that a seed falls at a distance <span class="math inline">\(r\)</span> from its point of origin.</p>
+<p>Suppose that <span class="math inline">\(y\)</span> represents the number of seeds in one of the traps and can be represented by a negative binomial distribution.</p>
+<p><span class="math display">\[y_i \sim \textrm{NB}(\mu_i, \theta)\]</span></p>
+<p>The mean number of seeds in trap <span class="math inline">\(i\)</span>, <span class="math inline">\(\mu_i\)</span>, corresponds to the sum of the contributions of each mother plant <span class="math inline">\(j\)</span> in the vicinity of the trap; this contribution is equal to the number of seeds produced by a mother plant (<span class="math inline">\(b\)</span>, which we assume to be fixed) multiplied by the dispersal kernel evaluated for the distance <span class="math inline">\(r_{ij}\)</span> between trap <span class="math inline">\(i\)</span> and plant <span class="math inline">\(j\)</span>.</p>
+<p><span class="math display">\[y_i \sim \textrm{NB}(\sum_j b\times f(r_{ij}), \theta)\]</span></p>
+<p>Since <span class="math inline">\(f\)</span> is a non-linear function with its own adjustable parameters, and since the mean of <span class="math inline">\(y\)</span> contains the sum of values of <span class="math inline">\(f\)</span> evaluated at different distances, it is necessary to write a custom likelihood function and maximize it with a tool like <code>mle2</code>.</p>
+<p><strong>Estimation of the neighbourhood competition function</strong> (e.g. Canham et al. 2004).</p>
+<p>The growth of trees in a forest can be reduced by competition from their neighbours. If we assume that the competition exerted on a tree <span class="math inline">\(i\)</span> by a neighbour <span class="math inline">\(j\)</span> increases with the diameter <span class="math inline">\(D_j\)</span> of this neighbour and decreases with the distance <span class="math inline">\(r_{ij}\)</span> between the two trees, we can define a competition index (<em>CI</em>) summing the effects of each neighbour on <span class="math inline">\(i\)</span>:</p>
+<p><span class="math display">\[CI_i = \sum_j \frac{D_j^{\delta}}{r_{ij}^{\gamma}}\]</span></p>
+<p>We wish to estimate the <span class="math inline">\(\delta\)</span> and <span class="math inline">\(\gamma\)</span> exponents appearing in the index from the data. Suppose we have a linear model of the growth <span class="math inline">\(y_i\)</span> of the tree <span class="math inline">\(i\)</span> to which we add a term dependent on this index:</p>
+<p><span class="math display">\[y_i = \beta_0 + ... + \beta_{CI} \sum_j \frac{D_j^{\delta}}{r_{ij}^{\gamma}}\]</span></p>
+<p>There is no way to simplify this last term, so the maximum likelihood method can be useful to estimate the coefficients (all <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\delta\)</span>) of this now non-linear model.</p>
+</div>
+<div id="limitations-of-the-maximum-likelihood-method" class="section level2">
+<h2>Limitations of the maximum likelihood method</h2>
+<p>Most of the advantageous properties of maximum likelihood estimates, including the absence of bias, are valid at the limit where the sample size is large. What constitutes a large enough sample size depends on the model and in particular on the number of parameters to be estimated.</p>
+<p>In practice, the maximum likelihood is obtained by a numerical algorithm seeking the maximum by an iterative process. A complex likelihood function could have several local maxima (points where the function is maximized with respect to parameter values near the point), in which case it is not guaranteed that the algorithm finds the global maximum (the one with the highest likelihood overall).</p>
+</div>
+</div>
+<div id="likelihood-ratio-test" class="section level1">
+<h1>Likelihood-ratio test</h1>
+<div id="test-on-the-value-of-a-parameter" class="section level2">
+<h2>Test on the value of a parameter</h2>
+<p>It is possible to use the likelihood function to test a hypothesis about the value of a parameter.</p>
+<p>For example, consider the likelihood function calculated at the beginning of the class to estimate the probability of germination of a seed lot, if 6 seeds germinated out of 20 attempts.</p>
+<pre class="r"><code>ggplot(NULL) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x),
+                  geom = &quot;density&quot;) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>In this case, the maximum likelihood estimate is <span class="math inline">\(\hat{p} = 0.3\)</span>. Suppose that the seed supplier claims that the germination rate is 50%. Is the result of the experiment consistent with this value?</p>
+<p>The likelihood corresponding to the null hypothesis (<span class="math inline">\(p_0 = 0.5\)</span>) is about <span class="math inline">\(L(p_0) = 0.037\)</span>, compared to a maximum of <span class="math inline">\(L(\hat{p}) = 0.192\)</span>.</p>
+<pre class="r"><code>l_0 &lt;- dbinom(6, 20, prob = 0.5)
+l_max &lt;- dbinom(6, 20, prob = 0.3)
+c(l_0, l_max)</code></pre>
+<pre><code>## [1] 0.03696442 0.19163898</code></pre>
+<p>The ratio between these two <span class="math inline">\(L\)</span> values is used to define a statistic for the likelihood-ratio test. This statistic is -2 times the logarithm of the ratio between the likelihood of the parameter under the null hypothesis and the estimated maximum likelihood.</p>
+<p><span class="math display">\[- 2 \log \left( \frac{L(\theta_0)}{L(\hat{\theta})} \right)\]</span></p>
+<p>Equivalently, we can replace the ratio by a difference of the log-likelihoods:</p>
+<p><span class="math display">\[- 2 \left( l(\theta_0) - l(\hat{\theta}) \right)\]</span></p>
+<p>The factor -2 is added so that, if the null hypothesis is true and the sample is large enough, the distribution of the statistic approaches a <span class="math inline">\(\chi^2\)</span> distribution with 1 degree of freedom.</p>
+<p>In our example, the likelihood-ratio statistic is equal to 3.29.</p>
+<pre class="r"><code>rv &lt;- -2*log(l_0 / l_max)
+rv</code></pre>
+<pre><code>## [1] 3.291315</code></pre>
+<p>The probability of obtaining a ratio greater than or equal to this value, if the null hypothesis <span class="math inline">\(p = 0.5\)</span> is true, can be approximated with the cumulative <span class="math inline">\(\chi^2\)</span> distribution.</p>
+<pre class="r"><code>1 - pchisq(rv, df = 1)</code></pre>
+<pre><code>## [1] 0.06964722</code></pre>
+<p><em>Note</em>: The likelihood-ratio test cannot be applied if the null hypothesis is at the limit of possible values for a parameter. For example, for the parameter <span class="math inline">\(p\)</span> of a binomial distribution, we cannot use this test for the null hypothesis <span class="math inline">\(p_0 = 0\)</span> or <span class="math inline">\(p_0 = 1\)</span>.</p>
+</div>
+<div id="model-comparison" class="section level2">
+<h2>Model comparison</h2>
+<p>The likelihood-ratio test is also used to compare two models. In this case, the models must be nested, i.e. the simpler model must contain a subset of the parameters of the more complex model. For example, suppose a linear regression model with 1 predictor and a second model with 3 predictors.</p>
+<ul>
+<li>M1: <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \epsilon\)</span></li>
+<li>M2: <span class="math inline">\(y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_3 + \epsilon\)</span></li>
+</ul>
+<p>In this case, M1 can be seen as a version of M2 where <span class="math inline">\(\beta_2\)</span> and <span class="math inline">\(\beta_3\)</span> are set to 0. If M1 is the true model for the data, the likelihood ratio statistic between the two models approximately follows a <span class="math inline">\(\chi^2\)</span> distribution, with a number of degrees of freedom equal to the difference in the number of estimated parameters between the two models (here, 2).</p>
+<p><span class="math display">\[- 2 \left( l_{M1} - l_{M2} \right) \sim \chi^2(2)\]</span></p>
+<p>In the previous course ECL7102, we used the Akaike information criterion (AIC) to compare models:</p>
+<p><span class="math display">\[AIC = - 2 \log L + 2K =  -2l + 2K\]</span></p>
+<p>In this formula, <span class="math inline">\(K\)</span> is the number of adjustable parameters in the model. We also saw a corrected version of AIC (AICc) for “small” samples (when <span class="math inline">\(N/K\)</span> &lt; 30, where <span class="math inline">\(N\)</span> is the sample size).</p>
+<p>The AIC has a broader scope than the likelihood-ratio test because more than two models can be compared, whether they are nested or not. In cases where the two methods are applicable, their objectives are different:</p>
+<ul>
+<li><p>AIC aims to identify the model that would best predict the response for a new sample of the same population;</p></li>
+<li><p>the likelihood-ratio test indicates whether the observed difference between the fit of the simpler and the more complex model is consistent with the assumption that the simpler model is correct.</p></li>
+</ul>
+</div>
+</div>
+<div id="calculation-of-confidence-intervals" class="section level1">
+<h1>Calculation of confidence intervals</h1>
+<p>If <span class="math inline">\(\hat{\theta}\)</span> is the maximum likelihood estimate for a parameter <span class="math inline">\(\theta\)</span>, we can obtain a confidence interval for this parameter by using the relationship between hypothesis testing and confidence interval:</p>
+<blockquote>
+<p>If we cannot reject the null hypothesis <span class="math inline">\(\theta = \theta_0\)</span> with a significance threshold <span class="math inline">\(\alpha\)</span>, therefore <span class="math inline">\(\theta_0\)</span> is included in the <span class="math inline">\(100(1-\alpha)\%\)</span> confidence interval for <span class="math inline">\(\theta\)</span>.</p>
+</blockquote>
+<p>For example, the limits of the 95% confidence interval are the values of <span class="math inline">\(\theta\)</span> where the likelihood-ratio statistic is equal to the 95th percentile of the <span class="math inline">\(\chi^2\)</span> distribution; this is the maximum value of the statistic that is not rejected at a threshold <span class="math inline">\(\alpha = 0.05\)</span>.</p>
+<p><span class="math display">\[- 2 \left( l(\theta_0) - l(\hat{\theta}) \right) = \chi^2_{0.95}(1)\]</span></p>
+<p><em>Reminder</em>: The <span class="math inline">\(\chi^2\)</span> test is one-sided, because only high values of the statistic indicate a significant deviation from the null hypothesis.</p>
+<p>If we isolate <span class="math inline">\(\theta_0\)</span> in the equation, we get:</p>
+<p><span class="math display">\[l(\theta_0) = l(\hat{\theta}) - \frac{\chi^2_{0.95}(1)}{2}\]</span></p>
+<p>We must therefore find the values of <span class="math inline">\(\theta\)</span> for which the log-likelihood is about 1.92 lower than the maximum.</p>
+<pre class="r"><code>qchisq(0.95, df = 1) / 2</code></pre>
+<pre><code>## [1] 1.920729</code></pre>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>For our seed germination example (<span class="math inline">\(\hat{p} = 0.3\)</span>), the 95% interval limits correspond to <span class="math inline">\(L = 0.0281\)</span>.</p>
+<pre class="r"><code>exp(dbinom(6, 20, 0.3, log = TRUE) - qchisq(0.95, df = 1)/2)</code></pre>
+<pre><code>## [1] 0.02807512</code></pre>
+<p>This threshold is represented by the dotted line on the graph below and corresponds to an interval of (0.132, 0.516) for <span class="math inline">\(p\)</span>.</p>
+<pre class="r"><code>ggplot(NULL) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(geom = &quot;area&quot;, fill = &quot;#d3492a&quot;, n = 1000,
+        fun = function(x) ifelse(x &gt; 0.132 &amp; x &lt; 0.516,
+                                 dbinom(6, 20, prob = x), NA)) +
+    stat_function(fun = function(x) dbinom(6, 20, prob = x), 
+                  geom = &quot;density&quot;) +
+    geom_hline(yintercept = 0.0279, linetype = &quot;dashed&quot;) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>For an experiment with the same estimate of <span class="math inline">\(\hat{p}\)</span>, but a larger sample <span class="math inline">\((n = 50, y = 15)\)</span>, the limit of <span class="math inline">\(L\)</span> for the 95% interval is 0.0179.</p>
+<pre class="r"><code>exp(dbinom(15, 50, 0.3, log = TRUE) - qchisq(0.95, df = 1)/2)</code></pre>
+<pre><code>## [1] 0.01792382</code></pre>
+<p>As we can see below, the likelihood function and thus the confidence interval are narrower.</p>
+<pre class="r"><code>ggplot(NULL) +
+    labs(x = &quot;p&quot;, y = &quot;L(p)&quot;) +
+    stat_function(geom = &quot;area&quot;, fill = &quot;#d3492a&quot;, n = 1000,
+        fun = function(x) ifelse(x &gt; 0.185 &amp; x &lt; 0.435,
+                                 dbinom(15, 50, prob = x), NA)) +
+    stat_function(fun = function(x) dbinom(15, 50, prob = x), 
+                  geom = &quot;density&quot;) +
+    geom_hline(yintercept = 0.0179, linetype = &quot;dashed&quot;) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_y_continuous(breaks = seq(0, 0.12, 0.03), 
+                       limits = c(0, 0.13), expand = c(0, 0))</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+</div>
+<div id="profile-likelihood" class="section level2">
+<h2>Profile likelihood</h2>
+<p>If <span class="math inline">\(m\)</span> parameters are estimated at the same time, the likelihood function is not a curve, but rather a surface in <span class="math inline">\(m\)</span> dimensions. When calculating the likelihood ratio <span class="math inline">\(- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right)\)</span> for different values <span class="math inline">\(\theta_{0}\)</span> of one of the parameters, one must therefore choose which value to give to the other <span class="math inline">\(m - 1\)</span> parameters. A simple solution would be to set all the other parameters to their estimated maximum likelihood value, but this assumes that these estimates are independent. In general, if one sets <span class="math inline">\(\theta_0\)</span> to a value other than <span class="math inline">\(\hat{\theta}\)</span>, the maximum likelihood estimate may change.</p>
+<p>For example, in the linear regression model shown below, the best estimate of slope changes if the intercept is set to 0 (dotted line).</p>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>In order to create a curve of <span class="math inline">\(l(\theta_0)\)</span> for different values of the parameter, it is thus necessary for each fixed value of <span class="math inline">\(\theta_0\)</span> to find the maximum likelihood for the rest of the parameters. The resulting curve is called the profile likelihood.</p>
+<p>The <code>profile</code> function of the <em>bbmle</em> package evaluates the profiled likelihood of each parameter from the result of <code>mle2</code>. Here is the result obtained for the model fitted earlier (negative binomial regression of the number of plant species in the Galapagos Islands).</p>
+<pre class="r"><code>galap_pro &lt;- profile(mle_galap)
+plot(galap_pro)</code></pre>
+<p><img src="03E-Maximum_vraisemblance_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>For each parameter, the graph shows the square root of the likelihood-ratio statistic <span class="math inline">\(\sqrt{- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right)}\)</span> for the profile likelihood. The square root transformation allows us to quickly see if the log of the profile likelihood is approximately quadratic (see next section), which would result in a symmetrical “V” after transformation.</p>
+<p>Different confidence intervals are superimposed on the graph; these intervals can also be obtained directly with the function <code>confint</code>.</p>
+<pre class="r"><code>confint(galap_pro, level = 0.95)</code></pre>
+<pre><code>##             2.5 %     97.5 %
+## b_0     3.0259619 3.66809720
+## b_area  0.2837173 0.42822254
+## b_near -0.2600032 0.05105544
+## theta   1.5113578 4.69693757</code></pre>
+</div>
+<div id="quadratic-approximation" class="section level2">
+<h2>Quadratic approximation</h2>
+<p>Since calculating the profile likelihood for one parameter requires repeated fitting of the other parameters of the model, this method is very time consuming for a complex model.</p>
+<p>A more approximate, but much faster, method is to assume that the log-likelihood follows a quadratic form. With only one parameter, this quadratic form is a parabola centered on the maximum likelihood: <span class="math inline">\(- 2 \left( l(\theta_{0}) - l(\hat{\theta}) \right) = a (\theta_{0} - \hat{\theta})^2\)</span>. Here, the coefficient <span class="math inline">\(a\)</span> measures the curvature of the parabola. As we saw in the binomial example above, the more pronounced the curvature, the more precise the parameter estimate is.</p>
+<p>In fact, if the quadratic approximation is good, the variance of <span class="math inline">\(\hat{\theta}\)</span> (thus the square of its standard error) is the inverse of the second derivative of <span class="math inline">\(-l\)</span>, which measures the curvature at maximum.</p>
+<p><span class="math display">\[\frac{\textrm{d}^2(-l)}{\textrm{d}\theta^2} = \frac{1}{\sigma_{\hat{\theta}}^2}\]</span></p>
+<p>With <span class="math inline">\(m\)</span> parameters, the curvature in <span class="math inline">\(m\)</span> dimensions around the maximum is represented by a <span class="math inline">\(m \times m\)</span> matrix of the second partial derivatives of <span class="math inline">\(-l\)</span>, called the Fisher information matrix. By inverting this matrix, we obtain the variances and covariances of the estimates. Assuming that the quadratic approximation is correct, these variances and covariances are sufficient to obtain the desired confidence intervals for each parameter.</p>
+<p>In the <em>bbmle</em> package, one can calculate the confidence intervals according to the quadratic approximation by specifying <code>method = "quad"</code> in the <code>confint</code> function:</p>
+<pre class="r"><code>confint(mle_galap, level = 0.95, method = &quot;quad&quot;)</code></pre>
+<pre><code>##             2.5 %    97.5 %
+## b_0     3.0246480 3.6457823
+## b_area  0.2847479 0.4241100
+## b_near -0.2536734 0.0451341
+## theta   1.1781122 4.2508322</code></pre>
+<p>Here we note that the estimates are close to those of the profile likelihood, except for <span class="math inline">\(\theta\)</span>. By inspecting the profile likelihood graphs above, it is apparent that the profile for <span class="math inline">\(\theta\)</span> departs further from the quadratic form.</p>
+</div>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<ul>
+<li><p>For a statistical model, the likelihood is a function that associates to each value of the parameters the probability of the observed data, conditional to this parameterization. According to the principle of maximum likelihood, the best estimate of the parameters is the one that maximizes the likelihood.</p></li>
+<li><p>In order to determine the maximum likelihood for a custom model in R, we must create a function that calculates the log-likelihood as a function of the parameters and then use an optimization algorithm to find the maximum.</p></li>
+<li><p>The likelihood-ratio test is used to test a hypothesis about the value of a parameter estimated using the maximum likelihood, to obtain a confidence interval for that parameter, or to compare two nested models.</p></li>
+<li><p>To estimate the uncertainty of an estimate in a model with several adjustable parameters, we can either calculate the profile likelihood for this parameter or use the quadratic approximation.</p></li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li><p>Bolker, B.M. (2008) Ecological models and data in R. Princeton University Press, Princeton, New Jersey. (Chapitre 6 sur le maximum de vraisemblance)</p></li>
+<li><p>Canham, C.D., LePage, P.T. and Coates, K.D. (2004) A neighborhood analysis of canopy tree competition: effects of shading versus crowding. Canadian Journal of Forest Research 34: 778–787.</p></li>
+<li><p>Clark, J.S., Silman, M., Kern, R., Macklin, E. and HilleRisLambers, J. (1999) Seed dispersal near and far: Patterns across temperate and tropical forests. Ecology 80: 1475–1494.</p></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+---
+title: "Generalized linear mixed models 2"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+    
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot())
+set.seed(8202)
+```
+
+# Contents
+
+In this class, we will present different models for processing count data where the Poisson distribution does not exactly apply. In particular:
+
+- overdispersed data (negative binomial model);
+
+- data expressed as rates (counts per unit of time, space, etc.); and
+
+- zero-inflated data.
+
+
+# Negative binomial model
+
+## Negative binomial distribution
+
+Like the Poisson distribution, the negative binomial distribution makes it possible to represent count data, i.e. integers $\ge 0$.
+
+Historically, the name "negative binomial" comes from the fact that this distribution represents the number of failures before obtaining a certain number of successes in a binomial experiment. However, in order to use this distribution in a regression model, a more general definition of the distribution is more appropriate.
+
+According to this definition, if we have a process where each observation follows a Poisson distribution with its own mean $\lambda$ and these $\lambda$ values vary randomly from one observation to another according to a gamma distribution, then the distribution obtained corresponds to the negative binomial distribution. In practice, we will not model this variation at two levels, but this view of the binomial distribution explains why it represents well the overdispersion of count data. 
+
+The negative binomial distribution noted $\text{NB}(\mu, \theta)$ depends on the parameters $\mu$ (mean) and $\theta$. The variance of the distribution is $\mu + \mu^2 / \theta$, so a smaller $\theta$ means a larger variance. Below, we compare the Poisson distribution with $\lambda$ = 10 to negative binomial distributions with $\mu$ = 10 and $\theta$ = 1 or 3.
+
+```{r, echo = FALSE}
+ggplot(data.frame(x = 0:35), aes(x = x)) +
+    labs(x = "y", y = "P(y)") +
+    stat_function(fun = dnbinom, args = list(mu = 10, size = 1), geom = "bar", n = 36,
+                  aes(fill = "NB(10, 1)"), alpha = 0.7) +
+    stat_function(fun = dnbinom, args = list(mu = 10, size = 3), geom = "bar", n = 36,
+                  aes(fill = "NB(10, 3)"), alpha = 0.7) +
+    stat_function(fun = dpois, args = list(lambda = 10), geom = "bar", n = 36,
+                  aes(fill = "Pois(10)"), alpha = 0.7) +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_fill_manual(name = "", values = c("Pois(10)"="#1b9e77","NB(10, 3)"="#d95f02", "NB(10, 1)"="#7570b3"))
+```
+
+In the context of a regression model (GLM or GLMM), the mean $\mu$ is generally related to the linear predictor by a logarithmic link, as in Poisson regression.
+
+$$y \sim \text{NB}(\mu, \theta)$$
+
+$$\log \mu  = \beta_0 + \sum_{i=1}^m \beta_i x_i$$
+
+Technically, this model is a GLM only if $\theta$ is known. If we wish to estimate $\theta$ from the data, we can proceed by iteration. Starting from an initial value chosen for $\theta$, we fit the other parameters as for a GLM, then we use the residual variance to estimate $\theta$, and repeat these steps until the estimates converge to stable values. In R, this method is implemented by the functions `glm.nb` of the *MASS* package (for models without random effects) and `glmer.nb` of the *lme4* package (for GLMM).
+
+## Example: Local adaptation of maple
+
+The [acer_transplant.csv](../data/acer_transplant.csv) dataset contains data from an experiment to compare the germination of sugar maple seeds from different geographic origins in three forest types (boreal, mixed and temperate).
+
+> Solarik, K.A.,Messier, C., Ouimet, R., Bergeron, Y., Gravel, D. (2018). Local adaptation of trees at the range margins impact range shifts in the face of climate change. Global Ecology and Biogeography, DOI:10.1111/geb.12829.
+
+```{r, echo = TRUE}
+acer <- read.csv("../donnees/acer_transplant.csv")
+str(acer)
+```
+
+The treatments are therefore *origin* (original population) and *stand* (forest type). Four sites were studied in each forest type with 3 replicates per site, so we expect a random effect of *site*. Finally, the response of interest is *first*, which is the number of seedlings counted the first year after the plots were seeded.
+
+By making a histogram of the number of seedlings in all treatments combined, it appears that the dataset contains several values close to 0 as well as some very large values (> 50). This could suggest over-dispersion, but it is important to assess this from the model residuals, not the raw response.
+
+```{r, warning = FALSE, message = FALSE}
+ggplot(acer, aes(x = first)) +
+    geom_histogram(color = "white") +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+Here are the values of the response for each combination of an origin and a forest type. There still appears to be overdispersion.
+
+```{r, echo = TRUE}
+ggplot(data = acer, aes(x = origin, y = first, color = stand)) +
+    geom_point(position = position_jitterdodge(jitter.width = 0.2, dodge.width = 0.4)) +
+    scale_color_brewer(palette = "Dark2")
+```
+
+Note the use of `position_jitterdodge` in `ggplot`. The `dodge.width` part (between 0 and 1) controls the horizontal spacing between dots of different colors, while `jitter.width` controls the random horizontal movement of the dots of each color, to distinguish repeated values.
+
+## Poisson regression
+
+We first estimate the parameters of the Poisson GLMM, including the interaction between the population of origin and forest type, as well as the random effect of the site. We also choose the BOBYQA optimizer because of a convergence problem with the default optimizer.
+
+```{r, warning = FALSE, message = FALSE, echo = TRUE}
+library(lme4)
+acer_p <- glmer(first ~ stand * origin + (1 | site), data = acer, family = poisson,
+                control = glmerControl(optimizer = "bobyqa"))
+```
+
+The $\chi^2$ test shows an important and statistically significant overdispersion.
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(acer_p, "pearson")^2)
+chi2 / df.residual(acer_p)
+1 - pchisq(chi2, df = df.residual(acer_p))
+```
+
+This overdispersion is also apparent when simulating from the fitted model to produce 95% prediction intervals, which are much too narrow compared to the observed data.
+
+```{r, echo = TRUE}
+sim_acer_p <- simulate(acer_p, nsim = 1000, re.form = NULL)
+acer_pred <- mutate(acer, pred = predict(acer_p, type = "response"),
+                    q025 = apply(sim_acer_p, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_acer_p, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+
+ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = first))
+```
+
+*Note*: In the code above, we called `predict` and `simulate` without providing a `newdata` dataset. In this case, the predictions are made from the rows of the original dataset. The function `arrange(pred)` orders the dataset according to the predicted values, which helps in visualization; for this graph, the $x$-axis represents only the position of each row in the ordered dataset.
+
+## Negative binomial regression
+
+Here is the corresponding negative binomial model with `glmer.nb`. Note that the code is identical to the Poisson model, except for the `family` argument, which is not necessary because the `glmer.nb` function implies a negative binomial distribution.
+
+```{r, echo = TRUE}
+acer_nb <- glmer.nb(first ~ stand * origin + (1 | site), acer,
+                    control = glmerControl(optimizer = "bobyqa"))
+
+```
+
+In this model, the residuals follow the expected dispersion.
+
+```{r, echo = TRUE}
+chi2 <- sum(residuals(acer_nb, "pearson")^2)
+chi2/df.residual(acer_nb)
+1-pchisq(chi2, df = df.residual(acer_nb))
+```
+
+We use the same method as above to illustrate the prediction intervals for each observation in the dataset.
+
+```{r}
+sim_acer_nb <- simulate(acer_nb, nsim = 1000, re.form = NULL)
+acer_pred <- mutate(acer, pred = predict(acer_nb, type = "response"),
+                    q025 = apply(sim_acer_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_acer_nb, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+
+ggplot(acer_pred, aes(x = 1:nrow(acer_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = first))
+```
+
+Knowing that the fit of the model is good, we can now inspect the coefficient estimates. Note that in the second line of the summary, `Negative Binomial(0.9232)` tells us the estimated $\theta$ value for this model (0.9232). This is a rather small $\theta$, so the variance of the counts is large.
+
+```{r, echo = TRUE}
+summary(acer_nb)
+```
+
+Since we have the interaction of two categorical predictors, the coefficients give us the differences between the values of the linear predictor (thus the log of the mean number of seedlings) between each combination of treatments and the reference values (here, `originC1` and `standBoreal`). In order to quickly compare the different treatments, the *emmeans* package can be useful. This package performs multiple comparisons, similar to the Tukey test seen for the ANOVA, but is applicable to different types of models, including GLMM. 
+
+In the example below, `emmeans(acer_nb, ~ origin | stand)` tells the function to compare the mean effects of different origins within each forest type. These comparisons are displayed with the `plot` function.
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+library(emmeans)
+plot(emmeans(acer_nb, ~ origin | stand), comparisons = TRUE)
+```
+
+In this graph, the horizontal `emmean` axis shows the average effect of each treatment on the linear predictor scale (i.e. the logarithm of the average number of seedlings). The shaded areas show the 95% confidence interval for each mean, while the red arrows (obtained by specifying `comparisons = TRUE` in `plot`) indicate which effects are significantly different. The difference between two treatments is not significant if the arrows overlap.
+
+*Note*: Specifying `~ origin | stand` in `emmeans` performs a correction (of the Tukey type) for multiple comparisons between origins for each forest type, but you cannot compare means between forest types. We could specify `~ origin * stand` to make comparisons between all combinations of the two variables, but in this case the arrows would be longer because of the number of additional comparisons.
+
+
+# Models for rates
+
+Suppose that we want to analyze data on the abundance (number of individuals) of a species on different plots. However, plot sizes differ, so it is expected that at the same population density, abundance will increase in proportion to plot size.
+
+In this case, the population density could be modeled directly (individuals / m$^2$). However, this method has several drawbacks. We lose count information, which prevents us from using the Poisson or negative binomial distribution. In addition, this method would consider the presence of 3 individuals in 1 m$^2$ as equivalent to the presence of 12 individuals in 4 m$^2$, even though these two results are not statistically equivalent due to a different sample size.
+
+A better solution is to adapt the Poisson regression model.
+
+For example, suppose that the number of individuals $y$ in a plot follows a Poisson distribution of mean $\lambda = \rho A$, where $\rho$ is the population density and $A$ is the plot area. In this case, if we want to model $\log \rho$ according to the $x_i$ predictors:
+
+$$\log \rho = \beta_0 + \beta_1 x_1 + ...$$
+
+We can rewrite $\rho$ as the ratio $\lambda / A$ and use the properties of logarithms:
+
+$$\log \rho  = \log(\lambda / A) = \log \lambda - \log A $$
+
+$$\log \lambda  = \log A + \beta_0 + \beta_1 x_1 + ...$$
+
+Thus, the model can be represented as a Poisson regression, as long as we add a $\log A$ term, called *offset*, to the linear predictor. This term is different from the other predictors, because we do not estimate a $\beta$ coefficient. In a sense, it is a predictor with a coefficient set to 1, to express the assumption that the mean count is proportional to $A$.
+
+## Example
+
+The *Owls* dataset of the *glmmTMB* package presents the results of a study on the behaviour of barn owls nestlings.
+
+> Roulin et Bersier (2007) "Nestling barn owls beg more intensely in the presence of their mother than in the presence of their father." Animal Behaviour 74: 1099-1110.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+library(glmmTMB)
+data(Owls)
+str(Owls)
+```
+
+The response variable, *SiblingNegotiation*, represents the number of cries made by nestlings waiting for food in a given nest, as a function of their level of hunger (*FoodTreatment*), the sex of the parent out foraging (*SexParent*), and the arrival time of that parent (*ArrivalTime*). Because repeated measurements were taken on each nest, *Nest* is a random effect. Finally, since the number of nestlings (*BroodSize*) varies in each nest, this variable will be used as *offset* to model the number of calls per nestling.
+
+Here is the distribution of the response variable. Note that more than 25% of the observations are 0.
+
+```{r, warning = FALSE, message = FALSE}
+ggplot(Owls, aes(x = SiblingNegotiation)) +
+    geom_histogram(color = "white") +
+    scale_y_continuous(expand = c(0, 0))
+```
+
+We start by fitting a Poisson GLMM with an offset:
+
+```{r, echo = TRUE}
+owls_p <- glmer(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                    (1|Nest) + offset(logBroodSize), data = Owls, family = poisson)
+
+chi2 <- sum(residuals(owls_p, type = "pearson")^2)
+chi2 / df.residual(owls_p)
+1 - pchisq(chi2, df = df.residual(owls_p))
+```
+
+Since the $\chi^2$ test shows important overdispersion, we then try a negative binomial model.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE}
+owls_nb <- glmer.nb(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                        (1|Nest) + offset(logBroodSize), data = Owls)
+chi2 <- sum(residuals(owls_nb, type = "pearson")^2)
+chi2 / df.residual(owls_nb)
+```
+
+In this case, the coefficient of dispersion is slightly less than 1. Looking at the model summary, we note that *FoodTreatment* and *ArrivalTime* have significant effects. Note the estimate $\theta = 0.8847$ in the second row.
+
+```{r}
+summary(owls_nb)
+```
+
+Here are the 95% prediction intervals for that model:
+
+```{r}
+sim_owls_nb <- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+owls_pred <- mutate(Owls, pred = predict(owls_nb, type = "response"),
+                    q025 = apply(sim_owls_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_owls_nb, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+
+ggplot(owls_pred, aes(x = 1:nrow(owls_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.3) +
+    geom_line() +
+    geom_point(aes(y = SiblingNegotiation))
+```
+
+Although the interval contains most of the data, note that it appears to be too narrow on the left side of the graph and too wide on the right (when the mean is high). 
+
+Now let's check whether the negative binomial model can reproduce the number of zeros observed in the dataset. The code below calculates for each simulation (each column of `sim_owls_nb`) the number of zeros present (`sum(x == 0)` counts 1 each time the expression `x == 0` is true). We predict a number of zeros between 90 and 125 for 95% of the model realizations.
+
+```{r, echo = TRUE}
+nb_zeros <- apply(sim_owls_nb, 2, function(x) sum(x == 0))
+c(quantile(nb_zeros, probs = 0.025), quantile(nb_zeros, probs = 0.975))
+```
+
+In comparison, the data contain 156 zeros.
+
+```{r, echo = TRUE}
+sum(Owls$SiblingNegotiation == 0)
+```
+
+
+# Zero-inflated models
+
+The previous example shows that an excess of zeros poses a different problem than overdispersion. Overdispersion produces more low and high counts compared to the expected distribution. In the presence of too many zeros, if these extra zeros were removed, we would retrieve the assumed distribution.
+
+To model a response $y$ with an excess of zeros, a two-part model is created:
+
+- with a probability of $p_0$, we have a "structural zero", i.e. $y = 0$ for sure;
+
+- with the remaining probability $(1 - p_0)$, $y$ follows a negative Poisson or binomial distribution; of course, this distribution can also occasionally produce zeros.
+
+The resulting model is called *zero-inflated Poisson* or *zero-inflated negative binomial*, depending on the distribution used for the second part.
+
+For example, a species may be completely absent from a site, which would be a structural zero (we would get a zero for each observation). If present, the number of individuals observed on a given plot varies according to a Poisson distribution, which can also produce zeros. 
+
+In the zero-inflated model, the second component (counting model) generally follows a Poisson or negative binomial distribution with a log link, for example $\log \lambda = \beta_0 + \beta_1 x_1 + ...$ (Poisson)
+
+As for the probability of obtaining a structural zero, $p_0$, it is modelled by a logit link, as in a logistic regression: $\text{logit}(p_0) = \gamma_0 + \gamma_1 z_1 + ...$.
+
+We chose different letters to emphasize that the predictors appearing in the model for $\lambda$ and for $p_0$ are not necessarily the same. In particular, we can estimate a constant $p_0$, independent of the predictors; in this case, only the intercept would appear in the model.
+
+## Exemple
+
+From the `Owls` dataset seen in the previous section, we estimate again a negative binomial GLMM, this time from the `glmmTMB` function of the *glmmTMB* package. This function allows us to fit some models not included in *lme4*, including zero-inflated models. Note that `family = nbinom2` corresponds to the negative binomial distribution as seen previously.
+
+```{r, echo = TRUE}
+owls_nb <- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime + 
+                       (1|Nest) + offset(logBroodSize), family = nbinom2, data=Owls)
+```
+
+Here is now a zero-inflated version of this model. The model for $p_0$ is given by the `ziformula` argument of `glmmTMB`. In our example, `ziformula = ~1` indicates that we only estimate the intercept, so $p_0$ is constant.
+
+```{r, echo = TRUE}
+owls_zinb <- glmmTMB(SiblingNegotiation ~ FoodTreatment * SexParent + ArrivalTime +
+                         (1|Nest)+offset(logBroodSize), 
+                     family = nbinom2, ziformula = ~1, data=Owls)
+summary(owls_zinb)
+```
+
+Note that the $\theta$ parameter of the negative binomial model is 2.31, compared to 0.89 for the `owls_nb` model. This is due to the fact that when accounting for zero-inflation separately, there isn't as much overdispersion.
+
+The results of the $p_0$ model are given in the last section. The intercept of -1.276 is equivalent to the logit of $p_0$. The corresponding probability can be obtained with the function `plogis`.
+
+```{r}
+plogis(-1.276)
+```
+
+We thus have a probability of around 22% of getting a structural zero.
+
+The zero-inflated model is a better fit according to AIC.
+
+```{r, echo = TRUE}
+AIC(owls_nb)
+AIC(owls_zinb)
+```
+
+We can also compare both models' predictions on the same graph.
+
+```{r}
+sim_owls_nb <- simulate(owls_nb, nsim = 1000, re.form = NULL, newdata = Owls)
+sim_owls_zi <- simulate(owls_zinb, nsim = 1000, re.form = NULL, newdata = Owls)
+owls_pred <- mutate(Owls, pred = predict(owls_nb, type = "response"),
+                    q025 = apply(sim_owls_nb, 1, quantile, probs = 0.025),
+                    q975 = apply(sim_owls_nb, 1, quantile, probs = 0.975),
+                    pred_zi = predict(owls_zinb, type = "response"),
+                    q025_zi = apply(sim_owls_zi, 1, quantile, probs = 0.025),
+                    q975_zi = apply(sim_owls_zi, 1, quantile, probs = 0.975)) %>%
+    arrange(pred)
+
+ggplot(owls_pred, aes(x = 1:nrow(owls_pred), y = pred, ymin = q025, ymax = q975)) +
+    geom_ribbon(alpha = 0.5, fill = "#1b9e77") +
+    geom_ribbon(aes(ymin = q025_zi, ymax = q975_zi), alpha = 0.3, fill = "#d95f02") +
+    geom_line(color = "#1b9e77", size = 1) +
+    geom_line(aes(y = pred_zi), color = "#d95f02", size = 1) +
+    geom_point(aes(y = SiblingNegotiation), alpha = 0.5)
+```
+
+We notice that the zero-inflated model (in orange) better represents the range of the data, with the maximum of the interval higher on the left and lower on the right. Here, the data are ordered on the $x$-axis according to the predictions of the model without zero inflation.

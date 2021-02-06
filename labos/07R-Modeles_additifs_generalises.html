@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Modèles additifs généralisés - Exercices en classe - Solutions</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Modèles additifs généralisés - Exercices en classe - Solutions</h1>
+
+</div>
+
+
+<div id="données" class="section level2">
+<h2>Données</h2>
+<p>Le fichier <a href="../donnees/dendro_wa082.csv">dendro_wa082.csv</a>, basé sur le jeu de données <em>wa082</em> inclus dans le package <em>dplR</em>, contient des séries dendrochronologiques de 23 sapins gracieux (<em>Abies amabilis</em>) échantillonnés dans l’état du Washington (nord-ouest américain). La première colonne représente l’année et chaque autre colonne représente la croissance annuelle de la surface terrière d’un arbre, telle que déterminée par les cernes de croissance. Les valeurs manquantes <code>NA</code> représentent des années antérieures à la formation du premier cerne de l’arbre.</p>
+<pre class="r"><code>wa &lt;- read.csv(&quot;../donnees/dendro_wa082.csv&quot;)
+wa[1:5, 1:8]</code></pre>
+<pre><code>##   year X712011 X712012 X712021 X712022 X712031 X712032 X712041
+## 1 1698      NA      NA      NA      NA      NA      NA      NA
+## 2 1699      NA      NA      NA      NA      NA      NA      NA
+## 3 1700      NA      NA      NA      NA      NA      NA      NA
+## 4 1701      NA      NA      NA      NA      NA      NA      NA
+## 5 1702      NA      NA      NA      NA      NA      NA      NA</code></pre>
+</div>
+<div id="préparation-des-données" class="section level2">
+<h2>1. Préparation des données</h2>
+<ol style="list-style-type: lower-alpha">
+<li>Utilisez la fonction <code>pivot_longer</code> du package <em>tidyr</em> pour transformer <code>wa</code> en un tableau avec trois colonnes: l’année, l’arbre et la croissance.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(tidyr)
+wa &lt;- pivot_longer(wa, cols = c(-year), names_to = &quot;tree&quot;, values_to = &quot;bai&quot;,
+                   values_drop_na = TRUE)
+head(wa)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##    year tree      bai
+##   &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt;
+## 1  1698 X712122  6.79
+## 2  1699 X712122 15.3 
+## 3  1700 X712122 24.3 
+## 4  1701 X712122 21.9 
+## 5  1702 X712101 12.4 
+## 6  1702 X712122 28.9</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Ajoutez des colonnes pour représenter l’âge et la surface terrière (croissance cumulative) correspondant à chaque paire arbre-année. Avec le package <em>dplyr</em>, vous pouvez trier les données par arbre et année, grouper les données par arbre, puis calculer l’âge avec <code>row_number</code> et la surface terrière avec <code>cumsum</code> (somme cumulative).</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(dplyr)
+wa &lt;- arrange(wa, tree, year) %&gt;%
+    group_by(tree) %&gt;%
+    mutate(age = row_number(), ba = cumsum(bai))
+head(wa)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+## # Groups:   tree [1]
+##    year tree      bai   age     ba
+##   &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;
+## 1  1811 X712011  7.35     1   7.35
+## 2  1812 X712011 19.2      2  26.6 
+## 3  1813 X712011 32.3      3  58.9 
+## 4  1814 X712011 48.6      4 108.  
+## 5  1815 X712011 58.5      5 166.  
+## 6  1816 X712011 67.4      6 233.</code></pre>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Illustrez les séries de croissance de chaque arbre. Il est recommandé de représenter le logarithme de la croissance en surface terrière.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(ggplot2)
+ggplot(wa, aes(x = year, y = log(bai), color = tree)) +
+    geom_line()</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="croissance-en-fonction-de-lâge-et-de-la-surface-terrière" class="section level2">
+<h2>2. Croissance en fonction de l’âge et de la surface terrière</h2>
+<p>La croissance annuelle d’un arbre dépend de facteurs intrinsèques (ex.: âge et taille actuelle de l’arbre) et extrinsèques, notamment les conditions climatiques. Afin d’isoler l’effet du climat sur la croissance, il est donc nécessaire de retirer des séries de croissance la tendance due à l’âge et la taille de chaque arbre. Nous utiliserons ici un GAM pour estimer cette tendance, avec une forme du modèle semblable à celle proposée dans l’étude de Girardin et al. (2016).</p>
+<ol style="list-style-type: lower-alpha">
+<li>Ajustez un modèle additif avec la formule <code>log(bai) ~ log(ba) + s(age)</code>, où <em>bai</em> (basal area increment) est la croissance en surface terrière de l’année et <em>ba</em> est la surface terrière. Assurez-vous que le paramètre <span class="math inline">\(k\)</span> de la spline est assez élevé. Comment interprétez-vous le coefficient de <code>log(ba)</code>? Comment décrivez-vous (brièvement) l’effet de l’âge?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(mgcv)
+wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age), data = wa)
+gam.check(wa_gam)</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre><code>## 
+## Method: GCV   Optimizer: magic
+## Smoothing parameter selection converged after 8 iterations.
+## The RMS GCV score gradient at convergence was 3.33104e-07 .
+## The Hessian was positive definite.
+## Model rank =  11 / 11 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##          k&#39;  edf k-index p-value    
+## s(age) 9.00 8.97    0.94  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Le test diagnostic de <span class="math inline">\(k\)</span> donne un résultat significatif avec un <code>edf</code> proche du <span class="math inline">\(k\)</span> choisi. Dans ce cas, il est utile d’augmenter la valeur de <span class="math inline">\(k\)</span> suffisamment pour que le test ne soit plus significatif.</p>
+<pre class="r"><code>wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa)
+gam.check(wa_gam)</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre><code>## 
+## Method: GCV   Optimizer: magic
+## Smoothing parameter selection converged after 7 iterations.
+## The RMS GCV score gradient at convergence was 8.075291e-07 .
+## The Hessian was positive definite.
+## Model rank =  31 / 31 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##          k&#39;  edf k-index p-value
+## s(age) 29.0 26.5    0.99    0.15</code></pre>
+<pre class="r"><code>plot(wa_gam, pages = 1)</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Le taux de croissance diminue avec l’âge de l’arbre.</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Ajoutez maintenant un effet aléatoire de l’arbre sur l’ordonnée à l’origine du modèle en (a). Vérifiez l’ajustement du modèle, incluant la normalité des effets aléatoires. Quelle est la fraction de la variance de <code>log(bai)</code> expliquée par ce modèle?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>wa$tree &lt;- as.factor(wa$tree)
+wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = &quot;re&quot;), data = wa)
+gam.check(wa_gam)</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre><code>## 
+## Method: GCV   Optimizer: magic
+## Smoothing parameter selection converged after 11 iterations.
+## The RMS GCV score gradient at convergence was 5.633129e-07 .
+## The Hessian was positive definite.
+## Model rank =  54 / 54 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
+## indicate that k is too low, especially if edf is close to k&#39;.
+## 
+##           k&#39;  edf k-index p-value
+## s(age)  29.0 27.6    1.06       1
+## s(tree) 23.0 21.7      NA      NA</code></pre>
+<p>Excepté pour la partie à gauche de -0.6 sur l’axe des <span class="math inline">\(x\)</span>, les résidus suivent à peu près une distribution normale.</p>
+<pre class="r"><code>plot(wa_gam, pages = 1)</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Les effets aléatoires s’éloignent un peu de la normale pour les valeurs les plus petits (en bas à gauche).</p>
+<pre class="r"><code>summary(wa_gam)</code></pre>
+<pre><code>## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = &quot;re&quot;)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -4.6166     0.1883  -24.52   &lt;2e-16 ***
+## log(ba)       1.0698     0.0181   59.12   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Approximate significance of smooth terms:
+##           edf Ref.df     F p-value    
+## s(age)  27.59  28.76 73.96  &lt;2e-16 ***
+## s(tree) 21.69  22.00 51.27  &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## R-sq.(adj) =  0.872   Deviance explained = 87.4%
+## GCV = 0.12806  Scale est. = 0.12661   n = 4536</code></pre>
+<p>Selon le <span class="math inline">\(R^2\)</span> ajusté, environ 87% de la variance de croissance en surface terrière est expliquée par ce modèle.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Comparez deux façons d’inclure la variation de la croissance d’une année à l’autre au modèle en (b): (1) une spline selon l’année (considérée comme variable numérique) ou (2) un effet aléatoire de l’année (considérée comme facteur) sur l’ordonnée à l’origine du modèle. Quelles sont les différences entre les suppositions des deux versions du modèle?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>wa$year_fac &lt;- as.factor(wa$year)
+wa_gam2 &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year) + 
+                   s(tree, bs = &quot;re&quot;), data = wa)
+plot(wa_gam2, pages = 1)</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>wa_gam3 &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year_fac, bs = &quot;re&quot;) +
+                   s(tree, bs = &quot;re&quot;), data = wa)
+plot(wa_gam3, pages = 1)</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
+<p>Le terme <code>s(year)</code> indique que la croissance moyenne varie de façon continue et non-linéaire selon l’année du cerne, donc elle ne peut pas varier “abruptement” d’une année à la suivante.</p>
+<p>Un effet aléatoire de l’année (prise comme facteur) signifie que les variations inter-annuelles proviennent d’une distribution normale, mais il n’y a pas de contrainte selon laquelle que les années proches l’une de l’autre aient un effet semblable.</p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Avec la fonction <code>predict(..., type = "terms")</code>, nous pouvons obtenir la contribution de chaque terme du modèle à la réponse prédite. Utilisez cette méthode pour illustrer les effets aléatoires de l’année estimés pour le deuxième modèle en (c).</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>wa_pred &lt;- as.data.frame(predict(wa_gam3, type = &quot;terms&quot;))
+head(wa_pred)</code></pre>
+<pre><code>##    log(ba)   s(age) s(year_fac)     s(tree)
+## 1 2.154846 4.318109  0.16692648 -0.09191234
+## 2 3.543452 4.082687  0.11482261 -0.09191234
+## 3 4.401851 3.848813  0.08749526 -0.09191234
+## 4 5.051727 3.618789  0.20494460 -0.09191234
+## 5 5.521118 3.395505  0.11918325 -0.09191234
+## 6 5.889021 3.182077  0.19920168 -0.09191234</code></pre>
+<pre class="r"><code>wa_pred$year &lt;- wa$year
+ggplot(wa_pred, aes(x = year, y = `s(year_fac)`)) +
+    geom_line()</code></pre>
+<p><img src="07R-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="références" class="section level2">
+<h2>Références</h2>
+<p>Girardin, M.P. et al. (2016) No growth stimulation of Canada’s boreal forest under half-century of combined warming and CO2 fertilization. PNAS 113, E8406-E8414.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

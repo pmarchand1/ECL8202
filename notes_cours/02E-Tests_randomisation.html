@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Randomization tests</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Randomization tests</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Seen in the previous class, bootstrapping is a method for determining the distribution of a statistic from a sample, without having to assume a parametric model for the sampling process. This method is based on the resampling of the observed sample.</p>
+<p>Randomization tests are another non-parametric method based on resampling. These tests aim to approximate the distribution of a statistic in the case where a certain null hypothesis (e.g. independence between two variables) is true.</p>
+<div id="contents" class="section level2">
+<h2>Contents</h2>
+<ul>
+<li><p>Review of concepts related to hypothesis testing</p></li>
+<li><p>Example of a randomization test</p></li>
+<li><p>Comparison between bootstrapping and randomization tests</p></li>
+<li><p>Randomization for simple linear regression or one-way ANOVA</p></li>
+<li><p>Multiple linear regression and multi-way ANOVAs</p></li>
+</ul>
+</div>
+</div>
+<div id="hypothesis-testing" class="section level1">
+<h1>Hypothesis testing</h1>
+<p>A statistical hypothesis test is designed to determine whether the variation observed in an observed sample is consistent with a “default” model (the null hypothesis), or whether observations are so unlikely under the null hypothesis that it should be rejected.</p>
+<div id="example-mean-compared-to-a-reference-value" class="section level2">
+<h2>Example: Mean compared to a reference value</h2>
+<p>Suppose a theory tells us that the mean of a variable <span class="math inline">\(x\)</span> in a population would be equal to a reference value <span class="math inline">\(\mu_0\)</span>. We sample <span class="math inline">\(n\)</span> values of this variable in the population; the sample mean is <span class="math inline">\(\bar{x}\)</span> and its standard deviation is <span class="math inline">\(s\)</span>.</p>
+<p>If we can assume that <span class="math inline">\(\bar{x}\)</span> follows a normal distribution, then the difference between <span class="math inline">\(\bar{x}\)</span> and the population mean <span class="math inline">\(\mu\)</span>, divided by the standard error of <span class="math inline">\(\bar{x}\)</span> (i.e. <span class="math inline">\(s / \sqrt{n}\)</span>), follows a <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(n - 1\)</span> degrees of freedom.</p>
+<p><span class="math display">\[t_{n-1} = \frac{\bar{x} - \mu}{s / \sqrt{n}}\]</span></p>
+<p>In this case, once <span class="math inline">\(\bar{x}\)</span> and <span class="math inline">\(s\)</span> are calculated, the <span class="math inline">\(t\)</span> distribution tells us the probability, if the null hypothesis <span class="math inline">\(\mu = \mu_0\)</span> is correct, of obtaining a value of <span class="math inline">\(\bar{x}\)</span> as far or further away from <span class="math inline">\(\mu_0\)</span> than the one calculated from this sample.</p>
+<p>For example, suppose that <span class="math inline">\(\mu_0 = 1\)</span>, <span class="math inline">\(n = 9\)</span>, <span class="math inline">\(\bar{x} = 4\)</span>, and <span class="math inline">\(s = 5\)</span>. In this case, <span class="math inline">\(t = (4 - 1) / (5/3) = 1.8\)</span> if the null hypothesis is true. The probability of observing such a large deviation if <span class="math inline">\(\mu = \mu_0\)</span> is given by the area under the curve of the <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(n - 1 = 8\)</span> degrees of freedom, for <span class="math inline">\(t &gt; 1.8\)</span> or <span class="math inline">\(t &lt; -1.8\)</span>:</p>
+<pre class="r"><code>t_obs &lt;- 1.8
+ggplot(NULL) + xlim(-4, 4) +
+    labs(x = &quot;t&quot;, y = &quot;p(t)&quot;) +
+    stat_function(fun = function(x) dt(x, df = 8)) +
+    stat_function(fun = function(x) ifelse(abs(x) &gt; t_obs, dt(x, df = 8), NA), geom = &quot;area&quot;, fill = &quot;#d3492a&quot;) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>In R, the cumulative distribution function <code>pt(q, df)</code> gives the probability that a value from the <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(df\)</span> degrees of freedom is less than or equal to <span class="math inline">\(q\)</span>. Therefore, the area under the curve can be calculated as follows:</p>
+<pre class="r"><code>pt(-1.8, 8) + (1 - pt(1.8, 8))</code></pre>
+<pre><code>## [1] 0.109553</code></pre>
+<p>This is the <span class="math inline">\(p\)</span>-value of the test.</p>
+<p>Note that the two terms of the sum are equal because the <span class="math inline">\(t\)</span> distribution is symmetrical. A null hypothesis of the type <span class="math inline">\(\mu = \mu_0\)</span> is <em>bilateral</em> because the alternative can occur in either direction. For a one-sided hypothesis (e.g., <span class="math inline">\(\mu = \mu_0\)</span>), the <span class="math inline">\(p\)</span>-value would be the area under the curve on one side only.</p>
+<p>Finally, the <span class="math inline">\(p\)</span>-value is compared to a significance level <span class="math inline">\(\alpha\)</span> chosen before performing the test. The null hypothesis is rejected if <span class="math inline">\(p &lt; \alpha\)</span>. The significance level is therefore the probability of rejecting the null hypothesis if it is true. The most commonly used value is <span class="math inline">\(\alpha = 0.05\)</span>.</p>
+</div>
+<div id="components-of-a-hypothesis-test" class="section level2">
+<h2>Components of a hypothesis test</h2>
+<p>Starting from a given null hypothesis, the construction of a statistical test requires three main components:</p>
+<ul>
+<li>a statistic that measures the deviation of the observations from the null hypothesis;</li>
+<li>the distribution of this statistic under the null hypothesis; and</li>
+<li>a significance level.</li>
+</ul>
+<p><img src="../images/synthesis_test.png" /></p>
+<p>In some cases, as in the <span class="math inline">\(t\)</span> test, the exact distribution of the test statistic under the null hypothesis can be derived mathematically. Another example is the one-factor ANOVA, where the ratio of the observed variation between groups to the variation within groups follows a <span class="math inline">\(F\)</span> distribution when the observations in each group come from the same normal distribution.</p>
+<table>
+<colgroup>
+<col width="11%" />
+<col width="50%" />
+<col width="37%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>One-sample <span class="math inline">\(t\)</span>-test (<span class="math inline">\(n\)</span> individuals)</th>
+<th>One-factor ANOVA (<span class="math inline">\(m\)</span> groups of <span class="math inline">\(n\)</span> individuals)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Null hypothesis</td>
+<td>The mean <span class="math inline">\(\bar{x}\)</span> equals <span class="math inline">\(\mu\)</span></td>
+<td>Same mean in each of the <span class="math inline">\(m\)</span> groups</td>
+</tr>
+<tr class="even">
+<td>Statistic</td>
+<td><span class="math inline">\(t = (\bar{x} - \mu) / (s/\sqrt{n})\)</span></td>
+<td><span class="math inline">\(F = MSA/MSE\)</span></td>
+</tr>
+<tr class="odd">
+<td>Distribution</td>
+<td><span class="math inline">\(t\)</span> with <span class="math inline">\(n-1\)</span> degrees of freedom</td>
+<td><span class="math inline">\(F\)</span> with <span class="math inline">\(m(n-1)\)</span> and <span class="math inline">\((m - 1)\)</span> degrees of freedom</td>
+</tr>
+</tbody>
+</table>
+<p>Randomization tests provide a way to approximate the distribution of the statistic under certain null hypotheses, when the data do not meet the assumptions to use a known theoretical distribution.</p>
+</div>
+</div>
+<div id="principle-of-randomization-tests" class="section level1">
+<h1>Principle of randomization tests</h1>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>Let’s take the <a href="../donnees/sphagnum_cover.csv">sphagnum_cover.csv</a> dataset that we used for the bootstrapping exercises. It contains measures of the percentage of sphagnum moss cover (<em>sphcover</em>) in three types of swamp habitats: drained (<em>Dr</em>, 9 replicates), rewetted (<em>Re</em>, 18 replicates) and undrained (<em>Un</em>, 9 replicates).</p>
+<pre class="r"><code>cover &lt;- read.csv(&quot;../donnees/sphagnum_cover.csv&quot;)
+ggplot(cover, aes(x = habitat, y = sphcover)) + 
+    geom_boxplot()</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Let’s first focus on comparing the <em>Dr</em> and <em>Re</em> swamps.</p>
+<pre class="r"><code>library(dplyr)
+cover2 &lt;- filter(cover, habitat != &quot;Un&quot;)
+head(cover2)</code></pre>
+<pre><code>##     site habitat   sphcover
+## 1 KoniOj      Dr 19.6287879
+## 2 LakkOj      Dr  5.6696970
+## 3 LiOjNx      Dr  0.1969697
+## 4 LiOjSx      Dr  4.8590909
+## 5 RuOjSP      Dr  5.3939394
+## 6 RuOjSu      Dr  0.0000000</code></pre>
+<p>Suppose this was an experimental design where 27 drained wetlands were selected in one area and 18 of these 27 were randomly selected for restoration, while the other 9 (control sites) remained drained.</p>
+<p>Consider the null hypothesis that treatment <em>Re</em> has no effect on the response variable <em>sphcover</em>. In this case, the differences in sphagnum cover observed between sites are due to factors other than the treatment. In particular, a dataset obtained by randomly permuting the values of the <em>Dr</em> and <em>Re</em> treatments between sites is as likely, under the null hypothesis, as the observed dataset.</p>
+<p>In R, the <code>sample</code> function is used to draw a sample from a vector. With the default settings, <code>sample(x)</code> draws a sample <em>without replacement</em> equal in size to the vector <code>x</code>, which produces a permutation of the original data.</p>
+<pre class="r"><code>set.seed(82022)
+cover_perm &lt;- cover2
+cover_perm$habitat_perm &lt;- sample(cover2$habitat)
+head(cover_perm)</code></pre>
+<pre><code>##     site habitat   sphcover habitat_perm
+## 1 KoniOj      Dr 19.6287879           Re
+## 2 LakkOj      Dr  5.6696970           Dr
+## 3 LiOjNx      Dr  0.1969697           Re
+## 4 LiOjSx      Dr  4.8590909           Re
+## 5 RuOjSP      Dr  5.3939394           Re
+## 6 RuOjSu      Dr  0.0000000           Re</code></pre>
+<pre class="r"><code>ggplot(cover_perm, aes(x = habitat_perm, y = sphcover)) + 
+    geom_boxplot()</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="randomization-test-for-a-difference-between-means" class="section level2">
+<h2>Randomization test for a difference between means</h2>
+<p>For the observed data, the rewetted sites have a mean <em>sphcover</em> around 16 percentage points greater than drained sites.</p>
+<pre class="r"><code>diff_obs &lt;- mean(cover2$sphcover[cover2$habitat == &quot;Re&quot;]) -
+            mean(cover2$sphcover[cover2$habitat == &quot;Dr&quot;])
+diff_obs</code></pre>
+<pre><code>## [1] 16.1413</code></pre>
+<p>We can approximate the distribution of this statistic under the null hypothesis by calculating the difference for a large number of permutations of the treatments in the original sample.</p>
+<p>To do this, we define a function containing the permutation operation and the difference calculation, and then we repeat its execution with <code>replicate</code>. (Note that for a function without any arguments, it is necessary to include empty parentheses after the function name in the <code>replicate</code> statement.)</p>
+<pre class="r"><code>diff_perm &lt;- function() {
+   cover_perm &lt;- cover2
+   cover_perm$habitat_perm &lt;- sample(cover2$habitat)
+   mean(cover_perm$sphcover[cover_perm$habitat_perm == &quot;Re&quot;]) -
+       mean(cover_perm$sphcover[cover_perm$habitat_perm == &quot;Dr&quot;])
+}
+
+nperm &lt;- 9999
+
+diff_null &lt;- replicate(nperm, diff_perm())</code></pre>
+<p>The graph below shows a histogram of the difference values obtained by permutation, with a dotted line showing the observed difference.</p>
+<pre class="r"><code>perm_hist &lt;- ggplot(NULL, aes(x = diff_null)) + 
+    labs(x = &quot;Mean difference in sphcover (Re - Dr)&quot;, y = &quot;Frequency&quot;) +
+    geom_histogram(color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_vline(xintercept = diff_obs, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;, size = 1) +
+    scale_y_continuous(expand = c(0, 0))
+perm_hist</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Since the null hypothesis assumes no effect of the treatment, the mean difference should be 0. The mean of the permutation results differs somewhat from zero because of the numerical approximation (9999 randomly selected permutations across all possible permutations).</p>
+<pre class="r"><code>mean(diff_null)</code></pre>
+<pre><code>## [1] 0.08801381</code></pre>
+</div>
+<div id="calculating-the-p-value" class="section level2">
+<h2>Calculating the <span class="math inline">\(p\)</span>-value</h2>
+<p>In general, suppose that the statistic <span class="math inline">\(T\)</span> measures the deviation of the observed data from the null hypothesis. For the observed sample, <span class="math inline">\(T = T_{obs}\)</span>; for the <span class="math inline">\(N\)</span> permutations, we get a set of values <span class="math inline">\(T^*\)</span>.</p>
+<p>In this case, the <span class="math inline">\(p\)</span>-value of the test is calculated as follows:</p>
+<p><span class="math display">\[\frac{\# \left(|T^*| \ge |T_{obs}| \right) + 1}{N + 1}\]</span></p>
+<p>The term <span class="math inline">\(\# (|T^*| \ge |T_{obs}| )\)</span> is the number of values of <span class="math inline">\(T^*\)</span> with an absolute value that is greater than or equal to the absolute value of <span class="math inline">\(T_{obs}\)</span>. So if <span class="math inline">\(T_{obs} = 16\)</span>, we count the number of values <span class="math inline">\(\ge 16\)</span> or <span class="math inline">\(\le -16\)</span>. In the case of a one-sided hypothesis test, we count the extreme values on one side only.</p>
+<p>In our example, <span class="math inline">\(p = 0.009\)</span>.</p>
+<pre class="r"><code>(sum(abs(diff_null) &gt;= abs(diff_obs)) + 1) / (nperm + 1)</code></pre>
+<pre><code>## [1] 0.009</code></pre>
+<p>Note that each comparison produces a logical value (<code>TRUE</code> or <code>FALSE</code>) and <code>sum</code> counts the number of <code>TRUE</code> values.</p>
+<p>The addition of 1 to the numerator and denominator in the <span class="math inline">\(p\)</span>-value equation represents the fact that the observed data is one of the possible permutations. Increasing the number of permutations makes it possible to determine <span class="math inline">\(p\)</span> with a better resolution. With <span class="math inline">\(N\)</span> permutations, the minimum possible value for <span class="math inline">\(p\)</span> is equal to <span class="math inline">\(1 / (N + 1)\)</span>, obtained when the observed statistic is more extreme than every simulated value.</p>
+</div>
+</div>
+<div id="assumptions-of-the-randomization-test" class="section level1">
+<h1>Assumptions of the randomization test</h1>
+<p>In an experimental context, it is the random assignment of treatments to individuals that ensures that the randomization test is valid, i.e., the samples produced by swapping treatments represent the distribution of the statistic under the null hypothesis.</p>
+<p>In a context where treatments have been observed rather than assigned, the randomization test requires that the observations be <em>exchangeable</em> if the null hypothesis is true, i.e., that each sample obtained by permutation is equally likely.</p>
+<p>For example, the hypothesis that a response variable is equally distributed in each group can be tested by randomization. However, we could not test the hypothesis that two groups have the same mean but a different variance, since permuting group labels would erase this difference in variances.</p>
+<p>Exchangeability of observations also does not apply if the observations are grouped (e.g., plots grouped together in sites) or correlated in space and time. This type of case requires more complex types of permutation that preserve the structure of the data.</p>
+<p>Randomization tests are also sometimes referred to as permutation tests. Some authors reserve these two names for different situations (e.g., depending on whether or not it is an experimental device, or whether it is an exact or approximate test), but we will not make a distinction here.</p>
+</div>
+<div id="comparison-between-bootstrapping-and-randomization-tests" class="section level1">
+<h1>Comparison between bootstrapping and randomization tests</h1>
+<p>Bootstrapping and randomization tests are two non-parametric methods of inference based on the simulation of virtual samples (Monte Carlo methods). They can sometimes be applied to the same problem, as in our example of sphagnum moss cover in different habitats.</p>
+<p>For this example, the bootstrap proceeds by resampling the observations in each habitat type (keeping the relation between <em>sphcover</em> and <em>habitat</em>). By calculating the difference in mean coverage, we obtain a distribution of this difference centered on the value of the statistic for the observed sample (dotted line). This distribution allows us, in particular, to calculate the confidence interval for a given probability.</p>
+<pre class="r"><code>library(boot)
+
+diff_boot &lt;- function(x, i) {
+    cover_boot &lt;- x[i, ]
+    mean(cover_boot$sphcover[cover_boot$habitat == &quot;Re&quot;]) -
+       mean(cover_boot$sphcover[cover_boot$habitat == &quot;Dr&quot;])
+}
+
+diff_boot_res &lt;- boot(cover2, diff_boot, R = 10000)
+
+ggplot(NULL, aes(x = diff_boot_res$t)) + 
+    labs(x = &quot;Mean difference in sphcover (Re - Dr)&quot;, y = &quot;Frequency&quot;) +
+    geom_histogram(color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_vline(xintercept = diff_obs, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;, size = 1) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>In contrast, the randomization test resamples without replacement (permutes) the habitat types to simulate the absence of a relationship between <em>sphcover</em> and <em>habitat</em>. We thus obtain a distribution of the mean difference in cover under the null hypothesis, centered on 0, which allows us to calculate the probability of having obtained a more extreme value than the observed one, if the null hypothesis were true.</p>
+<pre class="r"><code>perm_hist</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>There is a general relationship between a hypothesis test and a confidence interval. If the <span class="math inline">\(100(1 - \alpha)\%\)</span> confidence interval of a parameter <span class="math inline">\(\theta\)</span> does not include <span class="math inline">\(\theta_0\)</span>, then the hypothesis <span class="math inline">\(\theta = \theta_0\)</span> can be rejected with a significance level of <span class="math inline">\(\alpha\)</span>.</p>
+<p>For example, if the 95% confidence interval for the difference in means excludes 0, then we know that the <span class="math inline">\(p\)</span>-value associated with the hypothesis that this difference is zero is less than 0.05. However, the bootstrap confidence interval does not allow us to obtain the precise <span class="math inline">\(p\)</span>-value for a given test. In contrast, if a randomization test allows us to reject the null hypothesis, it is not easy to deduce the confidence interval for the value of the parameter from this test.</p>
+<p>Finally, there are statistical tests where the null hypothesis cannot be represented by randomization. For example, when comparing the mean of a single group to a reference value, there is nothing to randomize. In this case, one can still obtain a confidence interval with the bootstrap and check whether it includes the reference value.</p>
+</div>
+<div id="randomization-and-one-way-anova" class="section level1">
+<h1>Randomization and one-way ANOVA</h1>
+<div id="one-way-anova-model" class="section level2">
+<h2>One-way ANOVA model</h2>
+<p>Suppose we measure the variable <span class="math inline">\(y\)</span> for <span class="math inline">\(m\)</span> groups each comprising <span class="math inline">\(n\)</span> observations. The one-way ANOVA model assumes that <span class="math inline">\(y_{ik}\)</span>, the observation <span class="math inline">\(k\)</span> in group <span class="math inline">\(i\)</span>, is the sum of three terms: the global mean of the population <span class="math inline">\(\mu\)</span>, the difference <span class="math inline">\(\alpha_i\)</span> between the mean of group <span class="math inline">\(i\)</span> and the global mean, and then a residual <span class="math inline">\(\epsilon_{ik}\)</span>.</p>
+<p><span class="math display">\[y_{ik} = \mu + \alpha_i + \epsilon_{ik}\]</span></p>
+<p>In particular, residuals in each group follow a normal distribution with the same variance.</p>
+<p><span class="math display">\[\epsilon_{ik} \sim N(0, \sigma)\]</span></p>
+<p>For this model, the null hypothesis is that the mean of all groups is identical, i.e. all <span class="math inline">\(\alpha_i\)</span> are 0.</p>
+<p>Let us denote by <span class="math inline">\(\bar{y}\)</span> the global mean of the observations and by <span class="math inline">\(\bar{y_i}\)</span> the mean of the observations in group <span class="math inline">\(i\)</span>. The sum of the squared deviations between the observations and the global mean (<em>SST</em>) can be decomposed into two parts: one part due to the deviations between the group means and the global mean (<em>SSA</em>) and one part due to the deviations between the observations and the mean of their group (<em>SSE</em>).</p>
+<p><span class="math display">\[SST = SSA + SSE\]</span> <span class="math display">\[\sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2 = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2 + \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2\]</span></p>
+<p>Dividing <em>SSA</em> and <em>SSE</em> by the appropriate number of degrees of freedom (i.e., <span class="math inline">\(m-1\)</span> for intergroup differences, <span class="math inline">\(m(n-1)\)</span> for differences between observations in the same group) yields the mean square errors <em>MSA</em> and <em>MSE</em>, which we can consider as inter-group and intra-group variances, respectively. The <span class="math inline">\(F\)</span> statistic corresponds to the <em>MSA/MSE</em> ratio. The higher the <span class="math inline">\(F\)</span>, the larger the inter-group variance compared to the intra-group variance.</p>
+<table style="width:100%;">
+<colgroup>
+<col width="5%" />
+<col width="31%" />
+<col width="31%" />
+<col width="31%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Sum of squares (SS)</th>
+<th>Degrees of freedom (df)</th>
+<th>Mean square (MS)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Groups</td>
+<td><span class="math inline">\(SSA = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2\)</span></td>
+<td><span class="math inline">\(m - 1\)</span></td>
+<td><span class="math inline">\(MSA = \frac{SSA}{m - 1}\)</span></td>
+</tr>
+<tr class="even">
+<td>Residuals</td>
+<td><span class="math inline">\(SSE = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2\)</span></td>
+<td><span class="math inline">\(m(n-1)\)</span></td>
+<td><span class="math inline">\(MSE = \frac{SSE}{(n-1)m}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Total</td>
+<td><span class="math inline">\(SST = \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2\)</span></td>
+<td><span class="math inline">\(mn - 1\)</span></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>If the null hypothesis is true, i.e., the observed differences between groups are due to the random sampling alone, the <span class="math inline">\(F\)</span> statistic follows the <span class="math inline">\(F\)</span> distribution, with two parameters corresponding to the number of degrees of freedom of <em>MSA</em> and <em>MSE</em>.</p>
+<p>The <span class="math inline">\(F\)</span> test is one-tailed. If the group means differ, the <span class="math inline">\(F\)</span> statistic will be larger than expected under the null hypothesis.</p>
+<p>Here is for example the result of a classical ANOVA comparing sphagnum cover for the three habitat types of the <code>cover</code> dataset.</p>
+<pre class="r"><code>aov_cover &lt;- aov(sphcover ~ habitat, data = cover)
+summary(aov_cover)</code></pre>
+<pre><code>##             Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## habitat      2   7048    3524   14.88 2.47e-05 ***
+## Residuals   33   7814     237                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>It will be useful later to extract the <span class="math inline">\(F\)</span> value corresponding to the difference between habitats, which we can do by first saving the output of <code>summary</code>.</p>
+<pre class="r"><code>aov_sum &lt;- summary(aov_cover)
+f_obs &lt;- aov_sum[[1]][1, 4]
+f_obs</code></pre>
+<pre><code>## [1] 14.8819</code></pre>
+<p>In the code above, <code>[[1]]</code> extracts the first ANOVA table (there is only one here), then <code>[1, 4]</code> extracts the value in row 1 (<code>habitat</code>), column 4 (<code>F value</code>).</p>
+</div>
+<div id="randomizing-the-anova" class="section level2">
+<h2>Randomizing the ANOVA</h2>
+<p>If the ANOVA assumptions are not met, especially if the data from each group departs significantly from a normal distribution, then the calculated <span class="math inline">\(F\)</span> statistic will not exactly follow a <span class="math inline">\(F\)</span> distribution. In this case, we can determine the distribution of the statistic by a randomization test.</p>
+<p>As with the comparison of two means, we perform a permutation of the values in the <em>habitat</em> column and then extract the <span class="math inline">\(F\)</span> value from the ANOVA applied to the permuted data.</p>
+<pre class="r"><code>f_perm &lt;- function() {
+   cover_perm &lt;- cover
+   cover_perm$habitat_perm &lt;- sample(cover$habitat)
+   aov_sum &lt;- summary(aov(sphcover ~ habitat_perm, data = cover_perm))
+   aov_sum[[1]][1, 4]
+}
+
+nperm &lt;- 9999
+
+f_null &lt;- replicate(nperm, f_perm())</code></pre>
+<pre class="r"><code>ggplot(NULL, aes(x = f_null)) + 
+    labs(x = &quot;Mean difference in sphcover (Re - Dr)&quot;, y = &quot;Frequency&quot;) +
+    geom_histogram(color = &quot;black&quot;, fill = &quot;white&quot;) +
+    geom_vline(xintercept = f_obs, linetype = &quot;dashed&quot;, color = &quot;#b3452c&quot;, size = 1) +
+    scale_y_continuous(expand = c(0, 0))</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>Here, the <span class="math inline">\(F\)</span> statistic calculated from the observations exceeds all the values obtained by permutation, so we obtain the minimum possible <span class="math inline">\(p\)</span> value according to the number of permutations, i.e. 1/10000.</p>
+<pre class="r"><code>(sum(f_null &gt;= f_obs) + 1) / (nperm + 1)</code></pre>
+<pre><code>## [1] 1e-04</code></pre>
+</div>
+<div id="anova-for-a-multivariate-response" class="section level2">
+<h2>ANOVA for a multivariate response</h2>
+<p>The ANOVA model can be generalized to the case where the response <span class="math inline">\(y\)</span> is multivariate; for example, if we want to compare community composition (abundance of several species) at sites with different treatments.</p>
+<p>After selecting an appropriate distance measure to characterize the level of dissimilarity between the compositions of two sites, the mean square distance between (i) sites with the same treatment and (ii) sites with different treatments is calculated. These two statistics are equivalent to the <em>MSE</em> and <em>MSA</em>, respectively, so their ratio is analogous to the <span class="math inline">\(F\)</span> statistic. As in the univariate case, we can calculate the <span class="math inline">\(p\)</span> value of this statistic by randomizing the treatments, with the null hypothesis being that the treatments have no effect on the multivariate composition.</p>
+<p>This method known as PERMANOVA (for <em>permutational multivariate analysis of variance</em>) is implemented in several software packages, including the R <em>vegan</em> package (<code>adonis</code> function) and the commercial software PRIMER.</p>
+</div>
+</div>
+<div id="simple-linear-regression" class="section level1">
+<h1>Simple linear regression</h1>
+<p>The dataset <a href="../donnees/environment.csv">environment.csv</a> (from the textbook by Beckerman and Petchey, <em>Getting started with R: An introduction for biologists</em>) includes root biomass measurements (<em>biomass</em>, in g/m<span class="math inline">\(^2\)</span>) at 10 sites as a function of altitude (in m), temperature (in degrees C) and annual rainfall (in m).</p>
+<pre class="r"><code>enviro &lt;- read.csv(&quot;../donnees/environment.csv&quot;)</code></pre>
+<p>For this example, we will consider how biomass varies with precipitation.</p>
+<pre class="r"><code>ggplot(enviro, aes(x = rainfall, y = biomass)) +
+    geom_point()</code></pre>
+<p><img src="02E-Tests_randomisation_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>According to the linear regression model below, biomass is estimated to increase by 144 g/m<span class="math inline">\(^2\)</span> when annual precipitation increases by one meter. The probability of obtaining an estimate of this magnitude when the coefficient is equal to zero is equal to <span class="math inline">\(p = 0.034\)</span>; this <span class="math inline">\(p\)</span> value is based on a normal distribution for this estimate.</p>
+<pre class="r"><code>mod &lt;- lm(biomass ~ rainfall, data = enviro)
+summary(mod)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = biomass ~ rainfall, data = enviro)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -78.136 -24.178  -7.373   2.204 144.424 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)    43.93      38.18   1.151    0.283  
+## rainfall      144.40      56.55   2.553    0.034 *
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 67.44 on 8 degrees of freedom
+## Multiple R-squared:  0.449,  Adjusted R-squared:  0.3802 
+## F-statistic:  6.52 on 1 and 8 DF,  p-value: 0.03399</code></pre>
+<p>To carry out a randomization test of this same hypothesis (absence of correlation between <em>biomass</em> and <em>rainfall</em>), we can permute the precipitation values and calculate the correlation coefficient between these permuted data and the biomass observations.</p>
+<pre class="r"><code>nperm &lt;- 9999
+rain_cor &lt;- function() {
+    rain_perm &lt;- sample(enviro$rainfall)
+    cor(rain_perm, enviro$biomass)
+}
+
+rain_null &lt;- replicate(nperm, rain_cor())</code></pre>
+<p>Note that the correlation coefficient between <em>rainfall</em> and <em>biomass</em> is proportional to the coefficient of the above regression and the proportionality factor (the ratio between the variances of <em>biomass</em> and <em>rainfall</em>) remains unchanged with the permutations. Thus, the value <span class="math inline">\(p\)</span> will be the same for both statistics: regression coefficient and correlation coefficient.</p>
+<pre class="r"><code>rain_obs &lt;- cor(enviro$rainfall, enviro$biomass)
+(sum(abs(rain_null) &gt; abs(rain_obs)) + 1) / (nperm + 1)</code></pre>
+<pre><code>## [1] 0.0388</code></pre>
+<p>Here, the <span class="math inline">\(p\)</span>-value of the randomization test is very close to the one obtained from the classical linear model above <span class="math inline">\((p = 0.034)\)</span>.</p>
+</div>
+<div id="models-with-multiple-predictors" class="section level1">
+<h1>Models with multiple predictors</h1>
+<p>So far, we have considered randomization tests for models with a single predictor variable (numerical or categorical). The distribution of the statistic, under the null hypothesis where the predictor has no effect, can be obtained by random permutation of the predictor values. This permutation has the effect of “destroying” any existing correlation between the response and the predictor.</p>
+<p>The situation becomes more complicated when we want to test the absence of effect of a predictor in a model with several predictors. For example, consider the case where <span class="math inline">\(y\)</span> is a linear function of <span class="math inline">\(x\)</span> and <span class="math inline">\(w\)</span>:</p>
+<p><span class="math display">\[y = \beta_0 + \beta_1 x + \beta_2 w\]</span></p>
+<p>In a multiple regression model, each coefficient gives the effect of one variable if the other terms remain constant. Suppose we want to test the hypothesis <span class="math inline">\(\beta_1 = 0\)</span>.</p>
+<p>In this case, permuting <span class="math inline">\(y\)</span> eliminates its correlation with both <span class="math inline">\(x\)</span> and <span class="math inline">\(w\)</span>. It therefore simulates the null hypothesis where both predictors have no effect. Permuting <span class="math inline">\(x\)</span> retains the relationship between <span class="math inline">\(y\)</span> and <span class="math inline">\(w\)</span>, but eliminates a possible correlation between <span class="math inline">\(x\)</span> and <span class="math inline">\(w\)</span>, so the resulting permuted samples are no longer representative of the joint distribution of predictors.</p>
+<p>Anderson (2001) discusses this problem in detail and recommends Freedman and Lane’s method of first estimating the parameters of a model without <span class="math inline">\(x\)</span>:</p>
+<p><span class="math display">\[y = \beta_0 + \beta_2 w\]</span></p>
+<p>then perform a randomization test for the correlation between the residuals of this model (i.e. the part of the response not explained by <span class="math inline">\(w\)</span>) and the variable <span class="math inline">\(x\)</span>.</p>
+<p>Anderson (2001) discusses special cases where other methods, such as Manly’s (swapping the values of <span class="math inline">\(y\)</span>) and ter Braak’s (swapping the residuals of the full model including <span class="math inline">\(x\)</span>), would also be recommended.</p>
+<p>In R, the <em>permuco</em> package allows automatic permutation tests for each predictor of a linear model (<code>lmperm</code> function) or an ANOVA (<code>aovperm</code> function), with a choice of methods including those described by Anderson (2001).</p>
+<p>For example, here is the result of a regression of root biomass as a function of temperature and precipitation, for the <code>enviro</code> dataset. By default, the <code>lmperm</code> function uses the Freedman and Lane method with 5000 permutations.</p>
+<pre class="r"><code>library(permuco)
+
+lmperm(biomass ~ temperature + rainfall, data = enviro)</code></pre>
+<pre><code>## Table of marginal t-test of the betas
+## Permutation test using freedman_lane to handle nuisance variables and 5000 permutations.
+##             Estimate Std. Error t value parametric Pr(&gt;|t|) permutation Pr(&lt;t)
+## (Intercept)   525.28     97.247  5.4015            0.001007                   
+## temperature   -22.32      4.423 -5.0465            0.001486             0.0030
+## rainfall      -29.51     44.449 -0.6639            0.528029             0.2678
+##             permutation Pr(&gt;t) permutation Pr(&gt;|t|)
+## (Intercept)                                        
+## temperature             0.9972               0.0030
+## rainfall                0.7324               0.5264</code></pre>
+<p>The results table shows both the <span class="math inline">\(p\)</span>-value for the standard (two-tailed) parametric test, as well as the one-tailed and two-tailed <span class="math inline">\(p\)</span>-values obtained by randomization. In this case, there is little difference between the bilateral randomization test (last column) and the parametric tests.</p>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<ul>
+<li><p>Randomization tests offer a non-parametric alternative to many conventional hypothesis tests, when the null hypothesis represents the absence of effect of a predictor on a given response.</p></li>
+<li><p>The distribution of the test statistic under the null hypothesis is approximated by calculating this statistic for many permutations of the original data set. These permutations are designed to break any association between the response and the tested predictor, while maintaining the other characteristics of the dataset.</p></li>
+<li><p>The <code>sample</code> function allows permutations of a vector of values in R. By combining permutation and calculation of the statistic in the same function, several simple randomization tests can be manually coded (comparison of means, single-factor ANOVA, simple linear regression).</p></li>
+<li><p>The <em>permuco</em> package in R provides functions to perform randomization tests for each predictor of a multiple linear model or a multi-way ANOVA.</p></li>
+</ul>
+</div>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+<p>Anderson, M.J. (2001) Permutation tests for univariate or multivariate analysis of variance and regression. <em>Canadian Journal of Fisheries and Aquatic Sciences</em> 58: 626-639.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

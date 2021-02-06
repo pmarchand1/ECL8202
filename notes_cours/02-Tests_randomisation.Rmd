@@ -13,6 +13,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
+theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Introduction
@@ -46,13 +48,13 @@ Si nous pouvons supposer que $\bar{x}$ suit une distribution normale, alors la d
 
 $$t_{n-1} = \frac{\bar{x} - \mu}{s / \sqrt{n}}$$
 
-Dans ce cas, une fois $\bar{x}$ et $s$ calculés, la distribution $t$ nous indique quelle est la probabilité, si l'hypothèse nulle $\mu$ = $\mu_0$ est exacte, d'obtenir une valeur de $\bar{x}$ aussi extrême ou plus extrême que celle calculée à partir de cet échantillon.
+Dans ce cas, une fois $\bar{x}$ et $s$ calculés, la distribution $t$ nous indique quelle est la probabilité, si l'hypothèse nulle $\mu$ = $\mu_0$ est exacte, d'obtenir une valeur de $\bar{x}$ aussi loin où plus loin de $\mu_0$ que celle calculée à partir de cet échantillon.
 
 Par exemple, supposons que $\mu_0 = 1$, $n = 9$, $\bar{x} = 4$ et $s = 5$. Dans ce cas, $t = (4 - 1) / (5/3) = 1.8$ si l'hypothèse nulle est vraie. La probabilité d'observer une déviation aussi grande si $\mu = \mu_0$ est donnée par l'aire sous la courbe de la distribution $t$ avec $n - 1 = 8$ degrés de liberté, pour $t > 1.8$ ou $t < -1.8$:
 
 ```{r}
 t_obs <- 1.8
-ggplot(NULL, aes(x = seq(-4, 4, 0.1))) +
+ggplot(NULL) + xlim(-4, 4) +
     labs(x = "t", y = "p(t)") +
     stat_function(fun = function(x) dt(x, df = 8)) +
     stat_function(fun = function(x) ifelse(abs(x) > t_obs, dt(x, df = 8), NA), geom = "area", fill = "#d3492a") +
@@ -259,12 +261,12 @@ $$\epsilon_{ik} \sim N(0, \sigma)$$
 
 Pour ce modèle, l'hypothèse nulle est que la moyenne de tous les groupes est identique, i.e. tous les $\alpha_i$ sont 0.
 
-Notons par $\bar{y}$ la moyenne des générale des observations et par $\bar{y_i}$ la moyenne des observations du groupe $i$. On peut décomposer la somme des écarts au carré entre les observations et la moyenne générale (*SST*) en deux parties: une partie due aux écarts entre les moyennes des groupes et la moyenne générale (*SSA*) et une partie due aux écarts entre les observations et la moyenne de leur groupe (*SSE*).
+Notons par $\bar{y}$ la moyenne générale des observations et par $\bar{y_i}$ la moyenne des observations du groupe $i$. On peut décomposer la somme des écarts au carré entre les observations et la moyenne générale (*SST*) en deux parties: une partie due aux écarts entre les moyennes des groupes et la moyenne générale (*SSA*) et une partie due aux écarts entre les observations et la moyenne de leur groupe (*SSE*).
 
 $$SST = SSA + SSE$$
 $$\sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y})^2 = \sum_{i = 1}^m n (\bar{y_i} - \bar{y})^2 + \sum_{i = 1}^m \sum_{k = i}^n (y_{ik} - \bar{y_i})^2$$
 
-En divisant *SSA* et *SSE* par le nombre de degrés de libertés appropriés (soit $m-1$ pour les écarts entre groupes, $m(n-1)$ pour les écarts entre observations d'un même groupe), on obtient les écarts moyens *MSA* et *MSE*, que nous pouvons considérer comme des variances intra-groupe et inter-groupe, respectivement. La statistique $F$ correspond au ratio *MSA/MSE*. Plus $F$ est élevée, plus la variance inter-groupe est importante comparée à la variance intra-groupe. 
+En divisant *SSA* et *SSE* par le nombre de degrés de libertés appropriés (soit $m-1$ pour les écarts entre groupes, $m(n-1)$ pour les écarts entre observations d'un même groupe), on obtient les écarts moyens *MSA* et *MSE*, que nous pouvons considérer comme des variances inter-groupe et intra-groupe, respectivement. La statistique $F$ correspond au ratio *MSA/MSE*. Plus $F$ est élevée, plus la variance inter-groupe est importante comparée à la variance intra-groupe. 
 
 | Composante | Somme des carrés (SS) | Degrés de liberté (df) | Carré moyen (MS) |
 |-+------+------+------|

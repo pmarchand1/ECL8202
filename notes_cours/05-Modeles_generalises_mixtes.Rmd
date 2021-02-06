@@ -13,6 +13,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
+theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 
@@ -71,7 +73,7 @@ $$P(y | \lambda) = \frac{\lambda^y}{y!} e^{-\lambda}$$
 Comme nous pouvons voir sur le graphique ci-dessous, pour un petit $\lambda$, la distribution est davantage asymétrique (puisque $y$ ne peut pas être inférieur à zéro); plus $\lambda$ augmente, la distribution s'approche de la symétrie et d'une forme normale.  
 
 ```{r, echo = FALSE}
-ggplot(NULL, aes(x = 0:15)) +
+ggplot(data.frame(x = 0:15), aes(x = x)) +
     labs(x = "y", y = "P(y)") +
     stat_function(geom = "bar", fun = dpois, args = list(lambda = 6), n = 16, 
                   aes(fill = "6"), alpha = 0.7) +
@@ -107,7 +109,7 @@ $$P(y \vert n, p) = \binom{n}{y} p^y(1-p)^{n-y}$$
 La moyenne de $y$ est égale à $np$ et la variance à $np(1-p)$. En pratique, cela signifie que la variance est maximale pour $p = 0.5$ et diminue à mesure que $p$ s'approche de 0 ou 1.
 
 ```{r, echo = FALSE}
-ggplot(NULL, aes(x = 0:15)) +
+ggplot(data.frame(x = 0:15), aes(x = x)) +
     labs(x = "y", y = "P(y|n=15, p)") +
     stat_function(geom = "bar", fun = dbinom, args = list(size = 15, p = 0.2), 
                   n = 16, aes(fill = "0.2"), alpha = 0.7) +
@@ -190,14 +192,14 @@ Dans une régression linéaire, la variance résiduelle $\sigma^2$ est la même 
 En ajustant un modèle linéaire généralisé, il est donc possible que la tendance moyenne soit bien représentée par le modèle, mais que la variance résiduelle dépasse celle prévue par la distribution théorique. Dans le graphique ci-dessous, les histogrammes en vert représentent une distribution de Poisson avec $\lambda = 5$ (à gauche) et une distribution binomiale avec $n = 15$ et $p = 0.3$ (à droite). Les histogrammes en orange représentent des distributions avec la même moyenne, mais présentant une surdispersion.
 
 ```{r, echo = FALSE, fig.dim = c(7, 4)}
-p1 <- ggplot(NULL, aes(x = 0:25)) +
+p1 <- ggplot(data.frame(x = 0:25), aes(x = x)) +
     labs(x = "y", y = "P(y)") +
     stat_function(fun = dnbinom, args = list(mu = 5, size = 1), geom = "bar", n = 26,
                   fill = "#d95f02", alpha = 0.7) +
     stat_function(fun = dpois, args = list(lambda = 5), geom = "bar", n = 26,
                   fill = "#1b9e77", alpha = 0.7) +
     scale_y_continuous(expand = c(0, 0))
-p2 <- ggplot(NULL, aes(x = 0:15)) +
+p2 <- ggplot(data.frame(x = 0:15), aes(x = x)) +
     labs(x = "y", y = "P(y)") +
     stat_function(fun = emdbook::dbetabinom, args = list(size = 15, prob = 0.3, theta = 1), 
                   geom = "bar", n = 16, fill = "#d95f02", alpha = 0.7) +
@@ -397,7 +399,23 @@ Nous pouvons aussi définir un coefficient de dispersion en divisant la valeur d
 chi2 / df.residual(glmm_res)
 ```
 
-Le test du $\chi^2$ est unilatéral, car nous ne nous soucions pas généralement de la sous-dispersion (coefficient de dispersion inférieur à 1). Cependant, un cas extrême de sous-dispersion (valeur $p$ très proche de 1) pourrait indiquer que le modèle est surajusté aux données. 
+Le test du $\chi^2$ est unilatéral, car nous ne nous soucions pas généralement de la sous-dispersion (coefficient de dispersion inférieur à 1). Cependant, un cas extrême de sous-dispersion (valeur $p$ très proche de 1) pourrait indiquer que le modèle est surajusté aux données.
+
+Le package *DHARMa* offre une méthode générale pour vérifier si les résidus d'un GLMM sont distribués en accord avec le modèle spécifié et s'il y a absence de tendance résiduelle. Le package fonctionne en simulant des réplicats de chaque observation en fonction du modèle ajusté, puis en déterminant un "résidu standardisé", soit la position relative de la valeur observée par rapport aux valeurs simulées. (Ex.: 0 si l'observation est plus petite que toutes les simulations, 0.5 si elle est au milieu, etc.) Si le modèle représente bien les données, chaque valeur du résidu standardisé entre 0 et 1 devrait être également probable, donc les résidus standardisés devraient produire une distribution uniforme entre 0 et 1.
+
+La fonction `simulateResiduals` effectue le calcul des résidus standardisés, plus la fonction `plot` trace les graphiques de diagnostic avec les résultats de certains tests.
+
+```{r, message = FALSE, warning = FALSE}
+library(DHARMa)
+resid_sim <- simulateResiduals(glmm_res)
+plot(resid_sim)
+```
+
+Le graphique de gauche est un graphique quantile-quantile des résidus standardisés. Sur le graphique, on trouve les résultats de trois tests statistiques: un test de Kolmogorov-Smirnov (*KS*) qui vérifie si on s'éloigne de la distribution théorique, un test de dispersion qui vérifie s'il y a sous-dispersion ou surdispersion, puis un test des valeurs extrêmes (*outliers*) qui vérifie s'il y a excès de résidus plus extrêmes que toutes les simulations. Dans notre cas, les trois résultats sont non-significatifs, donc aucune anomalie à signaler.
+
+À droite, on voit un graphique des résidus standardisés (en *y*) en fonction du rang des valeurs prédites (en *x*). Les courbes représentent sont une régression quantile non-paramétrique pour le 1er quartile, la médiane et le 3e quartile. En théorie, ces trois courbes devraient être des droites horizontales (aucune tendance résiduelle des résidus en fonction des prédictions). La courbe pour le 1er quartile (en rouge) est significativement différente d'une droite horizontale et la présence d'une tendance (même non-linéaire) pourrait indiquer qu'il manque un effet important dans le modèle.
+
+Pour plus d'informations sur DHARMa, consultez la [vignette du package](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html.
 
 ## Distribution des effets aléatoires
 
@@ -458,7 +476,7 @@ Pour des modèles linéaires mixtes, la première étape est basée sur l'ajuste
 
 Pour le jeu de données *rikz*, nous définissons d'abord un modèle complet (`glmm1`) qui inclut l'effet d'une variable définie au niveau de la plage (`Exposure`) et l'effet du NAP, en plus d'effets aléatoires de la plage sur l'ordonnée à l'origine et le coefficient du NAP. Nous comparons ce modèle à un autre qui n'inclut qu'un effet aléatoire sur l'ordonnée à l'origine.
 
-La fonction `aictab` du packge *AICcmodavg* calcule l'AICc pour chaque modèle d'une liste et donne leurs poids relatifs déterminés par les différences d'AICc.
+La fonction `aictab` du package *AICcmodavg* calcule l'AICc pour chaque modèle d'une liste et donne leurs poids relatifs déterminés par les différences d'AICc.
 
 ```{r, warning = FALSE, message = FALSE}
 library(AICcmodavg)
@@ -484,13 +502,12 @@ Le modèle incluant `Exposure` produit un bien meilleur ajustement selon l'AICc.
 
 Même si un modèle est mieux ajusté que d'autres modèles candidats, cela ne signifie pas que ce modèle produit un bon ajustement des données. Pour répondre à cette question, nous devons vérifier l'ajustement du modèle choisi avec les méthodes vues plus haut.
 
-- Le test du $\chi^2$ ne rejette pas l'hypothèse que les résidus soient conformes à une distribution de Poisson.
+- Les graphiques des résidus standardisés produits par *DHARMa* ne montrent aucun problème; comparé à ceux du modèle précédent, le diagramme quantile-quantile (à gauche) s'approche plus d'une droite et les résidus semblent distribués plus aléatoirement en fonction des valeurs prédites (à droite). Notez que l'étoile rouge dans la figure de droite représente une valeur extrême.
 
 ```{r}
-chi2 <- sum(residuals(glmm2, type = "pearson")^2)
-chi2
-1 - pchisq(chi2, df = df.residual(glmm2))
+plot(simulateResiduals(glmm2))
 ```
+
 
 - Les effets aléatoires de la plage sur l'ordonnée à l'origine s'approchent assez bien d'une distribution normale, considérant le petit nombre de groupes.
 

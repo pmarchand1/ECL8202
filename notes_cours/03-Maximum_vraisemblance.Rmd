@@ -13,6 +13,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
+theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Introduction
@@ -57,7 +59,7 @@ où le nombre d'essais $n = 20$, $p$ est la probabilité de germination pour la 
 Par exemple, voici la distribution de $y$ si $p = 0.2$. La probabilité d'obtenir $y = 6$ dans ce cas est d'environ 0.11 (ligne pointillée sur le graphique).
 
 ```{r}
-ggplot(NULL, aes(x = 0:20)) +
+ggplot(data.frame(x = 0:20), aes(x)) +
     labs(x = "y", y = "f(y|p=0.2)") +
     stat_function(fun = dbinom, n = 21, args = list(size = 20, prob = 0.2),
                   geom = "bar", color = "black", fill = "white") +
@@ -75,7 +77,7 @@ $$L(p) = f(y \vert p) = {n \choose y} p^y (1-p)^{n-y}$$
 Voici la forme de $L(p)$ pour $y = 6$ et $n = 20$:
 
 ```{r}
-ggplot(NULL, aes(x = 0:1)) +
+ggplot(NULL) +
     labs(x = "p", y = "L(p)") +
     stat_function(fun = function(x) dbinom(6, 20, prob = x),
                   geom = "density") +
@@ -84,7 +86,7 @@ ggplot(NULL, aes(x = 0:1)) +
                  color = "#b3452c", linetype = "dashed", size = 1) +
     geom_segment(aes(x = 0.2, xend = 0.2, y = 0, yend = dbinom(6, 20, 0.2)), 
                  color = "#b3452c", linetype = "dashed", size = 1) +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
 ```
 
@@ -109,7 +111,7 @@ $$\hat{p} = \frac{y}{n}$$
 Autrement dit, la proportion de succès dans l'échantillon est le meilleur estimé de la probabilité de succès dans la population. Avec $y = 6$ et $n = 20$, on voit que le maximum de $L(p)$ est obtenu pour $p = 0.3$.
 
 ```{r}
-ggplot(NULL, aes(x = 0:1)) +
+ggplot(NULL) +
     labs(x = "p", y = "L(p)") +
     stat_function(fun = function(x) dbinom(6, 20, prob = x),
                   geom = "density") +
@@ -118,7 +120,7 @@ ggplot(NULL, aes(x = 0:1)) +
                  color = "#b3452c", linetype = "dashed", size = 1) +
     geom_segment(aes(x = 0.3, xend = 0.3, y = 0, yend = dbinom(6, 20, 0.3)), 
                  color = "#b3452c", linetype = "dashed", size = 1) +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
 ```
 
@@ -308,11 +310,11 @@ Il est possible d'utiliser la fonction de vraisemblance pour tester une hypothè
 Par exemple, considérons la fonction de vraisemblance calculée au début du cours pour estimer la probabilité de germination d'un lot de semences, si 6 semences ont germé sur 20 essais.
 
 ```{r}
-ggplot(NULL, aes(x = 0:1)) +
+ggplot(NULL) +
     labs(x = "p", y = "L(p)") +
     stat_function(fun = function(x) dbinom(6, 20, prob = x),
                   geom = "density") +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
 ```
 
@@ -382,7 +384,7 @@ Si $\hat{\theta}$ est l'estimé du maximum de vraisemblance pour un paramètre $
 
 > Si on ne peut pas rejeter l'hypothèse nulle $\theta = \theta_0$ avec un seuil de signification $\alpha$, alors $\theta_0$ fait partie de l'intervalle de confiance à $100(1-\alpha)\%$ pour $\theta$.
 
-Par exemple, les limites de l'intervalle de confiance sont les valeurs de $\theta$ où la statistique du rapport de vraisemblance est égale au 95e centile de la distribution du $\chi^2$; il s'agit de la valeur maximale de la statistique qui n'est pas rejetée à un seuil $\alpha = 0.05$.
+Par exemple, les limites de l'intervalle de confiance à 95% sont les valeurs de $\theta$ où la statistique du rapport de vraisemblance est égale au 95e centile de la distribution du $\chi^2$; il s'agit de la valeur maximale de la statistique qui n'est pas rejetée à un seuil $\alpha = 0.05$.
 
 $$- 2 \left( l(\theta_0) - l(\hat{\theta}) \right) = \chi^2_{0.95}(1)$$
 
@@ -410,7 +412,7 @@ exp(dbinom(6, 20, 0.3, log = TRUE) - qchisq(0.95, df = 1)/2)
 Ce seuil est représenté par la ligne pointillée sur le graphique ci-dessous et correspond à un intervalle approximatif de (0.132, 0.516) pour $p$. 
 
 ```{r}
-ggplot(NULL, aes(x = 0:1)) +
+ggplot(NULL) +
     labs(x = "p", y = "L(p)") +
     stat_function(geom = "area", fill = "#d3492a", n = 1000,
         fun = function(x) ifelse(x > 0.132 & x < 0.516,
@@ -418,7 +420,7 @@ ggplot(NULL, aes(x = 0:1)) +
     stat_function(fun = function(x) dbinom(6, 20, prob = x), 
                   geom = "density") +
     geom_hline(yintercept = 0.0279, linetype = "dashed") +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, 0.2), expand = c(0, 0))
 ```
 
@@ -428,10 +430,10 @@ Pour une expérience avec le même estimé de $\hat{p}$, mais un plus grand éch
 exp(dbinom(15, 50, 0.3, log = TRUE) - qchisq(0.95, df = 1)/2)
 ```
 
-Comme on le voit ci-dessus, la fonction de vraisemblance et donc l'intervalle de confiance sont plus étroits. 
+Comme on le voit ci-dessous, la fonction de vraisemblance et donc l'intervalle de confiance sont plus étroits. 
 
 ```{r}
-ggplot(NULL, aes(x = 0:1)) +
+ggplot(NULL) +
     labs(x = "p", y = "L(p)") +
     stat_function(geom = "area", fill = "#d3492a", n = 1000,
         fun = function(x) ifelse(x > 0.185 & x < 0.435,
@@ -439,7 +441,7 @@ ggplot(NULL, aes(x = 0:1)) +
     stat_function(fun = function(x) dbinom(15, 50, prob = x), 
                   geom = "density") +
     geom_hline(yintercept = 0.0179, linetype = "dashed") +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     scale_y_continuous(breaks = seq(0, 0.12, 0.03), 
                        limits = c(0, 0.13), expand = c(0, 0))
 ```

@@ -1,7 +1,6 @@
 ---
 title: "Maximum de vraisemblance"
 output:
-    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -78,7 +77,7 @@ f) Comparons maintenant les prédictions du modèle aux données.
 
 a) Répétez les parties (c) à (f) du numéro précédent en utilisant une distribution binomiale négative au lieu de la distribution de Poisson pour la portion aléatoire du modèle. 
 
-*Rappel*: Dans la distribution de Poisson, la moyenne et la variance sont égales à $\lambda$. Dans la distribution binomiale négative, la moyenne est égale à $\mu$ et la variance égale à $\mu + \mu^2/\theta$. Pour ce numéro, nous utiliserons $k = 1/\theta$ comme paramètre. Comme $\theta$, $k$ doit prendre une valeur supérieure ou égale à 0. Mais puisque la variance en fonction de $k$ est $\mu + k \mu^2$, la distribution de Poisson correspond au cas $k = 0$. 
+*Rappel*: Dans la distribution de Poisson, la moyenne et la variance sont égales à $\lambda$. Dans la distribution binomiale négative, la moyenne est égale à $\mu$ et la variance égale à $\mu + \mu^2/\theta$. Pour ce numéro, nous utiliserons $k = 1/\theta$ comme paramètre. Si $\theta > 0$, $k$ quant à lui doit prendre une valeur supérieure ou égale à 0. Puisque la variance en fonction de $k$ est $\mu + k \mu^2$, la distribution de Poisson correspond au cas $k = 0$.
 
 Voici les principaux changements à apporter pour remplacer le modèle de Poisson par le modèle binomiale négatif:
 

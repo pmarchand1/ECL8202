@@ -1,0 +1,68 @@
+---
+title: "Randomization tests - Solutions"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+---
+    
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The file [sablefish.csv](../donnees/sablefish.csv) contains data from Kimura (1988) on the number of sablefish caught per unit effort (*catch*) in four Alaskan locations for each of the six years between 1978 and 1983.
+
+```{r}
+sable <- read.csv("../donnees/sablefish.csv")
+head(sable)
+```
+
+a) Fit a linear model of catch as a function of location only. What is the interpretation of the `locationYakutat` coefficient of this model?
+
+**Solution**
+
+```{r}
+lm_sable <- lm(catch ~ location, sable)
+summary(lm_sable)
+```
+
+The coefficient `locationYakutat` gives the mean difference in catch between Yakutat and the reference location (Chirikof).
+
+b) Perform a permutation test to calculate the $p$-value corresponding to the mean difference in catch between the Kodiak and Chirikof locations. Is this value consistent with the corresponding value in the linear model?
+
+**Solution**
+
+```{r}
+set.seed(8202)
+
+diff_perm <- function() {
+   sable_perm <- sable
+   sable_perm$location <- sample(sable$location) 
+   mean(sable_perm$catch[sable_perm$location == "Kodiak"]) -
+       mean(sable_perm$catch[sable_perm$location == "Chirikof"])
+}
+
+nperm <- 9999
+
+diff_null <- replicate(nperm, diff_perm())
+
+diff_obs <- mean(sable$catch[sable$location == "Kodiak"]) -
+            mean(sable$catch[sable$location == "Chirikof"])
+
+(sum(abs(diff_null) >= abs(diff_obs)) + 1) / (nperm + 1)
+```
+
+Yes, the value is close to the $p$-value for the `locationKodiak` coefficient of the model in a).
+
+c) Using the *permuco* package, determine the $p$-value for the same difference, for a model including the additive effects of year and location. *Note*: We consider the year as a categorical variable here, so it must be converted to a factor. Does the $p$-value differ between the permutation test and the parametric model?
+
+**Solution**
+
+```{r}
+library(permuco)
+sable$year <- as.factor(sable$year)
+lmperm(catch ~ year + location, sable)
+```
+
+The $p$-value is about 0.08 for both the parametric model and the permutation test.

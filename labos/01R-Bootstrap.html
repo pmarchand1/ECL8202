@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
 
-<title>La méthode du bootstrap</title>
+<title>La méthode du bootstrap - Solutions</title>
 
 <script src="libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -287,26 +252,26 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">La méthode du bootstrap</h1>
+<h1 class="title toc-ignore">La méthode du bootstrap - Solutions</h1>
 
 </div>
 
 
-<div id="donnees" class="section level2">
+<div id="données" class="section level2">
 <h2>Données</h2>
-<p>Pour ce laboratoire, nous utiliserons le jeu de données <a href="../donnees/sphagnum_cover.csv">sphagnum_cover.csv</a>, qui provient de l’article:</p>
+<p>Pour ce laboratoire, nous utiliserons le jeu de données <a href="sphagnum_cover.csv">sphagnum_cover.csv</a>, qui provient de l’article:</p>
 <blockquote>
 <p>Maanavilja, L., Kangas, L., Mehtätalo, L. and Tuittila, E.‐S. (2015), Rewetting of drained boreal spruce swamp forests results in rapid recovery of Sphagnum production. J Appl Ecol, 52: 1355-1363. <a href="https://doi.org/10.1111/1365-2664.12474">doi:10.1111/1365-2664.12474</a>)</p>
 </blockquote>
 <p>Ces données contiennent des mesures du pourcentage de couverture par les sphaignes (<em>sphcover</em>) pour 36 marécages boréaux divisés en trois types (<em>habitat</em>): <em>Dr</em> = drainés, <em>Re</em> = remouillés et <em>Un</em> = non-drainés.</p>
-<pre class="r"><code>cover &lt;- read.csv(&quot;../donnees/sphagnum_cover.csv&quot;)
+<pre class="r"><code>cover &lt;- read.csv(&quot;sphagnum_cover.csv&quot;)
 str(cover)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    36 obs. of  3 variables:
-##  $ site    : Factor w/ 36 levels &quot;AmLuxx&quot;,&quot;Ev01VR&quot;,..: 1 5 6 9 29 31 32 33 34 10 ...
-##  $ habitat : Factor w/ 3 levels &quot;Dr&quot;,&quot;Re&quot;,&quot;Un&quot;: 3 3 3 3 3 3 3 3 3 1 ...
+##  $ site    : chr  &quot;AmLuxx&quot; &quot;EvLuPa&quot; &quot;EvLuVK&quot; &quot;HeLuxx&quot; ...
+##  $ habitat : chr  &quot;Un&quot; &quot;Un&quot; &quot;Un&quot; &quot;Un&quot; ...
 ##  $ sphcover: num  35.3 56.2 46.6 56 54.3 ...</code></pre>
 </div>
-<div id="estimation-de-la-couverture-moyenne-pour-les-marecages-draines" class="section level2">
+<div id="estimation-de-la-couverture-moyenne-pour-les-marécages-drainés" class="section level2">
 <h2>1. Estimation de la couverture moyenne pour les marécages drainés</h2>
 <ol style="list-style-type: lower-alpha">
 <li>À partir du jeu de données, faites l’extraction des valeurs de <em>sphcover</em> pour les marécages drainés. Calculez le pourcentage de couverture moyen, ainsi que son erreur-type selon la formule classique (basée sur l’écart-type et la taille de l’échantillon). Finalement, calculez l’intervalle de confiance à 95% basé sur la distribution <span class="math inline">\(t\)</span>:</li>
@@ -358,7 +323,7 @@ qqline(res$t)</code></pre>
 <pre class="r"><code>qqnorm(boot_moy$t)
 qqline(boot_moy$t)</code></pre>
 <p><img src="01R-Bootstrap_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<p>La distribution du bootstrap est asymétrique: les plus petites valeurs s’approchent plus de la moyenne comparé à une distribution normale, tandis que les plus grandes valeurs s’en éloignent.</p>
+<p>La distribution du bootstrap est asymétrique: les plus petites valeurs sont au-dessus de la droite, donc plus rapprochées de la moyenne comparé à une distribution normale, tandis que les plus grandes valeurs sont aussi au-dessus de la droite, donc elles sont plus éloignées de la moyenne.</p>
 <ol start="4" style="list-style-type: lower-alpha">
 <li>Calculez l’intervalle de confiance à 95% de la moyenne selon la méthode BCa. Comment diffère-t-il de celui calculé en a) selon la formule classique? Pouvez-vous expliquer cette différence en fonction du résultat en c)?</li>
 </ol>
@@ -380,9 +345,9 @@ boot.ci(boot_moy)</code></pre>
 ## Level     Percentile            BCa          
 ## 95%   ( 3.001, 12.340 )   ( 3.430, 13.281 )  
 ## Calculations and Intervals on Original Scale</code></pre>
-<p>L’intervalle BCa (3.44, 13.09) diffère de celui en a) (1.36, 12.97) surtout au niveau de la borne inférieure et les deux bornes sont corrigées vers le haut. En c), nous avons vu que les petites valeurs de la distribution du bootstrap sont plus rapprochées de la moyenne par rapport à la distribution normale et les plus grandes valeurs s’en éloignent.</p>
+<p>L’intervalle BCa (3.43, 13.28) diffère de celui en a) (1.36, 12.97) surtout au niveau de la borne inférieure et les deux bornes sont corrigées vers le haut. En c), nous avons vu que les petites valeurs de la distribution du bootstrap sont plus rapprochées de la moyenne par rapport à la distribution normale et les plus grandes valeurs s’en éloignent.</p>
 </div>
-<div id="estimation-des-differences-entre-habitats" class="section level2">
+<div id="estimation-des-différences-entre-habitats" class="section level2">
 <h2>2. Estimation des différences entre habitats</h2>
 <ol style="list-style-type: lower-alpha">
 <li>Voici la distribution des valeurs de <em>sphcover</em> dans chaque type d’habitat.</li>
@@ -451,11 +416,11 @@ apply(boot_hab$t, 2, sd)</code></pre>
 <p>La moyenne du bootstrap est très proche des coefficients estimés en b), mais les erreurs-types ont diminué.</p>
 <p>Notons que tous les coefficients dépendent de la moyenne du groupe de référence <em>Dr</em>. La moyenne et l’écart-type de ce groupe sont fortement affectés par deux valeurs extrêmes autour de 20, comme on peut voir sur le graphique en a). Ces valeurs extrêmes seront absentes dans plusieurs échantillons bootstrap, ce qui a pour effet de réduire l’écart-type estimée pour le groupe <em>Dr</em> et ainsi réduire l’erreur-type des coefficients du modèle.</p>
 <ol start="4" style="list-style-type: lower-alpha">
-<li>L’application du bootstrap en c) ré-échantillonne parmi l’ensemble des rangées, ce qui fait que le nombre d’observations dans chaque type d’habitat varie d’un échantillon à l’autre. S’il est préférable de considérer ces nombres comme des quantités fixes, on peut définir les types d’habitat comme des strates en ajoutant l’argument <code>strata = cover$habitat</code> à la fonction <code>boot</code>.</li>
+<li>L’application du bootstrap en c) ré-échantillonne parmi l’ensemble des rangées, ce qui fait que le nombre d’observations dans chaque type d’habitat varie d’un échantillon à l’autre. S’il est préférable de considérer ces nombres comme des quantités fixes, on peut définir les types d’habitat comme des strates en ajoutant l’argument <code>strata = as.factor(cover$habitat)</code> à la fonction <code>boot</code>. (La conversion de la variable <code>habitat</code> en facteur est nécessaire ici.)</li>
 </ol>
 <p>Répétez l’analyse en c) avec un ré-échantillonnage stratifié et comparez les erreurs-types obtenues pour chaque coefficient.</p>
 <p><strong>Réponse</strong></p>
-<pre class="r"><code>boot_strat &lt;- boot(cover, lm_hab, R = 10000, strata = cover$habitat)
+<pre class="r"><code>boot_strat &lt;- boot(cover, lm_hab, R = 10000, strata = as.factor(cover$habitat))
 
 # Moyenne
 apply(boot_strat$t, 2, mean)</code></pre>
@@ -490,7 +455,7 @@ apply(boot_strat$t, 2, sd)</code></pre>
 <ul>
 <li><p>Ajustez un modèle linéaire comme en b), puis ajoutez au jeu de données <code>cover</code>une colonne pour les valeurs attendues (<code>fitted</code>) du modèle.</p></li>
 <li><p>Écrivez une fonction qui crée un nouveau jeu de données en additionnant un vecteur ré-échantillonné <code>x[i]</code> aux valeurs attendues pour produire une nouvelle variable réponse, puis qui ajuste un modèle avec cette nouvelle variable réponse en fonction de l’habitat.</p></li>
-<li><p>Simulez 10 000 échantillons avec la fonction <code>boot</code>, avec comme arguments (1) le vecteurs de résidus (<code>residuals</code>) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l’erreur-type et l’intervalle de confiance à 95% des coefficients.</p></li>
+<li><p>Simulez 10 000 échantillons avec la fonction <code>boot</code>, avec comme arguments (1) le vecteur de résidus (<code>residuals</code>) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l’erreur-type et l’intervalle de confiance à 95% des coefficients.</p></li>
 </ul>
 <p>Le ré-échantillonnage des résidus est-il un bon choix pour ces données?</p>
 <p><strong>Réponse</strong></p>
@@ -548,6 +513,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

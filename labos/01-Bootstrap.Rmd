@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-## Données (FG)
+## Données
 
 Pour ce laboratoire, nous utiliserons le jeu de données [sphagnum_cover.csv](../donnees/sphagnum_cover.csv), qui provient de l'article:
 
@@ -75,7 +75,7 @@ c) Créez une fonction avec pour arguments `x` et `i `, qui ajuste le modèle li
 - Puisque la statistique calculée par la fonction comporte plusieurs valeurs (chacun des coefficients), l'élément `t` du résultat de `boot` est une matrice plutôt qu'un vecteur. Les colonnes de cette matrice correspondent à chacun des coefficients dans l'ordre. Vous pouvez calculer une statistique pour chaque colonne avec la fonction `apply`, ex.: `apply(res$t, 2, mean)`. Ici, `2` indique de calculer la fonction `mean` par colonne (`1` signifierait par rangée).
 
 
-d) L'application du bootstrap en c) ré-échantillonne parmi l'ensemble des rangées, ce qui fait que le nombre d'observations dans chaque type d'habitat varie d'un échantillon à l'autre. S'il est préférable de considérer ces nombres comme des quantités fixes, on peut définir les types d'habitat comme des strates en ajoutant l'argument `strata = cover$habitat` à la fonction `boot`. 
+d) L'application du bootstrap en c) ré-échantillonne parmi l'ensemble des rangées, ce qui fait que le nombre d'observations dans chaque type d'habitat varie d'un échantillon à l'autre. S'il est préférable de considérer ces nombres comme des quantités fixes, on peut définir les types d'habitat comme des strates en ajoutant l'argument `strata = as.factor(cover$habitat)` à la fonction `boot`. 
 
 Répétez l'analyse en c) avec un ré-échantillonnage stratifié et comparez les erreurs-types obtenues pour chaque coefficient.
 
@@ -89,7 +89,7 @@ f) Finalement, nous allons ré-échantillonner les résidus du modèle.
 
 - Écrivez une fonction qui crée un nouveau jeu de données en additionnant un vecteur ré-échantillonné `x[i]` aux valeurs attendues pour produire une nouvelle variable réponse, puis qui ajuste un modèle avec cette nouvelle variable réponse en fonction de l'habitat.
 
-- Simulez 10 000 échantillons avec la fonction `boot`, avec comme arguments (1) le vecteurs de résidus (`residuals`) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l'erreur-type et l'intervalle de confiance à 95% des coefficients.
+- Simulez 10 000 échantillons avec la fonction `boot`, avec comme arguments (1) le vecteur de résidus (`residuals`) du modèle et (2) la fonction créée ci-dessus. Ne spécifiez pas de strates. Calculez de nouveau la moyenne, l'erreur-type et l'intervalle de confiance à 95% des coefficients.
 
 Le ré-échantillonnage des résidus est-il un bon choix pour ces données?
 
