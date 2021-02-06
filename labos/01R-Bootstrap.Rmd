@@ -181,7 +181,7 @@ Répétez l'analyse en c) avec un ré-échantillonnage stratifié et comparez le
 **Réponse**
 
 ```{r}
-boot_strat <- boot(cover, lm_hab, R = 10000, strata = cover$habitat)
+boot_strat <- boot(cover, lm_hab, R = 10000, strata = as.factor(cover$habitat))
 
 # Moyenne
 apply(boot_strat$t, 2, mean)
