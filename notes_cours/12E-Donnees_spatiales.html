@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Spatial data</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Spatial data</h1>
+
+</div>
+
+
+<div id="introduction-to-spatial-statistics" class="section level1">
+<h1>Introduction to spatial statistics</h1>
+<div id="types-of-spatial-analyses" class="section level2">
+<h2>Types of spatial analyses</h2>
+<p>In this class, we will discuss three types of spatial analyses: point pattern analysis, geostatistical models and models for areal data.</p>
+<p>In <strong>point pattern analysis</strong>, we have point data representing the position of individuals or events in a study area and we assume that all individuals or events have been identified in that area. That analysis focuses on the distribution of the positions of the points themselves. Here are some typical questions for the analysis of point patterns:</p>
+<ul>
+<li><p>Are the points randomly arranged or clustered?</p></li>
+<li><p>Are two types of points arranged independently?</p></li>
+</ul>
+<p><strong>Geostatistical models</strong> represent the spatial distribution of continuous variables that are measured at certain sampling points. They assume that measurements of those variables at different points are correlated as a function of the distance between the points. Applications of geostatistical models include the smoothing of spatial data (e.g., producing a map of a variable over an entire region based on point measurements) and the prediction of those variables for non-sampled points.</p>
+<p><strong>Areal data</strong> are measurements taken not at points, but for regions of space represented by polygons (e.g. administrative divisions, grid cells). Models representing these types of data define a network linking each region to its neighbours and include correlations in the variable of interest between neighbouring regions.</p>
+</div>
+<div id="stationarity-and-isotropy" class="section level2">
+<h2>Stationarity and isotropy</h2>
+<p>Several spatial analyses assume that the variables are <strong>stationary</strong> in space. As with stationarity in the time domain, this property means that summary statistics (mean, variance and correlations between measures of a variable) do not vary with translation in space. For example, the spatial correlation between two points may depend on the distance between them, but not on their absolute position.</p>
+<p>In particular, there cannot be a large-scale trend (often called <em>gradient</em> in a spatial context), or this trend must be taken into account before modelling the spatial correlation of residuals.</p>
+<p>In the case of point pattern analysis, stationarity (also called homogeneity) means that point density does not follow a large-scale trend.</p>
+<p>In a <strong>isotropic</strong> statistical model, the spatial correlations between measurements at two points depend only on the distance between the points, not on the direction. In this case, the summary statistics do not change under a spatial rotation of the data.</p>
+</div>
+<div id="georeferenced-data" class="section level2">
+<h2>Georeferenced data</h2>
+<p>Environmental studies increasingly use data from geospatial data sources, i.e. variables measured over a large part of the globe (e.g. climate, remote sensing). The processing of these data requires concepts related to Geographic Information Systems (GIS), which are not covered in this workshop, where we focus on the statistical aspects of spatially varying data.</p>
+<p>The use of geospatial data does not necessarily mean that spatial statistics are required. For example, we will often extract values of geographic variables at study points to explain a biological response observed in the field. In this case, the use of spatial statistics is only necessary when there is a spatial correlation in the residuals, after controlling for the effect of the predictors.</p>
+</div>
+</div>
+<div id="point-pattern-analysis" class="section level1">
+<h1>Point pattern analysis</h1>
+<div id="point-pattern-and-point-process" class="section level2">
+<h2>Point pattern and point process</h2>
+<p>A <em>point pattern</em> describes the spatial position (most often in 2D) of individuals or events, represented by points, in a given study area, often called the observation “window”.</p>
+<p>It is assumed that each point has a negligible spatial extent relative to the distances between the points. More complex methods exist to deal with spatial patterns of objects that have a non-negligible width, but this topic is beyond the scope of this course.</p>
+<p>A <em>point process</em> is a statistical model that can be used to simulate point patterns or explain an observed point pattern.</p>
+</div>
+<div id="complete-spatial-randomness" class="section level2">
+<h2>Complete spatial randomness</h2>
+<p>Complete spatial randomness (CSR) is one of the simplest point patterns, which serves as a null model for evaluating the characteristics of real point patterns. In this pattern, the presence of a point at a given position is independent of the presence of points in a neighbourhood.</p>
+<p>The process creating this pattern is a homogeneous Poisson process. According to this model, the number of points in any area <span class="math inline">\(A\)</span> follows a Poisson distribution: <span class="math inline">\(N(A) \sim \text{Pois}(\lambda A)\)</span>, where <span class="math inline">\(\lambda\)</span> is the <em>intensity</em> of the process (i.e. the density of points per unit area). <span class="math inline">\(N\)</span> is independent between two disjoint regions, no matter how those regions are defined.</p>
+<p>In the graph below, only the pattern on the right is completely random. The pattern on the left shows point aggregation (higher probability of observing a point close to another point), while the pattern in the center shows repulsion (low probability of observing a point very close to another).</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="ripleys-k-function" class="section level2">
+<h2>Ripley’s K function</h2>
+<p>Ripley’s K function is one of the summary statistics that we can use to compare a point pattern to a null hypothesis like CSR.</p>
+<p>This function is calculated for different distances <span class="math inline">\(r\)</span>. For a given distance <span class="math inline">\(r\)</span>, <span class="math inline">\(K(r)\)</span> measures the mean number of points <span class="math inline">\(N(r)\)</span> in a disk of radius <span class="math inline">\(r\)</span> drawn around a point in the pattern, normalized by the intensity <span class="math inline">\(\lambda\)</span>.</p>
+<p>Under CSR, the mean of <span class="math inline">\(N(r)\)</span> is <span class="math inline">\(\lambda \pi r^2\)</span>, thus in theory <span class="math inline">\(K(r) = \pi r^2\)</span>. A higher value of <span class="math inline">\(K(r)\)</span> for a given pattern means that there is aggregation of points in this radius, while a lower value means that there is repulsion.</p>
+<p>To test whether a pattern is compatible with the null hypothesis of CSR, we can generate random patterns of the same intensity as the observed one, then calculate <span class="math inline">\(K(r)\)</span> for each simulation to create an <em>envelope</em> of values (e.g. containing 95% of the simulations) beyond which the null hypothesis will be rejected.</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>The graphs above show the value of <span class="math inline">\(K(r)\)</span> for the patterns shown above for values of <span class="math inline">\(r\)</span> up to 1/4 of the window width. The red dotted curve shows the theoretical value for a random pattern and the gray area is the envelope produced by 99 simulations. The aggregated pattern shows an excess of neighbours up to <span class="math inline">\(r = 0.25\)</span> and the pattern with repulsion shows a significant deficit of neighbours for small values of <span class="math inline">\(r\)</span>.</p>
+</div>
+<div id="effect-of-heterogeneity" class="section level2">
+<h2>Effect of heterogeneity</h2>
+<p>The graph below illustrates a <em>heterogeneous</em> point pattern, i.e. it shows an intensity gradient (more dots on the left than on the right).</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>A density gradient can be confused with an aggregation of points, as can be seen on the graph of the corresponding Ripley’s <span class="math inline">\(K\)</span>. In order to differentiate the two phenomena, we can correct the <span class="math inline">\(K\)</span> function so that the number of neighbours is normalized not by the global intensity, but by the intensity estimated at the position of the point.</p>
+<p>For this type of analysis, we must also make sure that the null model corresponds to a heterogeneous Poisson process (i.e. the points remain independent of each other, but their density varies in space).</p>
+<p>Below is the graph of the <span class="math inline">\(K\)</span> for this same pattern, after controlling for heterogeneity.</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>One can only differentiate a density gradient from a point aggregation process if the two processes operate at different scales. In general, we can remove the effect of a large-scale gradient to detect a smaller-scale aggregation.</p>
+</div>
+<div id="relationship-between-two-point-patterns" class="section level2">
+<h2>Relationship between two point patterns</h2>
+<p>Finally, let’s consider a case where we have two point patterns, for example the position of trees of two species in a plot (orange and green dots in the graph below). Each of the two patterns may or may not show aggregations of points.</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Regardless of this aggregation at the species level, we want to determine whether the two species are arranged independently. In other words, does the probability of observing a tree of one species depend on the presence of a tree of the other species at a given distance?</p>
+<p>The bivariate version of Ripley’s <span class="math inline">\(K\)</span> allows us to answer this question. For two patterns designated 1 and 2, the index <span class="math inline">\(K_{12}(r)\)</span> calculates the mean number of points in pattern 2 at a distance <span class="math inline">\(r\)</span> from a point in pattern 1, normalized by the density of pattern 2.</p>
+<p>In theory, this index is symmetrical, so <span class="math inline">\(K_{12}(r) = K_{21}(r)\)</span> and there is no difference according to whether the points of pattern 1 or 2 are chosen as “focal” points for the analysis. However, due to the randomness of the patterns, the distribution of <span class="math inline">\(K\)</span> determined by simulating a null model may vary in both cases.</p>
+<p>The choice of an appropriate null model is important here. In order to determine whether there is significant attraction or repulsion between the two patterns, the position of one pattern relative to the other must be randomized, while maintaining the spatial structure of each pattern taken in isolation.</p>
+<p>One way to do this randomization is to shift one of the two patterns horizontally and/or vertically by a random distance. The part of the pattern that “comes out” on one side of the window is attached to the other side. This method is called a toroidal shift, because by connecting the top and bottom as well as the left and right of a rectangular surface, we obtain the shape of a torus (a three-dimensional “donut”).</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>The graph above shows a translation of the green pattern to the right, while the orange pattern remains in the same place. The green points in the shaded area are brought back to the other side. Note that while this method generally preserves the structure of each pattern while randomizing their relative position, it can have some drawbacks, such as dividing clusters of dots that are near the cutoff point.</p>
+</div>
+<div id="for-more-information" class="section level2">
+<h2>For more information</h2>
+<p>This part was intended to illustrate the main concepts of point pattern analysis. You are invited to consult specialized resources, such as the recommended textbook by Wiegand and Moloney (2013) in the references, to learn more about these methods. In particular:</p>
+<ul>
+<li><p>In addition to Ripley’s <span class="math inline">\(K\)</span>, several other summary statistics can be used to describe point patterns, for example, the mean distance to the nearest neighbour.</p></li>
+<li><p>The estimation of the summary statistics of a point pattern must take into account “edge effects”, i.e. we do not know all the neighbours of the points near the edge of the observation window. We have not discussed these correction methods here.</p></li>
+<li><p>In addition to analyzing the position of the points, we can analyze the aggregation of characteristics of the points, or <em>marks</em>. For example, if a spatial tree pattern contains dead and living trees, we can check whether the mortality is spatially random or spatially aggregated.</p></li>
+</ul>
+</div>
+</div>
+<div id="point-patterns-in-r" class="section level1">
+<h1>Point patterns in R</h1>
+<p>For this example, we use the data set <a href="../donnees/semis_xy.csv">semis_xy.csv</a>, which represents the <span class="math inline">\((x, y)\)</span> coordinates of two species (<em>sp</em>, B = birch and P = poplar) seedlings in a 15 x 15 m plot.</p>
+<pre class="r"><code>semis &lt;- read.csv(&quot;../donnees/semis_xy.csv&quot;)
+head(semis)</code></pre>
+<pre><code>##       x    y sp
+## 1 14.73 0.05  P
+## 2 14.72 1.71  P
+## 3 14.31 2.06  P
+## 4 14.16 2.64  P
+## 5 14.12 4.15  B
+## 6  9.88 4.08  B</code></pre>
+<p>The <em>spatstat</em> package allows us to perform point pattern analysis in R. The first step consists in transforming our data table into a <code>ppp</code> object (point pattern) with the function of the same name. In this function, we specify which columns contain the coordinates <em>x</em> and <em>y</em> as well as the marks (<code>marks</code>), which will be here the species codes. It is also necessary to specify an observation window (<code>window</code>) using the <code>owin</code> function, at which we specify the plot boundaries in <em>x</em> and <em>y</em>.</p>
+<pre class="r"><code>library(spatstat)
+
+semis &lt;- ppp(x = semis$x, y = semis$y, marks = as.factor(semis$sp),
+             window = owin(xrange = c(0, 15), yrange = c(0, 15)))
+semis</code></pre>
+<pre><code>## Marked planar point pattern: 281 points
+## Multitype, with levels = B, P 
+## window: rectangle = [0, 15] x [0, 15] units</code></pre>
+<p>Marks can be numeric or categorical. Note that for categorical marks such as in this case, the variable must be explicitly converted to a factor.</p>
+<p>The <code>plot</code> function applied to a pattern of points shows a diagram of the pattern.</p>
+<pre class="r"><code>plot(semis)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>The <code>intensity</code> function calculates the density of the points of each species per unit area, here in <span class="math inline">\(m^2\)</span>.</p>
+<pre class="r"><code>intensity(semis)</code></pre>
+<pre><code>##         B         P 
+## 0.6666667 0.5822222</code></pre>
+<p>To first analyze the distribution of each species separately, we separate the pattern with <code>split</code>. Since the pattern contains marks, the separation is done automatically according to the value of the marks. The result is a list of two point patterns.</p>
+<pre class="r"><code>semis_split &lt;- split(semis)
+plot(semis_split)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>The <code>Kest</code> function calculates Ripley’s <span class="math inline">\(K\)</span> for a series of distances up to (by default) 1/4 of the width of the window. Here we apply it to the first pattern (birch) by choosing <code>split_split[[1]]</code>. Note that double square brackets are necessary to choose an item from a list in R.</p>
+<p>The argument <code>correction = "iso"</code> tells R to apply an isotropic correction for border effects.</p>
+<pre class="r"><code>k &lt;- Kest(semis_split[[1]], correction = &quot;iso&quot;)
+plot(k)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>According to this graph, there seems to be an excess of neighbours starting at a radius of 1 m. To check if this is a significant deviation, we produce a simulation envelope with the function <code>envelope</code>. The first argument of <code>envelope</code> is a point pattern to which the simulations will be compared, the second one is a function to be computed (here, <code>Kest</code>) for each simulated pattern, then we add the arguments of the <code>Kest</code> function (here, only <code>correction</code>).</p>
+<pre class="r"><code>plot(envelope(semis_split[[1]], Kest, correction = &quot;iso&quot;), legend = FALSE)</code></pre>
+<pre><code>## Generating 99 simulations of CSR  ...
+## 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+## 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+## 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98,  99.
+## 
+## Done.</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>As indicated by the message, this function performs by default 99 simulations of the null hypothesis corresponding to a totally random spatial structure (CSR, for <em>complete spatial randomness</em>).</p>
+<p>The observed curve falls outside the envelope of the 99 simulations near <span class="math inline">\(r = 2\)</span>. One must be careful not to interpret too quickly a result that is outside the envelope. Although there is about a 1% probability of obtaining a more extreme result under the null hypothesis at a given distance, the envelope is calculated for a large number of values of the distance and we do not make a correction for multiple comparisons. Thus, a significant difference for a very small range of values of <span class="math inline">\(r\)</span> may simply be due to chance.</p>
+<p>In contrast, the similar graph for poplar shows significant aggregation up to 3 m and beyond.</p>
+<pre class="r"><code>plot(envelope(semis_split[[2]], Kest, correction = &quot;iso&quot;), legend = FALSE)</code></pre>
+<pre><code>## Generating 99 simulations of CSR  ...
+## 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+## 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+## 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98,  99.
+## 
+## Done.</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>To determine if the position of points in each species depend on the other species, we calculate the bivariate <span class="math inline">\(K_{ij}\)</span>, with birch as the focal species <span class="math inline">\(i\)</span> and poplar as the neighbouring species <span class="math inline">\(j\)</span>, using the <code>Kcross</code> function.</p>
+<pre class="r"><code>plot(Kcross(semis, i = &quot;B&quot;, j = &quot;P&quot;, correction = &quot;iso&quot;), legend = FALSE)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>Here, the observed <span class="math inline">\(K\)</span> is lower than the theoretical value, indicating a possible repulsion of both patterns.</p>
+<p>To determine the envelope of the <span class="math inline">\(K\)</span> according to the null hypothesis of independence of the two patterns, we must specify that the simulations must be based on a translation of the patterns and not on complete spatial randomness. We indicate that the simulations must use the function <code>rshift</code> (random shift) with the argument <code>simulate = rshift</code>. As in the previous case, all the arguments necessary for <code>Kcross</code> must be repeated in the <code>envelope</code> function.</p>
+<pre class="r"><code>plot(envelope(semis, Kcross, simulate = rshift, i = &quot;P&quot;, j = &quot;B&quot;,
+              correction = &quot;iso&quot;), legend = FALSE)</code></pre>
+<pre><code>## Generating 99 simulations by evaluating function  ...
+## 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+## 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+## 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98,  99.
+## 
+## Done.</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>Here, the observed curve is totally within the envelope, so we do not reject the null hypothesis of independence of the two patterns.</p>
+</div>
+<div id="geostatistical-models" class="section level1">
+<h1>Geostatistical models</h1>
+<p>Geostatistics refers to a group of techniques that originated in the earth sciences. Geostatistics is concerned with variables that are continuously distributed in space, where the distribution is estimated by sampling a number of points. A classic example of these techniques comes from the mining field, where the aim was to create a map of the concentration of ore at a site from samples taken at different points on the site.</p>
+<p>For these models, we will assume that <span class="math inline">\(z(x, y)\)</span> is a stationary spatial variable measured in <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> coordinates.</p>
+<div id="variogram" class="section level2">
+<h2>Variogram</h2>
+<p>A central aspect of geostatistics is the estimation of the variogram <span class="math inline">\(\gamma_z\)</span>. The variogram is equal to half the mean square difference between the values of <span class="math inline">\(z\)</span> for two points <span class="math inline">\((x_i, y_i)\)</span> and <span class="math inline">\((x_j, y_j)\)</span> separated by a distance <span class="math inline">\(h\)</span>.</p>
+<p><span class="math display">\[\gamma_z(h) = \frac{1}{2} \text{E} \left[ \left( z(x_i, y_i) - z(x_j, y_j) \right)^2 \right]_{d_{ij} = h}\]</span></p>
+<p>In this equation, the <span class="math inline">\(\text{E}\)</span> function with the index <span class="math inline">\(d_{ij}=h\)</span> designates the statistical expectation (i.e., the mean) of the squared deviation between the values of <span class="math inline">\(z\)</span> for points separated by a distance <span class="math inline">\(h\)</span>.</p>
+<p>If we want instead to express the autocorrelation <span class="math inline">\(\rho_z(h)\)</span> between measures of <span class="math inline">\(z\)</span> separated by a distance <span class="math inline">\(h\)</span>, it is related to the variogram by the equation:</p>
+<p><span class="math display">\[\gamma_z = \sigma_z^2(1 - \rho_z)\]</span> ,</p>
+<p>where <span class="math inline">\(\sigma_z^2\)</span> is the global variance of <span class="math inline">\(z\)</span>.</p>
+<p>Note that <span class="math inline">\(\gamma_z = \sigma_z^2\)</span> when we reach a distance where the measurements of <span class="math inline">\(z\)</span> are independent, so <span class="math inline">\(\rho_z = 0\)</span>. In this case, we can see that <span class="math inline">\(\gamma_z\)</span> is similar to a variance, although it is sometimes called “semivariogram” or “semivariance” because of the 1/2 factor in the above equation.</p>
+</div>
+<div id="theoretical-models-for-the-variogram" class="section level2">
+<h2>Theoretical models for the variogram</h2>
+<p>Several parametric models have been proposed to represent the spatial correlation as a function of the distance between sampling points. Let us first consider a correlation that decreases exponentially:</p>
+<p><span class="math display">\[\rho_z(h) = e^{-h/r}\]</span></p>
+<p>Here, <span class="math inline">\(\rho_z = 1\)</span> for <span class="math inline">\(h = 0\)</span> and the correlation is multiplied by <span class="math inline">\(1/e \approx 0.37\)</span> each time the distance increases by <span class="math inline">\(r\)</span>. In this context, <span class="math inline">\(r\)</span> is called the <em>range</em> of the correlation.</p>
+<p>From the above equation, we can calculate the corresponding variogram.</p>
+<p><span class="math display">\[\gamma_z(h) = \sigma_z^2 (1 - e^{-h/r})\]</span></p>
+<p>Here is a graphical representation of this variogram.</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p>Because of the exponential function, the value of <span class="math inline">\(\gamma\)</span> at large distances approaches the global variance <span class="math inline">\(\sigma_z^2\)</span> without exactly reaching it. This asymptote is called a <em>sill</em> in the geostatistical context and is represented by the symbol <span class="math inline">\(s\)</span>.</p>
+<p>Finally, it is sometimes unrealistic to assume a perfect correlation when the distance tends towards 0, because of a possible variation of <span class="math inline">\(z\)</span> at a very small scale. A <em>nugget</em> effect, denoted <span class="math inline">\(n\)</span>, can be added to the model so that <span class="math inline">\(\gamma\)</span> approaches <span class="math inline">\(n\)</span> (rather than 0) if <span class="math inline">\(h\)</span> tends towards 0. The term nugget comes from the mining origin of these techniques, where a nugget could be the source of a sudden small-scale variation in the concentration of a mineral.</p>
+<p>By adding the nugget effect, the remainder of the variogram is “compressed” to keep the same sill, resulting in the following equation.</p>
+<p><span class="math display">\[\gamma_z(h) = n + (s - n) (1 - e^{-h/r})\]</span></p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>In addition to the exponential model, two other common theoretical models for the variogram are the Gaussian model (where the correlation follows a half-normal curve), and the spherical model (where the variogram increases linearly at the start and then curves and reaches the plateau at a distance equal to its range <span class="math inline">\(r\)</span>). The spherical model thus allows the correlation to be exactly 0 at large distances, rather than gradually approaching zero in the case of the other models.</p>
+<table>
+<colgroup>
+<col width="22%" />
+<col width="35%" />
+<col width="41%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th><span class="math inline">\(\rho(h)\)</span></th>
+<th><span class="math inline">\(\gamma(h)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exponential</td>
+<td><span class="math inline">\(\exp\left(-\frac{h}{r}\right)\)</span></td>
+<td><span class="math inline">\(s \left(1 - \exp\left(-\frac{h}{r}\right)\right)\)</span></td>
+</tr>
+<tr class="even">
+<td>Gaussian</td>
+<td><span class="math inline">\(\exp\left(-\frac{h^2}{r^2}\right)\)</span></td>
+<td><span class="math inline">\(s \left(1 - \exp\left(-\frac{h^2}{r^2}\right)\right)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Spherical <span class="math inline">\((h &lt; r)\)</span> *</td>
+<td><span class="math inline">\(1 - \frac{3}{2}\frac{h}{r} + \frac{1}{2}\frac{h^3}{r^3}\)</span></td>
+<td><span class="math inline">\(s \left(\frac{3}{2}\frac{h}{r} - \frac{1}{2}\frac{h^3}{r^3} \right)\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>* For the spherical model, <span class="math inline">\(\rho = 0\)</span> and <span class="math inline">\(\gamma = s\)</span> if <span class="math inline">\(h \ge r\)</span>.</p>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-23-1.png" width="864" /></p>
+</div>
+<div id="empirical-variogram" class="section level2">
+<h2>Empirical variogram</h2>
+<p>To estimate <span class="math inline">\(\gamma_z(h)\)</span> from empirical data, we need to define distance classes, thus grouping different distances within a margin of <span class="math inline">\(\pm \delta\)</span> around a distance <span class="math inline">\(h\)</span>, then calculating the mean square deviation for the pairs of points in that distance class.</p>
+<p><span class="math display">\[\hat{\gamma_z}(h) = \frac{1}{2 N_{\text{pairs}}} \sum \left[ \left( z(x_i, y_i) - z(x_j, y_j) \right)^2 \right]_{d_{ij} = h \pm \delta}\]</span></p>
+<p>We will see in the next section how to estimate a variogram in R.</p>
+</div>
+<div id="variogram-and-temporal-data" class="section level2">
+<h2>Variogram and temporal data</h2>
+<p>A variogram can also be estimated as a function of time deviations, which in this case is considered as a 1-dimensional space. This makes it possible to model the time dependence for a series of measurements taken at irregular intervals, when the autoregressive models seen at the last class do not apply.</p>
+</div>
+<div id="regression-model-with-spatial-correlation" class="section level2">
+<h2>Regression model with spatial correlation</h2>
+<p>The following equation represents a multiple linear regression including residual spatial correlation:</p>
+<p><span class="math display">\[v = \beta_0 + \sum_i \beta_i u_i + z + \epsilon\]</span></p>
+<p>Here, <span class="math inline">\(v\)</span> designates the response variable and <span class="math inline">\(u\)</span> the predictors, to avoid confusion with the spatial coordinates <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
+<p>In addition to the residual <span class="math inline">\(\epsilon\)</span> that is independent between observations, the model includes a term <span class="math inline">\(z\)</span> that represents the spatially correlated portion of the residual variance.</p>
+<p>Here are suggested steps to apply this type of model:</p>
+<ol style="list-style-type: decimal">
+<li><p>Fit the regression model without spatial correlation.</p></li>
+<li><p>Verify the presence of spatial correlation from the empirical variogram of the residuals.</p></li>
+<li><p>Fit one or more regression models with spatial correlation and select the one that shows the best fit to the data (for example, as determined by the AIC).</p></li>
+</ol>
+<p>We will see in the last part of this class how to include spatial correlation terms in complex models, including mixed effects or Bayesian models.</p>
+</div>
+</div>
+<div id="geostatistical-models-in-r" class="section level1">
+<h1>Geostatistical models in R</h1>
+<p>The <em>gstat</em> package contains functions related to geostatistics. For this example, we will use the <code>oxford</code> dataset from this package, which contains measurements of physical and chemical properties for 126 soil samples from a site, along with their coordinates <code>XCOORD</code> and <code>YCOORD</code>.</p>
+<pre class="r"><code>library(gstat)
+
+data(oxford)
+str(oxford)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    126 obs. of  22 variables:
+##  $ PROFILE  : num  1 2 3 4 5 6 7 8 9 10 ...
+##  $ XCOORD   : num  100 100 100 100 100 100 100 100 100 100 ...
+##  $ YCOORD   : num  2100 2000 1900 1800 1700 1600 1500 1400 1300 1200 ...
+##  $ ELEV     : num  598 597 610 615 610 595 580 590 598 588 ...
+##  $ PROFCLASS: Factor w/ 3 levels &quot;Cr&quot;,&quot;Ct&quot;,&quot;Ia&quot;: 2 2 2 3 3 2 3 2 3 3 ...
+##  $ MAPCLASS : Factor w/ 3 levels &quot;Cr&quot;,&quot;Ct&quot;,&quot;Ia&quot;: 2 3 3 3 3 2 2 3 3 3 ...
+##  $ VAL1     : num  3 3 4 4 3 3 4 4 4 3 ...
+##  $ CHR1     : num  3 3 3 3 3 2 2 3 3 3 ...
+##  $ LIME1    : num  4 4 4 4 4 0 2 1 0 4 ...
+##  $ VAL2     : num  4 4 5 8 8 4 8 4 8 8 ...
+##  $ CHR2     : num  4 4 4 2 2 4 2 4 2 2 ...
+##  $ LIME2    : num  4 4 4 5 5 4 5 4 5 5 ...
+##  $ DEPTHCM  : num  61 91 46 20 20 91 30 61 38 25 ...
+##  $ DEP2LIME : num  20 20 20 20 20 20 20 20 40 20 ...
+##  $ PCLAY1   : num  15 25 20 20 18 25 25 35 35 12 ...
+##  $ PCLAY2   : num  10 10 20 10 10 20 10 20 10 10 ...
+##  $ MG1      : num  63 58 55 60 88 168 99 59 233 87 ...
+##  $ OM1      : num  5.7 5.6 5.8 6.2 8.4 6.4 7.1 3.8 5 9.2 ...
+##  $ CEC1     : num  20 22 17 23 27 27 21 14 27 20 ...
+##  $ PH1      : num  7.7 7.7 7.5 7.6 7.6 7 7.5 7.6 6.6 7.5 ...
+##  $ PHOS1    : num  13 9.2 10.5 8.8 13 9.3 10 9 15 12.6 ...
+##  $ POT1     : num  196 157 115 172 238 164 312 184 123 282 ...</code></pre>
+<p>Suppose that we want to model the magnesium concentration (<code>MG1</code>), represented as a function of the spatial position in the following graph.</p>
+<pre class="r"><code>library(ggplot2)
+ggplot(oxford, aes(x = YCOORD, y = XCOORD, size = MG1)) +
+    geom_point() +
+    coord_fixed()</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p>Note that the <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> axes have been inverted to save space. The <code>coord_fixed()</code> function of <em>ggplot2</em> ensures that the scale is the same on both axes, which is useful for representing spatial data.</p>
+<p>We can immediately see that these measurements were taken on a 100 m grid. It seems that the magnesium concentration is spatially correlated, although it may be a correlation induced by another variable. In particular, we know that the concentration of magnesium is negatively related to the soil pH (<code>PH1</code>).</p>
+<pre class="r"><code>ggplot(oxford, aes(x = PH1, y = MG1)) +
+    geom_point()</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p>The <code>variogram</code> function of <em>gstat</em> is used to estimate a variogram from empirical data. Here is the result obtained for the variable <code>MG1</code>.</p>
+<pre class="r"><code>var_mg &lt;- variogram(MG1 ~ 1, locations = ~ XCOORD + YCOORD, data = oxford)
+var_mg</code></pre>
+<pre><code>##     np     dist    gamma dir.hor dir.ver   id
+## 1  225 100.0000 1601.404       0       0 var1
+## 2  200 141.4214 1950.805       0       0 var1
+## 3  548 215.0773 2171.231       0       0 var1
+## 4  623 303.6283 2422.245       0       0 var1
+## 5  258 360.5551 2704.366       0       0 var1
+## 6  144 400.0000 2948.774       0       0 var1
+## 7  570 427.5569 2994.621       0       0 var1
+## 8  291 500.0000 3402.058       0       0 var1
+## 9  366 522.8801 3844.165       0       0 var1
+## 10 200 577.1759 3603.060       0       0 var1
+## 11 458 619.8400 3816.595       0       0 var1
+## 12  90 670.8204 3345.739       0       0 var1</code></pre>
+<p>The formula <code>MG1 ~ 1</code> indicates that no linear predictor is included in this model, while the argument <code>locations</code> indicates which variables in the data frame correspond to the spatial coordinates.</p>
+<p>In the resulting table, <code>gamma</code> is the value of the variogram for the distance class centered on <code>dist</code>, while <code>np</code> is the number of pairs of points in that class. Here, since the points are located on a grid, we obtain regular distance classes (e.g.: 100 m for neighbouring points on the grid, 141 m for diagonal neighbours, etc.) We can illustrate the variogram with <code>plot</code>.</p>
+<pre class="r"><code>plot(var_mg, col = &quot;black&quot;)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p>If we want to estimate the residual spatial correlation of <code>MG1</code> after including the effect of <code>PH1</code>, we can add that predictor to the formula.</p>
+<pre class="r"><code>var_mg &lt;- variogram(MG1 ~ PH1, locations = ~ XCOORD + YCOORD, data = oxford)
+plot(var_mg, col = &quot;black&quot;)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+<p>Including the effect of pH, the range of the spatial correlation seems to decrease, while the plateau is reached around 300 m. It even seems that the variogram decreases beyond 400 m. In general, we assume that the variance between two points does not decrease with distance, unless there is a periodic spatial pattern.</p>
+<p>The function <code>fit.variogram</code> accepts as arguments a variogram estimated from the data, as well as a theoretical model described in a <code>vgm</code> function, and then estimates the parameters of that model according to the data. The fitting is done by the method of least squares.</p>
+<p>For example, <code>vgm("Exp")</code> means we want to fit an exponential model.</p>
+<pre class="r"><code>vfit &lt;- fit.variogram(var_mg, vgm(&quot;Exp&quot;))
+vfit</code></pre>
+<pre><code>##   model    psill    range
+## 1   Nug    0.000  0.00000
+## 2   Exp 1951.496 95.11235</code></pre>
+<p>There is no nugget effect, because <code>psill = 0</code> for the <code>Nug</code> (nugget) part of the model. The exponential part has a sill at 1951 (corresponding to <span class="math inline">\(\sigma_z^2\)</span>) and a range of 95 m.</p>
+<p>To compare different models, a vector of model names can be given to <code>vgm</code>. In the following example, we include the exponential, gaussian (“Gau”) and spherical (“Sph”) models.</p>
+<pre class="r"><code>vfit &lt;- fit.variogram(var_mg, vgm(c(&quot;Exp&quot;, &quot;Gau&quot;, &quot;Sph&quot;)))
+vfit</code></pre>
+<pre><code>##   model    psill    range
+## 1   Nug    0.000  0.00000
+## 2   Exp 1951.496 95.11235</code></pre>
+<p>The function gives us the result of the model with the best fit (lowest sum of squared deviations), which here is the same exponential model.</p>
+<p>Finally, we can superimpose the theoretical model and the empirical variogram on the same graph.</p>
+<pre class="r"><code>plot(var_mg, vfit, col = &quot;black&quot;)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
+</div>
+<div id="areal-data" class="section level1">
+<h1>Areal data</h1>
+<p>Areal data are variables measured for regions of space, defined by polygons. This type of data is more common in the social sciences, human geography and epidemiology, where data is often available at the scale of administrative divisions.</p>
+<p>This type of data also appears frequently in natural resource management. For example, the following map shows the forest management units of the Ministère de la Forêt, de la Faune et des Parcs du Québec.</p>
+<p><img src="../images/cartes_unites.png" /></p>
+<p>Suppose that a variable is available at the level of these management units. How can we model the spatial correlation between units that are spatially close together?</p>
+<p>One option would be to apply the geostatistical methods seen before, for example by calculating the distance between the centers of the polygons.</p>
+<p>Another option, which is more adapted for areal data, is to define a network where each region is connected to neighbouring regions by a link. It is then assumed that the variables are directly correlated between neighbouring regions only. (Note, however, that direct correlations between immediate neighbours also generate indirect correlations for a chain of neighbours).</p>
+<p>In this type of model, the correlation is not necessarily the same from one link to another. In this case, each link in the network can be associated with a <em>weight</em> representing its importance for the spatial correlation. We represent these weights by a matrix <span class="math inline">\(W\)</span> where <span class="math inline">\(w_{ij}\)</span> is the weight of the link between regions <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>. A region has no link with itself, so <span class="math inline">\(w_{ii} = 0\)</span>.</p>
+<p>A simple choice for <span class="math inline">\(W\)</span> is to assign a weight equal to 1 if the regions are neighbours, otherwise 0 (binary weight).</p>
+<p>In addition to land divisions represented by polygons, another example of areal data consists of a grid where the variable is calculated for each cell of the grid. In this case, a cell generally has 4 or 8 neighbouring cells, depending on whether diagonals are included or not.</p>
+<div id="morans-i" class="section level2">
+<h2>Moran’s I</h2>
+<p>Before discussing spatial autocorrelation models, we present Moran’s <span class="math inline">\(I\)</span> statistic, which allows us to test whether a significant correlation is present between neighbouring regions.</p>
+<p>Moran’s <span class="math inline">\(I\)</span> is a spatial autocorrelation coefficient of <span class="math inline">\(z\)</span>, weighted by the <span class="math inline">\(w_{ij}\)</span>. It therefore takes values between -1 and 1.</p>
+<p><span class="math display">\[I = \frac{N}{\sum_i \sum_j w_{ij}} \frac{\sum_i \sum_j w_{ij} (z_i - \bar{z}) (z_j - \bar{z})}{\sum_i (z_i - \bar{z})^2}\]</span></p>
+<p>In this equation, we recognize the expression of a correlation, which is the product of the deviations from the mean for two variables <span class="math inline">\(z_i\)</span> and <span class="math inline">\(z_j\)</span>, divided by the product of their standard deviations (it is the same variable here, so we get the variance). The contribution of each pair <span class="math inline">\((i, j)\)</span> is multiplied by its weight <span class="math inline">\(w_{ij}\)</span> and the term on the left (the number of regions <span class="math inline">\(N\)</span> divided by the sum of the weights) ensures that the result is bounded between -1 and 1.</p>
+<p>Since the distribution of <span class="math inline">\(I\)</span> is known in the absence of spatial autocorrelation, this statistic serves to test the null hypothesis that there is no spatial correlation between neighbouring regions.</p>
+<p>Although we will not see an example in this course, Moran’s <span class="math inline">\(I\)</span> can also be applied to point data. In this case, we divide the pairs of points into distance classes and calculate <span class="math inline">\(I\)</span> for each distance class; the weight <span class="math inline">\(w_{ij} = 1\)</span> if the distance between <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is in the desired distance class, otherwise 0.</p>
+</div>
+<div id="spatial-autoregression-models" class="section level2">
+<h2>Spatial autoregression models</h2>
+<p>Let us recall the formula for a linear regression with spatial dependence:</p>
+<p><span class="math display">\[v = \beta_0 + \sum_i \beta_i u_i + z + \epsilon\]</span> ,</p>
+<p>where <span class="math inline">\(z\)</span> is the portion of the residual variance that is spatially correlated.</p>
+<p>There are two main types of autoregressive models to represent the spatial dependence of <span class="math inline">\(z\)</span>: conditional autoregression (CAR) and simultaneous autoregressive (SAR).</p>
+<div id="conditional-autoregressive-car-model" class="section level3">
+<h3>Conditional autoregressive (CAR) model</h3>
+<p>In the conditional autoregressive model, the value of <span class="math inline">\(z_i\)</span> for the region <span class="math inline">\(i\)</span> follows a normal distribution: its mean depends on the value <span class="math inline">\(z_j\)</span> of neighbouring regions, multiplied by the weight <span class="math inline">\(w_{ij}\)</span> and a correlation coefficient <span class="math inline">\(\rho\)</span>; its standard deviation <span class="math inline">\(\sigma_{z_i}\)</span> may vary from one region to another.</p>
+<p><span class="math display">\[z_i \sim \text{N}\left(\sum_j \rho w_{ij} z_j,\sigma_{z_i} \right)\]</span></p>
+<p>In this model, if <span class="math inline">\(w_{ij}\)</span> is a binary matrix (0 for non-neighbours, 1 for neighbours), then <span class="math inline">\(\rho\)</span> is the coefficient of partial correlation between neighbouring regions. This is similar to a first-order autoregressive model in the context of time series, where the autoregression coefficient indicates the partial correlation.</p>
+</div>
+<div id="simultaneous-autoregressive-sar-model" class="section level3">
+<h3>Simultaneous autoregressive (SAR) model</h3>
+<p>In the simultaneous autoregressive model, the value of <span class="math inline">\(z_i\)</span> is given directly by the sum of contributions from neighbouring values <span class="math inline">\(z_j\)</span>, multiplied by <span class="math inline">\(\rho w_{ij}\)</span>, with an independent residual <span class="math inline">\(\nu_i\)</span> of standard deviation <span class="math inline">\(\sigma_z\)</span>.</p>
+<p><span class="math display">\[z_i = \sum_j \rho w_{ij} z_j + \nu_i\]</span></p>
+<p>At first glance, this looks like a temporal autoregressive model. However, there is an important conceptual difference. For temporal models, the causal influence is directed in only one direction: <span class="math inline">\(v(t-2)\)</span> affects <span class="math inline">\(v(t-1)\)</span> which then affects <span class="math inline">\(v(t)\)</span>. For a spatial model, each <span class="math inline">\(z_j\)</span> that affects <span class="math inline">\(z_i\)</span> depends in turn on <span class="math inline">\(z_i\)</span>. Thus, to determine the joint distribution of <span class="math inline">\(z\)</span>, a system of equations must be solved simultaneously (hence the name of the model).</p>
+<p>For this reason, although this model resembles the formula of CAR model, the solutions of the two models differ and in the case of SAR, the coefficient <span class="math inline">\(\rho\)</span> is not directly equal to the partial correlation due to each neighbouring region.</p>
+<p>For more details on the mathematical aspects of these models, see the article by Ver Hoef et al. (2018) suggested in reference.</p>
+<p>For the moment, we will consider SAR and CAR as two types of possible models to represent a spatial correlation on a network. We can always fit several models and compare them with the AIC to choose the best form of correlation or the best weight matrix.</p>
+<p>The CAR and SAR models share an advantage over geostatistical models in terms of efficiency. In a geostatistical model, spatial correlations are defined between each pair of points, although they become negligible as distance increases. For a CAR or SAR model, only neighbouring regions contribute and most weights are equal to 0, making these models faster to fit than a geostatistical model when the data are massive.</p>
+<p>Finally, note that there is also a spatial equivalent of moving average (MA) models seen in a temporal context. However, since their application is rarer, we do not discuss them in this course.</p>
+</div>
+</div>
+</div>
+<div id="areal-data-in-r" class="section level1">
+<h1>Areal data in R</h1>
+<p>To illustrate the analysis of areal data in R, we load the packages <em>spData</em> (containing examples of spatial data), <em>spdep</em> (to define spatial networks and calculate the Moran index) and <em>spatialreg</em> (for SAR and CAR models).</p>
+<pre class="r"><code>library(spData)
+library(spdep)
+library(spatialreg)</code></pre>
+<p>As an example, we will use the <code>us_states</code> spatial dataset which contains polygons for 49 U.S. states (all states excluding Alaska and Hawaii, plus the District of Columbia).</p>
+<pre class="r"><code>data(us_states)
+head(us_states)</code></pre>
+<pre><code>## Simple feature collection with 6 features and 6 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: -114.8136 ymin: 24.55868 xmax: -71.78699 ymax: 42.04964
+## CRS:            EPSG:4269
+##   GEOID        NAME   REGION             AREA total_pop_10 total_pop_15
+## 1    01     Alabama    South 133709.27 [km^2]      4712651      4830620
+## 2    04     Arizona     West 295281.25 [km^2]      6246816      6641928
+## 3    08    Colorado     West 269573.06 [km^2]      4887061      5278906
+## 4    09 Connecticut Norteast  12976.59 [km^2]      3545837      3593222
+## 5    12     Florida    South 151052.01 [km^2]     18511620     19645772
+## 6    13     Georgia    South 152725.21 [km^2]      9468815     10006693
+##                         geometry
+## 1 MULTIPOLYGON (((-88.20006 3...
+## 2 MULTIPOLYGON (((-114.7196 3...
+## 3 MULTIPOLYGON (((-109.0501 4...
+## 4 MULTIPOLYGON (((-73.48731 4...
+## 5 MULTIPOLYGON (((-81.81169 2...
+## 6 MULTIPOLYGON (((-85.60516 3...</code></pre>
+<p>It is a spatial data frame where the last column defines the polygon corresponding to the state and the other columns define variables associated with it. We will not discuss this data structure in detail, but note that the <em>sf</em> packge allows you to import vector GIS files (shapefiles) in this data format for R.</p>
+<p>To illustrate one of the variables on a map, we call the function <code>plot</code> with the column name in square brackets and quotes.</p>
+<pre class="r"><code>plot(us_states[&quot;REGION&quot;])</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p>Here we want to model the median income in each state in 2015. This variable <code>median_income_15</code> is found in another dataset, <code>us_states_df</code>.</p>
+<pre class="r"><code>data(us_states_df)
+head(us_states_df)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   state      median_income_10 median_income_15 poverty_level_10 poverty_level_15
+##   &lt;chr&gt;                 &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 Alabama               21746            22890           786544           887260
+## 2 Alaska                29509            31455            64245            72957
+## 3 Arizona               26412            26156           933113          1180690
+## 4 Arkansas              20881            22205           502684           553644
+## 5 California            27207            27035          4919945          6135142
+## 6 Colorado              29365            30752           584184           653969</code></pre>
+<p>We use the <code>inner_join</code> function of <em>dplyr</em> to join the two datasets, specifying with <code>by</code> that the <em>NAME</em> column of <code>us_states</code> matches the <em>state</em> column of <code>us_states_df</code>.</p>
+<pre class="r"><code>library(dplyr)
+us_states &lt;- inner_join(us_states, us_states_df,
+                        by = c(&quot;NAME&quot; = &quot;state&quot;))
+plot(us_states[&quot;median_income_15&quot;])</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p>The <code>poly2nb</code> function of the <em>spdep</em> package defines a neighbourhood network from polygons. The result <code>vois</code> is a list of 49 elements where each element contains the indices of the neighbouring polygons of a given polygon.</p>
+<pre class="r"><code>vois &lt;- poly2nb(us_states)
+vois[[1]]</code></pre>
+<pre><code>## [1]  5  6 36 44</code></pre>
+<p>We can illustrate this network by extracting the coordinates of the center of each state, creating a blank map with <code>plot(us_states["geometry"])</code>, then adding the network as an additional layer with <code>plot(vois, add = TRUE, coords = coords)</code>.</p>
+<pre class="r"><code>coords &lt;- st_centroid(us_states) %&gt;%
+    st_coordinates()
+plot(us_states[&quot;geometry&quot;])
+plot(vois, add = TRUE, col = &quot;red&quot;, coords = coords)</code></pre>
+<p><img src="12E-Donnees_spatiales_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p>We still have to add weights to each network link with the <code>nb2listw</code> function. The style of weight “B” corresponds to binary weights, i.e. 1 for the presence of a link and 0 for the absence of a link between two states.</p>
+<p>Once these weights have been defined, we can verify if there is a significant autocorrelation of the median income between neighbouring states with the Moran test.</p>
+<pre class="r"><code>poids &lt;- nb2listw(vois, style = &quot;B&quot;)
+
+moran.test(us_states$median_income_15, poids)</code></pre>
+<pre><code>## 
+##  Moran I test under randomisation
+## 
+## data:  us_states$median_income_15  
+## weights: poids    
+## 
+## Moran I statistic standard deviate = 4.127, p-value = 1.838e-05
+## alternative hypothesis: greater
+## sample estimates:
+## Moran I statistic       Expectation          Variance 
+##       0.342670652      -0.020833333       0.007758162</code></pre>
+<p>The value <span class="math inline">\(I = 0.34\)</span> is very significant judging by the <span class="math inline">\(p\)</span>-value of the test.</p>
+<p>Finally, we fit SAR and CAR models to these data with the `spautolm’ (<em>spatial autoregressive linear model</em>) function of <em>spatialreg</em>. Here is the code for a SAR model including the fixed effect of the region (west, mid-west, south or north-east).</p>
+<pre class="r"><code>modsp &lt;- spautolm(median_income_15 ~ REGION, data = us_states,
+                  listw = poids)
+summary(modsp)</code></pre>
+<pre><code>## 
+## Call: spautolm(formula = median_income_15 ~ REGION, data = us_states, 
+##     listw = poids)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -5632.95 -2243.24  -856.84  1781.90 11770.13 
+## 
+## Coefficients: 
+##                Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)   28703.411   1607.825 17.8523   &lt;2e-16
+## REGIONMidwest    42.832   2157.389  0.0199   0.9842
+## REGIONSouth   -1131.312   1904.512 -0.5940   0.5525
+## REGIONWest     -815.428   2393.545 -0.3407   0.7333
+## 
+## Lambda: 0.12915 LR test value: 7.7579 p-value: 0.0053479 
+## Numerical Hessian standard error of lambda: 0.033239 
+## 
+## Log likelihood: -466.35 
+## ML residual variance (sigma squared): 9804100, (sigma: 3131.2)
+## Number of observations: 49 
+## Number of parameters estimated: 6 
+## AIC: 944.7</code></pre>
+<p>The value given by <code>Lambda</code> in the summary corresponds to the coefficient <span class="math inline">\(\rho\)</span> in our description of the model. The likelihood ratio test (<code>LR test</code>) confirms that this residual spatial correlation (after accounting for the region effect) is significant.</p>
+<p>To evaluate a CAR rather than SAR model, we must specify <code>family = "CAR"</code>.</p>
+<pre class="r"><code>modsp2 &lt;- spautolm(median_income_15 ~ REGION, data = us_states,
+                  listw = poids, family = &quot;CAR&quot;)
+summary(modsp2)</code></pre>
+<pre><code>## 
+## Call: spautolm(formula = median_income_15 ~ REGION, data = us_states, 
+##     listw = poids, family = &quot;CAR&quot;)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -5709.20 -1999.90  -682.38  2072.01 11328.25 
+## 
+## Coefficients: 
+##               Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept)    29022.2     1484.4 19.5519   &lt;2e-16
+## REGIONMidwest   -408.0     2049.4 -0.1991   0.8422
+## REGIONSouth    -1436.2     1820.6 -0.7888   0.4302
+## REGIONWest     -1378.0     2239.7 -0.6153   0.5384
+## 
+## Lambda: 0.16539 LR test value: 5.8956 p-value: 0.015179 
+## Numerical Hessian standard error of lambda: 0.031414 
+## 
+## Log likelihood: -467.2811 
+## ML residual variance (sigma squared): 10168000, (sigma: 3188.7)
+## Number of observations: 49 
+## Number of parameters estimated: 6 
+## AIC: 946.56</code></pre>
+<p>For a CAR model with binary weights, the value of <code>Lambda</code> (which we called <span class="math inline">\(\rho\)</span>) directly gives the partial correlation coefficient between neighbouring states. Note that the AIC here is slightly higher than the SAR model, so the latter gave a better fit.</p>
+</div>
+<div id="spatial-correlation-in-complex-models" class="section level1">
+<h1>Spatial correlation in complex models</h1>
+<p>As for the class on time series, we conclude this class by presenting some avenues for integrating spatial correlations into more complex models.</p>
+<div id="geostatistical-models-with-nlme" class="section level2">
+<h2>Geostatistical models with <em>nlme</em></h2>
+<p>In the last course, we saw that the <code>lme</code> function of the package <em>nlme</em> allowed us to include temporal correlations with terms of type <code>corARMA</code>. The same package contains spatial correlation functions, including exponential (<code>corExp</code>), Gaussian (<code>corGaus</code>) and spherical (<code>corSpher</code>) correlation.</p>
+<p>Here is an example of a mixed linear model fitted with <code>lme</code>, where <code>v</code> is the response, <code>u</code> is a fixed effect and <code>group</code> is a random effect. The <code>correlation</code> argument indicates an exponential correlation as a function of the distance defined by the coordinates <code>x</code> and <code>y</code>, with a nugget effect <code>nugget = TRUE</code>.</p>
+<pre class="r"><code>library(nlme)
+mod &lt;- lme(v ~ u, data, random = list(groupe = ~1),
+           correlation = corExp(form = ~ x + y, nugget = TRUE))</code></pre>
+<p>Note that the limitations of the <em>nlme</em> package mentioned in the last class still apply here: it is not possible to include several crossed (non-nested) effects and the package is not very efficient for estimating generalized models.</p>
+<p>To add spatial correlation to a linear model, without random effects, we can replace <code>lme</code> by <code>gls</code>, for <em>generalized least squares</em>. This function is similar to <code>lm</code>, but allows correlations between model residuals.</p>
+<pre class="r"><code>library(nlme)
+mod &lt;- gls(v ~ u, data,
+           correlation = corExp(form = ~ x + y, nugget = TRUE))</code></pre>
+<p>Finally, as we saw in the last course, the <code>gamm</code> function of the <em>mgcv</em> package combines the functionality of <code>lme</code> with the possibility to include additive effects (smoothing splines) for the predictors.</p>
+<pre class="r"><code>library(mgcv)
+mod &lt;- gamm(v ~ s(u), data, random = list(groupe = ~1), 
+            correlation = corExp(form = ~ x + y, nugget = TRUE))</code></pre>
+</div>
+<div id="geostatistical-models-with-brms" class="section level2">
+<h2>Geostatistical models with <em>brms</em></h2>
+<p>To include spatial correlation of the geostatistical type in a Bayesian model estimated with <em>brms</em>, we must specify a <code>gp</code> term, which describes a Gaussian process.</p>
+<pre class="r"><code>library(brms)
+mod &lt;- brm(v ~ u + gp(x, y, cov = &quot;exp_quad&quot;), data)</code></pre>
+<p>The term <code>gp</code> indicates the variables containing the spatial coordinates (<code>x</code>, <code>y</code>) as well as the form of the covariance. Currently, only the Gaussian correlation (<code>exp_quad</code>, for <em>exponential quadratic</em>) is available.*</p>
+<p><span class="math inline">\(^*\)</span> Gaussian processes with other correlation functions are possible, if they are manually coded with Stan. The term “Gaussian” in “Gaussian process” refers to the normal error distribution, not to the form of the spatial correlation.</p>
+</div>
+<div id="spatial-autoregressive-models-with-brms" class="section level2">
+<h2>Spatial autoregressive models with <em>brms</em></h2>
+<p>On the other hand, the <code>brm</code> function allows us to specify a spatial autoregressive structure with <code>sar</code> and <code>car</code> terms, which is useful to combine a spatial autoregressive model with non-spatial random effects. The <code>sar</code> and <code>car</code> terms are only allowed in models where the response follows a normal or <span class="math inline">\(t\)</span> distribution, so they cannot be combined with generalized models.</p>
+<pre class="r"><code>library(brms)
+mod_sar &lt;- brm(v ~ u + sar(W, type = &quot;error&quot;), data, data2 = list(W = W))
+mod_car &lt;- brm(v ~ u + car(W), data, data2 = list(W = W))</code></pre>
+<ul>
+<li><p><code>W</code> is the weight matrix. Since this matrix is not part of the <code>data</code>, it is given separately in the <code>data2</code> argument.</p></li>
+<li><p>The argument <code>type = "error"</code> in <code>sar</code> represents the type of SAR model seen in this course, where the unexplained portion of the response is autocorrelated. There are other types of SAR, including those where the value of the response itself is autocorrelated.</p></li>
+</ul>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>This course is only a brief introduction to the main spatial analysis techniques useful in environmental science. To go further in this field, Fortin and Dale’s textbook provides a very comprehensive overview of these and other methods.</p>
+<p>Fortin, M.-J. and Dale, M.R.T. (2005) <em>Spatial Analysis: A Guide for Ecologists</em>. Cambridge University Press: Cambridge, UK.</p>
+<p>Ver Hoef, J.M., Peterson, E.E., Hooten, M.B., Hanks, E.M. and Fortin, M.-J. (2018) Spatial autoregressive models for statistical inference from ecological data. <em>Ecological Monographs</em> 88: 36-59.</p>
+<p>Wiegand, T. and Moloney, K.A. (2013) <em>Handbook of Spatial Point-Pattern Analysis in Ecology</em>, CRC Press.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

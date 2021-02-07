@@ -1,6 +1,7 @@
 ---
 title: "Séries temporelles"
 output:
+    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -95,7 +96,7 @@ Ce package installe et charge automatiquement d'autres packages utiles pour la v
 
 Le jeu de données `pelt` inclus avec le package *fpp3* présente le nombre de fourrures de lièvre (*Hare*) et de lynx échangées à la Compagnie de la Baie d'Hudson entre 1845 et 1935. Il s'agit d'un jeu de données célèbre en écologie dû à la présence de cycles bien définis des populations du prédateur (lynx) et de sa proie (lièvre).
 
-```{r}
+```{r, message = FALSE, table = FALSE}
 data(pelt)
 head(pelt)
 ```
@@ -544,7 +545,7 @@ ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
   scale_color_brewer(palette = "Dark2")
 ```
 
-Cependant, en visualisant les résidus du modèle en fonction de la date, nous voyons qu'une corrélation tmporelle persiste. Il serait donc utile de représenter ces résidus par un modèle ARIMA.
+Cependant, en visualisant les résidus du modèle en fonction de la date, nous voyons qu'une corrélation temporelle persiste. Il serait donc utile de représenter ces résidus par un modèle ARIMA.
 
 ```{r}
 ggplot(vic_elec, aes(x = Date, y = residuals(elec_lm), color = Workday)) +
@@ -562,7 +563,7 @@ Ici, notez que `PDQ(0,0,0)` spécifie qu'il n'y a pas de composante saisonnière
 
 Il ne faut pas confondre cette fonction avec `pdq` (en minuscules), qui spécifie l'ordre du modèle ARIMA de base.
 
-Le modèle choisi comporte une différence d'ordre 1, donc on modélise la différence de demande en fonction de la différence de température. Il comporte aussi 2 termes d'autorégression et 3 termes de moyenne mobile.
+Le modèle choisi comporte une différence d'ordre 1, donc on modélise la différence de demande en fonction de la différence de température. Il comporte aussi 1 terme d'autorégression et 4 termes de moyenne mobile.
 
 ```{r}
 report(elec_arima)
@@ -637,7 +638,7 @@ Dans cette approche, nous ne pourrons pas non plus effectuer une sélection auto
 
 ## Exemple: Séries dendrochronologiques
 
-Nous utilisons pour cet exemple le jeu de données `wa082` du package d'analyse dendrochronologique *dplr*, qui présente les séries de croissance en surface terrière (basées sur la largeur des cernes) pour 23 individus de l'espèce *Abies amabilis* (jeu de données `wa082` du package *dplr*). Ce jeu de données a déjà été utilisé pour le laboratoire sur les modèles additifs généralisés.
+Nous utilisons pour cet exemple le jeu de données `wa082` du package d'analyse dendrochronologique *dplr*, qui présente les séries de croissance en surface terrière (basées sur la largeur des cernes) pour 23 individus de l'espèce *Abies amabilis*. Ce jeu de données a déjà été utilisé pour le laboratoire sur les modèles additifs généralisés.
 
 Comme dans ce laboratoire, nous devons d'abord réarranger le jeu de données pour obtenir des colonnes représentant la croissance en surface terrière (*cst*), la surface terrière cumulative (*st*) et de l'âge pour chaque arbre à chaque année. 
 
@@ -669,7 +670,7 @@ gam_wa <- gam(log(cst) ~ log(st) + s(age) + s(id_arbre, bs = "re"), data = wa)
 plot(gam_wa, pages = 1)
 ```
 
-Afin d'ajouter des corrélations temporelles, nous devons plutôt utiliser la fonction `gamm`, qui représente les effets aléatoires différemment, car elle est basée sur la fonction `lme` du package *nlme*. (Il s'agit d'un autre package pour les effets aléatoires. Comme nous verrons plus tard il comporte des limites par rapport à `lme4` que nous avons utilisé dans ce cours. Cependant, il a l'avantage d'inclure les corrélations temporelles.)
+Afin d'ajouter des corrélations temporelles, nous devons plutôt utiliser la fonction `gamm`, qui représente les effets aléatoires différemment, car elle est basée sur la fonction `lme` du package *nlme*. (Il s'agit d'un autre package pour les effets aléatoires. Comme nous verrons plus tard il comporte des limites par rapport à *lme4* que nous avons utilisé dans ce cours. Cependant, il a l'avantage d'inclure les corrélations temporelles.)
 
 Les effets fixes sont représentés de la même façon dans `gamm` ou `gam`, mais l'effet aléatoire apparaît dans une liste sous l'argument `random`. Ici, `id_arbre = ~1` signifie un effet aléatoire d'`id_arbre` sur l'ordonnée à l'origine.
 

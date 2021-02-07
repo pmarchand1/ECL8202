@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -305,7 +270,7 @@ div.tocify {
 <li><p>GLMM bayésien avec brms</p></li>
 </ul>
 </div>
-<div id="methodes-de-monte-carlo-par-chaines-de-markov" class="section level1">
+<div id="méthodes-de-monte-carlo-par-chaînes-de-markov" class="section level1">
 <h1>Méthodes de Monte-Carlo par chaînes de Markov</h1>
 <p>Lors du dernier cours, nous avons vu l’application du théorème de Bayes pour estimer la distribution <em>a posteriori</em> des paramètres <span class="math inline">\(\theta\)</span> d’un modèle en fonction d’observations <span class="math inline">\(y\)</span>.</p>
 <p><span class="math display">\[p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}\]</span></p>
@@ -322,7 +287,7 @@ div.tocify {
 <p>L’algorithme de Metropolis-Hastings permet de générer un échantillon de la distribution <span class="math inline">\(p(\theta | y)\)</span> à partir de ces rapports de probabilité. Voici un résumé du fonctionnement de cette méthode.</p>
 <ol style="list-style-type: decimal">
 <li><p>Tout d’abord, on choisit aléatoirement un premier vecteur de paramètres <span class="math inline">\(\theta_{(1)}\)</span>.</p></li>
-<li><p>Ensuite, on choisit un deuxième vecteur <span class="math inline">\(\theta_{(2)}\)</span>, qui dépend de <span class="math inline">\(\theta_{(1)}\)</span> selon une certaine probabilité de transition. Par exemple, chacun des paramètres de <span class="math inline">\(\theta_{(1)}\)</span> est déplacé d’une quantité tirée d’une distribution alaétoire normale.</p></li>
+<li><p>Ensuite, on choisit un deuxième vecteur <span class="math inline">\(\theta_{(2)}\)</span>, qui dépend de <span class="math inline">\(\theta_{(1)}\)</span> selon une certaine probabilité de transition. Par exemple, chacun des paramètres de <span class="math inline">\(\theta_{(1)}\)</span> est déplacé d’une quantité tirée d’une distribution aléatoire normale.</p></li>
 <li><p>On calcule le rapport des probabilités <em>a posteriori</em> <span class="math inline">\(\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)}\)</span>.</p>
 <ul>
 <li><p>Si le rapport est plus grand ou égal à 1 (<span class="math inline">\(\theta_{(2)}\)</span> est plus probable que <span class="math inline">\(\theta_{(1)}\)</span>), on accepte <span class="math inline">\(\theta_{(2)}\)</span>.</p></li>
@@ -330,9 +295,9 @@ div.tocify {
 </ul></li>
 </ol>
 <p>Les étapes 2 et 3 sont répétées pour le nombre d’itérations voulues.</p>
-<p>Il a été démontré qu’avec suffisamment d’itérations, la distribution des <span class="math inline">\(\theta_{(i)}\)</span> s’approche aussi près que voulu de la distribution recherchée: <span class="math inline">\(p(\theta | y)\)</span>. Ce résultat théorique dépend en fait de certaines conditions; cependant, nous ne discuterons pas de ces détails ici, car nous sommes intéressés non pas à savoir si l’algorithme converge éventuellement, mais s’il converge assez rapidement pour être utile en pratique. Cela dépend du problème et il faudra déterminer empiriquement la convergence en inspectant les résultats de l’inférence, comme nosu verrons plus loin.</p>
+<p>Il a été démontré qu’avec suffisamment d’itérations, la distribution des <span class="math inline">\(\theta_{(i)}\)</span> s’approche aussi près que voulu de la distribution recherchée: <span class="math inline">\(p(\theta | y)\)</span>. Ce résultat théorique dépend en fait de certaines conditions; cependant, nous ne discuterons pas de ces détails ici, car nous sommes intéressés non pas à savoir si l’algorithme converge éventuellement, mais s’il converge assez rapidement pour être utile en pratique. Cela dépend du problème et il faudra déterminer empiriquement la convergence en inspectant les résultats de l’inférence, comme nous verrons plus loin.</p>
 </div>
-<div id="chaines-de-markov" class="section level2">
+<div id="chaînes-de-markov" class="section level2">
 <h2>Chaînes de Markov</h2>
 <p>Dans l’algorithme de Metropolis-Hastings, chaque vecteur <span class="math inline">\(\theta_{(i+1)}\)</span> est un vecteur aléatoire qui dépend de <span class="math inline">\(\theta_{(i)}\)</span>. En théorie des probabilités, ce type de séquence est nommé chaîne de Markov. Cet algorithme est donc à la base des méthodes de Monte-Carlo par chaînes de Markov (<em>Markov chain Monte Carlo</em> en anglais, souvent abbrévié MCMC).</p>
 <p>Pour illustrer la progression d’une chaîne de Markov, prenons l’exemple ci-dessous qui représente la distribution conjointe de deux paramètres <span class="math inline">\(\theta_1\)</span> et <span class="math inline">\(\theta_2\)</span>; les régions plus foncées représentent une plus grande densité de probabilité. Notez que les deux distributions sont corrélées: plus <span class="math inline">\(\theta_1\)</span> est grand, plus il est probable que <span class="math inline">\(\theta_2\)</span> soit petit et vice versa.</p>
@@ -345,23 +310,23 @@ div.tocify {
 <p><img src="../images/mcmc_trace_ex.png" /></p>
 <p>Au départ, les chaînes doivent partir de leur points initiaux respectifs et s’approcher de la partie principale de la distribution. Il s’agit de la période de rodage (appelée <em>burn-in</em> ou <em>warmup</em> en anglais). Les valeurs du paramètre durant la période de rodage ne sont pas retenues pour l’inférence. Après la ligne pointillée, on voit que les chaînes ont convergé et se sont mélangées. Il s’agit de la période d’échantillonnage qui sera utilisée pour approximer la distribution <em>a posteriori</em> du paramètre.</p>
 </div>
-<div id="verification-de-la-convergence-des-chaines" class="section level2">
+<div id="vérification-de-la-convergence-des-chaînes" class="section level2">
 <h2>Vérification de la convergence des chaînes</h2>
 <p>Comme nous avons vu ci-dessus, l’inspection du tracé des chaînes (<em>trace plot</em> en anglais) peut nous indiquer si différentes chaînes de Markov ont convergé, ce qui signifie que leurs valeurs peuvent être utilisées pour estimer la distribution <em>a posteriori</em>.</p>
 <p>Pour déterminer de façon plus quantitative la convergence, nous pouvons utiliser la statistique de Gelman-Rubin, dénotée <span class="math inline">\(\hat{R}\)</span>. Cette statistique représente la variance d’un paramètre entre les chaînes relative à la variance du paramètre dans chaque chaîne. Cette statistique est conceptuellement semblable à une ANOVA: si les chaînes explorent la même distribution, alors le niveau de variation entre valeurs d’une même chaîne est semblable à la variation entre valeurs de chaînes différentes.</p>
 <p>À la convergence, <span class="math inline">\(\hat{R}\)</span> doit être d’environ 1. Il n’y a pas de seuil définitif pour cette valeur, mais la plupart des auteurs s’entendent pour dire que <span class="math inline">\(\hat{R}\)</span> ne devrait pas dépasser 1.1. Néanmoins, <span class="math inline">\(\hat{R} \leq 1.1\)</span> ne garantit pas la convergence vers la bonne distribution; nous verrons plus tard d’autres diagnostics visant à confirmer que l’algorithme explore bien la distribution <em>a posteriori</em>.</p>
 <p>En cas de problème de convergence, nous pouvons allonger la période de rodage. Si la convergence est beaucoup trop lente ou que chaque chaîne reste “prise” dans une partie de la distribution plutôt que de se mélanger aux autres chaînes, cela pourrait indiquer une difficulté d’estimation des paramètres du modèle avec les données fournies. Dans ce cas, il serait utile de reparamétriser ou modifier le modèle.</p>
 </div>
-<div id="efficacite-de-lechantillonnage" class="section level2">
+<div id="efficacité-de-léchantillonnage" class="section level2">
 <h2>Efficacité de l’échantillonnage</h2>
 <p>Si l’algorithme converge, nous pouvons quantifier l’efficacité avec laquelle les chaînes de Markov approximent notre distribution <em>a posteriori</em>.</p>
 <p>Considérons une fonction <span class="math inline">\(f\)</span> calculée à partir des paramètres du modèle. Il peut s’agir de la moyenne du paramètre, d’un quantile, ou de toute statistique d’intérêt qui dépend d’un ou plusieurs paramètres du modèle. Si on avait un échantillon de <span class="math inline">\(N\)</span> tirages aléatoires <strong>indépendants</strong> de la distribution conjointe <em>a posteriori</em> des paramètres, alors la valeur de <span class="math inline">\(f\)</span> calculée à partir de cet échantillon s’approcherait de sa valeur pour la distribution exacte, avec une erreur d’approximation (erreur-type de Monte-Carlo) proportionnelle à <span class="math inline">\(1/\sqrt{N}\)</span>.</p>
-<p><em>Note</em>: Il ne faut pas confondre l’erreur-type de Monte-Carlo avec l’écart-type de la distribution <em>a posteriori</em> du paramètre. L’écart-type de la distribution <em>a posteriori</em> (semblable à l’erreur-type pour un estimateur fréquentiste) représente lincertitude sur la valeur du paramètre et dépend (notamment) de la quantité d’observations. L’erreur-type de Monte-Carlo est l’erreur d’approximation numérique de l’algorithme. En augmentant le nombre d’itérations, nous pouvons estimer plus précisément toutes les propriétés de la distribution <em>a posteriori</em>, incluant son écart-type, mais nous ne pouvons pas réduire cet écart-type sans avoir plus de données. Nous avions la même situation dans le cas du bootstrap: nous pouvions augmenter le nombre d’échantillons bootstrap pour réduire l’erreur d’approximation numérique, mais pas l’incertitude due aux données limitées.</p>
+<p><em>Note</em>: Il ne faut pas confondre l’erreur-type de Monte-Carlo avec l’écart-type de la distribution <em>a posteriori</em> du paramètre. L’écart-type de la distribution <em>a posteriori</em> (semblable à l’erreur-type pour un estimateur fréquentiste) représente l’incertitude sur la valeur du paramètre et dépend (notamment) de la quantité d’observations. L’erreur-type de Monte-Carlo est l’erreur d’approximation numérique de l’algorithme. En augmentant le nombre d’itérations, nous pouvons estimer plus précisément toutes les propriétés de la distribution <em>a posteriori</em>, incluant son écart-type, mais nous ne pouvons pas réduire cet écart-type sans avoir plus de données. Nous avions la même situation dans le cas du bootstrap: nous pouvions augmenter le nombre d’échantillons bootstrap pour réduire l’erreur d’approximation numérique, mais pas l’incertitude due aux données limitées.</p>
 <p>Toutefois, la chaîne de Markov ne produit <em>pas</em> des tirages indépendants, puisque la valeur de <span class="math inline">\(\theta_{(i+1)}\)</span> est conditionnelle à <span class="math inline">\(\theta_{i}\)</span>. Dans ce cas, les valeurs successives de la chaîne sont corrélées, donc un nombre <span class="math inline">\(N\)</span> d’itérations n’est pas équivalent à un échantillon de <span class="math inline">\(N\)</span> valeurs indépendantes.</p>
 <p>Les logiciels d’inférence bayésienne calculent l’erreur-type de Monte-Carlo et la taille effective de l’échantillon, <span class="math inline">\(N_{eff}\)</span>, soit le nombre de tirages indépendants nécessaires pour avoir la même précision que les <span class="math inline">\(N\)</span> itérations corrélées. En général, <span class="math inline">\(N_{eff}\)</span> est inférieur au nombre d’itérations, mais ce n’est pas toujours le cas, en particulier pour certains algorithmes plus performants comme l’algorithme hamiltonien vu dans la section suivante.</p>
 </div>
 </div>
-<div id="plateforme-stan-pour-linference-bayesienne" class="section level1">
+<div id="plateforme-stan-pour-linférence-bayésienne" class="section level1">
 <h1>Plateforme Stan pour l’inférence bayésienne</h1>
 <p>Stan (<a href="https://mc-stan.org" class="uri">https://mc-stan.org</a>) désigne à la fois un langage pour spécifier des modèles statistiques (comme nous avons vu au dernier labo) et un logiciel qui implémente différents algorithmes d’inférence pour ces modèles. Il s’agit d’un des plus récents logiciels d’inférence bayésienne, lancé en 2015.</p>
 <blockquote>
@@ -375,7 +340,7 @@ div.tocify {
 <li><p><em>loo</em> implémente une méthode de comparaison de modèles et de prédiction multi-modèles basées sur l’approximation de l’erreur de validation croisée;</p></li>
 <li><p><em>tidybayes</em> offre d’autres options de visualisations, en particulier pour les distributions <em>a posteriori</em> de paramètres.</p></li>
 </ul>
-<div id="methode-de-monte-carlo-hamiltonienne" class="section level2">
+<div id="méthode-de-monte-carlo-hamiltonienne" class="section level2">
 <h2>Méthode de Monte-Carlo hamiltonienne</h2>
 <p>L’algorithme MCMC implémenté par Stan est la méthode de Monte-Carlo hamiltonienne (HMC). Une des particularités de cette méthode est qu’elle évalue non seulement la valeur de <span class="math inline">\(p(y | \theta) p(\theta)\)</span> à chaque itération, mais aussi son gradient, qui est l’équivalent de la “pente” d’une surface en plusieurs dimensions. Ainsi, l’algorithme sait dans quelle direction la probabilité <em>a posteriori</em> augmente, ce qui permet de converger plus rapidement vers la partie de la distribution contenant la plus grande part de la probabilité.</p>
 <p>De plus, chaque itération de cet algorithme est composée de plusieurs pas et suit une “courbe” dans l’espace des paramètres qui est guidée par la forme de la distribution de probabilité. Cela permet aux points de la chaîne d’être moins rapprochés que dans le cas des méthodes MCMC traditionnelles, ce qui signifie que ces points sont davantage indépendants et que la taille effective de l’échantillon <span class="math inline">\(N_{eff}\)</span> est plus grande pour un même nombre d’itérations.</p>
@@ -397,14 +362,14 @@ div.tocify {
 <p>L’algorithme hamiltonien évalue différentes trajectoires possibles (représentées par un arbre) pour choisir la valeur des paramètres à la prochaine itération. Lorsque la profondeur maximale de l’arbre est atteinte, cela signifie que l’algorithme a essayé le nombre maximal de trajectoires, mais qu’une trajectoire plus longue demeure possible. Contrairement aux transitions divergentes, cet avertissement n’invalide pas les résultats, mais il peut indiquer une paramétrisation sous-optimale.</p>
 <p>On peut augmenter la profondeur maximale avec l’argument <em>max_treedepth</em>, mais cela augmente le temps pris pour chaque itération.</p>
 </div>
-<div id="energie-bfmi-low" class="section level3">
+<div id="énergie-bfmi-low" class="section level3">
 <h3>Énergie (<em>BFMI low</em>)</h3>
 <p>Comme pour les divergences, cet avertissement indique que l’algorithme ne parcourt pas la distribution <em>a posteriori</em> de façon efficace. Ce problème peut parfois être réglé en allongeant la période de rodage. Toutefois, s’il survient en même temps qu’un des précédents, la formulation du modèle doit probablement être revue.</p>
 </div>
 </div>
-<div id="options-pour-utiliser-stan-a-partir-de-r" class="section level2">
+<div id="options-pour-utiliser-stan-à-partir-de-r" class="section level2">
 <h2>Options pour utiliser Stan à partir de R</h2>
-<p>Pour conclure cette section, nous allons voir différentes façons d’utiliser Stan à partir de R. Tout d’abord, nous pouvons écrire un programme Stan, tel que vu au dernier laboratoire. Voici le début du code Stan pour un modèle simple, où il y a <span class="math inline">\(N\)</span> observations d’une variable réponse <span class="math inline">\(y\)</span> et d’un prédicteur <span class="math inline">\(x\)</span>.</p>
+<p>Pour conclure cette section, nous allons voir différentes façons d’utiliser Stan à partir de R. Tout d’abord, nous pouvons écrire un programme Stan, comme nous verrons au prochain laboratoire. Voici le début du code Stan pour un modèle simple, où il y a <span class="math inline">\(N\)</span> observations d’une variable réponse <span class="math inline">\(y\)</span> et d’un prédicteur <span class="math inline">\(x\)</span>.</p>
 <pre><code>data {
   int N;
   vector[N] y;
@@ -429,12 +394,12 @@ res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
 <p>Les deux packages <em>rstanarm</em> et <em>brms</em> permettent d’estimer les paramètres de types de modèles courants sans se soucier de programmer en langage Stan et particulièrement d’optimiser la formulation du modèle pour faciliter le travail de l’algorithme. Leur usage est donc recommandé, sauf lorsqu’on a besoin d’un modèle personnalisé qui doit être codé en Stan.</p>
 </div>
 </div>
-<div id="etapes-de-developpement-dun-modele-hierarchique-bayesien" class="section level1">
+<div id="étapes-de-développement-dun-modèle-hiérarchique-bayésien" class="section level1">
 <h1>Étapes de développement d’un modèle hiérarchique bayésien</h1>
 <p>Cette partie présente les étapes d’un plan suggéré pour le développement et la validation d’un modèle hiérarchique bayésien. La démonstration de ces étapes sera présentée dans la partie suivante.</p>
 <p>Ce plan est basé sur l’article:</p>
 <blockquote>
-<p>Betancourt, M. (2018) Towards A Principled Bayesian Workflow (RStan). <a href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html" class="uri">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a>.</p>
+<p>Betancourt, M. (2020) Towards A Principled Bayesian Workflow. <a href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html" class="uri">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a>.</p>
 </blockquote>
 <p>Michael Betancourt est un des développeurs de Stan et son site web contient plusieurs articles sur la théorie reliée aux modèles hiérarchiques bayésiens, ainsi que des études de cas sur leur application à différents problèmes.</p>
 <p>Voici les principales étapes à suivre lorsqu’on développe un nouveau modèle hiérarchique bayésien pour représenter un système donné.</p>
@@ -446,24 +411,25 @@ res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
 <li><p>Vérifier les prédictions <em>a posteriori</em>.</p></li>
 </ol>
 <p>Notez qu’avant l’étape 4, nous vérifions la cohérence interne du modèle, puis aux étapes 4 et 5 nous vérifions s’il représente adéquatement les données observées.</p>
-<div id="formulation-du-modele" class="section level2">
+<div id="formulation-du-modèle" class="section level2">
 <h2>Formulation du modèle</h2>
 <p>D’abord, nous devons décrire les variables du modèle et leurs relations mathématiques, ainsi que la distribution statistique assignée aux variables réponses. Il est notamment important de considérer la structure de l’échantillonnage ou de l’expérience afin de spécifier la hiérarchie des effets aléatoires.</p>
 <p>C’est aussi à cette étape que nous choisissons les distributions <em>a priori</em> des paramètres.</p>
 </div>
-<div id="predictions-a-priori" class="section level2">
+<div id="prédictions-a-priori" class="section level2">
 <h2>Prédictions <em>a priori</em></h2>
-<p>Pour vérifier si les distributions <em>a priori</em> des prédicteurs génèrent des valeurs réalistes des observations, nous commençons par générer des vecteurs de paramètres à partir de leur distribution <em>a priori</em>, puis nous simulons un jeu de données semblable à celui observé à partir du modèle basé sur chaque vecteur de paramètres. Cette simulation utilise sur la valeur réelle des prédicteurs pour chaque observation.</p>
+<p>Pour vérifier si les distributions <em>a priori</em> des prédicteurs génèrent des valeurs réalistes des observations, nous commençons par générer des vecteurs de paramètres à partir de leur distribution <em>a priori</em>, puis nous simulons un jeu de données semblable à celui observé à partir du modèle basé sur chaque vecteur de paramètres. Cette simulation utilise la valeur réelle des prédicteurs pour chaque observation.</p>
 <p>À partir des résultats des simulations, nous vérifions si les propriétés des observations simulées correspondent à des valeurs réalistes pour le problème. À cette étape, nous ne comparons pas directement les simulations aux observations réelles, seulement à notre connaissance préalable de ce qui constitue une valeur raisonnable de la réponse.</p>
 </div>
-<div id="ajustement-du-modele-aux-donnees-simulees" class="section level2">
+<div id="ajustement-du-modèle-aux-données-simulées" class="section level2">
 <h2>Ajustement du modèle aux données simulées</h2>
-<p>Pour cette étape, nous ajustons le modèle à chaque jeu de données simulé à l’étape précédente. Ces jeux de données contiennent les valeurs réelles des paramètres, mais la réponse est simulée à partir de paramètres connus tirés de la distribution <em>a priori</em>.</p>
+<p>Pour cette étape, nous ajustons le modèle à chaque jeu de données simulé à l’étape précédente. Ces jeux de données contiennent les valeurs réelles des prédicteurs, mais la réponse est simulée à partir de paramètres connus tirés de la distribution <em>a priori</em>.</p>
 <p>Ensuite, nous vérifions les diagnostics de l’ajustement pour chaque simulation, puis nous vérifions l’exactitude des inférences du modèle en comparant les distributions <em>a posteriori</em> aux valeurs des paramètres utilisées pour chaque simulation. Puisque les données ont été obtenues par simulation, nous nous attendons à ce que l’inférence produise des estimés compatibles avec les valeurs connues des paramètres. Deux tests sont utiles à ce point-ci:</p>
 <ul>
 <li><p>Test de calibration: les intervalles de probabilité <em>a posteriori</em> sont-ils justes?</p></li>
 <li><p>Test de sensibilité: Les données permettent-elles de cerner la valeur du paramètre?</p></li>
 </ul>
+<p>Puisqu’il faut répéter l’inférence bayésienne à plusieurs reprises, cette partie du protocole est très coûteuse en temps de calcul. Ainsi, il n’est pas nécessaire de la réaliser pour chaque modèle, surtout s’il s’agit d’un type de modèle déjà bien connu.</p>
 <div id="calibration-par-simulation" class="section level3">
 <h3>Calibration par simulation</h3>
 <p>Supposons que nous avons des observations <span class="math inline">\(y\)</span> simulées à partir du modèle avec un paramètre <span class="math inline">\(\theta\)</span> tiré de la distribution <em>a priori</em>. En ajustant le modèle à ces <span class="math inline">\(y\)</span>, nous obtenons un échantillon de la distribution <em>a posteriori</em> de <span class="math inline">\(\theta\)</span>, soit <span class="math inline">\(\theta_{(i)}\)</span> pour <span class="math inline">\(i\)</span> de 1 jusqu’à <span class="math inline">\(N\)</span> itérations.</p>
@@ -473,7 +439,7 @@ res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
 <p>Talts, S. et al. (2018) Validating Bayesian inference algorithms with simulation-based calibration. arXiv:1804.06788.</p>
 </blockquote>
 </div>
-<div id="sensibilite" class="section level3">
+<div id="sensibilité" class="section level3">
 <h3>Sensibilité</h3>
 <p>Si le modèle est bien calibré, le test de sensibilité vise à déterminer si, en fonction de la quantité de données disponible, il est possible d’estimer précisément la valeur de chaque paramètre.</p>
 <p>Le <span class="math inline">\(z\)</span>-score (ou cote <span class="math inline">\(z\)</span>) est la différence centrée réduite entre la valeur postérieure estimée et la valeur réelle du paramètre.</p>
@@ -485,18 +451,18 @@ res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
 <p>Notez que ce terme n’a pas le même sens ici que celui vu plus tôt dans le contexte des modèles mixtes, où il désigne la contraction des effets aléatoires vers la moyenne générale.</p>
 </div>
 </div>
-<div id="ajustement-aux-donnees-reelles" class="section level2">
+<div id="ajustement-aux-données-réelles" class="section level2">
 <h2>Ajustement aux données réelles</h2>
 <p>Une fois la cohérence interne du modèle vérifiée, nous pouvons maintenant ajuster le modèle aux données réelles, vérifier les diagnostics (divergences, profondeur de l’arbre, énergie), puis réajuster le modèle au besoin en modifiant les paramètres de l’algorithme.</p>
 <p>Si aucun problème n’est détecté, nous pouvons consulter le sommaire des estimés et visualiser les distributions <em>a posteriori</em> des paramètres.</p>
 </div>
-<div id="predictions-a-posteriori" class="section level2">
+<div id="prédictions-a-posteriori" class="section level2">
 <h2>Prédictions <em>a posteriori</em></h2>
 <p>À cette dernière étape, nous voulons vérifier que les prédictions obtenues en simulant des observations à partir de la distribution <em>a posteriori</em> des paramètres se rapprochent suffisamment des observations.</p>
 <p>Tel que vu à la fin du dernier cours, nous pouvons vérifier si suffisamment d’observations se trouvent dans leur intervalle de prédiction selon le modèle ajusté. Aussi, nous pouvons comparer les prédictions et observations au moyen de statistiques sommaires décrivant des caractéristiques importantes du jeu de données qui ne sont pas directement ajustées par le modèle.</p>
 </div>
 </div>
-<div id="exemple-detaille-glmm-bayesien-avec-brms" class="section level1">
+<div id="exemple-détaillé-glmm-bayésien-avec-brms" class="section level1">
 <h1>Exemple détaillé: GLMM bayésien avec <em>brms</em></h1>
 <p>Pour cet exemple, nous utilisons le jeu de données <code>rikz</code> tiré du manuel de Zuur et al., <em>Mixed Effects Models and Extensions in Ecology with R</em>. Nous avions utilisé ces mêmes données dans le cours 5 sur les modèles linéaires généralisés à effets mixtes.</p>
 <p>Le jeu de données <code>rikz</code> présente des mesures de la richesse de la faune benthique (<em>Richness</em>) pour 45 sites répartis sur 9 plages (<em>Beach</em>) aux Pays-Bas, ainsi que deux prédicteurs: la position verticale du site (<em>NAP</em>) ainsi que l’indice d’exposition de la plage (<em>Exposure</em>). Puisque ce dernier ne prend que trois valeurs différentes (8, 10 et 11), nous le traiterons comme un facteur.</p>
@@ -519,7 +485,7 @@ library(tidyr)
 library(ggplot2)
 library(cowplot)
 theme_set(theme_cowplot())</code></pre>
-<div id="formulation-du-modele-1" class="section level2">
+<div id="formulation-du-modèle-1" class="section level2">
 <h2>Formulation du modèle</h2>
 <p>Comme au cours 5, nous modélisons ces données par une régression de Poisson, avec un effet aléatoire de la plage sur l’ordonnée à l’origine. Voici la représentation mathématique de ce modèle, où nous avons choisi des noms des paramètres qui se rapprochent de ceux donnés par <em>brms</em>:</p>
 <pre><code>Richness ~ poisson(lambda)
@@ -543,9 +509,9 @@ r_Beach ~ normal(0, sd_Beach)</code></pre>
 <pre class="r"><code>rikz_prior &lt;- c(set_prior(&quot;normal(0, 1)&quot;, class = &quot;b&quot;),
                 set_prior(&quot;normal(2, 1)&quot;, class = &quot;Intercept&quot;),
                 set_prior(&quot;normal(0, 0.5)&quot;, class = &quot;sd&quot;))</code></pre>
-<p>La classe de coefficients “b” représente une distribution qui s’applique à tous les coefficients fixes, sauf l’ordonnée à l’origine qui correspond à la classe “Intercept”. Pour spécifier la distribution d’un seul coefficient dans une classe, il faut préciser l’argument <code>coef</code> en plus de <code>class</code>. La classe “sd” représente la distribution <em>a priori</em> pour les écarts-types des effets aléatoires. Pusique <em>brms</em> sait que les écarts-types sont toujours supérieurs à zéro, il n’est pas nécessaire de spécifier la borne inférieure avec <code>lb</code> ici.</p>
+<p>La classe de coefficients “b” représente une distribution qui s’applique à tous les coefficients fixes, sauf l’ordonnée à l’origine qui correspond à la classe “Intercept”. Pour spécifier la distribution d’un seul coefficient dans une classe, il faut préciser l’argument <code>coef</code> en plus de <code>class</code>. La classe “sd” représente la distribution <em>a priori</em> pour les écarts-types des effets aléatoires. Puisque <em>brms</em> sait que les écarts-types sont toujours supérieurs à zéro, il n’est pas nécessaire de spécifier la borne inférieure avec <code>lb</code> ici.</p>
 </div>
-<div id="predictions-a-priori-1" class="section level2">
+<div id="prédictions-a-priori-1" class="section level2">
 <h2>Prédictions <em>a priori</em></h2>
 <p>Nous appelons d’abord la fonction <code>brm</code> avec l’argument <code>sample_prior = "only"</code> pour obtenir un échantillon de la distribution <em>a priori</em> des paramètres d’un modèle.</p>
 <pre class="r"><code>res_prior &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
@@ -574,21 +540,36 @@ str(prior_params)</code></pre>
 <p>Chaque rangée représente une itération de la période d’échantillonnage. Dans ce cas-ci, Stan ne fait que tirer des valeurs de chaque paramètre à partir de leur distribution <em>a priori</em>. Les paramètres dont le nom commence par <code>b</code> représentent les effets fixes, <code>sd_Beach__Intercept</code> est l’écart-type des effets aléatoires de la plage sur l’ordonnée à l’origine, puis les paramètres avec un nom commençant par <code>r</code> sont les effets aléatoires; ces derniers sont tirés de la distribution définie par <code>sd_Beach__Intercept</code>. Le dernier paramètre, <code>lp__</code>, représente le log de la probabilité conjointe des paramètres.</p>
 <p>Nous ajoutons à ce jeu de données une colonne identifiant la simulation (de 1 à 200):</p>
 <pre class="r"><code>prior_params$sim_id &lt;- as.character(1:200)</code></pre>
-<p>La fonction <code>posterior_predict</code> génère une simulation de la variable réponse en fonction de la valeur des paramètres à chaque itération et des prédicteurs du jeu de données. (Malgré le nom, cette fonction se rapproche plus de la fonction <code>simulate</code> pour les modèles classiques dans R, plutôt que de <code>predict</code>.) Le résultat est une matrice avec une rangée pour chacune des 200 itérations de la distribution <em>a priori</em> et une colonne pour chacune des 45 observations du jeu de données original (dans le même ordre que les 45 rangées de ce jeu de données original).</p>
+<p>La fonction <code>posterior_predict</code> génère une simulation de la variable réponse en fonction de la valeur des paramètres à chaque itération et des prédicteurs du jeu de données.</p>
+<p>Malgré le nom, cette fonction se rapproche plus de la fonction <code>simulate</code> pour les modèles classiques dans R, plutôt que de <code>predict</code>. Tel que vu au dernier laboratoire, <code>posterior_epred</code> permet d’obtenir les prédictions de la réponse moyenne à chaque itération.</p>
+<p>Le résultat est une matrice avec une rangée pour chacune des 200 itérations de la distribution <em>a priori</em> et une colonne pour chacune des 45 observations du jeu de données original (dans le même ordre que les 45 rangées de ce jeu de données original).</p>
 <pre class="r"><code>prior_pred &lt;- posterior_predict(res_prior)
 str(prior_pred)</code></pre>
-<pre><code>##  int [1:200, 1:45] 6 21 4 0 19 1 99 6 25 95 ...</code></pre>
+<pre><code>##  int [1:200, 1:45] 2 21 2 2 18 1 96 4 42 101 ...
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ : NULL
+##   ..$ : NULL</code></pre>
 <p>Afin de pouvoir visualiser ces prédictions, nous ajoutons une colonne pour identifier la simulation et nous faisons un pivot pour obtenir 3 colonnes: <code>sim_id</code>, <code>obs_id</code> et <code>Richness</code>.</p>
 <pre class="r"><code>prior_df &lt;- data.frame(prior_pred)
 prior_df$sim_id &lt;- 1:200
 prior_df &lt;- pivot_longer(prior_df, cols = -sim_id, 
                          names_to = &quot;obs_id&quot;, values_to = &quot;Richness&quot;)
-summary(prior_df$Richness)</code></pre>
+head(prior_df)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   sim_id obs_id Richness
+##    &lt;int&gt; &lt;chr&gt;     &lt;int&gt;
+## 1      1 X1            2
+## 2      1 X2            4
+## 3      1 X3            7
+## 4      1 X4            3
+## 5      1 X5            1
+## 6      1 X6            1</code></pre>
+<pre class="r"><code>summary(prior_df$Richness)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    0.00    2.00    8.00   25.15   20.00 3375.00</code></pre>
+##    0.00    2.00    8.00   25.22   20.00 3406.00</code></pre>
 <p>La valeur maximale simulée est très élevée (3458 espèces), ce qui se produit fréquemment lorsque la réponse suit une fonction exponentielle des prédicteurs. Cependant, la grande majorité des valeurs simulées sont inférieures à 100.</p>
 <pre class="r"><code>mean(prior_df$Richness &lt; 100)</code></pre>
-<pre><code>## [1] 0.9581111</code></pre>
+<pre><code>## [1] 0.9588889</code></pre>
 <p>Voici une façon de visualiser la distribution de la richesse spécifique pour chaque simulation <em>a priori</em> du modèle. Nous créons une courbe de densité de probabilité (avec <code>stat_density</code>) pour chaque simulation (<code>group = sim_id</code>), avec un niveau de transparence <code>alpha = 0.3</code> pour voir les courbes superposées. Nous appliquons une transformation racine carrée à l’axe des <code>x</code> pour mieux voir toutes les données (une transformation log est impossible en raison de la présence de zéros), puis nous limitons cet axe aux valeurs entre 0 et 200.</p>
 <pre class="r"><code>ggplot(prior_df, aes(x = Richness)) +
     stat_density(aes(group = sim_id), position = &quot;identity&quot;, geom = &quot;line&quot;, alpha = 0.3) +
@@ -596,10 +577,115 @@ summary(prior_df$Richness)</code></pre>
     coord_cartesian(xlim = c(0, 200))</code></pre>
 <p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <p>La plupart des simulations donnent une faible probabilité à des valeurs de richesse spécifique &gt; 100, tel que prévu par les connaissances <em>a priori</em> du système.</p>
+<p>Tel que mentionné ci-dessus, l’étape 3 du protocole complet (ajustement du modèle aux données simulées) prend beaucoup de temps, donc elle est souvent omise, surtout pour un modèle “standard” comme un GLMM. Néanmoins, j’ai inclus le code pour réaliser cette étape en supplément à la fin de ces notes.</p>
 </div>
-<div id="ajustement-aux-donnees-simulees" class="section level2">
-<h2>Ajustement aux données simulées</h2>
-<p>Nous avons plus haut obtenu des simulations de la variable réponse pour chacune des 200 valeurs tirées de la distribution <em>a priori</em> de notre vecteur de paramètres. Nous souhaitons maintenant ajuster le modèle à chacune de ces simulations pour effectuer les tests de calibration et de sensibilité.</p>
+<div id="ajustement-du-modèle-aux-observations" class="section level2">
+<h2>Ajustement du modèle aux observations</h2>
+<p>Nous sommes maintenant prêts à ajuster le modèle aux observations réelles.</p>
+<pre class="r"><code>res_br &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+              family = poisson, control = list(adapt_delta = 0.99), 
+              chains = 2, prior = rikz_prior)</code></pre>
+<pre class="r"><code>summary(res_br)</code></pre>
+<pre><code>##  Family: poisson 
+##   Links: mu = log 
+## Formula: Richness ~ NAP + Exposure + (1 | Beach) 
+##    Data: rikz (Number of observations: 45) 
+## Samples: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup samples = 2000
+## 
+## Group-Level Effects: 
+## ~Beach (Number of levels: 9) 
+##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)     0.23      0.14     0.02     0.55 1.00      433      439
+## 
+## Population-Level Effects: 
+##            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept      2.38      0.29     1.69     2.90 1.00      933      652
+## NAP           -0.50      0.07    -0.65    -0.36 1.00     2032     1386
+## Exposure10    -0.47      0.33    -1.06     0.26 1.00      878      631
+## Exposure11    -1.17      0.34    -1.76    -0.38 1.01      827      663
+## 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<p>Le sommaire des résultats indique d’abord la formule du modèle, puis les paramètres de l’algorithme (nombre de chaînes et d’itérations, nombre d’itérations de rodage). La section <em>Group-Level Effects</em> présente l’écart-type des effets aléatoires, tandis que la section <em>Population-Level Effects</em> présente les effets fixes. Chaque estimé indique la moyenne, l’écart-type et un intervalle de crédibilité à 95% pour la distribution <em>a posteriori</em>, ainsi que la statistique de Gelman-Rubin (<em>Rhat</em>) et la taille effective de l’échantillon Monte-Carlo (selon deux mesures, <code>Bulk_ESS</code> et <code>Tail_ESS</code>).</p>
+<p>En comparant ces résultats à ceux du GLMM classique, nous obtenons des différences entre les estimés moyens, mais ces différences sont raisonnables en considérant les marges d’erreurs de chaque paramètre.</p>
+<pre class="r"><code>library(lme4)
+res_glmm &lt;- glmer(Richness ~ NAP +Exposure + (1 | Beach), data = rikz, family = poisson)
+summary(res_glmm)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: Richness ~ NAP + Exposure + (1 | Beach)
+##    Data: rikz
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##      210      219     -100      200       40 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.8080 -0.4947 -0.2078  0.2789  3.9801 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  Beach  (Intercept) 0.01138  0.1067  
+## Number of obs: 45, groups:  Beach, 9
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  2.52472    0.16720  15.100  &lt; 2e-16 ***
+## NAP         -0.50781    0.07128  -7.125 1.04e-12 ***
+## Exposure10  -0.59863    0.19615  -3.052  0.00227 ** 
+## Exposure11  -1.33491    0.21817  -6.119 9.43e-10 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##            (Intr) NAP    Exps10
+## NAP         0.078              
+## Exposure10 -0.847 -0.027       
+## Exposure11 -0.766 -0.063  0.653</code></pre>
+<p>Il existe quelques raisons pour lesquelles les estimés de l’approche bayésienne diffèrent de ceux obtenus par le maximum de vraisemblance, notamment:</p>
+<ul>
+<li><p>la distribution <em>a priori</em> peut influencer l’inférence si le nombre d’observations est petit;</p></li>
+<li><p>même dans le cas ou la distribution <em>a priori</em> a peu d’influence et que la distribution <em>a posteriori</em> prend la même forme de la fonction de vraisemblance, l’estimé bayésien est la moyenne de la distribution <em>a posteriori</em>, qui n’est pas nécessairement égal au maximum de la probabilité <em>a posteriori</em>, en particulier si la distribution est asymétrique.</p></li>
+</ul>
+<p>La fonction <code>stanplot</code> permet de visualiser différents résultats du modèle, notamment le tracé des chaînes de Markov, un histogramme des distributions <em>a posteriori</em>, ou une représentation des différents coefficients avec leurs intervalles de crédibilité.</p>
+<pre class="r"><code>stanplot(res_br, type = &quot;trace&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
+<pre><code>## No divergences to plot.</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre class="r"><code>stanplot(res_br, type = &quot;hist&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
+<pre class="r"><code>stanplot(res_br, type = &quot;intervals&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-22-3.png" width="672" /></p>
+<p>Notez que par défaut, les intervalles en traits gras représentent 50% de la probabilité <em>a posteriori</em> tandis que ceux en traits fins représentent 90% de cette probabilité.</p>
+<p>Un outil interactif de visualisation des résultats et diagnostics du modèle peut être lancée avec la fonction <code>launch_shinystan</code>.</p>
+<pre class="r"><code>launch_shinystan(res_br)</code></pre>
+</div>
+<div id="vérification-des-prédictions-a-posteriori" class="section level2">
+<h2>Vérification des prédictions <em>a posteriori</em></h2>
+<p>Comme au dernier cours, nous utilisons <code>pp_check</code> avec <code>type = "intervals"</code> pour comparer les observations aux intervalles de prédiction du modèle. En moyenne, nous nous attendons à ce que 50% des observations soient dans les intervalles en gras et 90% dans les intervalles en traits pâles.</p>
+<pre class="r"><code>pp_check(res_br, type = &quot;intervals&quot;)</code></pre>
+<pre><code>## Using all posterior samples for ppc type &#39;intervals&#39; by default.</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>Pour une régression de Poisson, nous pouvons aussi vérifier que l’écart-type des observations et le nombre de zéros obtenus sont comparables aux valeurs prévues par le modèle ajusté.</p>
+<pre class="r"><code>pp_check(res_br, type = &quot;stat&quot;, stat = sd)</code></pre>
+<pre><code>## Using all posterior samples for ppc type &#39;stat&#39; by default.</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<pre class="r"><code>pp_check(res_br, type = &quot;stat&quot;, stat = function(x) sum(x == 0))</code></pre>
+<pre><code>## Using all posterior samples for ppc type &#39;stat&#39; by default.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-25-2.png" width="672" /></p>
+</div>
+</div>
+<div id="supplément-ajustement-aux-données-simulées" class="section level1">
+<h1>Supplément: Ajustement aux données simulées</h1>
+<p>Nous avions obtenu plus haut des simulations de la variable réponse pour chacune des 200 valeurs tirées de la distribution <em>a priori</em> de notre vecteur de paramètres. Nous souhaitons maintenant ajuster le modèle à chacune de ces simulations pour effectuer les tests de calibration et de sensibilité.</p>
 <p>Le package <em>brms</em> inclut une fonction <code>brm_multiple</code> qui permet d’ajuster le même modèle à plusieurs jeux de données contenus dans une liste. Nous créons donc une liste de 200 réplicats du jeu de données original avec <code>replicate</code> (<code>simplify = FALSE</code> est nécessaire pour éviter que R tente de combiner les 200 jeux de données en un seul), puis nous utlisons une boucle pour remplacer la colonne réponse de chaque jeu de données avec une des rangées de la matrice de prédictions <em>a priori</em>.</p>
 <pre class="r"><code>rikz_repl &lt;- replicate(200, rikz, simplify = FALSE)
 
@@ -612,7 +698,8 @@ for (i in 1:200) {
                          data = rikz_repl, family = poisson,
                          chains = 2, control = list(adapt_delta = 0.99),
                          prior = rikz_prior, combine = FALSE)</code></pre>
-<p>L’ajustement des 200 modèles prend un certain temps et il est possible que Stan donne des avertissements en lien avec les diagnostics pour chaque modèle. Nous allons maintenant vérifier combien de modèles contiennent des transitions divergentes ou qui ont atteint la profondeur maximale de l’arbre. La fonction <code>nuts_params</code> produit les valeurs des diagnostics pour chaque itération d’un modèle ajusté. Ici, puisque nous avons une liste de 200 résultats, nous utilisons <code>lapply</code> pour appliquer cette fonction à chaque élément de la liste: <code>diags</code> contient donc une liste de 200 jeux de données.</p>
+<p>L’ajustement des 200 modèles prend un certain temps, donc en pratique cette partie pourrait nécessiter l’utilisation d’un serveur de calcul de haute performance.</p>
+<p>Nous allons maintenant vérifier combien de modèles contiennent des transitions divergentes ou ont atteint la profondeur maximale de l’arbre. La fonction <code>nuts_params</code> produit les valeurs des diagnostics pour chaque itération d’un modèle ajusté. Ici, puisque nous avons une liste de 200 résultats, nous utilisons <code>lapply</code> pour appliquer cette fonction à chaque élément de la liste: <code>diags</code> contient donc une liste de 200 jeux de données.</p>
 <pre class="r"><code>diags &lt;- lapply(res_test, nuts_params)</code></pre>
 <p>Nous pouvons combiner ces jeux de données en les plaçant bout à bout avec la fonction <code>bind_rows</code> de <em>dplyr</em>. L’argument <code>.id</code> de cette fonction crée une colonne (ici <code>sim_id</code>) qui identifie l’élément de la liste originale dont provient chaque rangée. Puisque les éléments de la liste n’ont pas de noms, cet identifiant est ici le numéro entre 1 et 200.</p>
 <pre class="r"><code>diags &lt;- bind_rows(diags, .id = &quot;sim_id&quot;)
@@ -630,7 +717,7 @@ head(diags)</code></pre>
 <pre><code>## # A tibble: 6 x 9
 ##   sim_id Iteration Chain accept_stat__ stepsize__ treedepth__ n_leapfrog__
 ##   &lt;chr&gt;      &lt;int&gt; &lt;int&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;
-## 1 1              1     1         1.000     0.0746           5           63
+## 1 1              1     1         1.00      0.0746           5           63
 ## 2 1              2     1         0.995     0.0746           5           31
 ## 3 1              3     1         0.988     0.0746           5           31
 ## 4 1              4     1         0.995     0.0746           6           63
@@ -641,6 +728,7 @@ head(diags)</code></pre>
 <pre class="r"><code>diags &lt;- group_by(diags, sim_id) %&gt;%
     summarize(div = sum(divergent__), maxtree = sum(treedepth__ == 10)) %&gt;%
     inner_join(prior_params)</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre><code>## Joining, by = &quot;sim_id&quot;</code></pre>
 <p>Puisqu’il ne s’agit pas de nos vraies données, mais de simulations, nous ne cherchons pas à éliminer tous les diagnostics problématiques, mais plutôt à voir généralement si l’estimation est difficile pour certaines plages de valeurs des paramètres <em>a priori</em>.</p>
 <p>En inspectant ce jeu de données, nous notons que 2 simulations contiennent 1 ou 2 transitions divergentes (respectivement), tandis qu’une dizaine de simulations ont parfois atteint la profondeur maximale de l’arbre. Les simulations où de nombreuses itérations atteignent la profondeur maximale semblent être caractérisées par une valeur élevée de l’ordonnée à l’origine ou de l’écart-type des effets aléatoires, mais sinon il n’y a pas de patron particulier à ces résultats.</p>
@@ -663,7 +751,6 @@ head(diags)</code></pre>
 ## 11     0       2       3.13               0.730 
 ## 12     0       2       0.869              0.515 
 ## 13     0       2       2.86               1.02</code></pre>
-</div>
 <div id="test-de-calibration" class="section level2">
 <h2>Test de calibration</h2>
 <p>Pour ce test, nous voulons vérifier si la position de la vraie valeur du paramètre utilisée pour une simulation est distribuée uniformément parmi les valeurs obtenues pour la distribution <em>a posteriori</em> estimée à partir de cette simulation. Pour chaque résultat dans notre liste, nous pourrions extraire ces distributions <em>a posteriori</em> avec <code>posterior_samples</code>, qui produit un tableau de 2000 itérations x 15 paramètres (14 paramètres plus le log de la probabilité conjointe).</p>
@@ -709,10 +796,10 @@ head(calib)</code></pre>
     geom_hline(yintercept = 20, linetype = &quot;dashed&quot;) +
     geom_histogram(breaks = seq(0.5, 400.5, 40), fill = &quot;orange&quot;, color = &quot;white&quot;) +
     facet_wrap(~ param)</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
 <p>La distribution semble uniforme et sur 140 barres (14 paramètres x 10 classes), seules 2 ou 3 sont hors de l’intervalle à 99%.</p>
 </div>
-<div id="test-de-sensibilite" class="section level2">
+<div id="test-de-sensibilité" class="section level2">
 <h2>Test de sensibilité</h2>
 <p>Vérifions maintenant si 45 observations suffisent à réaliser une estimation précise des paramètres pour chaque simulation.</p>
 <p>La fonction <code>posterior_summary</code> de <em>brms</em> produit le sommaire des distributions <em>a posteriori</em> de chaque paramètre, incluant la moyenne <code>Estimate</code> et l’écart-type <code>Est.Error</code>.</p>
@@ -786,7 +873,7 @@ head(prior_params)</code></pre>
 <pre class="r"><code>ggplot(post_sum, aes(x = zscore)) +
     geom_density() +
     facet_wrap(~ param)</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
 <p>Ensuite, nous regardons le facteur de contraction en fonction de la vraie valeur de chaque paramètre. Nous ne nous intéressons pas aux effets aléatoires de chaque plage pour cette comparaison, puisque leur écart-type <em>a priori</em> dépend de <code>sd_Beach__Intercept</code>.</p>
 <pre class="r"><code>post_sum2 &lt;- filter(post_sum, 
                     param %in% c(&quot;b_Intercept&quot;, &quot;b_NAP&quot;, &quot;b_Exposure10&quot;,
@@ -794,7 +881,7 @@ head(prior_params)</code></pre>
 ggplot(post_sum2, aes(x = true_val, y = contr)) +
     geom_point() +
     facet_wrap(~ param, scales = &quot;free_x&quot;)</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
 <p>Sauf pour <code>b_NAP</code>, nous remarquons que le facteur de contraction est souvent faible. Par exemple, un facteur de 0.5 signifie que les données ne permettent de réduire que de moitié l’incertitude par rapport à la distribution <em>a priori</em>. Selon le graphique pour <code>sd_Beach__Intercept</code>, plus l’écart-type des effets aléatoires est élevé, moins nous pouvons l’estimer précisément. Pour vérifier si c’est le cas pour les autres paramètres, nous ajoutons une autre colonne représentant la vraie valeur de <code>sd_Beach__Intercept</code> pour chaque simulation.</p>
 <pre class="r"><code>sd_true &lt;- filter(post_sum, param == &quot;sd_Beach__Intercept&quot;) %&gt;%
     select(sim_id, sd_true = true_val)
@@ -806,111 +893,8 @@ post_sum &lt;- inner_join(post_sum, sd_true)</code></pre>
 ggplot(post_sum2, aes(x = sd_true, y = contr)) +
     geom_point() +
     facet_wrap(~ param, scales = &quot;free_x&quot;)</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
-<p>En effet, nous constatons que plus la variance entre les plages est grande, plus nos estimés sont imprécis.</p>
-</div>
-<div id="ajustement-du-modele-aux-observations" class="section level2">
-<h2>Ajustement du modèle aux observations</h2>
-<p>Nous sommes maintenant prêts à ajuster le modèle aux observations réelles.</p>
-<pre class="r"><code>res_br &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
-              family = poisson, control = list(adapt_delta = 0.99), 
-              chains = 2, prior = rikz_prior)</code></pre>
-<pre class="r"><code>summary(res_br, mc_se = TRUE)</code></pre>
-<pre><code>##  Family: poisson 
-##   Links: mu = log 
-## Formula: Richness ~ NAP + Exposure + (1 | Beach) 
-##    Data: rikz (Number of observations: 45) 
-## Samples: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
-##          total post-warmup samples = 2000
-## 
-## Group-Level Effects: 
-## ~Beach (Number of levels: 9) 
-##               Estimate MC.Error Est.Error l-95% CI u-95% CI Eff.Sample
-## sd(Intercept)     0.23     0.01      0.14     0.02     0.55        487
-##               Rhat
-## sd(Intercept) 1.00
-## 
-## Population-Level Effects: 
-##            Estimate MC.Error Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-## Intercept      2.38     0.01      0.29     1.69     2.90        764 1.00
-## NAP           -0.50     0.00      0.07    -0.65    -0.36       2032 1.00
-## Exposure10    -0.47     0.01      0.33    -1.06     0.26        715 1.00
-## Exposure11    -1.17     0.01      0.34    -1.76    -0.38        728 1.01
-## 
-## Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
-## is a crude measure of effective sample size, and Rhat is the potential 
-## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
-<p>Le sommaire des résultats indique d’abord la formule du modèle, puis les paramètres de l’algorithme (nombre de chaînes et d’itérations, nombre d’itérations de rodage). La section <em>Group-Level Effects</em> présente l’écart-type des effets aléatoires, tandis que la section <em>Population-Level Effects</em> présente les effets fixes. Chaque estimé indique la moyenne, l’écart-type et un intervalle de crédibilité à 95% pour la distribution <em>a posteriori</em>, ainsi que la statistique de Gelman-Rubin (<em>Rhat</em>) et la taille effective de l’échantillon Monte-Carlo (<code>Eff.Sample</code>).</p>
-<p>En spécifiant <code>mc_se = TRUE</code>, nous obtenons aussi une colonne pour l’erreur-type de Monte-Carlo (<code>MC.Error</code>). Cette erreur d’approximation numérique devrait être négligeable par rapport à l’écart-type de la distribution <em>a posteriori</em> (<code>Est.Error</code>), ce qui est le cas ici.</p>
-<p>En comparant ces résultats à ceux du GLMM classique, nous obtenons des différences entre les estimés moyens, mais ces différences sont raisonnables en considérant les marges d’erreurs de chaque paramètre.</p>
-<pre class="r"><code>library(lme4)
-res_glmm &lt;- glmer(Richness ~ NAP +Exposure + (1 | Beach), data = rikz, family = poisson)
-summary(res_glmm)</code></pre>
-<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
-##   Approximation) [glmerMod]
-##  Family: poisson  ( log )
-## Formula: Richness ~ NAP + Exposure + (1 | Beach)
-##    Data: rikz
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##      210      219     -100      200       40 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -1.8080 -0.4947 -0.2078  0.2789  3.9801 
-## 
-## Random effects:
-##  Groups Name        Variance Std.Dev.
-##  Beach  (Intercept) 0.01138  0.1067  
-## Number of obs: 45, groups:  Beach, 9
-## 
-## Fixed effects:
-##             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  2.52472    0.16720  15.100  &lt; 2e-16 ***
-## NAP         -0.50781    0.07128  -7.125 1.04e-12 ***
-## Exposure10  -0.59863    0.19615  -3.052  0.00227 ** 
-## Exposure11  -1.33491    0.21817  -6.119 9.43e-10 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Correlation of Fixed Effects:
-##            (Intr) NAP    Exps10
-## NAP         0.078              
-## Exposure10 -0.847 -0.027       
-## Exposure11 -0.766 -0.063  0.653</code></pre>
-<p>Il existe quelques raisons pour lesquelles les estimés de l’approche bayésienne diffèrent de ceux obtenus par le maximum de vraisemblance, notamment:</p>
-<ul>
-<li><p>la distribution <em>a priori</em> peut influencer l’inférence si le nombre d’observations est petit;</p></li>
-<li><p>même dans le cas ou la distribution <em>a priori</em> a peu d’influence et que la distribution <em>a posteriori</em> prend la même forme de la fonction de vraisemblance, l’estimé bayésien est la moyenne de la distribution <em>a posteriori</em>, qui n’est pas nécessairement égal au maximum de la probabilité <em>a posteriori</em>, en particulier si la distribution est asymétrique.</p></li>
-</ul>
-<p>La fonction <code>stanplot</code> permet de visualiser différents résultats du modèle, notamment le tracé des chaînes de Markov, un histogramme des distributions <em>a posteriori</em>, ou une représentation des différents coefficients avec leurs intervalles de crédibilité</p>
-<pre class="r"><code>stanplot(res_br, type = &quot;trace&quot;)</code></pre>
-<pre><code>## No divergences to plot.</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
-<pre class="r"><code>stanplot(res_br, type = &quot;hist&quot;)</code></pre>
-<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-44-2.png" width="672" /></p>
-<pre class="r"><code>stanplot(res_br, type = &quot;intervals&quot;)</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-44-3.png" width="672" /></p>
-<p>Notez que par défaut, les intervalles en traits gras représentent 50% de la probabilité <em>a posteriori</em> tandis que ceux en traits fins représentent 90% de cette probabilité.</p>
-<p>Un outil interactif de visualisation des résultats et diagnostics du modèle peut être lancée avec la fonction <code>launch_shinystan</code>.</p>
-<pre class="r"><code>launch_shinystan(res_br)</code></pre>
-</div>
-<div id="verification-des-predictions-a-posteriori" class="section level2">
-<h2>Vérification des prédictions <em>a posteriori</em></h2>
-<p>Comme au dernier cours, nous utilisons <code>pp_check</code> avec <code>type = "intervals"</code> pour comparer les observations aux intervalles de prédiction du modèle. En moyenne, nous nous attendons à ce que 50% des observations soient dans les intervalles en gras et 90% dans les intervalles en traits pâles.</p>
-<pre class="r"><code>pp_check(res_br, type = &quot;intervals&quot;)</code></pre>
-<pre><code>## Using all posterior samples for ppc type &#39;intervals&#39; by default.</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
-<p>Pour une régression de Poisson, nous pouvons aussi vérifier que l’écart-type des observations et le nombre de zéros obtenus sont comparables aux valeurs prévues par le modèle ajusté.</p>
-<pre class="r"><code>pp_check(res_br, type = &quot;stat&quot;, stat = sd)</code></pre>
-<pre><code>## Using all posterior samples for ppc type &#39;stat&#39; by default.</code></pre>
-<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
-<pre class="r"><code>pp_check(res_br, type = &quot;stat&quot;, stat = function(x) sum(x == 0))</code></pre>
-<pre><code>## Using all posterior samples for ppc type &#39;stat&#39; by default.
-## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-47-2.png" width="672" /></p>
+<p>En effet, nous constatons que plus la variance entre les plages est grande, plus nos estimés sont imprécis.</p>
 </div>
 </div>
 
@@ -932,6 +916,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

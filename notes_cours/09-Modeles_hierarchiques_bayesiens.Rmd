@@ -59,7 +59,7 @@ L'algorithme de Metropolis-Hastings permet de générer un échantillon de la di
 
 1. Tout d'abord, on choisit aléatoirement un premier vecteur de paramètres $\theta_{(1)}$.
 
-2. Ensuite, on choisit un deuxième vecteur $\theta_{(2)}$, qui dépend de $\theta_{(1)}$ selon une certaine probabilité de transition. Par exemple, chacun des paramètres de $\theta_{(1)}$ est déplacé d'une quantité tirée d'une distribution alaétoire normale.
+2. Ensuite, on choisit un deuxième vecteur $\theta_{(2)}$, qui dépend de $\theta_{(1)}$ selon une certaine probabilité de transition. Par exemple, chacun des paramètres de $\theta_{(1)}$ est déplacé d'une quantité tirée d'une distribution aléatoire normale.
 
 3. On calcule le rapport des probabilités *a posteriori* $\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)}$.
 
@@ -69,7 +69,7 @@ L'algorithme de Metropolis-Hastings permet de générer un échantillon de la di
 
 Les étapes 2 et 3 sont répétées pour le nombre d'itérations voulues.
 
-Il a été démontré qu'avec suffisamment d'itérations, la distribution des $\theta_{(i)}$ s'approche aussi près que voulu de la distribution recherchée: $p(\theta | y)$. Ce résultat théorique dépend en fait de certaines conditions; cependant, nous ne discuterons pas de ces détails ici, car nous sommes intéressés non pas à savoir si l'algorithme converge éventuellement, mais s'il converge assez rapidement pour être utile en pratique. Cela dépend du problème et il faudra déterminer empiriquement la convergence en inspectant les résultats de l'inférence, comme nosu verrons plus loin.
+Il a été démontré qu'avec suffisamment d'itérations, la distribution des $\theta_{(i)}$ s'approche aussi près que voulu de la distribution recherchée: $p(\theta | y)$. Ce résultat théorique dépend en fait de certaines conditions; cependant, nous ne discuterons pas de ces détails ici, car nous sommes intéressés non pas à savoir si l'algorithme converge éventuellement, mais s'il converge assez rapidement pour être utile en pratique. Cela dépend du problème et il faudra déterminer empiriquement la convergence en inspectant les résultats de l'inférence, comme nous verrons plus loin.
 
 ## Chaînes de Markov
 
@@ -109,7 +109,7 @@ Si l'algorithme converge, nous pouvons quantifier l'efficacité avec laquelle le
 
 Considérons une fonction $f$ calculée à partir des paramètres du modèle. Il peut s'agir de la moyenne du paramètre, d'un quantile, ou de toute statistique d'intérêt qui dépend d'un ou plusieurs paramètres du modèle. Si on avait un échantillon de $N$ tirages aléatoires **indépendants** de la distribution conjointe *a posteriori* des paramètres, alors la valeur de $f$ calculée à partir de cet échantillon s'approcherait de sa valeur pour la distribution exacte, avec une erreur d'approximation (erreur-type de Monte-Carlo) proportionnelle à $1/\sqrt{N}$.
 
-*Note*: Il ne faut pas confondre l'erreur-type de Monte-Carlo avec l'écart-type de la distribution *a posteriori* du paramètre. L'écart-type de la distribution *a posteriori* (semblable à l'erreur-type pour un estimateur fréquentiste) représente lincertitude sur la valeur du paramètre et dépend (notamment) de la quantité d'observations. L'erreur-type de Monte-Carlo est l'erreur d'approximation numérique de l'algorithme. En augmentant le nombre d'itérations, nous pouvons estimer plus précisément toutes les propriétés de la distribution *a posteriori*, incluant son écart-type, mais nous ne pouvons pas réduire cet écart-type sans avoir plus de données. Nous avions la même situation dans le cas du bootstrap: nous pouvions augmenter le nombre d'échantillons bootstrap pour réduire l'erreur d'approximation numérique, mais pas l'incertitude due aux données limitées.
+*Note*: Il ne faut pas confondre l'erreur-type de Monte-Carlo avec l'écart-type de la distribution *a posteriori* du paramètre. L'écart-type de la distribution *a posteriori* (semblable à l'erreur-type pour un estimateur fréquentiste) représente l'incertitude sur la valeur du paramètre et dépend (notamment) de la quantité d'observations. L'erreur-type de Monte-Carlo est l'erreur d'approximation numérique de l'algorithme. En augmentant le nombre d'itérations, nous pouvons estimer plus précisément toutes les propriétés de la distribution *a posteriori*, incluant son écart-type, mais nous ne pouvons pas réduire cet écart-type sans avoir plus de données. Nous avions la même situation dans le cas du bootstrap: nous pouvions augmenter le nombre d'échantillons bootstrap pour réduire l'erreur d'approximation numérique, mais pas l'incertitude due aux données limitées.
 
 Toutefois, la chaîne de Markov ne produit *pas* des tirages indépendants, puisque la valeur de $\theta_{(i+1)}$ est conditionnelle à $\theta_{i}$. Dans ce cas, les valeurs successives de la chaîne sont corrélées, donc un nombre $N$ d'itérations n'est pas équivalent à un échantillon de $N$ valeurs indépendantes. 
 
@@ -166,7 +166,7 @@ Comme pour les divergences, cet avertissement indique que l'algorithme ne parcou
 
 ## Options pour utiliser Stan à partir de R
 
-Pour conclure cette section, nous allons voir différentes façons d'utiliser Stan à partir de R. Tout d'abord, nous pouvons écrire un programme Stan, tel que vu au dernier laboratoire. Voici le début du code Stan pour un modèle simple, où il y a $N$ observations d'une variable réponse $y$ et d'un prédicteur $x$.
+Pour conclure cette section, nous allons voir différentes façons d'utiliser Stan à partir de R. Tout d'abord, nous pouvons écrire un programme Stan, comme nous verrons au prochain laboratoire. Voici le début du code Stan pour un modèle simple, où il y a $N$ observations d'une variable réponse $y$ et d'un prédicteur $x$.
 
 ```
 data {
@@ -217,7 +217,7 @@ Cette partie présente les étapes d'un plan suggéré pour le développement et
 
 Ce plan est basé sur l'article:
 
-> Betancourt, M. (2018) Towards A Principled Bayesian Workflow (RStan). https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html.
+> Betancourt, M. (2020) Towards A Principled Bayesian Workflow. https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html.
 
 Michael Betancourt est un des développeurs de Stan et son site web contient plusieurs articles sur la théorie reliée aux modèles hiérarchiques bayésiens, ainsi que des études de cas sur leur application à différents problèmes.
 
@@ -243,19 +243,21 @@ C'est aussi à cette étape que nous choisissons les distributions *a priori* de
 
 ## Prédictions *a priori*
 
-Pour vérifier si les distributions *a priori* des prédicteurs génèrent des valeurs réalistes des observations, nous commençons par générer des vecteurs de paramètres à partir de leur distribution *a priori*, puis nous simulons un jeu de données semblable à celui observé à partir du modèle basé sur chaque vecteur de paramètres. Cette simulation utilise sur la valeur réelle des prédicteurs pour chaque observation.
+Pour vérifier si les distributions *a priori* des prédicteurs génèrent des valeurs réalistes des observations, nous commençons par générer des vecteurs de paramètres à partir de leur distribution *a priori*, puis nous simulons un jeu de données semblable à celui observé à partir du modèle basé sur chaque vecteur de paramètres. Cette simulation utilise la valeur réelle des prédicteurs pour chaque observation.
 
 À partir des résultats des simulations, nous vérifions si les propriétés des observations simulées correspondent à des valeurs réalistes pour le problème. À cette étape, nous ne comparons pas directement les simulations aux observations réelles, seulement à notre connaissance préalable de ce qui constitue une valeur raisonnable de la réponse. 
 
 ## Ajustement du modèle aux données simulées
 
-Pour cette étape, nous ajustons le modèle à chaque jeu de données simulé à l'étape précédente. Ces jeux de données contiennent les valeurs réelles des paramètres, mais la réponse est simulée à partir de paramètres connus tirés de la distribution *a priori*.
+Pour cette étape, nous ajustons le modèle à chaque jeu de données simulé à l'étape précédente. Ces jeux de données contiennent les valeurs réelles des prédicteurs, mais la réponse est simulée à partir de paramètres connus tirés de la distribution *a priori*.
 
 Ensuite, nous vérifions les diagnostics de l'ajustement pour chaque simulation, puis nous vérifions l'exactitude des inférences du modèle en comparant les distributions *a posteriori* aux valeurs des paramètres utilisées pour chaque simulation. Puisque les données ont été obtenues par simulation, nous nous attendons à ce que l'inférence produise des estimés compatibles avec les valeurs connues des paramètres. Deux tests sont utiles à ce point-ci:
 
 - Test de calibration: les intervalles de probabilité *a posteriori* sont-ils justes?
   
 - Test de sensibilité: Les données permettent-elles de cerner la valeur du paramètre?
+
+Puisqu'il faut répéter l'inférence bayésienne à plusieurs reprises, cette partie du protocole est très coûteuse en temps de calcul. Ainsi, il n'est pas nécessaire de la réaliser pour chaque modèle, surtout s'il s'agit d'un type de modèle déjà bien connu.
 
 ### Calibration par simulation
 
@@ -361,7 +363,7 @@ rikz_prior <- c(set_prior("normal(0, 1)", class = "b"),
                 set_prior("normal(0, 0.5)", class = "sd"))
 ```
 
-La classe de coefficients "b" représente une distribution qui s'applique à tous les coefficients fixes, sauf l'ordonnée à l'origine qui correspond à la classe "Intercept". Pour spécifier la distribution d'un seul coefficient dans une classe, il faut préciser l'argument `coef` en plus de `class`. La classe "sd" représente la distribution *a priori* pour les écarts-types des effets aléatoires. Pusique *brms* sait que les écarts-types sont toujours supérieurs à zéro, il n'est pas nécessaire de spécifier la borne inférieure avec `lb` ici. 
+La classe de coefficients "b" représente une distribution qui s'applique à tous les coefficients fixes, sauf l'ordonnée à l'origine qui correspond à la classe "Intercept". Pour spécifier la distribution d'un seul coefficient dans une classe, il faut préciser l'argument `coef` en plus de `class`. La classe "sd" représente la distribution *a priori* pour les écarts-types des effets aléatoires. Puisque *brms* sait que les écarts-types sont toujours supérieurs à zéro, il n'est pas nécessaire de spécifier la borne inférieure avec `lb` ici. 
 
 ## Prédictions *a priori*
 
@@ -394,7 +396,11 @@ Nous ajoutons à ce jeu de données une colonne identifiant la simulation (de 1 
 prior_params$sim_id <- as.character(1:200)
 ```
 
-La fonction `posterior_predict` génère une simulation de la variable réponse en fonction de la valeur des paramètres à chaque itération et des prédicteurs du jeu de données. (Malgré le nom, cette fonction se rapproche plus de la fonction `simulate` pour les modèles classiques dans R, plutôt que de `predict`.) Le résultat est une matrice avec une rangée pour chacune des 200 itérations de la distribution *a priori* et une colonne pour chacune des 45 observations du jeu de données original (dans le même ordre que les 45 rangées de ce jeu de données original).
+La fonction `posterior_predict` génère une simulation de la variable réponse en fonction de la valeur des paramètres à chaque itération et des prédicteurs du jeu de données. 
+
+Malgré le nom, cette fonction se rapproche plus de la fonction `simulate` pour les modèles classiques dans R, plutôt que de `predict`. Tel que vu au dernier laboratoire, `posterior_epred` permet d'obtenir les prédictions de la réponse moyenne à chaque itération.
+
+Le résultat est une matrice avec une rangée pour chacune des 200 itérations de la distribution *a priori* et une colonne pour chacune des 45 observations du jeu de données original (dans le même ordre que les 45 rangées de ce jeu de données original).
 
 ```{r}
 prior_pred <- posterior_predict(res_prior)
@@ -403,11 +409,12 @@ str(prior_pred)
 
 Afin de pouvoir visualiser ces prédictions, nous ajoutons une colonne pour identifier la simulation et nous faisons un pivot pour obtenir 3 colonnes: `sim_id`, `obs_id` et `Richness`.
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 prior_df <- data.frame(prior_pred)
 prior_df$sim_id <- 1:200
 prior_df <- pivot_longer(prior_df, cols = -sim_id, 
                          names_to = "obs_id", values_to = "Richness")
+head(prior_df)
 summary(prior_df$Richness)
 ```
 
@@ -428,9 +435,78 @@ ggplot(prior_df, aes(x = Richness)) +
 
 La plupart des simulations donnent une faible probabilité à des valeurs de richesse spécifique > 100, tel que prévu par les connaissances *a priori* du système.
 
-## Ajustement aux données simulées
+Tel que mentionné ci-dessus, l'étape 3 du protocole complet (ajustement du modèle aux données simulées) prend beaucoup de temps, donc elle est souvent omise, surtout pour un modèle "standard" comme un GLMM. Néanmoins, j'ai inclus le code pour réaliser cette étape en supplément à la fin de ces notes.
 
-Nous avons plus haut obtenu des simulations de la variable réponse pour chacune des 200 valeurs tirées de la distribution *a priori* de notre vecteur de paramètres. Nous souhaitons maintenant ajuster le modèle à chacune de ces simulations pour effectuer les tests de calibration et de sensibilité.
+## Ajustement du modèle aux observations
+
+Nous sommes maintenant prêts à ajuster le modèle aux observations réelles. 
+
+```{r, eval = FALSE}
+res_br <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+              family = poisson, control = list(adapt_delta = 0.99), 
+              chains = 2, prior = rikz_prior)
+```
+
+```{r, echo = FALSE}
+res_br <- readRDS("09-savedRDS/res_br.RDS")
+```
+
+```{r}
+summary(res_br)
+```
+
+Le sommaire des résultats indique d'abord la formule du modèle, puis les paramètres de l'algorithme (nombre de chaînes et d'itérations, nombre d'itérations de rodage). La section *Group-Level Effects* présente l'écart-type des effets aléatoires, tandis que la section *Population-Level Effects* présente les effets fixes. Chaque estimé indique la moyenne, l'écart-type et un intervalle de crédibilité à 95% pour la distribution *a posteriori*, ainsi que la statistique de Gelman-Rubin (*Rhat*) et la taille effective de l'échantillon Monte-Carlo (selon deux mesures, `Bulk_ESS` et `Tail_ESS`).
+
+En comparant ces résultats à ceux du GLMM classique, nous obtenons des différences entre les estimés moyens, mais ces différences sont raisonnables en considérant les marges d'erreurs de chaque paramètre.
+
+```{r, message = FALSE, warning = FALSE}
+library(lme4)
+res_glmm <- glmer(Richness ~ NAP +Exposure + (1 | Beach), data = rikz, family = poisson)
+summary(res_glmm)
+```
+
+Il existe quelques raisons pour lesquelles les estimés de l'approche bayésienne diffèrent de ceux obtenus par le maximum de vraisemblance, notamment:
+
+- la distribution *a priori* peut influencer l'inférence si le nombre d'observations est petit;
+
+- même dans le cas ou la distribution *a priori* a peu d'influence et que la distribution *a posteriori* prend la même forme de la fonction de vraisemblance, l'estimé bayésien est la moyenne de la distribution *a posteriori*, qui n'est pas nécessairement égal au maximum de la probabilité *a posteriori*, en particulier si la distribution est asymétrique.
+
+La fonction `stanplot` permet de visualiser différents résultats du modèle, notamment le tracé des chaînes de Markov, un histogramme des distributions *a posteriori*, ou une représentation des différents coefficients avec leurs intervalles de crédibilité.
+
+```{r}
+stanplot(res_br, type = "trace")
+stanplot(res_br, type = "hist")
+stanplot(res_br, type = "intervals")
+```
+
+Notez que par défaut, les intervalles en traits gras représentent 50% de la probabilité *a posteriori* tandis que ceux en traits fins représentent 90% de cette probabilité.
+
+Un outil interactif de visualisation des résultats et diagnostics du modèle peut être lancée avec la fonction `launch_shinystan`.
+
+```{r, eval = FALSE}
+launch_shinystan(res_br)
+```
+
+
+## Vérification des prédictions *a posteriori*
+
+Comme au dernier cours, nous utilisons `pp_check` avec `type = "intervals"` pour comparer les observations aux intervalles de prédiction du modèle. En moyenne, nous nous attendons à ce que 50% des observations soient dans les intervalles en gras et 90% dans les intervalles en traits pâles.
+
+```{r}
+pp_check(res_br, type = "intervals")
+```
+
+Pour une régression de Poisson, nous pouvons aussi vérifier que l'écart-type des observations et le nombre de zéros obtenus sont comparables aux valeurs prévues par le modèle ajusté.
+
+```{r}
+pp_check(res_br, type = "stat", stat = sd)
+pp_check(res_br, type = "stat", stat = function(x) sum(x == 0))
+```
+
+
+# Supplément: Ajustement aux données simulées
+
+Nous avions obtenu plus haut des simulations de la variable réponse pour chacune des 200 valeurs tirées de la distribution *a priori* de notre vecteur de paramètres. Nous souhaitons maintenant ajuster le modèle à chacune de ces simulations pour effectuer les tests de calibration et de sensibilité.
 
 Le package *brms* inclut une fonction `brm_multiple` qui permet d'ajuster le même modèle à plusieurs jeux de données contenus dans une liste. Nous créons donc une liste de 200 réplicats du jeu de données original avec `replicate` (`simplify = FALSE` est nécessaire pour éviter que R tente de combiner les 200 jeux de données en un seul), puis nous utlisons une boucle pour remplacer la colonne réponse de chaque jeu de données avec une des rangées de la matrice de prédictions *a priori*.
 
@@ -461,7 +537,9 @@ res_test <- brm_multiple(Richness ~ NAP + Exposure + (1 | Beach),
 res_test <- readRDS("09-savedRDS/res_test.RDS")
 ```
 
-L'ajustement des 200 modèles prend un certain temps et il est possible que Stan donne des avertissements en lien avec les diagnostics pour chaque modèle. Nous allons maintenant vérifier combien de modèles contiennent des transitions divergentes ou qui ont atteint la profondeur maximale de l'arbre. La fonction `nuts_params` produit les valeurs des diagnostics pour chaque itération d'un modèle ajusté. Ici, puisque nous avons une liste de 200 résultats, nous utilisons `lapply` pour appliquer cette fonction à chaque élément de la liste: `diags` contient donc une liste de 200 jeux de données. 
+L'ajustement des 200 modèles prend un certain temps, donc en pratique cette partie pourrait nécessiter l'utilisation d'un serveur de calcul de haute performance.
+
+Nous allons maintenant vérifier combien de modèles contiennent des transitions divergentes ou ont atteint la profondeur maximale de l'arbre. La fonction `nuts_params` produit les valeurs des diagnostics pour chaque itération d'un modèle ajusté. Ici, puisque nous avons une liste de 200 résultats, nous utilisons `lapply` pour appliquer cette fonction à chaque élément de la liste: `diags` contient donc une liste de 200 jeux de données.
 
 ```{r}
 diags <- lapply(res_test, nuts_params)
@@ -633,71 +711,5 @@ ggplot(post_sum2, aes(x = sd_true, y = contr)) +
 
 En effet, nous constatons que plus la variance entre les plages est grande, plus nos estimés sont imprécis.
 
-## Ajustement du modèle aux observations
 
-Nous sommes maintenant prêts à ajuster le modèle aux observations réelles. 
-
-```{r, eval = FALSE}
-res_br <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
-              family = poisson, control = list(adapt_delta = 0.99), 
-              chains = 2, prior = rikz_prior)
-```
-
-```{r, echo = FALSE}
-res_br <- readRDS("09-savedRDS/res_br.RDS")
-```
-
-```{r}
-summary(res_br, mc_se = TRUE)
-```
-
-Le sommaire des résultats indique d'abord la formule du modèle, puis les paramètres de l'algorithme (nombre de chaînes et d'itérations, nombre d'itérations de rodage). La section *Group-Level Effects* présente l'écart-type des effets aléatoires, tandis que la section *Population-Level Effects* présente les effets fixes. Chaque estimé indique la moyenne, l'écart-type et un intervalle de crédibilité à 95% pour la distribution *a posteriori*, ainsi que la statistique de Gelman-Rubin (*Rhat*) et la taille effective de l'échantillon Monte-Carlo (`Eff.Sample`). 
-
-En spécifiant `mc_se = TRUE`, nous obtenons aussi une colonne pour l'erreur-type de Monte-Carlo (`MC.Error`). Cette erreur d'approximation numérique devrait être négligeable par rapport à l'écart-type de la distribution *a posteriori* (`Est.Error`), ce qui est le cas ici.
-
-En comparant ces résultats à ceux du GLMM classique, nous obtenons des différences entre les estimés moyens, mais ces différences sont raisonnables en considérant les marges d'erreurs de chaque paramètre.
-
-```{r, message = FALSE, warning = FALSE}
-library(lme4)
-res_glmm <- glmer(Richness ~ NAP +Exposure + (1 | Beach), data = rikz, family = poisson)
-summary(res_glmm)
-```
-
-Il existe quelques raisons pour lesquelles les estimés de l'approche bayésienne diffèrent de ceux obtenus par le maximum de vraisemblance, notamment:
-
-- la distribution *a priori* peut influencer l'inférence si le nombre d'observations est petit;
-
-- même dans le cas ou la distribution *a priori* a peu d'influence et que la distribution *a posteriori* prend la même forme de la fonction de vraisemblance, l'estimé bayésien est la moyenne de la distribution *a posteriori*, qui n'est pas nécessairement égal au maximum de la probabilité *a posteriori*, en particulier si la distribution est asymétrique.
-
-La fonction `stanplot` permet de visualiser différents résultats du modèle, notamment le tracé des chaînes de Markov, un histogramme des distributions *a posteriori*, ou une représentation des différents coefficients avec leurs intervalles de crédibilité.
-
-```{r}
-stanplot(res_br, type = "trace")
-stanplot(res_br, type = "hist")
-stanplot(res_br, type = "intervals")
-```
-
-Notez que par défaut, les intervalles en traits gras représentent 50% de la probabilité *a posteriori* tandis que ceux en traits fins représentent 90% de cette probabilité.
-
-Un outil interactif de visualisation des résultats et diagnostics du modèle peut être lancée avec la fonction `launch_shinystan`.
-
-```{r, eval = FALSE}
-launch_shinystan(res_br)
-```
-
-
-## Vérification des prédictions *a posteriori*
-
-Comme au dernier cours, nous utilisons `pp_check` avec `type = "intervals"` pour comparer les observations aux intervalles de prédiction du modèle. En moyenne, nous nous attendons à ce que 50% des observations soient dans les intervalles en gras et 90% dans les intervalles en traits pâles.
-
-```{r}
-pp_check(res_br, type = "intervals")
-```
-
-Pour une régression de Poisson, nous pouvons aussi vérifier que l'écart-type des observations et le nombre de zéros obtenus sont comparables aux valeurs prévues par le modèle ajusté.
-
-```{r}
-pp_check(res_br, type = "stat", stat = sd)
-pp_check(res_br, type = "stat", stat = function(x) sum(x == 0))
-```
 

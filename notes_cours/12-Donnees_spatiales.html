@@ -354,12 +354,13 @@ head(semis)</code></pre>
 <p>Le package <em>spatstat</em> permet d’effectuer des analyses de patrons de point dans R. La première étape consiste à transformer notre tableau de données en objet <code>ppp</code> (patron de points) avec la fonction du même nom. Dans cette fonction, nous spécifions quelles colonnes contiennent les coordonnées <em>x</em> et <em>y</em> ainsi que les marques (<code>marks</code>), qui seront ici les codes d’espèce. Il faut aussi spécifier une fenêtre d’observation (<code>window</code>) à l’aide de la fonction <code>owin</code>, à laquelle nous indiquons les limites de la placette en <em>x</em> et <em>y</em>.</p>
 <pre class="r"><code>library(spatstat)
 
-semis &lt;- ppp(x = semis$x, y = semis$y, marks = semis$sp,
+semis &lt;- ppp(x = semis$x, y = semis$y, marks = as.factor(semis$sp),
              window = owin(xrange = c(0, 15), yrange = c(0, 15)))
 semis</code></pre>
 <pre><code>## Marked planar point pattern: 281 points
 ## Multitype, with levels = B, P 
 ## window: rectangle = [0, 15] x [0, 15] units</code></pre>
+<p>Les marques peuvent être numériques ou catégorielles. Notez que pour des marques catégorielles comme c’est le cas ici, il faut convertir explicitement la variable en facteur.</p>
 <p>La fonction <code>plot</code> appliquée à un patron de points montre un diagramme du patron.</p>
 <pre class="r"><code>plot(semis)</code></pre>
 <p><img src="12-Donnees_spatiales_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
@@ -420,11 +421,11 @@ plot(k)</code></pre>
 <h2>Variogramme</h2>
 <p>Un aspect central de la géostatistique est l’estimation du variogramme <span class="math inline">\(\gamma_z\)</span> de la variable <span class="math inline">\(z\)</span>. Le variogramme est égal à la moitié de l’écart carré moyen entre les valeurs de <span class="math inline">\(z\)</span> pour deux points <span class="math inline">\((x_i, y_i)\)</span> et <span class="math inline">\((x_j, y_j)\)</span> séparés par une distance <span class="math inline">\(h\)</span>.</p>
 <p><span class="math display">\[\gamma_z(h) = \frac{1}{2} \text{E} \left[ \left( z(x_i, y_i) - z(x_j, y_j) \right)^2 \right]_{d_{ij} = h}\]</span></p>
-<p>Dans cette équation, la fonction <span class="math inline">\(\text{E}\)</span> avec l’indice <span class="math inline">\(d_{ij}=h\)</span> désigne l’espérance statistique (autrement dit, la moyenne) de l’écart au carré entre les valeurs de <span class="math inline">\(z\)</span> pour les points séparée par une distance <span class="math inline">\(h\)</span>.</p>
+<p>Dans cette équation, la fonction <span class="math inline">\(\text{E}\)</span> avec l’indice <span class="math inline">\(d_{ij}=h\)</span> désigne l’espérance statistique (autrement dit, la moyenne) de l’écart au carré entre les valeurs de <span class="math inline">\(z\)</span> pour les points séparés par une distance <span class="math inline">\(h\)</span>.</p>
 <p>Si on préfère exprimer l’autocorrélation <span class="math inline">\(\rho_z(h)\)</span> entre mesures de <span class="math inline">\(z\)</span> séparées par une distance <span class="math inline">\(h\)</span>, celle-ci est reliée au variogramme par l’équation:</p>
 <p><span class="math display">\[\gamma_z = \sigma_z^2(1 - \rho_z)\]</span> ,</p>
 <p>où <span class="math inline">\(\sigma_z^2\)</span> est la variance globale de <span class="math inline">\(z\)</span>.</p>
-<p>Notez que <span class="math inline">\(\gamma_z = \sigma_z^2\)</span> si nous sommes à une distance ou les mesures de <span class="math inline">\(z\)</span> sont indépendantes, donc <span class="math inline">\(\rho_z = 0\)</span>. Dans ce cas, on voit bien que <span class="math inline">\(\gamma_z\)</span> s’apparente à une variance, même s’il est parfois appelé “semivariogramme” ou “semivariance” en raison du facteur 1/2 dans l’équation ci-dessus.</p>
+<p>Notez que <span class="math inline">\(\gamma_z = \sigma_z^2\)</span> si nous sommes à une distance où les mesures de <span class="math inline">\(z\)</span> sont indépendantes, donc <span class="math inline">\(\rho_z = 0\)</span>. Dans ce cas, on voit bien que <span class="math inline">\(\gamma_z\)</span> s’apparente à une variance, même s’il est parfois appelé “semivariogramme” ou “semivariance” en raison du facteur 1/2 dans l’équation ci-dessus.</p>
 </div>
 <div id="modèles-théoriques-du-variogramme" class="section level2">
 <h2>Modèles théoriques du variogramme</h2>
@@ -593,7 +594,7 @@ vfit</code></pre>
 <p>Supposons qu’une certaine variable soit disponible au niveau de ces divisions du territoire. Comment pouvons-nous modéliser la corrélation spatiale entre les unités qui sont spatialement rapprochées?</p>
 <p>Une option serait d’appliquer les méthodes géostatistiques vues précédemment, en calculant par exemple la distance entre les centres des polygones.</p>
 <p>Une autre option, qui est davantage privilégiée pour les données aréales, consiste à définir un réseau où chaque région est connectée aux régions voisines par un lien. On suppose ensuite que les variables sont directement corrélées entre régions voisines seulement. (Comme nous avons vu dans le cas des séries temporelles, les corrélations directes entre voisins immédiats génèrent aussi des corrélations indirectes pour une chaîne de voisins.)</p>
-<p>Dans ce type de modèle, la corrélation n’est pas nécessairement la même d’un lien à un autre. Dans ce cas, chaque lien du réseau peut être associé à un <em>poids</em> représentant son importance pour la corrélation spatiale. Nous représentons ces poids par une matrice <span class="math inline">\(W\)</span> où <span class="math inline">\(w_{ij}\)</span> est le poids du lien entre les régions <span class="math inline">\(i\)</span> et <span class="math inline">\(j\)</span>. Une région n’a pas de lien avec elle-même, donc <span class="math inline">\(w_{ii}\)</span>.</p>
+<p>Dans ce type de modèle, la corrélation n’est pas nécessairement la même d’un lien à un autre. Dans ce cas, chaque lien du réseau peut être associé à un <em>poids</em> représentant son importance pour la corrélation spatiale. Nous représentons ces poids par une matrice <span class="math inline">\(W\)</span> où <span class="math inline">\(w_{ij}\)</span> est le poids du lien entre les régions <span class="math inline">\(i\)</span> et <span class="math inline">\(j\)</span>. Une région n’a pas de lien avec elle-même, donc <span class="math inline">\(w_{ii} = 0\)</span>.</p>
 <p>Un choix simple pour <span class="math inline">\(W\)</span> consiste à assigner un poids égal à 1 si les régions sont voisines, sinon 0 (poids binaires).</p>
 <p>Outre les divisions du territoire en polygones, un autre exemple de données aréales consiste en une grille où la variable est compilée pour chaque cellule de la grille. Dans ce cas, une cellule a généralement 4 ou 8 cellules voisines, selon que les diagonales soient incluses ou non.</p>
 <div id="indice-de-moran" class="section level2">

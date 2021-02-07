@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -306,7 +271,7 @@ div.tocify {
 <li><p>Visualiser et vérifier l’ajustement</p></li>
 </ul>
 </div>
-<div id="probabilite-conditionnelle" class="section level1">
+<div id="probabilité-conditionnelle" class="section level1">
 <h1>Probabilité conditionnelle</h1>
 <div id="exemple" class="section level2">
 <h2>Exemple</h2>
@@ -356,21 +321,21 @@ div.tocify {
 <p>Donc, sur les 119 personnes recevant en moyenne un résultat positif, 19 / 119 = environ 16% sont atteintes de la maladie. Parmi celles recevant un résultat négatif, 1 / 9881 = environ 0.01% sont atteintes.</p>
 <p>Dans la section suivante, nous reprenons ce calcul en utilisant le concept de probabilité conditionnelle.</p>
 </div>
-<div id="definitions" class="section level2">
+<div id="définitions" class="section level2">
 <h2>Définitions</h2>
-<div id="probabilite-conditionnelle-1" class="section level3">
+<div id="probabilité-conditionnelle-1" class="section level3">
 <h3>Probabilité conditionnelle</h3>
 <p>Si <span class="math inline">\(x\)</span> et <span class="math inline">\(y\)</span> sont deux variables aléatoires, la probabilité conditionnelle <span class="math inline">\(p(y|x)\)</span> est la probabilité d’une valeur de <span class="math inline">\(y\)</span> pour une valeur donnée de <span class="math inline">\(x\)</span> (on dit aussi la probabilité de <span class="math inline">\(y\)</span> sachant <span class="math inline">\(x\)</span>).</p>
 <p>Dans notre exemple, nous avons deux variables: <span class="math inline">\(M\)</span> représente la présence ou absence de la maladie et <span class="math inline">\(T\)</span> représente le résultat positif ou négatif du test. La sensibilité du test est la probabilité de <span class="math inline">\(T_+\)</span> si on sait que la personne est atteinte, donc <span class="math inline">\(P(T_+ | M_1)\)</span>, égale à 0.95. La spécificité quant à elle représente la probabilité conditionnelle <span class="math inline">\(P(T_- | M_0)\)</span>, égale à 0.99.</p>
 </div>
-<div id="probabilite-conjointe" class="section level3">
+<div id="probabilité-conjointe" class="section level3">
 <h3>Probabilité conjointe</h3>
 <p>La probabilité conjointe d’obtenir à la fois une certaine valeur de <span class="math inline">\(x\)</span> et une certaine valeur de <span class="math inline">\(y\)</span>, notée <span class="math inline">\(p(x, y)\)</span>, peut être calculée de deux façons: (1) la probabilité d’obtenir <span class="math inline">\(x\)</span> multipliée par la probabilité d’obtenir <span class="math inline">\(y\)</span>, sachant qu’on a obtenu <span class="math inline">\(x\)</span>; ou (2) la probabilité d’obtenir <span class="math inline">\(y\)</span> multipliée par la probabilité d’obtenir <span class="math inline">\(x\)</span>, sachant qu’on a obtenu <span class="math inline">\(y\)</span>.</p>
 <p><span class="math display">\[p(x, y) = p(x) p(y | x) = p(y) p(x | y)\]</span></p>
 <p>Dans notre exemple, voici les deux façons de calculer la probabilité d’être atteint de la maladie <em>et</em> d’obtenir un test positif:</p>
 <p><span class="math display">\[p(M_1, T_+) = p(M_1) p(T_+ | M_1) = p(T_+) p(M_1 | T_+)\]</span></p>
 </div>
-<div id="probabilite-marginale" class="section level3">
+<div id="probabilité-marginale" class="section level3">
 <h3>Probabilité marginale</h3>
 <p>La probabilité marginale d’une variable <span class="math inline">\(y\)</span>, <span class="math inline">\(p(y)\)</span>, est sa probabilité si on ignore la valeur des autres variables. Si on ne connaît pas directement <span class="math inline">\(p(y)\)</span>, mais qu’on connaît <span class="math inline">\(p(y, x)\)</span> pour chaque valeur possible d’une autre variable <span class="math inline">\(x\)</span>, alors <span class="math inline">\(p(y)\)</span> correspond à la somme des probabilités conjointes de <span class="math inline">\(x\)</span> et <span class="math inline">\(y\)</span> pour chaque valeur de <span class="math inline">\(x\)</span>. (La <em>marginalisation</em> représente l’action de faire cette somme des différentes possibilités pour les variables autres que <span class="math inline">\(y\)</span>.)</p>
 <p><span class="math display">\[p(y) = \sum_x p(y, x) = \sum_x p(y|x) p(x)\]</span></p>
@@ -446,7 +411,7 @@ div.tocify {
 </table>
 </div>
 </div>
-<div id="theoreme-de-bayes" class="section level2">
+<div id="théorème-de-bayes" class="section level2">
 <h2>Théorème de Bayes</h2>
 <p>Pour deux variables <span class="math inline">\(x\)</span> et <span class="math inline">\(y\)</span>, il peut être plus facile de calculer <span class="math inline">\(p(y|x)\)</span> que <span class="math inline">\(p(x|y)\)</span>, ou vice versa. Dans notre exemple, nous connaissions la probabilité d’avoir un résultat positif si la maladie est présente <span class="math inline">\(p(T_+ | M_1)\)</span>, mais nous cherchions la probabilité que la maladie soit présente si le résultat est positif: <span class="math inline">\(p(M_1 | T_+)\)</span>. Le théorème de Bayes nous indique comment “inverser” la probabilité conditionnelle sans avoir à remplir un tableau comme celui ci-dessus.</p>
 <p>Rappelons-nous qu’il y a deux façons de calculer la probabilité conjointe <span class="math inline">\(p(x, y)\)</span> d’une valeur de <span class="math inline">\(x\)</span> et d’une valeur de <span class="math inline">\(y\)</span>:</p>
@@ -466,19 +431,19 @@ div.tocify {
 <p>on voit qu’il s’agit d’une méthode pour réviser une probabilité initiale <span class="math inline">\(p(M_1)\)</span> en fonction d’une nouvelle information donnée par le résultat du test, pour obtenir une probabilité <span class="math inline">\(p(M_1 | T_+)\)</span>. Cette idée est à la base de l’inférence bayésienne.</p>
 </div>
 </div>
-<div id="inference-bayesienne" class="section level1">
+<div id="inférence-bayésienne" class="section level1">
 <h1>Inférence bayésienne</h1>
-<div id="interpretations-frequentiste-et-bayesienne" class="section level2">
+<div id="interprétations-fréquentiste-et-bayésienne" class="section level2">
 <h2>Interprétations fréquentiste et bayésienne</h2>
 <p>Dans la section précédente, nous avons vu comment le théorème de Bayes permet de calculer la probabilité d’être atteint d’une maladie en fonction de sa prévalence générale <span class="math inline">\(p(M_1)\)</span> et du résultat d’un test de dépistage, <span class="math inline">\(T_+\)</span> ou <span class="math inline">\(T_-\)</span>:</p>
 <p><span class="math display">\[p(M_1 | T_+) = \frac{p(T_+ | M_1)}{p(T_+)}  p(M_1)\]</span> <span class="math display">\[p(M_1 | T_-) = \frac{p(T_- | M_1)}{p(T_-)}  p(M_1)\]</span></p>
 <p>Considérons maintenant <span class="math inline">\(M_1\)</span> comme une hypothèse selon laquelle un patient donné est atteint de la maladie. La probabilité <em>a priori</em> de <span class="math inline">\(M_1\)</span> (avant le test) est égale à <span class="math inline">\(p(M_1)\)</span>. Après le test, la probabilité <em>a posteriori</em> de <span class="math inline">\(M_1\)</span> est <span class="math inline">\(p(M_1 | T_+)\)</span> ou <span class="math inline">\(p(M_1 | T_-)\)</span>, selon le résultat.</p>
-<p>Selon l’interprétation <strong>fréquentiste</strong>, les probabilités représent la fréquence d’événements après un grand nombre de répétitions d’une observation ou d’une expérience. Dans ce cas-ci, nous pouvons assigner une probabilité à <span class="math inline">\(M_1\)</span> car le patient provient d’une population et la maladie a une certaine fréquence de la maladie dans cette population.</p>
+<p>Selon l’interprétation <strong>fréquentiste</strong>, les probabilités représent la fréquence d’événements après un grand nombre de répétitions d’une observation ou d’une expérience. Dans ce cas-ci, nous pouvons assigner une probabilité à <span class="math inline">\(M_1\)</span> car le patient provient d’une population et la maladie a une certaine fréquence dans cette population.</p>
 <p>L’interprétation fréquentiste est à la base de la plupart des cours d’introduction aux statistiques, car elle permet notamment de définir des tests d’hypothèse et des intervalles de confiance. Dans cette approche, on peut associer une probabilité aux statistiques basées sur les données, comme la moyenne d’un échantillon <span class="math inline">\(\bar{x}\)</span>, mais pas aux paramètres d’un modèle comme la moyenne de la population <span class="math inline">\(\mu\)</span>. Quand on définit un intervalle de confiance à 95% autour de <span class="math inline">\(\bar{x}\)</span>, ce n’est pas cet intervalle particulier qui a une probabilité de 95% de contenir <span class="math inline">\(\mu\)</span> (après l’échantillonnage, l’intervalle et <span class="math inline">\(\mu\)</span> sont tous les deux fixes), mais c’est 95% des échantillons possibles de <span class="math inline">\(x\)</span> qui produiraient un intervalle contenant la valeur de <span class="math inline">\(\mu\)</span>.</p>
 <p>Selon l’interprétation <strong>bayésienne</strong>, les probabilités représentent notre incertitude sur la valeur d’une quantité. On peut donc parler d’une distribution de probabilité même pour une valeur présumée fixe, ex.: un paramètre d’un modèle.</p>
 <p>Historiquement, les débats entre les deux approches ont souvent été acrimonieux. Aujourd’hui, les mêmes statisticiens peuvent employer l’approche fréquentiste ou l’approche bayésienne selon la nature du problème. Cependant, il faut s’assurer de toujours interpréter les résultats en fonction de l’approche utilisée. Il faut se rappeler, par exemple, qu’un intervalle de confiance fréquentiste ne représente pas une distribution de probabilité du paramètre, ou qu’une vérification de l’ajustement d’un modèle bayésien n’est pas équivalente à un test d’hypothèse nulle.</p>
 </div>
-<div id="inference-bayesienne-sur-la-valeur-dun-parametre" class="section level2">
+<div id="inférence-bayésienne-sur-la-valeur-dun-paramètre" class="section level2">
 <h2>Inférence bayésienne sur la valeur d’un paramètre</h2>
 <p>Supposons que nous avons une série d’observations d’une variable <span class="math inline">\(y\)</span>, que nous représentons par un modèle incluant un paramètre ajustable <span class="math inline">\(\theta\)</span>. Dans l’approche bayésienne, nous assignons une distribution de probabilité <em>a priori</em> à <span class="math inline">\(\theta\)</span>, <span class="math inline">\(p(\theta)\)</span>, représentant l’incertitude sur la valeur du paramètre avant d’avoir observé les données. La probabilité des observations <span class="math inline">\(y\)</span>, conditionnelle à une valeur de <span class="math inline">\(\theta\)</span> donnée, est donnée par la fonction de vraisemblance <span class="math inline">\(p(y|\theta)\)</span>.</p>
 <p>À partir de cette information, nous pouvons utiliser le théorème de Bayes pour déduire <span class="math inline">\(p(\theta | y)\)</span>, soit la distribution <em>a posteriori</em> de <span class="math inline">\(\theta\)</span> après avoir observé <span class="math inline">\(y\)</span>.</p>
@@ -505,13 +470,13 @@ div.tocify {
 <p>Une des critiques courantes de l’inférence bayésienne est que l’assignation d’une distribution <em>a priori</em> ajoute un biais à l’analyse. Cependant, si le choix de cette distribution est justifiée par le besoin de pénaliser des valeurs trop extrêmes des paramètres, le rôle de la distribution <em>a priori</em> n’est pas si différent de celui d’un effet aléatoire qui resserre les moyennes de groupes vers la moyenne générale, ou du paramètre de lissage dans un modèle additif qui pénalise les courbes trop complexes. Toutes ces méthodes sont des exemples de <em>régularisation</em>, c’est-à-dire l’imposition de contraintes permettant de contrôler le risque de surajustement dans un modèle complexe, sans avoir à fixer complètement certains paramètres et certains effets.</p>
 <p>On peut considérer le choix de la distribution <em>a priori</em> comme une supposition qui s’ajoute aux autres suppositions du modèle, comme le choix de la distribution représentant les observations, le choix des prédicteurs et interactions à inclure ou non dans le modèle, etc. Ultimement, c’est le modèle au complet qui doit être validé en fonction de sa capacité à reproduire les caractéristiques des observations, incluant des observations autres que celles utilisées pour réaliser son ajustement.</p>
 </div>
-<div id="avantages-et-desavantages-de-lapproche-bayesienne" class="section level2">
+<div id="avantages-et-désavantages-de-lapproche-bayésienne" class="section level2">
 <h2>Avantages et désavantages de l’approche bayésienne</h2>
-<p>Comme le maximum de vraisemblance, l’inférence bayésienne a l’avantage d’être applicable à n’importe quel type de <em>modèle génératif</em>, c’est-à-dire un modèle qui décrit mathématiquement comment les observations sont générées à partir des paramètres. Dans une approche bayésienne, les paramètres de divers types de modèles, incluant tous ceux vus dans ce cours (modèles linéaires généralisés, à effets mixtes, additifs, avec dépendance temporelle ou spatiale) peuvent être estimés avec les mêmes algorithmes; nous discuterons davantage de ces algorithmes au prochain cours. Ces algorithmes produisent la distribution <em>a posteriori</em> conjointe des paramètres du modèle, à partir de laquelle nous pouvons facilement obtenir la distribution de n’importe quelle quantité dérivée du modèle: combinaison des paramètres, prédiction, etc. À titre de comparaison, le maximum de vraisemblance ne nous indique que la valeur de chaque paramètre maximisant la vraisemblance et l’obtention d’intervalles de confiance sur des valeurs dérivées de plusieurs paramètres peut être très laborieuse. En contrepartie, les méthodes bayésiennes sont beaucoup demandent beaucoup plus de ressources de calcul.</p>
+<p>Comme le maximum de vraisemblance, l’inférence bayésienne a l’avantage d’être applicable à n’importe quel type de <em>modèle génératif</em>, c’est-à-dire un modèle qui décrit mathématiquement comment les observations sont générées à partir des paramètres. Dans une approche bayésienne, les paramètres de divers types de modèles, incluant tous ceux vus dans ce cours (modèles linéaires généralisés, à effets mixtes, additifs, avec dépendance temporelle ou spatiale) peuvent être estimés avec les mêmes algorithmes; nous discuterons davantage de ces algorithmes au prochain cours. Ces algorithmes produisent la distribution <em>a posteriori</em> conjointe des paramètres du modèle, à partir de laquelle nous pouvons facilement obtenir la distribution de n’importe quelle quantité dérivée du modèle: combinaison des paramètres, prédiction, etc. À titre de comparaison, le maximum de vraisemblance ne nous indique que la valeur de chaque paramètre maximisant la vraisemblance et l’obtention d’intervalles de confiance sur des valeurs dérivées de plusieurs paramètres peut être très laborieuse. En contrepartie, les méthodes bayésiennes produisent plus d’informations, mais demandent beaucoup plus de ressources de calcul.</p>
 <p>Du point de vue de la conception du modèle, l’approche bayésienne est aussi plus demandante, car il faut spécifier une distribution <em>a priori</em> pour chaque paramètre ajustable. Comme nous avons mentionné ci-dessus, ces distributions <em>a priori</em> sont néanmoins utiles pour stabiliser l’estimation de modèles complexes; lorsque les données sont limitées, contraindre la valeur des effets peut être une solution préférable à simplement éliminer ces effets du modèle.</p>
 </div>
 </div>
-<div id="exemple-de-regression-bayesienne" class="section level1">
+<div id="exemple-de-régression-bayésienne" class="section level1">
 <h1>Exemple de régression bayésienne</h1>
 <p>Pour illustrer l’approche bayésienne, nous estimerons ici la relation entre le nombre d’espèces de plantes et la superficie de 30 îles de l’archipel des Galapagos, à partir du jeu de données <a href="../donnees/galapagos.csv">galapagos.csv</a> déjà vu plus tôt dans ce cours.</p>
 <pre class="r"><code>galap &lt;- read.csv(&quot;../donnees/galapagos.csv&quot;)
@@ -541,10 +506,10 @@ head(galap)</code></pre>
 <p>Dans ce cas, nous choisissons comme distribution <em>a priori</em> pour <span class="math inline">\(\beta_1\)</span> une distribution exponentielle avec un paramètre de 4: <span class="math inline">\(\beta_1 \sim \text{Exp}(4)\)</span>. La distribution exponentielle a un maximum à 0 et décroît de façon exponentielle; le taux de cette décroissance est donnée par le paramètre ajustable. Ici, avec un paramètre de 4 nous avons environ 2% de probabilité que <span class="math inline">\(\beta_1 &gt; 1\)</span>. Ainsi, les valeurs supérieures à 1 sont jugées improbables mais pas impossibles.</p>
 <p><img src="08-Intro_Bayes_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>Quant à l’ordonnée à l’origine <span class="math inline">\(\beta_0\)</span>, il s’agit du logarithme du nombre d’espèces moyen lorsque <span class="math inline">\(\log A = 0\)</span>, autrement dit lorsque la superficie est de 1 km<span class="math inline">\(^2\)</span>.</p>
-<p><em>Note</em>: Le package <em>brms</em> que nous utiliserons transforme les prédicteurs d’une régression pour les centrer sur leur valeur moyenne. Cela n’affiche pas les résultats produits pour la régression, mais cela nécessite que nous spécifions une distribution <em>a priori</em> non pas pour <span class="math inline">\(\beta_0\)</span> tel que défini ici, mais pour une ordonnée à l’origine qui représenterait la valeur moyenne de la réponse si les prédicteurs étaient à leur valeur moyenne. Autrement dit, nous cherchons une distribution <em>a priori</em> du log du nombre d’espèces pour une île ayant une log-superficie moyenne.</p>
+<p><em>Note</em>: Le package <em>brms</em> que nous utiliserons transforme les prédicteurs d’une régression pour les centrer sur leur valeur moyenne. Cela n’affecte pas les résultats produits pour la régression, mais cela nécessite que nous spécifions une distribution <em>a priori</em> non pas pour <span class="math inline">\(\beta_0\)</span> tel que défini ici, mais pour une ordonnée à l’origine qui représenterait la valeur moyenne de la réponse si les prédicteurs étaient à leur valeur moyenne. Autrement dit, nous cherchons une distribution <em>a priori</em> du log du nombre d’espèces pour une île ayant une log-superficie moyenne.</p>
 <p>Supposons que les valeurs plausibles pour le nombre d’espèces de l’île moyenne sont entre 1 et 1000. En prenant le log de ces valeurs, nous obtenons <span class="math inline">\(\log(1) = 0\)</span> et <span class="math inline">\(\log(1000) = 6.91\)</span>. Dans ce cas, nous choisissons une distribution <em>a priori</em> normale, avec moyenne de 3 et écart-type de 2: <span class="math inline">\(\beta_0 \sim \text{N}(3, 2)\)</span>. Celle-ci place environ 95% de la probabilité entre -1 et 7.</p>
 </div>
-<div id="droites-de-regression-possibles-a-priori" class="section level2">
+<div id="droites-de-régression-possibles-a-priori" class="section level2">
 <h2>Droites de régression possibles <em>a priori</em></h2>
 <p>Pour voir si nos distributions <em>a priori</em> couvrent bien les scénarios plausibles pour notre modèle, il est utile de simuler les prédictions réalisées par ces distributions. Dans le code R ci-dessous, nous créons d’abord un jeu de données <code>sim_df</code> contenant 100 valeurs de <span class="math inline">\(\beta_0\)</span> et <span class="math inline">\(\beta_1\)</span> à partir des distributions <em>a priori</em>, avec un index <em>i</em> identifiant la simulation. Nous créons ensuite une <code>grille</code> associant à chaque numéro de simulation une série géométrique de valeurs de la superficie (entre 0.01 km<span class="math inline">\(^2\)</span> et 10 000 km<span class="math inline">\(^2\)</span>) pour réaliser les prédictions. Finalement, nous combinons les deux jeux de données et nous calculons la valeur <span class="math inline">\(\lambda\)</span> prédite pour chaque superficie pour chacune des 100 simulations.</p>
 <pre class="r"><code>library(dplyr)
@@ -578,7 +543,7 @@ head(sim_df)</code></pre>
 <p>On voit que ces droites couvrent une gamme de possibilités très larges, certaines mêmes implausibles (la plus prononcée a une fraction d’espèce pour la plus petite île jusqu’à plus de 100 000 espèces pour la plus grandes).</p>
 </div>
 </div>
-<div id="regression-bayesienne-avec-brms" class="section level1">
+<div id="régression-bayésienne-avec-brms" class="section level1">
 <h1>Régression bayésienne avec <em>brms</em></h1>
 <p>Le package <em>brms</em>, qui est un acronyme pour <em>Bayesian Regression Models using Stan</em>, nous permet d’ajuster divers modèles de régression par l’approche bayésienne. L’avantage de ce package est qu’il nous permet de spécifier un large éventail de modèles, incluant presque tous les types de modèles paramétriques vus cette session (ex.: GLMM, GAMM, modèles avec dépendance temporelle et spatiale). La spécification des modèles utilise le même type de formule que les autres packages en R, puis <em>brms</em> traduit automatiquement les modèles spécifiés dans le langage utilisé par le programme d’inférence bayésienne <em>Stan</em>, que nous présenterons au prochain cours.</p>
 <p>Dans ce package, la fonction <code>brm</code> est utilisée pour ajuster un modèle de régression.</p>
@@ -598,12 +563,12 @@ bmod &lt;- brm(Species ~ log(Area), data = galap, family = poisson,
 ##          total post-warmup samples = 4000
 ## 
 ## Population-Level Effects: 
-##           Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-## Intercept     3.28      0.04     3.19     3.35       1190 1.01
-## logArea       0.34      0.01     0.32     0.35       1224 1.00
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     3.27      0.04     3.19     3.36 1.00     1072      999
+## logArea       0.34      0.01     0.32     0.35 1.00     1159     1376
 ## 
-## Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
-## is a crude measure of effective sample size, and Rhat is the potential 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
 ## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 <p>Plusieurs des informations données ici sont liées à l’algorithme d’inférence bayésienne, dont nous discuterons au prochain cours. Les colonnes <code>Estimate</code> et <code>Est. Error</code> donnent respectivement la moyenne (3.27 et 0.34) et l’écart-type (0.04 et 0.01) de la distribution <em>a posteriori</em> des coefficients. Ces résultats sont en fait identiques à ce qu’on obtient avec un GLM classique, comme nous pouvons voir ci-dessous.</p>
 <pre class="r"><code>gmod &lt;- glm(Species ~ log(Area), data = galap, family = poisson)
@@ -632,9 +597,9 @@ summary(gmod)</code></pre>
 ## Number of Fisher Scoring iterations: 5</code></pre>
 <p>Nous avons ici un modèle simple avec suffisamment de données, donc l’influence de la distribution <em>a priori</em> est négligeable et les deux méthodes (inférence bayésienne et maximum de vraisemblance) mènent à la même conclusion. Néanmoins, cet exercice visait à illustrer comment nous pouvions choisir des distributions <em>a priori</em> pour un jeu de données réel.</p>
 </div>
-<div id="visualiser-et-verifier-lajustement-du-modele" class="section level1">
+<div id="visualiser-et-vérifier-lajustement-du-modèle" class="section level1">
 <h1>Visualiser et vérifier l’ajustement du modèle</h1>
-<div id="estimation-des-effets-et-intervalles-de-credibilite" class="section level2">
+<div id="estimation-des-effets-et-intervalles-de-crédibilité" class="section level2">
 <h2>Estimation des effets et intervalles de crédibilité</h2>
 <p>Revenons sur le sommaire des résultats de notre régression bayésienne:</p>
 <pre class="r"><code>summary(bmod)</code></pre>
@@ -646,34 +611,37 @@ summary(gmod)</code></pre>
 ##          total post-warmup samples = 4000
 ## 
 ## Population-Level Effects: 
-##           Estimate Est.Error l-95% CI u-95% CI Eff.Sample Rhat
-## Intercept     3.28      0.04     3.19     3.35       1190 1.01
-## logArea       0.34      0.01     0.32     0.35       1224 1.00
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     3.27      0.04     3.19     3.36 1.00     1072      999
+## logArea       0.34      0.01     0.32     0.35 1.00     1159     1376
 ## 
-## Samples were drawn using sampling(NUTS). For each parameter, Eff.Sample 
-## is a crude measure of effective sample size, and Rhat is the potential 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
 ## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 <p>La section <em>Population-Level Effects</em> décrit les effets fixes du modèle (ici, il n’y a pas d’effets aléatoires). La même information peut être obtenue avec <code>fixef</code>.</p>
 <pre class="r"><code>fixef(bmod)</code></pre>
 <pre><code>##            Estimate   Est.Error      Q2.5     Q97.5
-## Intercept 3.2757685 0.041556695 3.1931649 3.3546125
-## logArea   0.3371228 0.007208022 0.3231905 0.3512037</code></pre>
+## Intercept 3.2724709 0.040513089 3.1918485 3.3555394
+## logArea   0.3377724 0.006974184 0.3237699 0.3511179</code></pre>
 <p>Par défaut, l’estimé est la moyenne <em>a posteriori</em> du paramètre et l’erreur est son écart-type. Cependant, on peut choisir des estimés plus robustes aux valeurs extrêmes. Avec la spécification <code>robust = TRUE</code>, R nous donne un estimé basé sur la médiane et une erreur basée sur l’écart absolu médian.</p>
 <pre class="r"><code>fixef(bmod, robust = TRUE)</code></pre>
-<pre><code>##           Estimate   Est.Error      Q2.5     Q97.5
-## Intercept 3.275669 0.043258559 3.1931649 3.3546125
-## logArea   0.337175 0.007280233 0.3231905 0.3512037</code></pre>
+<pre><code>##            Estimate   Est.Error      Q2.5     Q97.5
+## Intercept 3.2718813 0.039567998 3.1918485 3.3555394
+## logArea   0.3378376 0.007005959 0.3237699 0.3511179</code></pre>
 <p>Dans ce cas-ci, la distribution <em>a posteriori</em> s’approche probablement d’une distribution normale, ce qui fait que les estimés robustes et non-robustes sont presque identiques.</p>
 <p>Les quantiles à 2.5% et 97.5% présentés dans ce sommaire définissent un <em>intervalle de crédibilité</em> contenant 95% de la distribution de probabilité <em>a posteriori</em> du paramètre. Ces intervalles sont les analogues bayésiens des intervalles de confiance.</p>
 <p>La fonction <code>marginal_effects</code> permet de visualiser l’effet de chaque prédicteur sur la réponse, avec un intervalle de crédibilité à 95%. Si nous avions plusieurs prédicteurs, l’effet représenté pour un prédicteur serait calculé en fixant les autres prédicteurs à leur valeur moyenne.</p>
 <pre class="r"><code>marginal_effects(bmod)</code></pre>
+<pre><code>## Warning: Method &#39;marginal_effects&#39; is deprecated. Please use
+## &#39;conditional_effects&#39; instead.</code></pre>
 <p><img src="08-Intro_Bayes_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <p>La fonction <code>stanplot</code> permet de réaliser différentes visualisations de la distribution <em>a posteriori</em> des paramètres. Par exemple, nous affichons ici la densité de probabilité (<code>type = "dens"</code>) pour le coefficient de <code>log(Area)</code>:</p>
 <pre class="r"><code>stanplot(bmod, pars = &quot;b_logArea&quot;, type = &quot;dens&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
 <p><img src="08-Intro_Bayes_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 <p>L’aspect “bosselé” de la courbe de densité est dû au fait que la distribution <em>a posteriori</em> est approximée par l’algorithme, comme nous verrons dans les prochains cours.</p>
 </div>
-<div id="verification-des-predictions-a-posteriori" class="section level2">
+<div id="vérification-des-prédictions-a-posteriori" class="section level2">
 <h2>Vérification des prédictions <em>a posteriori</em></h2>
 <p>Puisque l’inférence bayésienne s’applique à plusieurs types de modèles, les statistiques utilisées pour vérifier l’ajustement varient d’un modèle à l’autre. Cependant, une stratégie générale consiste à simuler des jeux de données à partir de la distribution <em>a posteriori</em> des paramètres et vérifier si les caractéristiques des données observées sont bien représentées par ces simulations. Cette technique s’appelle la vérification des prédictions <em>a posteriori</em> (ou <em>posterior predictive check</em>).</p>
 <p>Dans <em>brms</em>, plusieurs options de vérification sont accessibles à partir de la fonction <code>pp_check</code>, ce qui nous évite d’avoir à coder nous-mêmes les simulations et visualisations. Par exemple, le type de vérification “dens_overlay” superpose la densité de probabilité estimée de l’ensemble des observations (<span class="math inline">\(y\)</span>, courbe foncée dans le graphique) à celles estimées à partir de simulations du modèle ajusté (<span class="math inline">\(y_{rep}\)</span>, courbes pâles). L’argument <code>nsamples</code> détermine le nombre de simulations réalisées.</p>
@@ -689,10 +657,10 @@ summary(gmod)</code></pre>
 <pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
 <p><img src="08-Intro_Bayes_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 <p>En effet, l’écart-type observé est extrême par rapport aux prédictions du modèle, ce qui appuie l’idée que les données sont surdisperséees. Une distribution binomiale négative de la réponse serait peut-être plus appropriée ici.</p>
-<p>Notez que les statistiques sommaires les plus utiles pour la vérification sont celles qui ne sont pas directement ajustées par le modèle. Par exemple, tous les modèles de régression s’ajustent pour bien représenter la moyenne des observations. Puisque la régression de Poisson n’a pas de paramètre séparé pour ajuster la dispersion des observations autour de leur moyenne, il est possible que celle-ci ne soit pas bien représentée par le modèle, ce qui en fait une bonne statistique à vérifier.</p>
+<p>Notez que les statistiques sommaires les plus utiles pour la vérification sont celles qui ne sont pas directement ajustées par le modèle. Par exemple, tous les modèles de régression s’ajustent pour bien représenter la moyenne des observations. Puisque la régression de Poisson n’a pas de paramètre séparé pour ajuster la dispersion des observations autour de leur moyenne, il est possible que celle-ci ne soit pas bien représentée par le modèle, ce qui fait de l’écart-type une bonne statistique à vérifier.</p>
 </div>
 </div>
-<div id="resume" class="section level1">
+<div id="résumé" class="section level1">
 <h1>Résumé</h1>
 <ul>
 <li>Dans l’inférence bayésienne, la probabilité <em>a posteriori</em> d’une valeur d’un paramètre est proportionnelle au produit de sa probabilité <em>a priori</em> et de sa vraisemblance selon les données observées.</li>
@@ -725,6 +693,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

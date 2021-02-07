@@ -1,7 +1,6 @@
 ---
 title: "Données spatiales"
 output:
-    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -35,10 +34,10 @@ Pour cet exercice, nous utiliserons la racine carrée de la richesse spécifique
 
 a) Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l'effet des deux prédicteurs selon ce modèle?
 
-b) Calculez le variogramme empirique des résidus du modèle en (a) et ajustez un modèle théorique pour ce variogramme avec les fonctions du package *gstat*. Parmi les modèles exponentiel, gaussien et sphérique, lequel convient le mieux à ces données?
+b) Calculez le variogramme empirique des résidus du modèle en (a). Semble-t-il y avoir une corrélation spatiale entre les points?
 
 *Note*: L'argument `cutoff` de la fonction `variogram` spécifie la distance maximale à laquelle le variogramme est calculé. Vous pouvez ajuster manuellement cette valeur pour vous assurer que le palier du variogramme soit atteint.
 
-c) Ré-ajustez le modèle linéaire en (a) avec la fonction `gls` du package *nlme*, puis ajoutez-y un terme de corrélation spatiale basé sur le meilleur modèle déterminé en (b). Comparez l'AIC des modèles avec et sans corrélation spatiale.
+c) Ré-ajustez le modèle linéaire en (a) avec la fonction `gls` du package *nlme*, en essayant différents modèles de corrélation spatiale (exponentiel, Gaussien, sphérique). Comparez les modèles (incluant celui sans corrélation spatiale) avec l'AIC.
 
-d) Quel est l'effet de la fraction de forêts et de milieux humides selon le modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a). 
+d) Quel est l'effet de la fraction de forêts et de milieux humides selon le meilleur modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a).

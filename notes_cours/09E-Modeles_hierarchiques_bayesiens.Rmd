@@ -48,6 +48,7 @@ To solve this problem, we will use Monte-Carlo methods. As we saw in the first c
 It does not seem possible to draw samples from the distribution $p(\theta | y)$ if we do not know $p(y)$. However, since $p(y)$ does not depend on $\theta$, it is possible to calculate the *ratio* of the posterior probabilities of two vectors $\theta$:
 
 $$\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} = \frac{p(y | \theta_{(2)}) p(\theta_{(2)})}{p(y | \theta_{(1)}) p(\theta_{(1)})}$$
+
 *Note*: Here, we use indices in parentheses to represent different $\theta$ vectors, in order to avoid confusion with the different elements of a single vector, e.g. if $\theta$ is a vector of $m$ parameters, $\theta_{(1)} = (\theta_{1(1)}, \theta_{2(1)}, ... \theta_{m(1)})$.
 
 ## Metropolis-Hastings algorithm
@@ -58,7 +59,7 @@ The Metropolis-Hastings algorithm makes it possible to generate a sample of the 
 
 2. Next, we choose a second vector $\theta_{(2)}$, which depends on $\theta_{(1)}$ according to some transition probability. For example, adding to each of the parameters in $\theta_{(1)}$ an amount drawn from a normal distribution.
 
-3. We compute the posterior probability ratio $\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} $.
+3. We compute the posterior probability ratio $\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)}$.
 
     + If the ratio is greater than or equal to 1 ($\theta_{(2)}$ is more likely than $\theta_{(1)}$), we accept $\theta_{(2)}$.
 
@@ -162,7 +163,7 @@ As with the divergences, this warning indicates that the algorithm does not trav
 
 ## Options for using Stan from R
 
-To conclude this section, we will see different ways to use Stan from R. First, we can write a Stan program, as seen in the previous lab. Here is the beginning of the Stan code for a simple model, where there are $N$ observations of a response variable $y$ and a predictor $x$.
+To conclude this section, we will see different ways to use Stan from R. First, we can write a Stan program, as we will see in the next lab. Here is the beginning of the Stan code for a simple model, where there are $N$ observations of a response variable $y$ and a predictor $x$.
 
 ```
 data {
@@ -213,7 +214,7 @@ This part presents the steps of a suggested protocol for the development and val
 
 The protocol is based on the article:
 
-> Betancourt, M. (2018) Towards A Principled Bayesian Workflow (RStan). https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html.
+> Betancourt, M. (2020) Towards A Principled Bayesian Workflow. https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html.
 
 Michael Betancourt is one of Stan's developers and his website contains several articles on the theory related to hierarchical Bayesian models, as well as case studies on their application to different problems.
 
@@ -253,6 +254,8 @@ Next, we check the fitting diagnostics for each simulation, then we check the ac
   
 - Sensitivity test: Does the data allow us to determine the value of the parameter?
 
+Since Bayesian inference must be repeated several times, this part of the protocol is very costly in terms of computation time. Thus, it is not necessary to perform it for each model, especially if it is a type of model that is already well known.
+
 ### Calibration by simulation
 
 Suppose we have observations $y$ simulated from the model with a parameter value $\theta$ drawn from the prior distribution. By fitting the model to these $y$, we obtain a sample of the posterior distribution of $\theta$, that is $\theta_{(i)}$ for $i$ from 1 to $N$ iterations .
@@ -291,4 +294,416 @@ If no problem is detected, we can consult the summary of estimates and view the 
 
 In this last step, we want to verify that the predictions obtained by simulating observations from the posterior distribution of the parameters are sufficiently close to the observations.
 
-As seen at the end of the last class, we can check if enough observations are in their prediction interval according to the fitted model. Also, we can compare predictions and observations using summary statistics describing important characteristics of the data set that are not directly fit by the model.
+As seen at the end of the last class, we can check if enough observations are within their prediction interval according to the fitted model. Also, we can compare predictions and observations using summary statistics describing important characteristics of the data set that are not directly fit by the model.
+
+# Detailed example: Bayesian GLMM with *brms*
+
+For this example, we use the `rikz` dataset from the textbook by Zuur et al., *Mixed Effects Models and Extensions in Ecology with R*. We used the same data in week 5 for generalized linear mixed models. 
+
+The `rikz` dataset contains measurements of benthic species richness for 45 sites on 9 beaches (*Beach*) in the Netherlands, and two predictors: the vertical position of the site (*NAP*) and the beach exposure index (*Exposure*). Since the latter only takes three different values (8, 10 and 11), we will treat it as a factor.
+
+```{r}
+rikz <- read.csv("../donnees/rikz.csv")
+# Convert Beach and Exposure to factors (categorical variables)
+rikz <- mutate(rikz, Beach = as.factor(Beach), 
+               Exposure = as.factor(Exposure))
+head(rikz)
+```
+
+Here are the packages we will need for this example.
+
+```{r, message = FALSE, warning = FALSE}
+library(brms)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+theme_set(theme_cowplot())
+```
+
+
+## Model formulation
+
+As we did in week 5, we model this data using Poisson regression, with a random effect of the beach on the intercept. Here is the mathematical representation of this model, where we have chosen parameter names that are close to those given by *brms*:
+
+```
+Richness ~ poisson(lambda)
+log(lambda) = b_Intercept + r_Beach + b_NAP * NAP + b_Exposure10 * Exposure10 + b_Exposure * Exposure11
+r_Beach ~ normal(0, sd_Beach)
+```
+
+- the species richness follows a Poisson distribution with mean `lambda`;
+- `log(lambda)` is given by a linear function of the NAP and the exposure index, with a mean intercept (`b_Intercept`) and a random effect for each beach around this mean (`r_Beach`);
+- the beach random effects are normally distributed with a standard deviation `sd_Beach`.
+
+The above formula is based on the default coding of factors in R, with `Exposure = 8` as the reference level. `Exposure10` and `Exposure11` take a value of 1 when the `Exposure` variable is 10 or 11, respectively; thus, `b_Exposure10` represents the difference in `log(lambda)` between levels 8 and 10 and `b_Exposure11` represents the difference between levels 8 and 11.
+
+We still have to choose the prior distribution for each parameter. Suppose we know that the species richness on this type of site can reach tens of species, but not hundreds. A `normal(2, 1)` distribution for the intercept means that we give 95% probability to values between 0 and 4 on the logarithmic scale, or between 1 and 55 after taking the exponential.
+
+```{r}
+exp(c(0, 4))
+```
+
+For the predictor coefficients, the `normal(0, 1)` distribution is a reasonable choice: we already assume that the logarithm of the number of species varies on a scale of a few units, which is also the case for the only numerical predictor (NAP).
+
+```{r}
+summary(rikz$NAP)
+```
+
+Finally, we need to specify a distribution for the standard deviation of the random effects of the beach. The `normal(0, 1)` distribution, which is actually half-normal because it is truncated to zero, may be too permissive here. A standard deviation of 2 would mean that the species richness would vary by a factor of $e^2 \approx 7$ from one beach to another. We therefore use `normal(0, 0.5)` instead.
+
+Here is how to specify these prior distributions with *brms*:
+
+```{r}
+rikz_prior <- c(set_prior("normal(0, 1)", class = "b"),
+                set_prior("normal(2, 1)", class = "Intercept"),
+                set_prior("normal(0, 0.5)", class = "sd"))
+```
+
+The class of coefficients "b" represents a distribution that applies to all fixed coefficients except the intercept class. To specify the distribution of a single coefficient in a class, the argument `coef` must be specified in addition to `class`. The "sd" class represents the prior distribution for standard deviations of random effects. Since *brms* knows that standard deviations are always greater than zero, we do not need to specify the lower bound with `lb` here. 
+
+## Prior predictive checks
+
+We first call the function `brm` with the argument `sample_prior = "only"` to obtain a sample of the prior distribution of the parameters of a model.
+
+```{r, eval = FALSE}
+res_prior <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+                 family = poisson, sample_prior = "only", 
+                 chains = 1, iter = 400, prior = rikz_prior)
+```
+
+```{r, echo = FALSE}
+res_prior <- readRDS("09-savedRDS/res_prior.RDS")
+```
+
+By default, `brm` estimates the posterior distribution with 4 chains and 2000 iterations per chain, with 50% of these iterations constituting the warmup period. Here, we specify a single chain and 400 iterations, so there are 200 warmup iterations and 200 for sampling.
+
+The function `posterior_samples` usually returns an array of values taken from the posterior distribution of the parameters, but here it is the prior distribution because of the argument `sample_prior`.
+
+```{r}
+prior_params <- posterior_samples(res_prior)
+str(prior_params)
+```
+
+Each row represents one iteration of the sampling period. In this case, Stan is simply drawing values for each parameter from their prior distribution. Parameters with names beginning with `b` represent the fixed effects, `sd_Beach__Intercept` is the standard deviation of the random effects of the beach on the intercept, and then parameters with names beginning with `r` are the random effects; these are drawn from the distribution defined by `sd_Beach__Intercept`. The last parameter, `lp__`, represents the log of the joint probability of the parameters.
+
+We add to this dataset a column identifying the simulation (from 1 to 200):
+
+```{r}
+prior_params$sim_id <- as.character(1:200)
+```
+
+The `posterior_predict` function generates a simulation of the response variable according to the value of the parameters at each iteration and the predictors of the dataset.
+
+Despite the name, this function is closer to the `simulate` function for classical models in R, rather than `predict`. As seen in the previous lab, `posterior_epred` provides the predictions of the mean response at each iteration.
+
+The result is a matrix with one row for each of the 200 iterations of the prior distribution and one column for each of the 45 observations of the original dataset (in the same order as the 45 rows of the original dataset).
+
+```{r}
+prior_pred <- posterior_predict(res_prior)
+str(prior_pred)
+```
+
+In order to visualize these predictions, we add a column to identify the simulation and we perform a pivot to get 3 columns: `sim_id`, `obs_id` and `Richness`.
+
+```{r, message = FALSE, warning = FALSE}
+prior_df <- data.frame(prior_pred)
+prior_df$sim_id <- 1:200
+prior_df <- pivot_longer(prior_df, cols = -sim_id, 
+                         names_to = "obs_id", values_to = "Richness")
+head(prior_df)
+summary(prior_df$Richness)
+```
+
+The maximum simulated value is very high (3458 species), which frequently occurs when the response follows an exponential function of the predictors. However, the vast majority of simulated values are less than 100.
+
+```{r}
+mean(prior_df$Richness < 100)
+```
+
+Here is a way to visualize the distribution of the species richness for each prior simulation of the model. We create a probability density curve (with `stat_density`) for each simulation (`group = sim_id`), with a transparency level `alpha = 0.3` to see the superimposed curves. We apply a square root transformation to the `x` axis to see more of the data (a log transformation is impossible because of the presence of zeros), then we limit this axis to values between 0 and 200.
+
+```{r}
+ggplot(prior_df, aes(x = Richness)) +
+    stat_density(aes(group = sim_id), position = "identity", geom = "line", alpha = 0.3) +
+    scale_x_sqrt(breaks = c(0, 1, 10, 25, 50, 75, 100)) +
+    coord_cartesian(xlim = c(0, 200))
+```
+
+Most simulations give a low probability to richness values > 100, consistent with the prior knowledge of the system.
+
+As mentioned above, step 3 of the full protocol (fitting the model to the simulated data) takes a lot of time, so it is often omitted, especially for a "standard" model such as a GLMM. Nevertheless, I have included the code to perform this step as a supplement at the end of these notes.
+
+## Fitting the model to observations
+
+We are now ready to fit the model to the actual observations. 
+
+```{r, eval = FALSE}
+res_br <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+              family = poisson, control = list(adapt_delta = 0.99), 
+              chains = 2, prior = rikz_prior)
+```
+
+```{r, echo = FALSE}
+res_br <- readRDS("09-savedRDS/res_br.RDS")
+```
+
+```{r}
+summary(res_br)
+```
+
+The summary of the results indicates first the model formula, then the parameters of the algorithm (number of chains and iterations, number of warmup iterations). The *Group-Level Effects* section shows the standard deviation of random effects, while the *Population-Level Effects* section shows the fixed effects. Each estimate shows the mean, standard deviation, and a 95% credibility interval for the posterior distribution, as well as the Gelman-Rubin statistic (*Rhat*) and the effective Monte Carlo sample size (based on two measures, `Bulk_ESS` and `Tail_ESS`).
+
+Comparing these results with those of the classical GLMM, we obtain differences between the mean estimates, but these differences are reasonable considering the margins of error of each parameter.
+
+```{r, message = FALSE, warning = FALSE}
+library(lme4)
+res_glmm <- glmer(Richness ~ NAP +Exposure + (1 | Beach), data = rikz, family = poisson)
+summary(res_glmm)
+```
+
+There are a few reasons why the estimates obtained by the Bayesian approach differ from those obtained by maximum likelihood, in particular:
+
+- the prior distribution can influence the inference if the number of observations is small;
+
+- even in the case where the prior distribution has little influence and the posterior distribution takes the same form as the likelihood function, the Bayesian estimate is the mean of the posterior distribution, which is not necessarily equal to the point of maximum probability, especially if the distribution is skewed.
+
+The `stanplot` function allows the visualization of different model results, including the traceplot of the Markov chains, a histogram of the posterior distributions, or a representation of the different coefficients with their credibility intervals.
+
+```{r}
+stanplot(res_br, type = "trace")
+stanplot(res_br, type = "hist")
+stanplot(res_br, type = "intervals")
+```
+
+Note that by default, the intervals in bold lines contain 50% of the posterior probability while those in thin lines contain 90% of this probability.
+
+An interactive tool to visualize the results and diagnostics of the model can be launched with the `launch_shinystan` function.
+
+```{r, eval = FALSE}
+launch_shinystan(res_br)
+```
+
+
+## Posterior predictive checks
+
+As in the last course, we use `pp_check` with `type = "intervals"` to compare the observations to the model's prediction intervals. On average, we expect 50% of the observations to be in the bold intervals and 90% in the lighter intervals.
+
+```{r}
+pp_check(res_br, type = "intervals")
+```
+
+For a Poisson regression, we can also check that the standard deviation of the observations and the number of zeros obtained are comparable to the values predicted by the fitted model.
+
+```{r}
+pp_check(res_br, type = "stat", stat = sd)
+pp_check(res_br, type = "stat", stat = function(x) sum(x == 0))
+```
+
+
+# Supplement: Fitting the model to simulated data
+
+We had obtained above simulations of the response variable for each of the 200 values derived from the prior distribution of our parameter vector. We now wish to fit the model to each of these simulations in order to perform calibration and sensitivity tests.
+
+The *brms* package includes a `brm_multiple` function that allows us to fit the same model to several datasets contained in a list. So we create a list of 200 replicates of the original dataset with `replicate` (`simplify = FALSE` is necessary to prevent R from trying to combine all 200 datasets into one), then we use a loop to replace the response column of each dataset with one of the rows of the prior prediction matrix.
+
+```{r, eval = FALSE}
+rikz_repl <- replicate(200, rikz, simplify = FALSE)
+
+for (i in 1:200) {
+    rikz_repl[[i]]$Richness <- prior_pred[i, ] 
+}
+```
+
+```{r, echo = FALSE}
+rikz_repl <- readRDS("09-savedRDS/rikz_repl.RDS")
+```
+
+Then we call the `brm_multiple` function with our model and this list of datasets. We reduce the number of Markov chains to 2 and specify the control parameter `adapt_delpth = 0.99`, because we had previously observed that the default value (`adapt_delta = 0.8`) generates several divergences. Finally, `combine = FALSE` ensures that `brm_multiple` produces a list of 200 objects for the results of each model, rather than combining them into a single object. 
+
+We did not specify the number of iterations per string, so *brms* uses 2000 iterations by default, including 1000 in the warmup period. With two chains, the sample of the posterior distribution will therefore contain 2000 values of each parameter by simulation.
+
+```{r, eval = FALSE}
+res_test <- brm_multiple(Richness ~ NAP + Exposure + (1 | Beach), 
+                         data = rikz_repl, family = poisson,
+                         chains = 2, control = list(adapt_delta = 0.99),
+                         prior = rikz_prior, combine = FALSE)
+```
+
+```{r, echo = FALSE}
+res_test <- readRDS("09-savedRDS/res_test.RDS")
+```
+
+Fitting the 200 models takes some time, so in practice this part might require the use of a high-performance computing cluster.
+
+We will now check how many models contain divergent transitions or have reached the maximum tree depth. The `nuts_params` function produces the diagnostic values for each iteration of a fitted model. Here, since we have a list of 200 results, we use `lapply` to apply this function to each element in the list: `diags` therefore contains a list of 200 data sets.
+
+```{r}
+diags <- lapply(res_test, nuts_params)
+```
+
+We can combine these datasets by stacking them with the `bind_rows` function of *dplyr*. The `.id` argument to this function creates a column (here `sim_id`) that identifies the original list item from which each row comes. Since the elements in the list have no names, this id here is the number between 1 and 200.
+
+```{r}
+diags <- bind_rows(diags, .id = "sim_id")
+head(diags)
+```
+
+Instead of two columns indicating the parameter and its value, we would like one column per parameter, so we need to pivot the data with `pivot_wider`.
+
+```{r}
+diags <- pivot_wider(diags, names_from = Parameter, values_from = Value)
+head(diags)
+```
+
+Each row indicates the number of the simulation, the chain and the iteration in that chain, as well as the values of six parameters of the algorithm. We are mainly interested in `divergent__`, which indicates whether the transition was divergent (1) or not (0), and then in the `treedepth__`. With `summarize`, we count the number of divergent transitions per simulation and the number of iterations having reached the maximum tree depth (which is 10 by default). We also attach to this result the `prior_params` table containing the parameters of each simulation in order to check if some parameter values are associated with the problems identified by the diagnostics.
+
+```{r}
+diags <- group_by(diags, sim_id) %>%
+    summarize(div = sum(divergent__), maxtree = sum(treedepth__ == 10)) %>%
+    inner_join(prior_params)
+```
+
+Since these are not our real data, but simulations, we do not try to eliminate all problematic diagnoses, but rather to see generally if estimation is difficult for certain ranges of values of the prior parameter distributions.
+
+When inspecting this dataset, we note that 2 simulations contain 1 or 2 divergent transitions (respectively), while about 10 simulations have sometimes reached the maximum tree depth. Simulations where many iterations reach the maximum depth seem to be characterized by a high intercept or standard deviation of the random effects, but otherwise there is no particular pattern to these results. 
+
+```{r}
+filter(diags, maxtree > 0 | div > 0) %>%
+  arrange(desc(div), desc(maxtree)) %>%
+  select(div, maxtree, b_Intercept, sd_Beach__Intercept)
+```
+
+## Calibration test
+
+For this test, we want to check whether the position of the true value of the parameter used for a simulation is uniformly distributed among the values obtained for the posterior distribution estimated from this simulation. For each result in our list, we can extract these posterior distributions with `posterior_samples`, which produces a data frame of 2000 iterations x 15 parameters (14 parameters plus the log of the joint probability).
+
+```{r}
+test_params <- lapply(res_test, posterior_samples)
+```
+
+However, the calibration test is based on an independent sample, so we subsample the results by taking one value every 5 iterations, for a total of 399 values between iterations 5 and 1995. As before, we combine the results of the 200 simulations with `bind_rows` by adding a column identifying the original simulation.
+
+```{r}
+test_params <- lapply(res_test, function(x) posterior_samples(x)[seq(5, 1995, 5),])
+test_params <- bind_rows(test_params, .id = "sim_id")
+```
+
+We use `bind_rows` to combine these posterior distributions with the values of the parameters from the prior distribution that were used for the simulations, contained in the `prior_params` table. With `id = "type"`, we create a column which indicates whether it is the true value of the parameter (`prior`) or a value from the posterior distribution (`posterior`). Finally, we apply a pivot to obtain 4 columns: the type of value, the simulation number, the parameter and its value.
+
+```{r}
+test_params <- bind_rows(prior = prior_params, posterior = test_params, .id = "type")
+test_params <- pivot_longer(test_params, cols = -c(sim_id, type), 
+                            names_to = "param", values_to = "value")
+head(test_params)
+```
+
+For each simulation and each parameter, `test_params` contains 400 values: the prior value of the parameter that was used to simulate the data, then 399 values of the posterior distribution.
+
+We still have to group the values by simulation and parameter, determine the rank of the 400 values (with `mutate`), then keep only the ranks of the original values of the parameters (`type == "prior"`), which should be uniformly distributed between 1 and 400 if the model is well calibrated. 
+
+*Note*: We eliminate the `lp__` column because log-probability is not a parameter of the model and is certainly not comparable between the prior and posterior distributions. 
+
+```{r}
+calib <- group_by(test_params, sim_id, param) %>%
+  mutate(rank = rank(value)) %>%
+  filter(type == "prior", param != "lp__") %>%
+  ungroup()
+head(calib)
+```
+
+To test the uniformity of the ranks for each parameter, we group the ranks into 10 classes with a histogram: 1 to 40, 41 to 80, etc. (It is important to specify the limits of the classes manually with `breaks`.) In theory, the number of observations per class is given by a binomial distribution $\text{Bin}(N = 200, p = 0.1)$, with a mean of 20 (dotted line) and for which 99% of the probability is in the grey zone.
+
+```{r}
+ggplot(calib, aes(x = rank)) +
+    geom_rect(ymin = qbinom(0.005, 200, 0.1), ymax = qbinom(0.995, 200, 0.1),
+              xmin = -40, xmax = 440, color = "white", fill = "grey80") +
+    geom_hline(yintercept = 20, linetype = "dashed") +
+    geom_histogram(breaks = seq(0.5, 400.5, 40), fill = "orange", color = "white") +
+    facet_wrap(~ param)
+```
+
+The distribution seems uniform and out of 140 bars (14 parameters x 10 classes), only 2 or 3 are out of the 99% range.
+
+## Sensitivity test
+
+Let us now check whether 45 observations are sufficient to produce accurates estimates of the parameters for each simulation.
+
+The `posterior_summary` function of *brms* produces the summary of the posterior distributions of each parameter, including the mean `Estimate` and the standard deviation `Error`.
+
+```{r}
+posterior_summary(res_test[[1]])
+```
+
+The format of this result is a matrix where the row names indicate the parameter. We create a function that converts this result into a data frame, adds the row names as a column and renames this column `param`. Then we can apply this function to each simulation and combine the results with `bind_rows` (you can ignore the warnings that the `add_rownames` function is outdated).
+
+```{r, warning = FALSE}
+get_post_sum <- function(x) {
+    posterior_summary(x) %>%
+        as.data.frame() %>%
+        add_rownames() %>%
+        rename(param = rowname)
+}
+
+post_sum <- bind_rows(lapply(res_test, get_post_sum), .id = "sim_id")
+head(post_sum)
+```
+
+We still need to add to this data frame the real values of the parameters used to simulate the data. To do this, we pivot the `prior_params` dataset, then we join the two datasets.
+
+```{r}
+prior_params <- pivot_longer(prior_params, cols = -sim_id, 
+                             names_to = "param", values_to = "true_val")
+head(prior_params)
+```
+
+
+```{r}
+post_sum <- inner_join(post_sum, prior_params)
+head(post_sum)
+```
+
+Finally, we calculate the $z$ score for each estimate, i.e. the difference between the mean and the true value of the parameter, divided by the standard deviation; then the shrinkage factor, i.e. 1 - the ratio between the posterior and prior variances of the parameters (the prior variance is 1 for fixed effects and 0.09 for `sd_Beach__Intercept`, the latter calculated from the truncated normal distribution).
+
+```{r}
+post_sum <- filter(post_sum, param != "lp__") %>%
+    mutate(zscore = (Estimate - true_val) / Est.Error,
+           prior_var = ifelse(param == "sd_Beach__Intercept", 0.09, 1),
+           contr = 1 - Est.Error^2/prior_var)
+```
+
+The following graph shows the distribution of $z$ scores for each parameter. These are centered on 0 and most estimates are within two standard deviations of the true value of the parameter ($-2 < z < $2), showing that the standard deviation of the posterior distribution does represent the uncertainty in the value of each parameter.
+
+```{r}
+ggplot(post_sum, aes(x = zscore)) +
+    geom_density() +
+    facet_wrap(~ param)
+```
+
+Then we look at the shrinkage factor as a function of the true value of each parameter. We are not interested in the random effects of each beach for this comparison, since their prior standard deviation depends on `sd_Beach__Intercept`.
+
+```{r}
+post_sum2 <- filter(post_sum, 
+                    param %in% c("b_Intercept", "b_NAP", "b_Exposure10",
+                                 "b_Exposure11", "sd_Beach__Intercept"))
+ggplot(post_sum2, aes(x = true_val, y = contr)) +
+    geom_point() +
+    facet_wrap(~ param, scales = "free_x")
+```
+
+Except for `b_NAP`, we notice that the contraction factor is often low. For example, a factor of 0.5 means that the data only halves the uncertainty with respect to the prior distribution. According to the graph for `sd_Beach__Intercept`, the higher the standard deviation of random effects, the less accurately we can estimate it. To check if this is the case for the other parameters, we add another column representing the true value of `sd_Beach__Intercept` for each simulation.
+
+```{r}
+sd_true <- filter(post_sum, param == "sd_Beach__Intercept") %>%
+    select(sim_id, sd_true = true_val)
+post_sum <- inner_join(post_sum, sd_true)
+
+post_sum2 <- filter(post_sum, 
+                    param %in% c("b_Intercept", "b_NAP", "b_Exposure10",
+                                 "b_Exposure11", "sd_Beach__Intercept"))
+ggplot(post_sum2, aes(x = sd_true, y = contr)) +
+    geom_point() +
+    facet_wrap(~ param, scales = "free_x")
+```
+
+Indeed, we find that the greater the variance between beaches, the less precise our estimates are.

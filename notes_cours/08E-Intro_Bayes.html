@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Introduction to Bayesian analysis</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Introduction to Bayesian analysis</h1>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This class presents the basic concepts of the Bayesian approach to parameter estimation, in preparation for the use of hierarchical Bayesian models in the next two weeks.</p>
+<p>We begin with a presentation of conditional probability theory and Bayes theorem, a topic that is not specific to Bayesian inference, but will be useful in understanding the logic of this approach.</p>
+</div>
+<div id="contents" class="section level1">
+<h1>Contents</h1>
+<ul>
+<li><p>Conditional probability</p></li>
+<li><p>Bayesian inference</p></li>
+<li><p>Example of Bayesian regression</p></li>
+<li><p>Visualize and verify the fit of a model</p></li>
+</ul>
+</div>
+<div id="conditional-probability" class="section level1">
+<h1>Conditional probability</h1>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>Suppose a new test is designed to detect a disease by measuring the concentration of a certain protein in the blood. This concentration is higher on average in people with the disease than in people without the disease, but it is not possible to distinguish between the two groups perfectly. Clinical studies have estimated the following two properties of this test:</p>
+<ul>
+<li><p>The sensitivity of the test, i.e. the probability of obtaining a positive result if the disease is present, is 95%.</p></li>
+<li><p>The specificity of the test, i.e. the probability of obtaining a negative result if the disease is absent, is 99%.</p></li>
+</ul>
+<p>Based on this information, can we determine the probability of having the disease if we receive a positive result?</p>
+<p>As we will see below, this probability depends on the general prevalence of the disease in the population tested. Therefore, let’s assume that 0.2% of the tested population has the disease.</p>
+<p>With this information, we can divide the tested population into 4 groups according to whether the disease is present (<span class="math inline">\(M_1\)</span>) or not (<span class="math inline">\(M_0\)</span>) and whether the test is positive (<span class="math inline">\(T_+\)</span>) or negative (<span class="math inline">\(T_-\)</span>). Out of 10,000 people receiving the test, we can calculate that on average:</p>
+<ul>
+<li><p>0.2% x 10,000 = 20 will be affected.</p></li>
+<li><p>Out of 20 people affected, on average 95% x 20 = 19 will receive a positive result, and 1 will receive a negative result.</p></li>
+<li><p>Out of 9980 people not affected, on average 1% x 9980 = 99.8 (rounded to 100) will receive a positive result and the other 9880 will receive a negative result.</p></li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">Affected: <span class="math inline">\(M_1\)</span></th>
+<th align="right">Not affected: <span class="math inline">\(M_0\)</span></th>
+<th align="right">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Positive test: <span class="math inline">\(T_+\)</span></td>
+<td align="right">19</td>
+<td align="right">100</td>
+<td align="right">119</td>
+</tr>
+<tr class="even">
+<td>Negative test: <span class="math inline">\(T_-\)</span></td>
+<td align="right">1</td>
+<td align="right">9880</td>
+<td align="right">9881</td>
+</tr>
+<tr class="odd">
+<td>Total</td>
+<td align="right">20</td>
+<td align="right">9980</td>
+<td align="right">10000</td>
+</tr>
+</tbody>
+</table>
+<p>Therefore, out of the 119 people receiving a positive result on average, 19 / 119 = about 16% have the disease. Among those who receive a negative result, 1 / 9881 = about 0.01% are affected.</p>
+<p>In the following section, we repeat this calculation using the concept of conditional probability.</p>
+</div>
+<div id="definitions" class="section level2">
+<h2>Definitions</h2>
+<div id="conditional-probability-1" class="section level3">
+<h3>Conditional probability</h3>
+<p>If <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> are two random variables, the conditional probability <span class="math inline">\(p(y|x)\)</span> is the probability of <span class="math inline">\(y\)</span> for a given value of <span class="math inline">\(x\)</span> (also called the probability of <span class="math inline">\(y\)</span> given <span class="math inline">\(x\)</span>).</p>
+<p>In our example, we have two variables: <span class="math inline">\(M\)</span> represents the presence or absence of the disease and <span class="math inline">\(T\)</span> represents the positive or negative test result. The sensitivity of the test is the probability of <span class="math inline">\(T_+\)</span> if the person is known to have the disease, i.e. <span class="math inline">\(P(T_+ | M_1)\)</span>, equal to 0.95. The specificity represents the conditional probability <span class="math inline">\(P(T_- | M_0)\)</span>, equal to 0.99.</p>
+</div>
+<div id="joint-probability" class="section level3">
+<h3>Joint probability</h3>
+<p>The joint probability of obtaining both a certain value of <span class="math inline">\(x\)</span> and a certain value of <span class="math inline">\(y\)</span>, denoted <span class="math inline">\(p(x, y)\)</span>, can be calculated in two ways: (1) the probability of obtaining <span class="math inline">\(x\)</span> multiplied by the probability of obtaining <span class="math inline">\(y\)</span>, given <span class="math inline">\(x\)</span>; or (2) the probability of obtaining <span class="math inline">\(y\)</span> multiplied by the probability of obtaining <span class="math inline">\(x\)</span>, given <span class="math inline">\(y\)</span>.</p>
+<p><span class="math display">\[p(x, y) = p(x) p(y | x) = p(y) p(x | y)\]</span></p>
+<p>In our example, here are the two ways to calculate the probability of having the disease <em>and</em> getting a positive test:</p>
+<p><span class="math display">\[p(M_1, T_+) = p(M_1) p(T_+ | M_1) = p(T_+) p(M_1 | T_+)\]</span></p>
+</div>
+<div id="marginal-probability" class="section level3">
+<h3>Marginal probability</h3>
+<p>The marginal probability of a variable <span class="math inline">\(y\)</span>, <span class="math inline">\(p(y)\)</span>, is its probability if the value of the other variables is unknown. If we do not directly know <span class="math inline">\(p(y)\)</span>, but know <span class="math inline">\(p(y, x)\)</span> for each possible value of another variable <span class="math inline">\(x\)</span>, then <span class="math inline">\(p(y)\)</span> is the sum of the joint probabilities of <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> for each value of <span class="math inline">\(x\)</span>. (<em>Marginalization</em> is the action of summing up the different possibilities for variables other than <span class="math inline">\(y\)</span>).</p>
+<p><span class="math display">\[p(y) = \sum_x p(y, x) = \sum_x p(y|x) p(x)\]</span></p>
+<p>If <span class="math inline">\(x\)</span> is a continuous variable, the principle is the same, but the sum becomes an integral:</p>
+<p><span class="math display">\[p(y) = \int p(y, x) \text{d}x = \int p(y|x) p(x) \text{d}x\]</span></p>
+<p>Returning to our example, we can express each item in the table as a joint probability with specific values of <span class="math inline">\(M\)</span> or <span class="math inline">\(T\)</span> (inner cells), or as a marginal probability (for the row and column sums).</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right"><span class="math inline">\(M_1\)</span></th>
+<th align="right"><span class="math inline">\(M_0\)</span></th>
+<th align="right">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T_+\)</span></td>
+<td align="right"><span class="math inline">\(p(M_1, T_+)\)</span></td>
+<td align="right"><span class="math inline">\(p(M_0, T_+)\)</span></td>
+<td align="right"><span class="math inline">\(p(T_+)\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_-\)</span></td>
+<td align="right"><span class="math inline">\(p(M_1, T_-)\)</span></td>
+<td align="right"><span class="math inline">\(p(M_0, T_-)\)</span></td>
+<td align="right"><span class="math inline">\(p(T_-)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Total</td>
+<td align="right"><span class="math inline">\(p(M_1)\)</span></td>
+<td align="right"><span class="math inline">\(p(M_0)\)</span></td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p>This allows us to fill in the cells in the table using the relationship between conditional, joint, and marginal probabilities. For example, for the row <span class="math inline">\(T_+\)</span>:</p>
+<ul>
+<li><p><span class="math inline">\(p(M_1, T_+) = p(M_1) p(T_+ | M_1) = 0.002 \times 0.95 = 0.0019\)</span></p></li>
+<li><p><span class="math inline">\(p(M_0, T_+) = p(M_0) p(T_+ | M_0) = 0.998 \times 0.01 = 0.00998\)</span> (<span class="math inline">\(p(T_+ | M_0)\)</span> is the probability to get a false positive, so the complement of specificity, equal to 1%.)</p></li>
+<li><p><span class="math inline">\(p(T_+) = p(M_1, T_+) + p(M_0, T_+) = 0.019 + 0.00998 \approx 0.119\)</span></p></li>
+</ul>
+<p>Here is the full table:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right"><span class="math inline">\(M_1\)</span></th>
+<th align="right"><span class="math inline">\(M_0\)</span></th>
+<th align="right">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T_+\)</span></td>
+<td align="right"><span class="math inline">\(p(M_1, T_+)\)</span> = 0.0019</td>
+<td align="right"><span class="math inline">\(p(M_0, T_+)\)</span> = 0.01</td>
+<td align="right"><span class="math inline">\(p(T_+)\)</span> = 0.0119</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_-\)</span></td>
+<td align="right"><span class="math inline">\(p(M_1, T_-)\)</span> = 0.0001</td>
+<td align="right"><span class="math inline">\(p(M_0, T_-)\)</span> = 0.988</td>
+<td align="right"><span class="math inline">\(p(T_-)\)</span> = 0.9881</td>
+</tr>
+<tr class="odd">
+<td>Total</td>
+<td align="right"><span class="math inline">\(p(M_1)\)</span> = 0.002</td>
+<td align="right"><span class="math inline">\(p(M_0)\)</span> = 0.998</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="bayes-theorem" class="section level2">
+<h2>Bayes’ theorem</h2>
+<p>For two variables <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, it may be easier to calculate <span class="math inline">\(p(y|x)\)</span> than <span class="math inline">\(p(x|y)\)</span>, or vice versa. In our example, we knew the probability of having a positive result if the disease is present <span class="math inline">\(p(T_+ | M_1)\)</span>, but we were looking for the probability that the disease is present if the result is positive: <span class="math inline">\(p(M_1 | T_+)\)</span>. Bayes’ theorem tells us how to “invert” the conditional probability without having to fill in a table like the one above.</p>
+<p>Remember that there are two ways to compute the joint probability <span class="math inline">\(p(x, y)\)</span> with a value of <span class="math inline">\(x\)</span> and a value of <span class="math inline">\(y\)</span>:</p>
+<p><span class="math display">\[p(x, y) = p(x) p(y | x) = p(y) p(x | y)\]</span></p>
+<p>If we divide both sides of the right equality by <span class="math inline">\(p(y)\)</span>, we obtain Bayes’ theorem:</p>
+<p><span class="math display">\[p(x|y) = \frac{p(x) p(y | x)}{p(y)}\]</span></p>
+<p>This tells us that we can compute the probability distribution from <span class="math inline">\(x\)</span> conditional on <span class="math inline">\(y\)</span> if we know: (1) the probability distribution of <span class="math inline">\(y\)</span> conditional on <span class="math inline">\(x\)</span> and (2) the marginal probability distribution of <span class="math inline">\(x\)</span>. As for the denominator <span class="math inline">\(p(y)\)</span>, it can be obtained by summing (or integrating) <span class="math inline">\(p(x) p(y|x)\)</span> over the set of possible values of <span class="math inline">\(x\)</span>.</p>
+<p>In our example, the application of the theorem shows that <span class="math inline">\(p(M_1 | T_+)\)</span> = 16%, as previously determined.</p>
+<p><span class="math display">\[p(M_1 | T_+) = \frac{p(T_+ | M_1) p(M_1)}{p(T_+)}\]</span></p>
+<p>–</p>
+<p><span class="math display">\[p(M_1 | T_+) = \frac{p(T_+ | M_1) p(M_1)}{p(T_+ | M_1) p(M_1) + p(T_+ | M_0) p(M_0)}\]</span></p>
+<p><span class="math display">\[p(M_1 | T_+) = \frac{0.95 \times 0.002}{0.95 \times 0.002 + 0.01 \times 0.998} = 0.16\]</span></p>
+<p>Note that with a positive result, the probability of having the disease is multiplied by 80 (16% vs. 0.2%), but it is still more likely to not have it. In other words, if a disease is quite rare, most positive results will be false positives. This is why some tests are not performed without the presence of other symptoms that would increase the probability of being affected before the test. The question of whether or not to perform a test is sometimes a difficult ethical decision, because both a lack of detection or a false alarm have harmful effects.</p>
+<p>Similarly, one could calculate <span class="math inline">\(p(M_1 | T_-)\)</span> = 0.01%. So with a negative result, the probability of being affected is divided by 20 relative to the general prevalence of the disease.</p>
+<p>By rearranging the terms of Bayes’ theorem:</p>
+<p><span class="math display">\[p(M_1 | T_+) = \frac{p(T_+ | M_1)}{p(T_+)}  p(M_1)\]</span></p>
+<p>we see that it is a method to revise an initial probability <span class="math inline">\(p(M_1)\)</span> according to new information given by the test result, to obtain a probability <span class="math inline">\(p(M_1 | T_+)\)</span>. This idea is the basis of Bayesian inference.</p>
+</div>
+</div>
+<div id="bayesian-inference" class="section level1">
+<h1>Bayesian inference</h1>
+<div id="frequentist-and-bayesian-interpretations" class="section level2">
+<h2>Frequentist and Bayesian interpretations</h2>
+<p>In the previous section, we saw how Bayes’ theorem allows us to calculate the probability of having a disease based on its general prevalence <span class="math inline">\(p(M_1)\)</span> and the result of a screening test, <span class="math inline">\(T_+\)</span> or <span class="math inline">\(T_-\)</span>:</p>
+<p><span class="math display">\[p(M_1 | T_+) = \frac{p(T_+ | M_1)}{p(T_+)}  p(M_1)\]</span> <span class="math display">\[p(M_1 | T_-) = \frac{p(T_- | M_1)}{p(T_-)}  p(M_1)\]</span></p>
+<p>Now consider <span class="math inline">\(M_1\)</span> as a hypothesis that a given patient has the disease. The <em>prior</em> probability of <span class="math inline">\(M_1\)</span> (before the test) is equal to <span class="math inline">\(p(M_1)\)</span>. After the test, the <em>posterior</em> probability of <span class="math inline">\(M_1\)</span> is <span class="math inline">\(p(M_1 | T_+)\)</span> or <span class="math inline">\(p(M_1 | T_-)\)</span>, depending on the result.</p>
+<p>According to the <strong>frequentist</strong> interpretation, probabilities represent the frequency of events after a large number of repetitions of an observation or experiment. In this case, we can assign a probability to <span class="math inline">\(M_1\)</span> because the patient comes from a population and the disease has a certain frequency in that population.</p>
+<p>Frequentist interpretation is the basis of most introductory statistics courses, as it allows, among other things, the definition of hypothesis tests and confidence intervals. In this approach, a probability can be assigned to statistics based on observed data, such as the mean of a sample <span class="math inline">\(\bar{x}\)</span>, but not to model parameters such as the population mean <span class="math inline">\(\mu\)</span>. When defining a 95% confidence interval around <span class="math inline">\(\bar{x}\)</span>, it is not that this particular interval that has a 95% probability of containing <span class="math inline">\(\mu\)</span> (after sampling, the interval and <span class="math inline">\(\mu\)</span> are both fixed), but it is 95% of the possible samples of <span class="math inline">\(x\)</span> that would produce an interval containing the value of <span class="math inline">\(\mu\)</span>.</p>
+<p>According to the <strong>Bayesian</strong> interpretation, probabilities represent our uncertainty about the value of a quantity. We can therefore speak of a probability distribution even for a presumed fixed value, e.g. a parameter of a model.</p>
+<p>Historically, debates between the two approaches have often been acrimonious. Today, the same statisticians may use either the frequentist or the Bayesian approach depending on the nature of the problem. However, care must be taken to ensure that the results are always interpreted according to the approach used. Remember, for example, that a frequentist confidence interval does not represent a probability distribution of the parameter, or that checking the fit of a Bayesian model is not equivalent to a null hypothesis test.</p>
+</div>
+<div id="bayesian-inference-on-the-value-of-a-parameter" class="section level2">
+<h2>Bayesian inference on the value of a parameter</h2>
+<p>Suppose we have a series of observations of a variable <span class="math inline">\(y\)</span>, which we represent by a model including an adjustable parameter <span class="math inline">\(\theta\)</span>. In the Bayesian approach, we assign a prior probability distribution to <span class="math inline">\(\theta\)</span>, <span class="math inline">\(p(\theta)\)</span>, representing the uncertainty on the value of the parameter before having observed the data. The probability of the observations <span class="math inline">\(y\)</span>, conditional on a given value of <span class="math inline">\(\theta\)</span>, is given by the likelihood function <span class="math inline">\(p(y|\theta)\)</span>.</p>
+<p>From this information, we can use Bayes’ theorem to infer <span class="math inline">\(p(\theta | y)\)</span>, which is the posterior distribution of <span class="math inline">\(\theta\)</span> after observing <span class="math inline">\(y\)</span>.</p>
+<p><span class="math display">\[p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}\]</span></p>
+<p>The denominator <span class="math inline">\(p(y)\)</span> is obtained by summing (or integrating) <span class="math inline">\(p(y | \theta) p(\theta)\)</span> for all possible values of <span class="math inline">\(\theta\)</span>. Most of the time, this quantity cannot be calculated exactly, but it is approximated by the Monte-Carlo methods that we will see in the next lesson.</p>
+</div>
+<div id="example-1" class="section level2">
+<h2>Example</h2>
+<p>Here is a simple example to illustrate the principle of Bayesian inference. Suppose that ten throws of a coin produce the following series of values (0 = tails, 1 = heads): 0,0,0,0,0,0,0,1,1,1,1,0,0,0. We try to estimate <span class="math inline">\(p\)</span>, the probability of getting “heads” for this coin.</p>
+<p>If <span class="math inline">\(y\)</span> is the number of “heads” obtained among <span class="math inline">\(n\)</span> throws, then the likelihood function is given by the binomial distribution: <span class="math inline">\(y \sim \text{Bin}(n, p)\)</span>.</p>
+<p>The different panels of the graph below show the posterior distribution of <span class="math inline">\(p\)</span> (solid line) after each throw in the sequence. In this case, the prior distribution indicated by the dotted line was very diffuse, giving an equal probability to each possible value of <span class="math inline">\(p\)</span>. After 10 throws, the maximum of the posterior distribution is equal to the proportion of “heads” in the data (0.3), which is also the maximum likelihood estimate.</p>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>The graph below shows the same inference, but with a prior distribution much more concentrated around 0.5. This distribution represents the idea that a coin is much more likely to be balanced (50% heads) and that deviations around this value are generally minor. In this case, the posterior distribution moves with the data, but remains much closer to the prior distribution.</p>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Finally, the graph below compares the posterior distribution (orange line) according to each prior distribution (dotted line). The likelihood (identical in both cases) is indicated by a solid line and has been normalized to be compared to the distributions.</p>
+<p>For the diffuse prior distribution (left), the posterior distribution is exactly proportional to the likelihood. When the prior distribution is more concentrated than the likelihood (right), the posterior distribution is in between, but closer to the prior distribution.</p>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="choosing-the-prior-distribution" class="section level2">
+<h2>Choosing the prior distribution</h2>
+<p>In some cases, prior knowledge can give us a fairly specific idea of the prior distribution to use. For example, the posterior distribution obtained from one study can be used as the prior distribution for a subsequent study.</p>
+<p>More often, however, we can use a fairly diffuse distribution to penalize very implausible parameter values without unduly constraining the analysis. The term <em>weakly informative prior</em> describes this type of choice.</p>
+<p>A common criticism of Bayesian inference is that assigning a prior distribution adds bias to the analysis. However, if the choice of this distribution is justified by the need to penalize too extreme values of the parameters, the role of the prior distribution is not so different from that of a random effect that shrinks the group means towards the general mean, or of the smoothing parameter in an additive model that penalizes too complex curves. All these methods are examples of <em>regularization</em>, i.e. the imposition of constraints that control the risk of overfitting in a complex model, without having to completely fix certain parameters and effects.</p>
+<p>The choice of the prior distribution can be considered as an assumption in addition to the other assumptions of the model, such as the choice of the distribution representing the observations, the choice of the predictors and interactions to be included or excluded in the model, etc. Ultimately, it is the entire model that must be validated for its ability to reproduce the characteristics of the observations, including observations other than those used to fit the model.</p>
+</div>
+<div id="advantages-and-disadvantages-of-the-bayesian-approach" class="section level2">
+<h2>Advantages and disadvantages of the Bayesian approach</h2>
+<p>Like maximum likelihood, Bayesian inference has the advantage of being applicable to any type of <em>generative model</em>, i.e. a model that mathematically describes how observations are generated from parameters. In a Bayesian approach, the parameters of various types of models, including all those seen in this course (generalized linear, mixed effects, additive, time-dependent and spatially-dependent models) can be estimated using the same algorithms; we will discuss these algorithms further in the next class. These algorithms produce the joint posterior distribution of the parameters of the model, from which we can easily obtain the distribution of any quantity derived from the model: combination of parameters, prediction, etc. By way of comparison, maximum likelihood only tells us the value of each parameter maximizing the likelihood, and obtaining confidence intervals on values derived from several parameters can be very laborious. On the other hand, Bayesian methods produce more information, but require much more computational resources.</p>
+<p>From the model design point of view, the Bayesian approach is also more demanding, since a prior distribution must be specified for each adjustable parameter. As mentioned above, these prior distributions are nevertheless useful for stabilizing the estimation of complex models; when data are limited, constraining the value of the effects may be a better solution than simply eliminating these effects from the model.</p>
+</div>
+</div>
+<div id="bayesian-regression-example" class="section level1">
+<h1>Bayesian regression example</h1>
+<p>To illustrate the Bayesian approach, we will estimate here the relationship between the number of plant species and the area of 30 islands of the Galapagos Archipelago, from the <a href="../donnees/galapagos.csv">galapagos.csv</a> dataset already seen in this course.</p>
+<pre class="r"><code>galap &lt;- read.csv(&quot;../donnees/galapagos.csv&quot;)
+head(galap)</code></pre>
+<pre><code>##           Name Species Endemics  Area Elevation Nearest Scruz Adjacent
+## 1       Baltra      58       23 25.09       346     0.6   0.6     1.84
+## 2    Bartolome      31       21  1.24       109     0.6  26.3   572.33
+## 3     Caldwell       3        3  0.21       114     2.8  58.7     0.78
+## 4     Champion      25        9  0.10        46     1.9  47.4     0.18
+## 5      Coamano       2        1  0.05        77     1.9   1.9   903.82
+## 6 Daphne.Major      18       11  0.34       119     8.0   8.0     1.84</code></pre>
+<p>The number of species per island varies between 2 and 444, while the surface area of the islands varies on several orders of magnitude, from 0.01 to 5000 km<span class="math inline">\(^2\)</span>.</p>
+<pre class="r"><code>summary(galap$Species)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    2.00   13.00   42.00   85.23   96.00  444.00</code></pre>
+<pre class="r"><code>summary(galap$Area)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+##    0.010    0.258    2.590  261.709   59.238 4669.320</code></pre>
+<p>We assume that the number of species <span class="math inline">\(S\)</span> follows a Poisson distribution, where the logarithm of the mean number of species varies with the logarithm of the area <span class="math inline">\(A\)</span>.</p>
+<p><span class="math display">\[S \sim \text{Pois}(\lambda)\]</span></p>
+<p><span class="math display">\[\log \lambda = \beta_0 + \beta_1 \log A\]</span></p>
+<p>This last equation is equivalent to a power law (with exponent <span class="math inline">\(\beta_1\)</span>) linking <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(A\)</span>.</p>
+<p><span class="math display">\[\lambda = e^{\beta_0} A^{\beta_1}\]</span></p>
+<div id="choice-of-prior-distributions" class="section level2">
+<h2>Choice of prior distributions</h2>
+<p>In the above equation, <span class="math inline">\(\beta_1\)</span> is the exponent of the relationship between the number of species and the area of an island. In order to choose a prior distribution, we first assume that <span class="math inline">\(\beta_1 \ge 0\)</span>, due to a theoretical argument that a larger area cannot have a negative effect on the mean number of species. This does not mean that a larger island cannot have fewer species; only that it cannot have fewer species <em>because</em> of its larger area. Also, since <span class="math inline">\(\beta_1 = 1\)</span> represents a linear relationship between <span class="math inline">\(S\)</span> and <span class="math inline">\(A\)</span>, a value of <span class="math inline">\(\beta_1 &gt; 1\)</span> would mean that the effect of adding an extra km<span class="math inline">\(^2\)</span> on <span class="math inline">\(S\)</span> is greater for a large island (e.g.: quadratic relationship with <span class="math inline">\(\beta = 2\)</span>). On the contrary, we assume that it is more plausible than <span class="math inline">\(\beta_1 &lt; 1\)</span>, because the addition of one km<span class="math inline">\(^2\)</span> should have more effect on the number of species if the island is small than if it is already very large.</p>
+<p>In this case, we choose as a prior distribution for <span class="math inline">\(\beta_1\)</span> an exponential distribution with a parameter of 4: <span class="math inline">\(\beta_1 \sim \text{Exp}(4)\)</span>. The exponential distribution has a maximum at 0 and decreases exponentially; the rate of this decrease is given by the adjustable parameter. Here, with a parameter of 4 we have about 2% probability that <span class="math inline">\(\beta_1 &gt; 1\)</span>. Thus, values greater than 1 are considered improbable but not impossible.</p>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>As for the intercept <span class="math inline">\(\beta_0\)</span>, it is the logarithm of the mean number of species when <span class="math inline">\(\log A = 0\)</span>, i.e. when the area is 1 km<span class="math inline">\(^2\)</span>.</p>
+<p><em>Note</em>: The <em>brms</em> package we will use transforms the regression predictors to center them on their mean value. It does not affect the results produced for the regression, but it requires that we specify a prior distribution not for <span class="math inline">\(\beta_0\)</span> as defined here, but for an intercept that would represent the mean value of the response if the predictors were at their mean value. In other words, we are looking for a prior distribution of the log of the number of species for an island with an average log area.</p>
+<p>Suppose that the plausible values for the number of species of the mean island are between 1 and 1000. Taking the log of these values, we obtain <span class="math inline">\(\log(1) = 0\)</span> and <span class="math inline">\(\log(1000) = 6.91\)</span>. In this case, we choose a prior normal distribution, with a mean of 3 and standard deviation of 2: <span class="math inline">\(\beta_0 \sim \text{N}(3, 2)\)</span>. This places about 95% of the probability between -1 and 7.</p>
+</div>
+<div id="possible-regression-lines-from-the-prior" class="section level2">
+<h2>Possible regression lines from the prior</h2>
+<p>To see if our prior distributions cover the plausible scenarios for our model, it is useful to simulate the predictions made by these distributions. In the R code below, we first create a <code>sim_df</code> data set containing 100 values of <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> drawn from their prior distributions, with an index <em>i</em> identifying the simulation. We then create a grid associating to each simulation number a geometric series of values of the area (between 0.01 km<span class="math inline">\(^2\)</span> and 10 000 km<span class="math inline">\(^2\)</span>) to make the predictions. Finally, we combine the two sets of data and calculate the predicted <span class="math inline">\(\lambda\)</span> value for each area for each of the 100 simulations.</p>
+<pre class="r"><code>library(dplyr)
+
+# 100 simulations of parameters b0 et b1
+sim_df &lt;- data.frame(i = 1:100, b0 = rnorm(100, 3, 2), b1 = rexp(100, 4))
+
+# Grid with different values of the area for each simulation
+grille &lt;- expand.grid(i = 1:100, area = c(0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 
+                                          100, 300, 1000, 3000, 10000))
+
+# Mean number of species for each simulation 
+sim_df &lt;- inner_join(sim_df, grille) %&gt;%
+    mutate(lambda = exp(b0 + b1 * log(area)))
+
+head(sim_df)</code></pre>
+<pre><code>##   i       b0         b1 area   lambda
+## 1 1 0.580099 0.08847682 0.01 1.188448
+## 2 1 0.580099 0.08847682 0.03 1.309768
+## 3 1 0.580099 0.08847682 0.10 1.456991
+## 4 1 0.580099 0.08847682 0.30 1.605725
+## 5 1 0.580099 0.08847682 1.00 1.786215
+## 6 1 0.580099 0.08847682 3.00 1.968557</code></pre>
+<p>Here are the regression lines from 100 simulations based on the prior distributions:</p>
+<pre class="r"><code>ggplot(sim_df, aes(x = area, y = lambda, group = i)) +
+    labs(x = &quot;A&quot;, y = expression(lambda)) +
+    geom_line(alpha = 0.3) +
+    scale_x_log10(label = scales::number_format(accuracy = 0.1)) +
+    scale_y_log10(label = scales::number_format(accuracy = 0.1))</code></pre>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>We can see that these lines cover a very wide range of possibilities, some even implausible (the steepest line has a fraction of a species for the smallest island up to more than 100,000 species for the largest).</p>
+</div>
+</div>
+<div id="bayesian-regression-with-brms." class="section level1">
+<h1>Bayesian regression with <em>brms</em>.</h1>
+<p>The <em>brms</em> package, which is an acronym for <em>Bayesian Regression Models using Stan</em>, allows us to fit various regression models using the Bayesian approach. The advantage of this package is that it allows us to specify a wide range of models, including almost all types of parametric models seen in this course (e.g. GLMM, GAMM, models with temporal and spatial dependence). The model specification uses the same type of formula as the other R packages, then <em>brms</em> automatically translates the specified models into the language used by the Bayesian inference program <em>Stan</em>, which we will present in the next class.</p>
+<p>In this package, the <code>brm</code> function is used to fit a regression model.</p>
+<pre class="r"><code>library(brms)
+bmod &lt;- brm(Species ~ log(Area), data = galap, family = poisson, 
+            prior = c(set_prior(&quot;normal(3, 2)&quot;, class = &quot;Intercept&quot;),
+                      set_prior(&quot;exponential(4)&quot;, class = &quot;b&quot;, lb = 0)))</code></pre>
+<p>The first line looks like a classic GLM specification, while the other lines define the prior distributions for each parameter. The intercept (<code>class = "Intercept"</code>) receives a normal distribution with a mean of 3 and a standard deviation of 2, while the other regression coefficients (<code>class = "b"</code>) - there is only one here - receive an exponential distribution of parameter 4.</p>
+<p><em>Notes</em>: - The specification of the distributions, e.g. “normal(3, 2)” is based on the syntax of the <a href="https://mc-stan.org">Stan</a> language. - The argument <code>lb = 0</code> (for <em>lower bound</em>) is needed here, because the exponential prior distribution is only valid for values greater than or equal to 0.</p>
+<p>Here is the summary of the model results:</p>
+<pre class="r"><code>summary(bmod)</code></pre>
+<pre><code>##  Family: poisson 
+##   Links: mu = log 
+## Formula: Species ~ log(Area) 
+##    Data: galap (Number of observations: 30) 
+## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup samples = 4000
+## 
+## Population-Level Effects: 
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     3.27      0.04     3.19     3.36 1.00     1072      999
+## logArea       0.34      0.01     0.32     0.35 1.00     1159     1376
+## 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<p>Many of the information given here are related to the Bayesian inference algorithm, which we will discuss in the next class. The <code>Estimate</code> and <code>Est. Error</code> columns give respectively the mean (3.27 and 0.34) and the standard deviation (0.04 and 0.01) of the posterior distribution of the coefficients. These results are in fact identical to those obtained with a classical GLM, as we can see below.</p>
+<pre class="r"><code>gmod &lt;- glm(Species ~ log(Area), data = galap, family = poisson)
+summary(gmod)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = Species ~ log(Area), family = poisson, data = galap)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -10.4688   -3.6073   -0.8874    2.9028   10.1517  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) 3.273200   0.041663   78.56   &lt;2e-16 ***
+## log(Area)   0.337737   0.007154   47.21   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 3510.73  on 29  degrees of freedom
+## Residual deviance:  651.67  on 28  degrees of freedom
+## AIC: 816.5
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<p>We have here a simple model with sufficient data, so the influence of the prior distribution is negligible and both methods (Bayesian inference and maximum likelihood) lead to the same conclusion. Nevertheless, the purpose of this exercise was to illustrate how we could choose prior distributions for a real data set.</p>
+</div>
+<div id="visualize-and-verify-the-fit-of-the-model" class="section level1">
+<h1>Visualize and verify the fit of the model</h1>
+<div id="estimated-effects-and-credible-intervals" class="section level2">
+<h2>Estimated effects and credible intervals</h2>
+<p>Let us return to the summary of the results of our Bayesian regression:</p>
+<pre class="r"><code>summary(bmod)</code></pre>
+<pre><code>##  Family: poisson 
+##   Links: mu = log 
+## Formula: Species ~ log(Area) 
+##    Data: galap (Number of observations: 30) 
+## Samples: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup samples = 4000
+## 
+## Population-Level Effects: 
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept     3.27      0.04     3.19     3.36 1.00     1072      999
+## logArea       0.34      0.01     0.32     0.35 1.00     1159     1376
+## 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<p>The <em>Population-Level Effects</em> section describes the fixed effects of the model (there are no random effects here). The same information can be obtained with <code>fixef</code>.</p>
+<pre class="r"><code>fixef(bmod)</code></pre>
+<pre><code>##            Estimate   Est.Error      Q2.5     Q97.5
+## Intercept 3.2724709 0.040513089 3.1918485 3.3555394
+## logArea   0.3377724 0.006974184 0.3237699 0.3511179</code></pre>
+<p>By default, the estimate is the posterior mean of the parameter and the error is its standard deviation. However, more robust estimates can be chosen. With the specification <code>robust = TRUE</code>, R gives us an estimate based on the median and an error based on the median absolute deviation.</p>
+<pre class="r"><code>fixef(bmod, robust = TRUE)</code></pre>
+<pre><code>##            Estimate   Est.Error      Q2.5     Q97.5
+## Intercept 3.2718813 0.039567998 3.1918485 3.3555394
+## logArea   0.3378376 0.007005959 0.3237699 0.3511179</code></pre>
+<p>In this case, the posterior distribution is probably close to a normal distribution, so that the robust and non-robust estimates are almost identical.</p>
+<p>The 2.5% and 97.5% quantiles presented in this summary define a <em>credible interval</em> containing 95% of the posterior probability distribution of the parameter. These intervals are the Bayesian analogues of the confidence intervals.</p>
+<p>The function <code>marginal_effects</code> allows us to visualize the effect of each predictor on the response, with a 95% credible interval. If we had several predictors, the effect represented for one predictor would be calculated by setting the other predictors to their mean value.</p>
+<pre class="r"><code>marginal_effects(bmod)</code></pre>
+<pre><code>## Warning: Method &#39;marginal_effects&#39; is deprecated. Please use
+## &#39;conditional_effects&#39; instead.</code></pre>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>The <code>stanplot</code> function allows us to produce different visualizations of the posterior distribution of the parameters. For example, here we display the probability density (<code>type = "dens"</code>) for the coefficient of <code>log(Area)</code>:</p>
+<pre class="r"><code>stanplot(bmod, pars = &quot;b_logArea&quot;, type = &quot;dens&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>The “bumpy” aspect of the density curve is due to the fact that the posterior distribution is approximated by the algorithm, as we will see in the next classes.</p>
+</div>
+<div id="checking-the-posterior-predictions" class="section level2">
+<h2>Checking the posterior predictions</h2>
+<p>Since Bayesian inference applies to many types of models, the statistics used to test the fit vary from model to model. However, a general strategy is to simulate datasets from the posterior distribution of parameters and check whether the characteristics of the observed data are well represented by these simulations. This technique is called the <em>posterior predictive checks</em>.</p>
+<p>In <em>brms</em>, several verification options are accessible from the <code>pp_check</code> function, which saves us from having to code the simulations and visualizations ourselves. For example, the verification type “dens_overlay” superimposes the estimated probability density of the set of observations (<span class="math inline">\(y\)</span>, dark curve in the graph) on those estimated from simulations of the fitted model (<span class="math inline">\(y_{rep}\)</span>, light curves). The argument <code>nsamples</code> determines the number of simulations performed.</p>
+<p>Each simulation generates a value for the parameters from their joint posterior distribution, and then simulates the data from the model, so the results include both the uncertainty in the parameters and the random variation in the individual observations.</p>
+<pre class="r"><code>pp_check(bmod, nsamples = 100, type = &quot;dens_overlay&quot;)</code></pre>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>Here, the observation curve is not entirely contained within the envelope created by the simulations, so there may be a fit problem.</p>
+<p>This can also be seen with the “intervals” check, which compares each observation (they are ordered on the <span class="math inline">\(x\)</span> axis according to their position in the dataset) with a prediction interval obtained by the model. In fact, each light blue dot in the graph below indicates two intervals: the shorter interval contains 50% of the posterior probability, while the longer interval with a lighter line contains 95%.</p>
+<pre class="r"><code>pp_check(bmod, nsamples = 100, type = &quot;intervals&quot;)</code></pre>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p>Since the majority of observations are outside their 95% prediction interval, it seems that the observations are more variable than expected. To verify this possibility in a more direct way, we can calculate the standard deviation of the response for each posterior simulation with the “stat” check type and the statistic “sd”.</p>
+<pre class="r"><code>pp_check(bmod, nsamples = 100, type = &quot;stat&quot;, stat = &quot;sd&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="08E-Intro_Bayes_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Indeed, the observed standard deviation is extreme compared to the model’s predictions, which supports the idea that the data are overdispersed. A negative binomial distribution of the response may be more appropriate here.</p>
+<p>Note that the most useful summary statistics for model checking are those that are not directly fitted by the model. For example, all regression models are fit to properly represent the mean of the observations. Since Poisson regression does not have a separate parameter to fit the dispersion of the observations around their mean, it is possible that the standard deviation is not well represented by the model, making it a good statistic to check.</p>
+</div>
+</div>
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<ul>
+<li>In Bayesian inference, the posterior probability of a value of a parameter is proportional to the product of its prior probability and its likelihood according to the observed data.</li>
+</ul>
+<p><span class="math display">\[p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}\]</span></p>
+<ul>
+<li><p>For a complex model, the prior distribution is used to penalize values of a parameter that are less plausible for the system under study.</p></li>
+<li><p>The influence of the prior distribution decreases as the number of observations increases.</p></li>
+<li><p>The credible intervals contain a certain % of the posterior probability.</p></li>
+<li><p>Model checking is done by comparing the data simulated by the fitted model with the observations (posterior predictive checks).</p></li>
+<li><p>These checks must be based on summary statistics for which the fit is not guaranteed by the model.</p></li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

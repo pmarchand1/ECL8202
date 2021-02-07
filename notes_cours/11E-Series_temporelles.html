@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Time series</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Time series</h1>
+
+</div>
+
+
+<div id="contents" class="section level1">
+<h1>Contents</h1>
+<ul>
+<li><p>Temporal and spatial dependence</p></li>
+<li><p>Properties of time series</p></li>
+<li><p>ARIMA models for time series</p></li>
+<li><p>Fitting ARIMA models in R</p></li>
+<li><p>Producing forecasts from a model</p></li>
+<li><p>Temporal correlations in additive and Bayesian models</p></li>
+</ul>
+</div>
+<div id="temporal-and-spatial-dependence" class="section level1">
+<h1>Temporal and spatial dependence</h1>
+<p>The temporal or spatial dependence present in many datasets is due to the fact that observations that are close together, in time or space, are more similar than those that are far apart.</p>
+<p>In a spatial context, this principle is sometimes referred to as the “First Law of Geography” and is expressed by the following quote from Waldo Tobler: “Everything is related to everything else, but near things are more related than distant things.”</p>
+<p>In statistics, we often refer to “autocorrelation” as the correlation between measurements of the same variable taken at different times or places.</p>
+<div id="intrinsic-or-induced-dependence" class="section level2">
+<h2>Intrinsic or induced dependence</h2>
+<p>There are two fundamental types of spatial or temporal dependence on a measured variable <span class="math inline">\(y\)</span>: an <em>intrinsic</em> dependence on <span class="math inline">\(y\)</span>, or a dependence <em>induced</em> by external variables influencing <span class="math inline">\(y\)</span>, which are themselves correlated in space or time.</p>
+<p>For example, suppose that the growth of a plant in the year <span class="math inline">\(t + 1\)</span> is correlated with the growth of the year <span class="math inline">\(t\)</span>:</p>
+<ul>
+<li><p>if this correlation is due to a correlation in the climate that affects the growth of the plant between successive years, it is an induced dependence;</p></li>
+<li><p>if the correlation is due to the fact that the growth at time <span class="math inline">\(t\)</span> determines (by the size of leaves and roots) the quantity of resources absorbed by the plant at time <span class="math inline">\(t+1\)</span>, then it is an intrinsic dependence.</p></li>
+</ul>
+<p>Now suppose that the abundance of a species is correlated between two closely spaced sites:</p>
+<ul>
+<li><p>this spatial dependence can be induced if it is due to a spatial correlation of habitat factors that favor or disadvantage the species;</p></li>
+<li><p>or it can be intrinsic if it is due to the dispersion of individuals between close sites.</p></li>
+</ul>
+<p>In many cases, both types of dependence affect a given variable.</p>
+<p>If the dependence is simply induced and the external variables that cause it are included in the model explaining <span class="math inline">\(y\)</span>, then the model residuals will be independent and we can use all the methods already seen that ignore temporal and spatial dependence.</p>
+<p>However, if the dependence is intrinsic or due to unmeasured external influences, then the spatial and temporal dependence of the residuals in the model will have to be taken into account.</p>
+</div>
+<div id="different-ways-to-model-spatial-and-temporal-effects" class="section level2">
+<h2>Different ways to model spatial and temporal effects</h2>
+<p>In this class and the next, we will directly model the temporal and spatial correlations of our data. It is useful to compare this approach to other ways of including temporal and spatial aspects in a statistical model, which have been seen previously.</p>
+<p>First, we could include predictors in the model that represent time (e.g., year) or position (e.g., longitude, latitude). Such predictors can be useful for detecting a systematic large-scale trend or gradient, whether or not the trend is linear (e.g., with an additive model).</p>
+<p>In contrast to this approach, the models we will now see are used to model a temporal or spatial correlation in the random fluctuations of a variable (i.e., in the residuals after removing any systematic effect).</p>
+<p>In previous classes, we have used random effects to represent the non-independence of data on the basis of their grouping, i.e., after accounting for systematic fixed effects, data from the same group are more similar (their residual variation is correlated) than data from different groups. These groups were often defined according to temporal (e.g., observations in the same year) or spatial (observations at the same site) criteria.</p>
+<p>However, in the context of a random group effect, all groups are equally different from each other. That is, data from 2000 are not necessarily more or less similar to those from 2001 than to those from 2005, and two sites within 100 km of each other are not more or less similar than two sites 2 km apart.</p>
+<p>The methods we will see here therefore allow us to model non-independence on a continuous scale (closer = more correlated) rather than just discrete (hierarchy of groupings).</p>
+<p>The methods seen in this class apply to temporal data measured at regular intervals (e.g.: every month, every year). The methods in the next class apply to spatial data and do not require regular intervals.</p>
+</div>
+</div>
+<div id="properties-of-time-series" class="section level1">
+<h1>Properties of time series</h1>
+<div id="r-packages-for-time-series-analysis" class="section level2">
+<h2>R packages for time series analysis</h2>
+<p>In this class, we will use the package <em>fpp3</em> that accompanies the textbook of Hyndman and Athanasopoulos, <em>Forecasting: Principles and Practice</em> (see reference at the end).</p>
+<pre class="r"><code>library(fpp3)</code></pre>
+<p>This package automatically installs and loads other useful packages for time series visualization and analysis.</p>
+</div>
+<div id="structure-and-visualization-of-time-series-data" class="section level2">
+<h2>Structure and visualization of time series data</h2>
+<p>The <code>pelt</code> dataset included with the <em>fpp3</em> package shows the number of hare and lynx pelts traded at the Hudson’s Bay Company between 1845 and 1935. This is a famous dataset in ecology due to the presence of well-defined cycles of predator (lynx) and prey (hare) populations.</p>
+<pre class="r"><code>data(pelt)
+head(pelt)</code></pre>
+<pre><code>## # A tsibble: 6 x 3 [1Y]
+##    Year  Hare  Lynx
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  1845 19580 30090
+## 2  1846 19600 45150
+## 3  1847 19610 49150
+## 4  1848 11990 39520
+## 5  1849 28040 21230
+## 6  1850 58000  8420</code></pre>
+<p>The <code>pelt</code> object is a temporal data frame or <em>tsibble</em>. This term comes from the combination of <em>ts</em> for <em>time series</em> and <em>tibble</em> (which sounds like table), a specialized type of <em>data frame</em>. The particularity of <em>tsibble</em> objects is that one of the variables, here <em>Year</em>, is specified as a time index while the other variables define quantities measured at each point in time.</p>
+<p>The <code>autoplot</code> function automatically chooses a graph appropriate to the type of object given to it. By applying it to a <em>tsibble</em>, we can visualize the variables over time. The second argument is used to specify the variable(s) to be displayed; here we choose the two variables, which must be grouped in the function <code>vars</code>.</p>
+<pre class="r"><code>autoplot(pelt, vars(Hare, Lynx))</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Note that the <span class="math inline">\(x\)</span>-axis indicates the time between each observation, i.e. [1Y] for 1 year.</p>
+<p>Since the <code>autoplot</code> function produces a <code>ggplot</code> graph, we can customize it with the usual options, e.g. customize the axis titles.</p>
+<pre class="r"><code>autoplot(pelt, vars(Hare, Lynx)) +
+  labs(x = &quot;Year&quot;, y = &quot;Pelts traded&quot;)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>The <a href="../donnees/sea_ice.txt">sea_ice.txt</a> dataset contains daily data of the ice surface in the Arctic Ocean between 1972 and 2018.</p>
+<blockquote>
+<p>Spreen, G., L. Kaleschke, and G.Heygster (2008), Sea ice remote sensing using AMSR-E 89 GHz channels J. Geophys. Res.,vol. 113, C02S03, <a href="doi:10.1029/2005JC003384" class="uri">doi:10.1029/2005JC003384</a>.</p>
+</blockquote>
+<p>Since this is not a .csv file (comma-delimited columns), but rather columns are delimited by spaces, we must use <code>read.table</code>. We must also manually specify the names of columns that are absent from the file.</p>
+<pre class="r"><code>ice &lt;- read.table(&quot;../donnees/sea_ice.txt&quot;)
+colnames(ice) &lt;- c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;, &quot;ice_km2&quot;)
+head(ice)</code></pre>
+<pre><code>##   year month day  ice_km2
+## 1 1972     1   1 14449000
+## 2 1972     1   2 14541400
+## 3 1972     1   3 14633900
+## 4 1972     1   4 14716100
+## 5 1972     1   5 14808500
+## 6 1972     1   6 14890700</code></pre>
+<p>To convert the three columns <em>year</em>, <em>month</em> and <em>day</em> into a date, we use the function <code>make_date</code>. We also convert the ice surface to millions of km<span class="math inline">\(^2\)</span> to make the numbers easier to read. We remove the superfluous columns and convert the result to <em>tsibble</em> with the function <code>as_tsibble</code>, specifying that the column <em>date</em> is the time index.</p>
+<pre class="r"><code>ice &lt;- mutate(ice, date = make_date(year, month, day),
+              ice_Mkm2 = ice_km2 / 1E6) %&gt;%
+    select(-year, -month, -day, -ice_km2)
+ice &lt;- as_tsibble(ice, index = date)
+head(ice)</code></pre>
+<pre><code>## # A tsibble: 6 x 2 [1D]
+##   date       ice_Mkm2
+##   &lt;date&gt;        &lt;dbl&gt;
+## 1 1972-01-01     14.4
+## 2 1972-01-02     14.5
+## 3 1972-01-03     14.6
+## 4 1972-01-04     14.7
+## 5 1972-01-05     14.8
+## 6 1972-01-06     14.9</code></pre>
+<p>Note the indication [1D] meaning that these are daily data.</p>
+<p>The functions of the <em>dplyr</em> package also apply to <em>tsibble</em>, with a few changes. The most important is the addition of an <code>index_by</code> function, which acts as <code>group_by</code> but allows to group rows by time period. This is useful for aggregating data on a larger time scale. Here we group the dates by month with the <code>yearmonth</code> function and then calculate the mean ice area by month.</p>
+<pre class="r"><code>ice &lt;- index_by(ice, month = yearmonth(date)) %&gt;%
+    summarize(ice_Mkm2 = mean(ice_Mkm2))
+head(ice)</code></pre>
+<pre><code>## # A tsibble: 6 x 2 [1M]
+##        month ice_Mkm2
+##        &lt;mth&gt;    &lt;dbl&gt;
+## 1 1972 janv.     15.4
+## 2 1972 févr.     16.3
+## 3  1972 mars     16.2
+## 4  1972 avr.     15.5
+## 5   1972 mai     14.6
+## 6  1972 juin     12.9</code></pre>
+</div>
+<div id="seasonality" class="section level2">
+<h2>Seasonality</h2>
+<p>The series of ice surface measurements shows a general downward trend due to global warming, but also a strong seasonal pattern (increase in winter, decrease in summer).</p>
+<pre class="r"><code>autoplot(ice)</code></pre>
+<pre><code>## Plot variable not specified, automatically selected `.vars = ice_Mkm2`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>In time series analysis, seasonality refers to a variation that repeats itself over a fixed and known period of time (e.g., week, month, year).</p>
+<p>Two types of graphs allow us to visualize time series with a seasonal component. First, <code>gg_season</code> places each season (here, R automatically chooses the months) on the <span class="math inline">\(x\)</span> axis, then superimposes the different years with a color code. Note that it is not necessary to specify the variable to be displayed, i.e. <em>ice_Mkm2</em>, because the table contains only one.</p>
+<pre class="r"><code>gg_season(ice)</code></pre>
+<pre><code>## Plot variable not specified, automatically selected `y = ice_Mkm2`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>The annual fluctuation with a maximum in March and a minimum in September, as well as the trend towards a smaller ice surface in recent years is clearly visible here.</p>
+<p>The seasonal subseries graph separates the data for the different months to show the trend between the data for the same month over time, as well as the mean level for that month (blue horizontal line).</p>
+<pre class="r"><code>gg_subseries(ice)</code></pre>
+<pre><code>## Plot variable not specified, automatically selected `y = ice_Mkm2`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>As their name suggests, the <code>gg_season</code> and <code>gg_subseries</code> graphs are also <code>ggplot</code> graphs.</p>
+</div>
+<div id="components-of-a-time-series" class="section level2">
+<h2>Components of a time series</h2>
+<p>We can now present in a more formal way the different components of a time series.</p>
+<ul>
+<li><p>A <strong>trend</strong> is a directional change (positive or negative, but not necessarily linear) in the long-term time series.</p></li>
+<li><p><strong>Seasonality</strong> refers to repeated fluctuations with a known fixed period, often associated with the calendar (annual, weekly, daily, etc.).</p></li>
+<li><p>A <strong>cycle</strong>, in the context of time series, refers to fluctuations that are repeated, but not according to a period fixed by a calendar element. For example, the fluctuations in the lynx and hare populations in the previous example do not have a completely regular amplitude or frequency. Economic cycles (periods of growth and recession) are another example of cyclical behavior generated by the dynamics of a system. These cycles are usually on a multi-year scale and are not as predictable as seasonal fluctuations.</p></li>
+<li><p>Finally, once trends, cycles and seasonal variations have been subtracted from a time series, there remains a <strong>residual</strong> also called <strong>noise</strong>.</p></li>
+</ul>
+<p>Different models exist to extract these components from a given time series. Chapter 3 of the Hyndman and Athanasopoulos textboook presents these models in more detail, but only a brief example will be shown here.</p>
+<p>The R code below applies a model to the <code>ice</code> series, using the <code>STL</code> decomposition method. Then the function <code>components</code> extracts the components of the result, then <code>autoplot</code> displays them in a graph.</p>
+<pre class="r"><code>decomp &lt;- model(ice, STL())</code></pre>
+<pre><code>## Model not specified, defaulting to automatic modelling of the `ice_Mkm2` variable. Override this using the model formula.</code></pre>
+<pre class="r"><code>autoplot(components(decomp))</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>This graph allows us to visualize the general downward trend, the seasonal variation, with an amplitude that increases slightly with time, and then the residual, with a lower amplitude and very fast frequency, resembling random noise. Note that the gray bars to the left of each series have the same scale, which helps to put the importance of each component into perspective.</p>
+</div>
+<div id="autocorrelation" class="section level2">
+<h2>Autocorrelation</h2>
+<p>The last concept we will discuss in this section is that of autocorrelation. For a time series <span class="math inline">\(y\)</span>, it is the correlation between <span class="math inline">\(y_t\)</span> and <span class="math inline">\(y_{t-k}\)</span> measured for a delay (<em>lag</em>) <span class="math inline">\(k\)</span>, thus the correlation between each measurement of <span class="math inline">\(y\)</span> and the measurement taken at <span class="math inline">\(k\)</span> previous intervals.</p>
+<p>The function <code>ACF</code>, applied to a <em>tsibble</em>, calculates this autocorrelation for different values of the delay <span class="math inline">\(k\)</span>, which can then be viewed with <code>autoplot</code>.</p>
+<pre class="r"><code>head(ACF(ice))</code></pre>
+<pre><code>## Response variable not specified, automatically selected `var = ice_Mkm2`</code></pre>
+<pre><code>## # A tsibble: 6 x 2 [1M]
+##     lag     acf
+##   &lt;lag&gt;   &lt;dbl&gt;
+## 1    1M  0.857 
+## 2    2M  0.491 
+## 3    3M  0.0263
+## 4    4M -0.411 
+## 5    5M -0.718 
+## 6    6M -0.829</code></pre>
+<pre class="r"><code>autoplot(ACF(ice))</code></pre>
+<pre><code>## Response variable not specified, automatically selected `var = ice_Mkm2`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>For our <code>ice</code> dataset, we see a strong positive autocorrelation for a period of one month, which decreases to a maximum negative value at 6 months and then continues this cycle every 12 months. This, of course, represents seasonal variation, with opposite trends at a lag of 6 months (summer-winter, spring-fall) and maximum correlation for data from the same month in successive years. The blue dashes represent the significance threshold for the autocorrelation values.</p>
+<p>If we had a process without true autocorrelation, then none of the values would be expected to cross this line. However, since this is a 95% interval, 5% of the values will be significant by chance, so the occasional crossing of the line (especially for large lags) should not necessarily be interpreted as true autocorrelation.</p>
+<p>Here is the autocorrelation function for the lynx fur time series.</p>
+<pre class="r"><code>autoplot(ACF(pelt, Lynx))</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Here, we still see a cyclical behavior repeating itself approximately every 10 years. However, since these cycles are not quite constant, the autocorrelation decreases slightly for each subsequent cycle.</p>
+</div>
+</div>
+<div id="arima-models-for-time-series" class="section level1">
+<h1>ARIMA models for time series</h1>
+<p>This part presents the theory of ARIMA models, a class of models used to represent time series.</p>
+<p>We first define the concept of stationarity, which is a necessary condition to represent a time series with an ARIMA model.</p>
+<div id="stationarity" class="section level2">
+<h2>Stationarity</h2>
+<p>A time series is stationary if its statistical properties do not depend on the absolute value of the time variable <span class="math inline">\(t\)</span>. In other words, these properties are not affected by any translation of the series over time.</p>
+<p>For example, a series with a trend is not stationary because the average of <span class="math inline">\(y_t\)</span> varies with <span class="math inline">\(t\)</span>.</p>
+<p>A series with a seasonal component is also not stationary. Let’s take our example of the Arctic ice surface as a function of time, with a maximum at the end of winter and a minimum at the end of summer. A six-month translation would reverse this minimum and maximum and would no longer represent the same phenomenon.</p>
+<p>However, a series with a non-seasonal cycle may be stationary.</p>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>In the example of hare pelts traded at the Hudson’s Bay Company, the cycles we observe are due to the dynamics of the animal’s populations and are not related to a point in time; for example, there is no particular reason why a minimum occurs around the year 1900 and a translation of the series of a few years would not change our model of the phenomenon.</p>
+<p>It is important to note that non-stationarity may be due to a stochastic (random) trend rather than a systematic effect.</p>
+<p>For example, consider the model of a random walk, where each <span class="math inline">\(y_t\)</span> value is obtained by adding a normally distributed random value to the previous <span class="math inline">\(y_{t-1}\)</span> value:</p>
+<p><span class="math display">\[y_t = y_{t-1} + \epsilon_t\]</span></p>
+<p><span class="math display">\[\epsilon_t \sim \text{N}(0, \sigma)\]</span></p>
+<p>Here are three time series produced from this model:</p>
+<pre><code>## Plot variable not specified, automatically selected `.vars = y`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>It is clear that each of the three time series is gradually moving away from 0, so this process is not stationary.</p>
+</div>
+<div id="differencing" class="section level2">
+<h2>Differencing</h2>
+<p>The random walk shown above does not produce stationary series. However, the difference between two consecutive values (denoted <span class="math inline">\(y_t&#39;\)</span>) of a random walk is stationary because it is simply the normally distributed variable <span class="math inline">\(\epsilon_t\)</span>.</p>
+<p><span class="math display">\[y_t - y_{t-1} = y_t&#39; = \epsilon_t\]</span></p>
+<p>In fact, since all <span class="math inline">\(\epsilon_t\)</span> have the same distribution and are not correlated over time, it is “white noise”.</p>
+<pre><code>## `mutate_if()` ignored the following grouping variables:
+## Column `serie`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>Differencing is a general method for eliminating a trend in a time series. The difference of order 1:</p>
+<p><span class="math display">\[y_t&#39; = y_t - y_{t-1}\]</span></p>
+<p>is usually sufficient to reach a stationary state, but sometimes it is necessary to go to order 2:</p>
+<p><span class="math display">\[y_t&#39;&#39; = (y_t - y_{t-1}) - (y_{t-1} - y_{t-2})\]</span></p>
+<p>which is the “difference of differences”.</p>
+<p>We will not discuss seasonal patterns in this course, but it is useful to note that the seasonality of a time series can be eliminated by replacing <span class="math inline">\(y_t\)</span> by its difference between consecutive values of the same season, for example <span class="math inline">\(y_t&#39; = y_t - y_{t-12}\)</span> for monthly data. In this case <span class="math inline">\(y_t&#39;\)</span> represents the difference between the value of <span class="math inline">\(y\)</span> between January and the previous January, February and the previous February, etc.</p>
+</div>
+<div id="moving-average-model" class="section level2">
+<h2>Moving average model</h2>
+<p>Moving average models are a subset of ARIMA models. Consider a white noise <span class="math inline">\(\epsilon_t\)</span> and a variable <span class="math inline">\(y_t\)</span> that depends on the value of this white noise for different successive periods, for example:</p>
+<p><span class="math display">\[y_t = \epsilon_t + 0.6 \epsilon_{t-1} + 0.4 \epsilon_{t-2}\]</span></p>
+<p><span class="math display">\[\epsilon_t \sim \text{N}(0, 1)\]</span></p>
+<p>In this case, the value of <span class="math inline">\(y_t\)</span> is given by <span class="math inline">\(\epsilon_t\)</span> to which we add part of the two previous values of <span class="math inline">\(\epsilon\)</span>, that part is determined by the coefficients 0.6 and 0.4. The graph below illustrates a series generated by this model.</p>
+<p>–</p>
+<pre><code>## Plot variable not specified, automatically selected `.vars = y`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>More generally, a moving average model of order <span class="math inline">\(q\)</span>, MA(q), is represented by the equation:</p>
+<p><span class="math display">\[y_t = \epsilon_t + \theta_1 \epsilon_{t-1} + ... + \theta_q \epsilon_{t-q}\]</span></p>
+<p>Here, <span class="math inline">\(y\)</span> is the weighted average of the last <span class="math inline">\(q+1\)</span> values of a white noise. Concretely, this means that the value of <span class="math inline">\(y\)</span> depends on random “shocks” <span class="math inline">\(\epsilon_t\)</span>, where the effect of each shock is felt for <span class="math inline">\(q\)</span> periods of time before disappearing at time <span class="math inline">\(t+q+1\)</span>. For this model, the autocorrelation becomes null for lags <span class="math inline">\(&gt;q\)</span>.</p>
+<p>Here is the autocorrelation graph for our example of a MA(2) model: <span class="math inline">\(y_t = \epsilon_t + 0.6 \epsilon_{t-1} + 0.4 \epsilon_{t-2}\)</span>.</p>
+<pre><code>## Response variable not specified, automatically selected `var = y`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+</div>
+<div id="autoregressive-model" class="section level2">
+<h2>Autoregressive model</h2>
+<p>Autoregressive (AR) models are another subset of the ARIMA models. As the name suggests, it is a regression between the current and previous values of <span class="math inline">\(y_t\)</span>. For example, here is the graph of the model:</p>
+<p><span class="math display">\[y_t = 0.6 y_{t-1} + \epsilon_t\]</span></p>
+<pre><code>## Plot variable not specified, automatically selected `.vars = y`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>More generally, in an AR(p) model, <span class="math inline">\(y_t\)</span> depends of the last <span class="math inline">\(p\)</span> values of <span class="math inline">\(y\)</span>:</p>
+<p><span class="math display">\[y_t = \phi_1 y_{t-1} + ... + \phi_p y_{t-p} + \epsilon_t\]</span></p>
+<p>Certain conditions must be met by the coefficients <span class="math inline">\(\phi\)</span> to obtain a stationary series. For example, for an AR(1) model, <span class="math inline">\(\phi_1\)</span> must be less than 1, because <span class="math inline">\(\phi_1 = 1\)</span> would produce the random walk seen above.</p>
+<p>Note that the autocorrelation of <span class="math inline">\(y_t\)</span> in an AR(p) model extends beyond the lag <span class="math inline">\(p\)</span>. For example, for AR(1), <span class="math inline">\(y_t\)</span> depends on <span class="math inline">\(y_{t-1}\)</span>, but <span class="math inline">\(y_{t-1}\)</span> depends on <span class="math inline">\(y_{t-2}\)</span>, so <span class="math inline">\(y_t\)</span> depends indirectly on <span class="math inline">\(y_{t-2}\)</span> and so on. However, this indirect dependence diminishes over time.</p>
+<p>For example, here is the autocorrelation function for our AR(1) model:</p>
+<p><span class="math display">\[y_t = 0.6 y_{t-1} + \epsilon_t\]</span></p>
+<pre><code>## Response variable not specified, automatically selected `var = y`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+</div>
+<div id="partial-autocorrelation" class="section level2">
+<h2>Partial autocorrelation</h2>
+<p>Partial autocorrelation is defined as the correlation between <span class="math inline">\(y_t\)</span> and <span class="math inline">\(y_{t-k}\)</span> that remains after taking into account correlations for all delays below <span class="math inline">\(k\)</span>. In R, this is obtained by the <code>PACF</code> function rather than <code>ACF</code>.</p>
+<p>For an AR(1) model, we see that whereas the ACF gradually decreases with <span class="math inline">\(k\)</span>, the PACF becomes insignificant for <span class="math inline">\(k &gt; 1\)</span>, because the subsequent correlations were all indirect effects of the correlation at lag 1.</p>
+<pre class="r"><code>plot_grid(autoplot(ACF(ar1_sim)), autoplot(PACF(ar1_sim)))</code></pre>
+<pre><code>## Response variable not specified, automatically selected `var = y`
+## Response variable not specified, automatically selected `var = y`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+</div>
+<div id="arima-model" class="section level2">
+<h2>ARIMA model</h2>
+<p>An ARIMA (<em>autoregressive integrated moving average model</em>) of order (p,d,q) combines an autoregressive model of order <span class="math inline">\(p\)</span> and a moving average of order <span class="math inline">\(q\)</span> on the variable <span class="math inline">\(y\)</span> differentiated <span class="math inline">\(d\)</span> times.</p>
+<p>For example, here is an ARIMA(1,1,2) model:</p>
+<p><span class="math display">\[y&#39;_t = c + \phi_1 y&#39;_{t-1} + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2}\]</span></p>
+<p>The response variable <span class="math inline">\(y_t&#39;\)</span> (difference between successive values of <span class="math inline">\(y_t\)</span>) is given by a constant <span class="math inline">\(c\)</span> (mean level of the series) to which we add an autoregressive term, a noise term <span class="math inline">\(\epsilon_t\)</span> and two terms of the moving average as a function of the previous <span class="math inline">\(\epsilon_t\)</span>.</p>
+<p>There are also ARIMA models with components representing seasonality, i.e. terms based on delays representing the period between two seasons (e.g. delay of 12 for monthly data). We will not see these models in this course, but you can consult the Hyndman and Athanasopoulos textbook for reference on this subject.</p>
+</div>
+<div id="regression-with-correlated-residuals" class="section level2">
+<h2>Regression with correlated residuals</h2>
+<p>We often want to model <span class="math inline">\(y_t\)</span> not only based on its previous values, but also on external predictors <span class="math inline">\(x_t\)</span> that are also measured at each time period. For example, here is the equation for a simple linear model:</p>
+<p><span class="math display">\[y_t = \beta_0 + \beta_1 x_{t} + \eta_t\]</span></p>
+<p>Here, we represent the residual by <span class="math inline">\(\eta_t\)</span> rather than <span class="math inline">\(\epsilon_t\)</span>; this residual is not an independent random variable, but has correlations over time. Then we can represent <span class="math inline">\(\eta_t\)</span>, the portion of <span class="math inline">\(y_t\)</span> not explained by the predictors <span class="math inline">\(x_t\)</span>, by an ARIMA model.</p>
+<p>Finally, note that depending on the phenomenon to be modeled, it may be useful to differentiate the values of <span class="math inline">\(y\)</span> and <span class="math inline">\(x\)</span> (so regression explains the differences in <span class="math inline">\(y\)</span> according to the differences in <span class="math inline">\(x\)</span>). In other cases, we could also model <span class="math inline">\(y_t\)</span> not only as a function of <span class="math inline">\(x_t\)</span>, but also of previous values of <span class="math inline">\(x\)</span>, if the effect of <span class="math inline">\(x\)</span> on <span class="math inline">\(y\)</span> occurs with a delay.</p>
+</div>
+</div>
+<div id="example-1-lynx-pelts-traded-at-the-hbc" class="section level1">
+<h1>Example 1: Lynx pelts traded at the HBC</h1>
+<p>We will first apply an ARIMA model to the time series of lynx pelts traded to the Hudson’s Bay Company. To make the numbers easier to read, the response variable will be measured in thousands of pelts.</p>
+<pre class="r"><code>pelt &lt;- mutate(pelt, Lynx = Lynx / 1000)
+autoplot(pelt, Lynx)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<div id="choice-of-arima-model" class="section level2">
+<h2>Choice of ARIMA model</h2>
+<p>First, we have to choose the <span class="math inline">\(p\)</span>, <span class="math inline">\(d\)</span> and <span class="math inline">\(q\)</span> orders of our model. We start by checking if the series must be differenced to obtain a stationary series.</p>
+<p>The function <code>unitroot_ndiffs</code> performs a statistical test to determine the minimum number of differences to be made.</p>
+<pre class="r"><code>unitroot_ndiffs(pelt$Lynx)</code></pre>
+<pre><code>## ndiffs 
+##      0</code></pre>
+<p>Here, the result is 0 so no differencing is necessary (<span class="math inline">\(d = 0\)</span>).</p>
+<p>For a time series containing only an AR or MA component, the order (<span class="math inline">\(p\)</span> or <span class="math inline">\(q\)</span>) can be determined by consulting the autocorrelation graphs.</p>
+<ul>
+<li><p>If the data follow an autoregressive model of order <span class="math inline">\(p\)</span>, the partial autocorrelation (PACF) becomes insignificant for lags <span class="math inline">\(&gt;p\)</span>.</p></li>
+<li><p>If the data follow a moving average model of order <span class="math inline">\(q\)</span>, the autocorrelation (ACF) becomes insignificant for lags <span class="math inline">\(&gt;q\)</span>.</p></li>
+</ul>
+<p>For a model combining AR and MA, however, it is difficult to deduce <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> graphically.</p>
+<p>Here are the ACF and PACF graphs for lynx pelts:</p>
+<pre class="r"><code>plot_grid(autoplot(ACF(pelt, Lynx)), autoplot(PACF(pelt, Lynx)))</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p>The partial autocorrelation graph shows large peaks at a lag of 1 (positive correlation) and 2 (negative correlation), so an AR(2) model may be sufficient here.</p>
+</div>
+<div id="fit-an-arima-model" class="section level2">
+<h2>Fit an ARIMA model</h2>
+<p>The <code>model</code> function of the <em>fable</em> package allows us to fit different time series models. This package (with a name formed by the contraction of <em>forecast table</em>) was automatically loaded with <em>fpp3</em>.</p>
+<pre class="r"><code>lynx_ar2 &lt;- model(pelt, ARIMA(Lynx ~ pdq(2,0,0)))</code></pre>
+<p>In the code above, we indicate that we want to model the data contained in <code>pelt</code> and more precisely apply an ARIMA model for the variable <code>Lynx</code>. The term <code>ARIMA(Lynx ~ pdq(2,0,0))</code> specifies an AR(2) model <span class="math inline">\((p = 2, d = 0, q = 0)\)</span>.</p>
+<p>Note that the <code>ARIMA</code> function estimates the coefficients of the model by the maximum likelihood method.</p>
+<p>To see the summary of the model, we do not use <code>summary</code>, but rather <code>report</code>.</p>
+<pre class="r"><code>report(lynx_ar2)</code></pre>
+<pre><code>## Series: Lynx 
+## Model: ARIMA(2,0,0) w/ mean 
+## 
+## Coefficients:
+##          ar1      ar2  constant
+##       1.3446  -0.7393   11.0927
+## s.e.  0.0687   0.0681    0.8307
+## 
+## sigma^2 estimated as 64.44:  log likelihood=-318.39
+## AIC=644.77   AICc=645.24   BIC=654.81</code></pre>
+<p>The table of coefficients shows each of the two autoregression terms (<span class="math inline">\(\phi_1\)</span> and <span class="math inline">\(\phi_2\)</span>) and the constant <span class="math inline">\(c\)</span> representing the mean level of <span class="math inline">\(y\)</span>. Each of the coefficients has its standard error (s.e.) on the bottom line. Finally, <code>sigma^2</code> indicates the variance of the residuals <span class="math inline">\(\epsilon_t\)</span> and the last line shows the value of the AIC and the AICc (the BIC is another criterion that we do not see in this course).</p>
+</div>
+<div id="automatic-model-selection" class="section level2">
+<h2>Automatic model selection</h2>
+<p>If we call the <code>ARIMA</code> function without specifying <code>pdq(...)</code>, the function will automatically choose an ARIMA model.</p>
+<pre class="r"><code>lynx_arima &lt;- model(pelt, ARIMA(Lynx))</code></pre>
+<p>First, <code>ARIMA</code> performs the same test as <code>unitroot_ndiffs</code> to determine the number of differences <span class="math inline">\(d\)</span>, then chooses the values of <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> minimizing the AIC by a stepwise method. As we saw in the prerequisite course, sequential methods do not always find the best model. However, in the case of ARIMA models it is rare that the actual data requires <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> orders greater than 3, so a simple model is usually sufficient.</p>
+<pre class="r"><code>report(lynx_arima)</code></pre>
+<pre><code>## Series: Lynx 
+## Model: ARIMA(2,0,1) w/ mean 
+## 
+## Coefficients:
+##          ar1      ar2      ma1  constant
+##       1.4851  -0.8468  -0.3392   10.1657
+## s.e.  0.0652   0.0571   0.1185    0.5352
+## 
+## sigma^2 estimated as 60.92:  log likelihood=-315.39
+## AIC=640.77   AICc=641.48   BIC=653.33</code></pre>
+<p>We see here that the optimal model chosen includes not only an autoregression of order 2, but also a moving average of order 1. The AIC value shows a small improvement (AIC decrease of ~4) compared to the AR(2) model.</p>
+</div>
+<div id="diagnostic-graphs" class="section level2">
+<h2>Diagnostic graphs</h2>
+<p>The <code>gg_tsresiduals</code> function verifies that the ARIMA residuals meet the model’s assumptions, namely that they are normally distributed and do not have any autocorrelation, which seems to be the case here (based on the autocorrelation graph and the histogram of the residuals in the last row).</p>
+<pre class="r"><code>gg_tsresiduals(lynx_arima)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p>In addition, we can add the expected values of the model (<code>fitted</code>) to the graph of the time series using the <code>autolayer</code> function:</p>
+<pre class="r"><code>autoplot(pelt, Lynx) +
+  autolayer(fitted(lynx_arima), linetype = &quot;dashed&quot;)</code></pre>
+<pre><code>## Plot variable not specified, automatically selected `.vars = .fitted`</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+</div>
+<div id="forecasts" class="section level2">
+<h2>Forecasts</h2>
+<p>Time series models are often used to make forecasts, or predictions of future values of the variable. Here we apply the <code>forecast</code> function to the <code>lynx_arima</code> model, specifying to make predictions for the next 10 points in time (<code>h = 10</code>).</p>
+<pre class="r"><code>prev_lynx &lt;- forecast(lynx_arima, h = 10)
+head(prev_lynx)</code></pre>
+<pre><code>## # A fable: 6 x 4 [1Y]
+## # Key:     .model [1]
+##   .model       Year  Lynx .distribution
+##   &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;dist&gt;       
+## 1 ARIMA(Lynx)  1936  37.4 N(37,  61)   
+## 2 ARIMA(Lynx)  1937  35.7 N(36, 141)   
+## 3 ARIMA(Lynx)  1938  31.5 N(32, 185)   
+## 4 ARIMA(Lynx)  1939  26.7 N(27, 191)   
+## 5 ARIMA(Lynx)  1940  23.2 N(23, 196)   
+## 6 ARIMA(Lynx)  1941  22.0 N(22, 223)</code></pre>
+<p>The table produced by <code>forecast</code> contains columns for the year (starting in 1936, since the observations end in 1935), the predicted value of the variable <code>Lynx</code> and a distribution of this prediction: <code>N</code> means a normal distribution with two parameters given by the mean and the variance (the latter is used here rather than the standard deviation). This distribution will be used to plot prediction intervals. Note that the variance increases with time.</p>
+<p>Predictions can be viewed with <code>autoplot</code>. Adding <code>pelt</code> as a second argument allows the observed and predicted values to be plotted on the same graph, while <code>level</code> specifies the level (in %) of the prediction intervals to be displayed.</p>
+<pre class="r"><code>autoplot(prev_lynx, pelt, level = c(50, 95))</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-33-1.png" width="672" /></p>
+<p>It is clear from this graph that the uncertainty of the forecasts increases further away from the observations. This is due to the fact that the value at time <span class="math inline">\(t\)</span> depends on the values at the previous time, so the uncertainty accumulates with time.</p>
+</div>
+</div>
+<div id="example-2-electricity-demand-in-the-state-of-victoria" class="section level1">
+<h1>Example 2: Electricity demand in the state of Victoria</h1>
+<p>The next example illustrates the use of an ARIMA model with external predictors. We will use the <code>vic_elec</code> dataset included with the <em>fpp3</em> package, which represents the electricity demand (in MW) recorded every half hour in the Australian state of Victoria.</p>
+<pre class="r"><code>data(vic_elec)
+head(vic_elec)</code></pre>
+<pre><code>## # A tsibble: 6 x 5 [30m] &lt;Australia/Melbourne&gt;
+##   Time                Demand Temperature Date       Holiday
+##   &lt;dttm&gt;               &lt;dbl&gt;       &lt;dbl&gt; &lt;date&gt;     &lt;lgl&gt;  
+## 1 2012-01-01 00:00:00  4383.        21.4 2012-01-01 TRUE   
+## 2 2012-01-01 00:30:00  4263.        21.0 2012-01-01 TRUE   
+## 3 2012-01-01 01:00:00  4049.        20.7 2012-01-01 TRUE   
+## 4 2012-01-01 01:30:00  3878.        20.6 2012-01-01 TRUE   
+## 5 2012-01-01 02:00:00  4036.        20.4 2012-01-01 TRUE   
+## 6 2012-01-01 02:30:00  3866.        20.2 2012-01-01 TRUE</code></pre>
+<p>The other columns show the temperature at the same time, the date and a binary variable <em>Holiday</em> indicating if this date is a holiday.</p>
+<p>To work with a larger scale data (daily rather than half-hourly), we aggregate the measurements by date with <code>index_by</code>. We calculate the total demand and the mean temperature per day, the holiday status (<code>any(Holiday)</code> means that there is at least one <code>TRUE</code> value in the group, but in reality this variable is constant for a given date).</p>
+<pre class="r"><code>vic_elec &lt;- index_by(vic_elec, Date) %&gt;%
+  summarize(Demand = sum(Demand), Tmean = mean(Temperature),
+            Holiday = any(Holiday)) %&gt;%
+  mutate(Workday = (!Holiday) &amp; (wday(Date) %in% 2:6))</code></pre>
+<p>We also created a variable <em>Workday</em> that identifies the working days, i.e. non-holidays between Monday and Friday; `wday’ is a function that indicates the day of the week between Sunday (1) and Saturday (7).</p>
+<p>Finally, we convert the demand to GW to make the numbers easier to read.</p>
+<pre class="r"><code>vic_elec &lt;- mutate(vic_elec, Demand = Demand / 1000)</code></pre>
+<p>By representing the demand based on mean temperature and working day status, we see that it follows a roughly quadratic function of temperature (minimum around 18 degrees C and increasing for colder and warmer temperatures) and that there is an almost constant decrease for holidays and weekends.</p>
+<pre class="r"><code>ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
+  geom_point() +
+  scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<p>We therefore apply to these data a linear model including a quadratic term for temperature (it is necessary to surround the term <code>Tmean^2</code> with <code>I()</code> in R) and an additive effect of <em>Workday</em>. As we can see, this model describes the observed pattern well.</p>
+<pre class="r"><code>elec_lm &lt;- lm(Demand ~ Tmean + I(Tmean^2) + Workday, vic_elec)
+
+ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
+  geom_point(alpha = 0.3) +
+  geom_line(aes(y = fitted(elec_lm))) +
+  scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
+<p>However, by visualizing the residuals of the model as a function of the date, we see that a temporal correlation persists. It would therefore be useful to represent these residuals by an ARIMA model.</p>
+<pre class="r"><code>ggplot(vic_elec, aes(x = Date, y = residuals(elec_lm), color = Workday)) +
+  geom_point() +
+  scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p>In the <code>ARIMA()</code> model, we specify the formula linking the response to the predictors as in an <code>lm</code>, then we add the ARIMA terms if necessary (otherwise the function chooses the model automatically, as seen earlier).</p>
+<pre class="r"><code>elec_arima &lt;- model(vic_elec, ARIMA(Demand ~ Tmean + I(Tmean^2) + Workday + PDQ(0,0,0)))</code></pre>
+<p>Here, note that <code>PDQ(0,0,0)</code> specifies that there is no seasonal component, because the automatic selection method would choose a model with seasonality here, a type of model that we do not cover in this course.</p>
+<p>This function should not be confused with <code>pdq</code> (lowercase), which specifies the order of the basic ARIMA model.</p>
+<p>The chosen model has a difference of order 1, so we model the difference in demand as a function of the difference in temperature. It also includes 2 autoregression terms and 3 moving average terms.</p>
+<pre class="r"><code>report(elec_arima)</code></pre>
+<pre><code>## Series: Demand 
+## Model: LM w/ ARIMA(1,1,4) errors 
+## 
+## Coefficients:
+##           ar1     ma1      ma2      ma3      ma4     Tmean  I(Tmean^2)
+##       -0.7906  0.3727  -0.4266  -0.1977  -0.1488  -11.9062      0.3692
+## s.e.   0.0941  0.0989   0.0481   0.0407   0.0284    0.3775      0.0096
+##       WorkdayTRUE
+##           32.7278
+## s.e.       0.4453
+## 
+## sigma^2 estimated as 46.14:  log likelihood=-3647.85
+## AIC=7313.7   AICc=7313.87   BIC=7358.69</code></pre>
+<p>Residues appear to be close to normal, but there is still significant autocorrelation. Notably, the positive autocorrelation at 7, 14, 21 and 28 days suggests that there is a weekly pattern not accounted for by the distinction between working and non-working days.</p>
+<pre class="r"><code>gg_tsresiduals(elec_arima)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<div id="forecasts-1" class="section level2">
+<h2>Forecasts</h2>
+<p>When a model includes external predictors, the value of these predictors must be specified for new time periods in order to make predictions.</p>
+<p>We use the function <code>new_data(vic_elec, 14)</code> to create a dataset containing the 14 dates following the series present in <code>vic_elec</code> (thus starting from January 1st, 2015), then we add values for the predictors <code>Tmean</code> and <code>Workday</code>. To simplify here, the predicted temperature is constant.</p>
+<pre class="r"><code>prev_df &lt;- new_data(vic_elec, 14) %&gt;%
+  mutate(Tmean = 20, Workday = TRUE)
+
+head(prev_df)</code></pre>
+<pre><code>## # A tsibble: 6 x 3 [1D]
+##   Date       Tmean Workday
+##   &lt;date&gt;     &lt;dbl&gt; &lt;lgl&gt;  
+## 1 2015-01-01    20 TRUE   
+## 2 2015-01-02    20 TRUE   
+## 3 2015-01-03    20 TRUE   
+## 4 2015-01-04    20 TRUE   
+## 5 2015-01-05    20 TRUE   
+## 6 2015-01-06    20 TRUE</code></pre>
+<p>Then we specify this dataset as <code>new_data</code> in the <code>forecast</code> function. The data and forecasts are shown with <code>autoplot</code>; the addition of <code>coord_cartesian</code> allows us to <em>zoom</em> on the end of the series to better see the forecasts.</p>
+<pre class="r"><code>prev_elec &lt;- forecast(elec_arima, new_data = prev_df)
+autoplot(prev_elec, vic_elec) +
+  coord_cartesian(xlim = c(as_date(&quot;2014-11-01&quot;), as_date(&quot;2015-01-15&quot;)))</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
+</div>
+</div>
+<div id="summary-of-r-functions" class="section level1">
+<h1>Summary of R functions</h1>
+<p>Here are the main R functions presented in this course, which come from packages loaded with <em>fpp3</em>.</p>
+<ul>
+<li><p><code>as_tsibble(..., index = ...)</code>: Convert a <code>data.frame</code> to <code>tsibble</code>, specifying the time column with <code>index</code>.</p></li>
+<li><p><code>index_by</code>: Group a <code>tsibble</code> for temporal aggregation.</p></li>
+<li><p><code>ACF</code> and <code>PACF</code>: functions to compute autocorrelation and partial autocorrelation from a <code>tsibble</code>.</p></li>
+<li><p><code>model</code>: Create a time series model from a dataset and a specific modeling function, such as <code>ARIMA</code>.</p></li>
+<li><p><code>ARIMA(y ~ x + pdq(...) + PDQ(...))</code>: Defines a model for <span class="math inline">\(y\)</span> based on external predictors <span class="math inline">\(x\)</span>. We can specify the order of the ARIMA with <code>pdq</code> or seasonal ARIMA with <code>PDQ</code>, otherwise the function automatically chooses the order of the model to minimize the AIC.</p></li>
+<li><p><code>forecast(mod, h = ...)</code> or <code>forecast(mod, new_data = ...)</code>: Produces forecasts from the <code>mod</code> model for the next <code>h</code> time periods, or for a forecast dataset defined in <code>new_data</code>.</p></li>
+<li><p><code>autoplot</code>: Produces a <em>ggplot2</em> graph adapted to the given object (e.g.: time series for a <code>tsibble</code>, correlation graph for ACF or PACF, forecast graph for the result of <code>forecast</code>).</p></li>
+<li><p><code>gg_season</code> and <code>gg_subseries</code>: Graphs to illustrate the seasonality of a time series.</p></li>
+<li><p><code>gg_tsresiduals</code>: Diagnostic graphs for the residuals of a time series model.</p></li>
+</ul>
+</div>
+<div id="additive-and-bayesian-models-with-temporal-correlations" class="section level1">
+<h1>Additive and Bayesian models with temporal correlations</h1>
+<div id="multiple-time-series" class="section level2">
+<h2>Multiple time series</h2>
+<p>In the previous examples, all the data came from the same time series. However, it is common to want to fit the same model (with the same parameters) to several independent time series. For example, we could fit a common growth model for several trees of the same species, or a model for the abundance of the same species at several sites.</p>
+<p>Note that a temporal data table (<em>tsibble</em>) can contain several time series, but in this case, fitting an <code>ARIMA</code> model to this table is done separately for each series, with different parameters for each.</p>
+</div>
+<div id="integration-of-temporal-correlations-with-other-models" class="section level2">
+<h2>Integration of temporal correlations with other models</h2>
+<p>In this part, we will see how to add a temporal correlation of ARMA type to the residuals of a GAM (with <em>mgcv</em>) or of a hierarchical Bayesian model (with <em>brms</em>).</p>
+<p>These models are therefore models without differencing (the “I” in ARIMA is missing), but in any case the residuals should be stationary and any trend should be included in the main model.</p>
+<p>In this approach, we will also not be able to make an automatic selection of <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span>. So we have to select these parameters manually, either according to our theoretical knowledge, by visualizing the ACF and PACF, or by comparing the AIC of several models.</p>
+</div>
+<div id="example-dendrochronological-series" class="section level2">
+<h2>Example: Dendrochronological series</h2>
+<p>We use for this example the data set <code>wa082</code> from the dendrochronological analysis package <em>dplr</em>, which presents basal area growth series (based on tree ring width) for 23 individuals of the species <em>Abies amabilis</em>. This dataset has already been used in the laboratory on generalized additive models.</p>
+<p>As in this laboratory, we first have to rearrange the data set to obtain columns representing basal area growth (<em>cst</em>), cumulative basal area (<em>st</em>) and age for each tree in each year.</p>
+<pre class="r"><code>library(tidyr)
+
+# Load data
+wa &lt;- read.csv(&quot;../donnees/dendro_wa082.csv&quot;)
+# Transform to a &quot;long&quot; format (rather than a tree x year matrix)
+wa &lt;- pivot_longer(wa, cols = -year, names_to = &quot;id_arbre&quot;,
+                   values_to = &quot;cst&quot;, values_drop_na = TRUE)
+# Calculate the age and cumulative basal area
+wa &lt;- arrange(wa, id_arbre, year) %&gt;%
+  group_by(id_arbre) %&gt;%
+  mutate(age = row_number(), st = cumsum(cst)) %&gt;%
+  ungroup() %&gt;%
+  rename(annee = year) %&gt;%
+  mutate(id_arbre = as.factor(id_arbre))
+head(wa)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   annee id_arbre   cst   age     st
+##   &lt;int&gt; &lt;fct&gt;    &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;
+## 1  1811 X712011   7.35     1   7.35
+## 2  1812 X712011  19.2      2  26.6 
+## 3  1813 X712011  32.3      3  58.9 
+## 4  1814 X712011  48.6      4 108.  
+## 5  1815 X712011  58.5      5 166.  
+## 6  1816 X712011  67.4      6 233.</code></pre>
+</div>
+<div id="fitting-with-gamm" class="section level2">
+<h2>Fitting with <code>gamm</code></h2>
+<p>First, here are the results of the model of growth versus basal area (linear effect on a log-log scale) and age (represented by a spline), with a random effect for each tree.</p>
+<pre class="r"><code>library(mgcv)
+gam_wa &lt;- gam(log(cst) ~ log(st) + s(age) + s(id_arbre, bs = &quot;re&quot;), data = wa)
+plot(gam_wa, pages = 1)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+<p>In order to add temporal correlations, we will instead use the <code>gamm</code> function, which represents random effects differently, because it is based on the <code>lme</code> function of the <em>nlme</em> package. (This is another package for random effects. As we will see later, it has limitations compared to the package <em>lme4</em> we used in this course. However, it has the advantage of including temporal correlations.)</p>
+<p>Fixed effects are represented in the same way in <code>gamm</code> or <code>gam</code>, but the random effect appears in a list under the argument <code>random</code>. Here, <code>id_arbre = ~1</code> means a random effect of <code>id_arbre</code> on the intercept.</p>
+<pre class="r"><code>gam_wa2 &lt;- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                random = list(id_arbre = ~1))
+gam_wa2$lme</code></pre>
+<pre><code>## Linear mixed-effects model fit by maximum likelihood
+##   Data: strip.offset(mf) 
+##   Log-likelihood: -1958.017
+##   Fixed: y ~ X - 1 
+## X(Intercept)     Xlog(st)   Xs(age)Fx1 
+##   -2.8430849    0.8926357   -3.6526718 
+## 
+## Random effects:
+##  Formula: ~Xr - 1 | g
+##  Structure: pdIdnot
+##              Xr1      Xr2      Xr3      Xr4      Xr5      Xr6      Xr7      Xr8
+## StdDev: 5.359563 5.359563 5.359563 5.359563 5.359563 5.359563 5.359563 5.359563
+## 
+##  Formula: ~1 | id_arbre %in% g
+##         (Intercept)  Residual
+## StdDev:   0.1834672 0.3666839
+## 
+## Number of Observations: 4536
+## Number of Groups: 
+##               g id_arbre %in% g 
+##               1              23</code></pre>
+<p>The random effect of <code>id_arbre</code> appears in the results under: <code>Formula: ~1 | id_arbre %in% g</code> (there is a standard deviation of 0.18 between trees, compared with a residual standard deviation of 0.37).</p>
+</div>
+<div id="adding-a-temporal-correlation" class="section level2">
+<h2>Adding a temporal correlation</h2>
+<p>Suppose that growth is correlated between successive years for the same tree, even after taking into account the fixed effects of age and basal area.</p>
+<p>We can add this correlation to the <code>gamm</code> model with the argument <code>correlation = corAR1(form = ~ 1 | id_arbre)</code>. This means that there is an autocorrelation of type AR(1) within the measurements grouped by tree.</p>
+<pre class="r"><code>gam_wa_ar &lt;- gamm(log(cst) ~ log(st) + s(age), data = wa,
+                  random = list(id_arbre = ~1), 
+                  correlation = corAR1(form = ~ 1 | id_arbre))
+gam_wa_ar$lme</code></pre>
+<pre><code>## Linear mixed-effects model fit by maximum likelihood
+##   Data: strip.offset(mf) 
+##   Log-likelihood: -567.5418
+##   Fixed: y ~ X - 1 
+## X(Intercept)     Xlog(st)   Xs(age)Fx1 
+##   -2.6964027    0.8779548   -3.3712324 
+## 
+## Random effects:
+##  Formula: ~Xr - 1 | g
+##  Structure: pdIdnot
+##             Xr1     Xr2     Xr3     Xr4     Xr5     Xr6     Xr7     Xr8
+## StdDev: 4.92288 4.92288 4.92288 4.92288 4.92288 4.92288 4.92288 4.92288
+## 
+##  Formula: ~1 | id_arbre %in% g
+##         (Intercept)  Residual
+## StdDev:   0.1718674 0.3730067
+## 
+## Correlation Structure: AR(1)
+##  Formula: ~1 | g/id_arbre 
+##  Parameter estimate(s):
+##       Phi 
+## 0.6870206 
+## Number of Observations: 4536
+## Number of Groups: 
+##               g id_arbre %in% g 
+##               1              23</code></pre>
+<p>The parameter <span class="math inline">\(\phi_1\)</span> for autocorrelation is 0.687, so the growth indeed shows a positive correlation between successive years.</p>
+<p>By comparing the spline representing the effect of age between the two models, the uncertainty is greater for the model with autocorrelation. This is consistent with the fact that autocorrelation reduces the number of independent measurements.</p>
+<pre class="r"><code>par(mfrow = c(1, 2))
+plot(gam_wa2$gam, select = 1, main = &quot;GAMM&quot;)
+plot(gam_wa_ar$gam, select = 1, main = &quot;GAMM AR(1)&quot;)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-49-1.png" width="672" /></p>
+<p>To specify a more general ARMA model, we could use <code>corARMA</code>, e.g.: <code>correlation = corARMA(form = ~ 1 | id_arbre, p = 2, q = 1)</code> for an AR(2), MA(1) model.</p>
+<p>The <code>lme</code> function of the <em>nlme</em> package offers the same functionality for mixed linear models (without additive effects), with the same <code>random</code> and <code>correlation</code> arguments.</p>
+<p>Mixed models specified with <code>gamm</code> and <code>lme</code> have some limitations. First, these functions are less well-suited for fitting generalized models (distributions other than normal for the response). Also, they do not allow for multiple random effects unless these are nested.</p>
+<p>For these reasons, Bayesian models (with <em>brms</em>) offer the most flexible option for combining random effects and time correlations in the same model.</p>
+</div>
+<div id="bayesian-version-of-the-model-with-brms" class="section level2">
+<h2>Bayesian version of the model with <em>brms</em></h2>
+<p>The <code>brm</code> function recognizes the spline terms <code>s()</code>, as in a <code>gam</code>. The temporal correlation term is specified by <code>ar(p = 1, gr = id_arbre)</code>, which means an AR(1) correlation within groups defined by <em>id_arbre</em>.</p>
+<pre class="r"><code>library(brms)
+
+wa_br &lt;- brm(log(cst) ~ log(st) + s(age) + (1 | id_arbre) + ar(p = 1, gr = id_arbre), 
+             data = wa, chains = 2)</code></pre>
+<p>Instead of <code>ar(p = ...)</code>, we could have specified an MA model with <code>ma(q = ...)</code> or ARMA model with <code>arma(p = ..., q = ...)</code>.</p>
+<p>Note that in this example, we let <code>brms</code> choose prior distributions by default. For splines in particular, it is difficult to determine these distributions and the default choices are reasonable, especially with a lot of data.</p>
+<p>In the summary of results, we obtain the same AR(1) correlation coefficient as for the <code>gamm</code> model above.</p>
+<pre class="r"><code>summary(wa_br)</code></pre>
+<pre><code>##  Family: gaussian 
+##   Links: mu = identity; sigma = identity 
+## Formula: log(cst) ~ log(st) + s(age) + (1 | id_arbre) + ar(p = 1, gr = id_arbre) 
+##    Data: wa (Number of observations: 4536) 
+## Samples: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup samples = 2000
+## 
+## Smooth Terms: 
+##             Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sds(sage_1)     4.99      1.38     3.01     8.46 1.01      454      597
+## 
+## Correlation Structures:
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## ar[1]     0.69      0.01     0.67     0.71 1.00     1594     1495
+## 
+## Group-Level Effects: 
+## ~id_arbre (Number of levels: 23) 
+##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)     0.19      0.03     0.13     0.25 1.01      405      906
+## 
+## Population-Level Effects: 
+##           Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept    -2.49      0.21    -2.91    -2.07 1.00      829      984
+## logst         0.86      0.02     0.82     0.90 1.00      903     1065
+## sage_1      -21.98      2.62   -27.04   -16.86 1.00      902     1003
+## 
+## Family Specific Parameters: 
+##       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sigma     0.27      0.00     0.27     0.28 1.00     1993     1554
+## 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<p>Finally, we can visualize the spline representing basal area increments vs. age with the <code>marginal_smooths</code> function.</p>
+<pre class="r"><code>marginal_smooths(wa_br)</code></pre>
+<p><img src="11E-Series_temporelles_files/figure-html/unnamed-chunk-54-1.png" width="672" /></p>
+</div>
+</div>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+<p>Hyndman, R.J. and Athanasopoulos, G. (2019) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. <a href="http://OTexts.com/fpp3" class="uri">http://OTexts.com/fpp3</a>.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

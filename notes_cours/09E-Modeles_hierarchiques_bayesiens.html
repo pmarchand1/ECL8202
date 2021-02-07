@@ -366,7 +366,7 @@ div.tocify {
 </div>
 <div id="options-for-using-stan-from-r" class="section level2">
 <h2>Options for using Stan from R</h2>
-<p>To conclude this section, we will see different ways to use Stan from R. First, we can write a Stan program, as seen in the previous lab. Here is the beginning of the Stan code for a simple model, where there are <span class="math inline">\(N\)</span> observations of a response variable <span class="math inline">\(y\)</span> and a predictor <span class="math inline">\(x\)</span>.</p>
+<p>To conclude this section, we will see different ways to use Stan from R. First, we can write a Stan program, as we will see in the next lab. Here is the beginning of the Stan code for a simple model, where there are <span class="math inline">\(N\)</span> observations of a response variable <span class="math inline">\(y\)</span> and a predictor <span class="math inline">\(x\)</span>.</p>
 <pre><code>data {
   int N;
   vector[N] y;
@@ -396,7 +396,7 @@ res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
 <p>This part presents the steps of a suggested protocol for the development and validation of a hierarchical Bayesian model.</p>
 <p>The protocol is based on the article:</p>
 <blockquote>
-<p>Betancourt, M. (2018) Towards A Principled Bayesian Workflow (RStan). <a href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html" class="uri">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a>.</p>
+<p>Betancourt, M. (2020) Towards A Principled Bayesian Workflow. <a href="https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html" class="uri">https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html</a>.</p>
 </blockquote>
 <p>Michael Betancourt is one of Stan’s developers and his website contains several articles on the theory related to hierarchical Bayesian models, as well as case studies on their application to different problems.</p>
 <p>Here are the main steps to follow when developing a new hierarchical Bayesian model to represent a given system.</p>
@@ -426,6 +426,7 @@ res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
 <li><p>Calibration test: Are the posterior probability intervals correct?</p></li>
 <li><p>Sensitivity test: Does the data allow us to determine the value of the parameter?</p></li>
 </ul>
+<p>Since Bayesian inference must be repeated several times, this part of the protocol is very costly in terms of computation time. Thus, it is not necessary to perform it for each model, especially if it is a type of model that is already well known.</p>
 <div id="calibration-by-simulation" class="section level3">
 <h3>Calibration by simulation</h3>
 <p>Suppose we have observations <span class="math inline">\(y\)</span> simulated from the model with a parameter value <span class="math inline">\(\theta\)</span> drawn from the prior distribution. By fitting the model to these <span class="math inline">\(y\)</span>, we obtain a sample of the posterior distribution of <span class="math inline">\(\theta\)</span>, that is <span class="math inline">\(\theta_{(i)}\)</span> for <span class="math inline">\(i\)</span> from 1 to <span class="math inline">\(N\)</span> iterations .</p>
@@ -455,7 +456,442 @@ res_arm &lt;- stan_lm(y ~ x, data = df)</code></pre>
 <div id="posterior-predictive-checks" class="section level2">
 <h2>Posterior predictive checks</h2>
 <p>In this last step, we want to verify that the predictions obtained by simulating observations from the posterior distribution of the parameters are sufficiently close to the observations.</p>
-<p>As seen at the end of the last class, we can check if enough observations are in their prediction interval according to the fitted model. Also, we can compare predictions and observations using summary statistics describing important characteristics of the data set that are not directly fit by the model.</p>
+<p>As seen at the end of the last class, we can check if enough observations are within their prediction interval according to the fitted model. Also, we can compare predictions and observations using summary statistics describing important characteristics of the data set that are not directly fit by the model.</p>
+</div>
+</div>
+<div id="detailed-example-bayesian-glmm-with-brms" class="section level1">
+<h1>Detailed example: Bayesian GLMM with <em>brms</em></h1>
+<p>For this example, we use the <code>rikz</code> dataset from the textbook by Zuur et al., <em>Mixed Effects Models and Extensions in Ecology with R</em>. We used the same data in week 5 for generalized linear mixed models.</p>
+<p>The <code>rikz</code> dataset contains measurements of benthic species richness for 45 sites on 9 beaches (<em>Beach</em>) in the Netherlands, and two predictors: the vertical position of the site (<em>NAP</em>) and the beach exposure index (<em>Exposure</em>). Since the latter only takes three different values (8, 10 and 11), we will treat it as a factor.</p>
+<pre class="r"><code>rikz &lt;- read.csv(&quot;../donnees/rikz.csv&quot;)
+# Convert Beach and Exposure to factors (categorical variables)
+rikz &lt;- mutate(rikz, Beach = as.factor(Beach), 
+               Exposure = as.factor(Exposure))
+head(rikz)</code></pre>
+<pre><code>##   Sample Richness Exposure    NAP Beach
+## 1      1       11       10  0.045     1
+## 2      2       10       10 -1.036     1
+## 3      3       13       10 -1.336     1
+## 4      4       11       10  0.616     1
+## 5      5       10       10 -0.684     1
+## 6      6        8        8  1.190     2</code></pre>
+<p>Here are the packages we will need for this example.</p>
+<pre class="r"><code>library(brms)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+theme_set(theme_cowplot())</code></pre>
+<div id="model-formulation-1" class="section level2">
+<h2>Model formulation</h2>
+<p>As we did in week 5, we model this data using Poisson regression, with a random effect of the beach on the intercept. Here is the mathematical representation of this model, where we have chosen parameter names that are close to those given by <em>brms</em>:</p>
+<pre><code>Richness ~ poisson(lambda)
+log(lambda) = b_Intercept + r_Beach + b_NAP * NAP + b_Exposure10 * Exposure10 + b_Exposure * Exposure11
+r_Beach ~ normal(0, sd_Beach)</code></pre>
+<ul>
+<li>the species richness follows a Poisson distribution with mean <code>lambda</code>;</li>
+<li><code>log(lambda)</code> is given by a linear function of the NAP and the exposure index, with a mean intercept (<code>b_Intercept</code>) and a random effect for each beach around this mean (<code>r_Beach</code>);</li>
+<li>the beach random effects are normally distributed with a standard deviation <code>sd_Beach</code>.</li>
+</ul>
+<p>The above formula is based on the default coding of factors in R, with <code>Exposure = 8</code> as the reference level. <code>Exposure10</code> and <code>Exposure11</code> take a value of 1 when the <code>Exposure</code> variable is 10 or 11, respectively; thus, <code>b_Exposure10</code> represents the difference in <code>log(lambda)</code> between levels 8 and 10 and <code>b_Exposure11</code> represents the difference between levels 8 and 11.</p>
+<p>We still have to choose the prior distribution for each parameter. Suppose we know that the species richness on this type of site can reach tens of species, but not hundreds. A <code>normal(2, 1)</code> distribution for the intercept means that we give 95% probability to values between 0 and 4 on the logarithmic scale, or between 1 and 55 after taking the exponential.</p>
+<pre class="r"><code>exp(c(0, 4))</code></pre>
+<pre><code>## [1]  1.00000 54.59815</code></pre>
+<p>For the predictor coefficients, the <code>normal(0, 1)</code> distribution is a reasonable choice: we already assume that the logarithm of the number of species varies on a scale of a few units, which is also the case for the only numerical predictor (NAP).</p>
+<pre class="r"><code>summary(rikz$NAP)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## -1.3360 -0.3750  0.1670  0.3477  1.1170  2.2550</code></pre>
+<p>Finally, we need to specify a distribution for the standard deviation of the random effects of the beach. The <code>normal(0, 1)</code> distribution, which is actually half-normal because it is truncated to zero, may be too permissive here. A standard deviation of 2 would mean that the species richness would vary by a factor of $e^2 $7 from one beach to another. We therefore use <code>normal(0, 0.5)</code> instead.</p>
+<p>Here is how to specify these prior distributions with <em>brms</em>:</p>
+<pre class="r"><code>rikz_prior &lt;- c(set_prior(&quot;normal(0, 1)&quot;, class = &quot;b&quot;),
+                set_prior(&quot;normal(2, 1)&quot;, class = &quot;Intercept&quot;),
+                set_prior(&quot;normal(0, 0.5)&quot;, class = &quot;sd&quot;))</code></pre>
+<p>The class of coefficients “b” represents a distribution that applies to all fixed coefficients except the intercept class. To specify the distribution of a single coefficient in a class, the argument <code>coef</code> must be specified in addition to <code>class</code>. The “sd” class represents the prior distribution for standard deviations of random effects. Since <em>brms</em> knows that standard deviations are always greater than zero, we do not need to specify the lower bound with <code>lb</code> here.</p>
+</div>
+<div id="prior-predictive-checks-1" class="section level2">
+<h2>Prior predictive checks</h2>
+<p>We first call the function <code>brm</code> with the argument <code>sample_prior = "only"</code> to obtain a sample of the prior distribution of the parameters of a model.</p>
+<pre class="r"><code>res_prior &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+                 family = poisson, sample_prior = &quot;only&quot;, 
+                 chains = 1, iter = 400, prior = rikz_prior)</code></pre>
+<p>By default, <code>brm</code> estimates the posterior distribution with 4 chains and 2000 iterations per chain, with 50% of these iterations constituting the warmup period. Here, we specify a single chain and 400 iterations, so there are 200 warmup iterations and 200 for sampling.</p>
+<p>The function <code>posterior_samples</code> usually returns an array of values taken from the posterior distribution of the parameters, but here it is the prior distribution because of the argument <code>sample_prior</code>.</p>
+<pre class="r"><code>prior_params &lt;- posterior_samples(res_prior)
+str(prior_params)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    200 obs. of  15 variables:
+##  $ b_Intercept         : num  1.113 3.499 2.153 0.136 3.622 ...
+##  $ b_NAP               : num  -0.0686 -0.6141 -1.234 -0.2929 0.4807 ...
+##  $ b_Exposure10        : num  -0.441 -0.406 -0.473 0.321 -0.639 ...
+##  $ b_Exposure11        : num  0.265 -0.257 0.138 2.156 -1.629 ...
+##  $ sd_Beach__Intercept : num  0.3018 0.0763 0.0478 0.3042 0.7093 ...
+##  $ r_Beach[1,Intercept]: num  0.3419 -0.0968 -0.0536 0.0275 -0.0424 ...
+##  $ r_Beach[2,Intercept]: num  -0.32867 -0.00337 0.05592 -0.01466 0.04736 ...
+##  $ r_Beach[3,Intercept]: num  -0.1363 0.0619 0.024 0.1615 -0.7123 ...
+##  $ r_Beach[4,Intercept]: num  0.6445 -0.1244 -0.0595 -0.3911 0.8905 ...
+##  $ r_Beach[5,Intercept]: num  -0.31044 0.00526 0.0078 0.23129 -0.6946 ...
+##  $ r_Beach[6,Intercept]: num  -0.1426 0.0228 0.0352 0.5641 0.0794 ...
+##  $ r_Beach[7,Intercept]: num  0.0378 -0.0767 -0.0131 0.3138 -0.7143 ...
+##  $ r_Beach[8,Intercept]: num  -0.27338 -0.02351 0.00226 0.15147 -0.14758 ...
+##  $ r_Beach[9,Intercept]: num  -0.1703 -0.1018 -0.0316 -0.3655 1.0734 ...
+##  $ lp__                : num  -18.3 -18.8 -18.2 -20 -18.2 ...</code></pre>
+<p>Each row represents one iteration of the sampling period. In this case, Stan is simply drawing values for each parameter from their prior distribution. Parameters with names beginning with <code>b</code> represent the fixed effects, <code>sd_Beach__Intercept</code> is the standard deviation of the random effects of the beach on the intercept, and then parameters with names beginning with <code>r</code> are the random effects; these are drawn from the distribution defined by <code>sd_Beach__Intercept</code>. The last parameter, <code>lp__</code>, represents the log of the joint probability of the parameters.</p>
+<p>We add to this dataset a column identifying the simulation (from 1 to 200):</p>
+<pre class="r"><code>prior_params$sim_id &lt;- as.character(1:200)</code></pre>
+<p>The <code>posterior_predict</code> function generates a simulation of the response variable according to the value of the parameters at each iteration and the predictors of the dataset.</p>
+<p>Despite the name, this function is closer to the <code>simulate</code> function for classical models in R, rather than <code>predict</code>. As seen in the previous lab, <code>posterior_epred</code> provides the predictions of the mean response at each iteration.</p>
+<p>The result is a matrix with one row for each of the 200 iterations of the prior distribution and one column for each of the 45 observations of the original dataset (in the same order as the 45 rows of the original dataset).</p>
+<pre class="r"><code>prior_pred &lt;- posterior_predict(res_prior)
+str(prior_pred)</code></pre>
+<pre><code>##  int [1:200, 1:45] 2 23 5 0 21 0 94 3 30 75 ...
+##  - attr(*, &quot;dimnames&quot;)=List of 2
+##   ..$ : NULL
+##   ..$ : NULL</code></pre>
+<p>In order to visualize these predictions, we add a column to identify the simulation and we perform a pivot to get 3 columns: <code>sim_id</code>, <code>obs_id</code> and <code>Richness</code>.</p>
+<pre class="r"><code>prior_df &lt;- data.frame(prior_pred)
+prior_df$sim_id &lt;- 1:200
+prior_df &lt;- pivot_longer(prior_df, cols = -sim_id, 
+                         names_to = &quot;obs_id&quot;, values_to = &quot;Richness&quot;)
+head(prior_df)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   sim_id obs_id Richness
+##    &lt;int&gt; &lt;chr&gt;     &lt;int&gt;
+## 1      1 X1            2
+## 2      1 X2            6
+## 3      1 X3            3
+## 4      1 X4            1
+## 5      1 X5            3
+## 6      1 X6            3</code></pre>
+<pre class="r"><code>summary(prior_df$Richness)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00    2.00    8.00   25.18   20.00 3338.00</code></pre>
+<p>The maximum simulated value is very high (3458 species), which frequently occurs when the response follows an exponential function of the predictors. However, the vast majority of simulated values are less than 100.</p>
+<pre class="r"><code>mean(prior_df$Richness &lt; 100)</code></pre>
+<pre><code>## [1] 0.9586667</code></pre>
+<p>Here is a way to visualize the distribution of the species richness for each prior simulation of the model. We create a probability density curve (with <code>stat_density</code>) for each simulation (<code>group = sim_id</code>), with a transparency level <code>alpha = 0.3</code> to see the superimposed curves. We apply a square root transformation to the <code>x</code> axis to see more of the data (a log transformation is impossible because of the presence of zeros), then we limit this axis to values between 0 and 200.</p>
+<pre class="r"><code>ggplot(prior_df, aes(x = Richness)) +
+    stat_density(aes(group = sim_id), position = &quot;identity&quot;, geom = &quot;line&quot;, alpha = 0.3) +
+    scale_x_sqrt(breaks = c(0, 1, 10, 25, 50, 75, 100)) +
+    coord_cartesian(xlim = c(0, 200))</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>Most simulations give a low probability to richness values &gt; 100, consistent with the prior knowledge of the system.</p>
+<p>As mentioned above, step 3 of the full protocol (fitting the model to the simulated data) takes a lot of time, so it is often omitted, especially for a “standard” model such as a GLMM. Nevertheless, I have included the code to perform this step as a supplement at the end of these notes.</p>
+</div>
+<div id="fitting-the-model-to-observations" class="section level2">
+<h2>Fitting the model to observations</h2>
+<p>We are now ready to fit the model to the actual observations.</p>
+<pre class="r"><code>res_br &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
+              family = poisson, control = list(adapt_delta = 0.99), 
+              chains = 2, prior = rikz_prior)</code></pre>
+<pre class="r"><code>summary(res_br)</code></pre>
+<pre><code>##  Family: poisson 
+##   Links: mu = log 
+## Formula: Richness ~ NAP + Exposure + (1 | Beach) 
+##    Data: rikz (Number of observations: 45) 
+## Samples: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
+##          total post-warmup samples = 2000
+## 
+## Group-Level Effects: 
+## ~Beach (Number of levels: 9) 
+##               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## sd(Intercept)     0.23      0.14     0.02     0.55 1.00      433      439
+## 
+## Population-Level Effects: 
+##            Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+## Intercept      2.38      0.29     1.69     2.90 1.00      933      652
+## NAP           -0.50      0.07    -0.65    -0.36 1.00     2032     1386
+## Exposure10    -0.47      0.33    -1.06     0.26 1.00      878      631
+## Exposure11    -1.17      0.34    -1.76    -0.38 1.01      827      663
+## 
+## Samples were drawn using sampling(NUTS). For each parameter, Bulk_ESS
+## and Tail_ESS are effective sample size measures, and Rhat is the potential
+## scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
+<p>The summary of the results indicates first the model formula, then the parameters of the algorithm (number of chains and iterations, number of warmup iterations). The <em>Group-Level Effects</em> section shows the standard deviation of random effects, while the <em>Population-Level Effects</em> section shows the fixed effects. Each estimate shows the mean, standard deviation, and a 95% credibility interval for the posterior distribution, as well as the Gelman-Rubin statistic (<em>Rhat</em>) and the effective Monte Carlo sample size (based on two measures, <code>Bulk_ESS</code> and <code>Tail_ESS</code>).</p>
+<p>Comparing these results with those of the classical GLMM, we obtain differences between the mean estimates, but these differences are reasonable considering the margins of error of each parameter.</p>
+<pre class="r"><code>library(lme4)
+res_glmm &lt;- glmer(Richness ~ NAP +Exposure + (1 | Beach), data = rikz, family = poisson)
+summary(res_glmm)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: Richness ~ NAP + Exposure + (1 | Beach)
+##    Data: rikz
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##      210      219     -100      200       40 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.8080 -0.4947 -0.2078  0.2789  3.9801 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  Beach  (Intercept) 0.01138  0.1067  
+## Number of obs: 45, groups:  Beach, 9
+## 
+## Fixed effects:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  2.52472    0.16720  15.100  &lt; 2e-16 ***
+## NAP         -0.50781    0.07128  -7.125 1.04e-12 ***
+## Exposure10  -0.59863    0.19615  -3.052  0.00227 ** 
+## Exposure11  -1.33491    0.21817  -6.119 9.43e-10 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##            (Intr) NAP    Exps10
+## NAP         0.078              
+## Exposure10 -0.847 -0.027       
+## Exposure11 -0.766 -0.063  0.653</code></pre>
+<p>There are a few reasons why the estimates obtained by the Bayesian approach differ from those obtained by maximum likelihood, in particular:</p>
+<ul>
+<li><p>the prior distribution can influence the inference if the number of observations is small;</p></li>
+<li><p>even in the case where the prior distribution has little influence and the posterior distribution takes the same form as the likelihood function, the Bayesian estimate is the mean of the posterior distribution, which is not necessarily equal to the point of maximum probability, especially if the distribution is skewed.</p></li>
+</ul>
+<p>The <code>stanplot</code> function allows the visualization of different model results, including the traceplot of the Markov chains, a histogram of the posterior distributions, or a representation of the different coefficients with their credibility intervals.</p>
+<pre class="r"><code>stanplot(res_br, type = &quot;trace&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
+<pre><code>## No divergences to plot.</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre class="r"><code>stanplot(res_br, type = &quot;hist&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
+<pre class="r"><code>stanplot(res_br, type = &quot;intervals&quot;)</code></pre>
+<pre><code>## Warning: Method &#39;stanplot&#39; is deprecated. Please use &#39;mcmc_plot&#39; instead.</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-22-3.png" width="672" /></p>
+<p>Note that by default, the intervals in bold lines contain 50% of the posterior probability while those in thin lines contain 90% of this probability.</p>
+<p>An interactive tool to visualize the results and diagnostics of the model can be launched with the <code>launch_shinystan</code> function.</p>
+<pre class="r"><code>launch_shinystan(res_br)</code></pre>
+</div>
+<div id="posterior-predictive-checks-1" class="section level2">
+<h2>Posterior predictive checks</h2>
+<p>As in the last course, we use <code>pp_check</code> with <code>type = "intervals"</code> to compare the observations to the model’s prediction intervals. On average, we expect 50% of the observations to be in the bold intervals and 90% in the lighter intervals.</p>
+<pre class="r"><code>pp_check(res_br, type = &quot;intervals&quot;)</code></pre>
+<pre><code>## Using all posterior samples for ppc type &#39;intervals&#39; by default.</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>For a Poisson regression, we can also check that the standard deviation of the observations and the number of zeros obtained are comparable to the values predicted by the fitted model.</p>
+<pre class="r"><code>pp_check(res_br, type = &quot;stat&quot;, stat = sd)</code></pre>
+<pre><code>## Using all posterior samples for ppc type &#39;stat&#39; by default.</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<pre class="r"><code>pp_check(res_br, type = &quot;stat&quot;, stat = function(x) sum(x == 0))</code></pre>
+<pre><code>## Using all posterior samples for ppc type &#39;stat&#39; by default.
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-25-2.png" width="672" /></p>
+</div>
+</div>
+<div id="supplement-fitting-the-model-to-simulated-data" class="section level1">
+<h1>Supplement: Fitting the model to simulated data</h1>
+<p>We had obtained above simulations of the response variable for each of the 200 values derived from the prior distribution of our parameter vector. We now wish to fit the model to each of these simulations in order to perform calibration and sensitivity tests.</p>
+<p>The <em>brms</em> package includes a <code>brm_multiple</code> function that allows us to fit the same model to several datasets contained in a list. So we create a list of 200 replicates of the original dataset with <code>replicate</code> (<code>simplify = FALSE</code> is necessary to prevent R from trying to combine all 200 datasets into one), then we use a loop to replace the response column of each dataset with one of the rows of the prior prediction matrix.</p>
+<pre class="r"><code>rikz_repl &lt;- replicate(200, rikz, simplify = FALSE)
+
+for (i in 1:200) {
+    rikz_repl[[i]]$Richness &lt;- prior_pred[i, ] 
+}</code></pre>
+<p>Then we call the <code>brm_multiple</code> function with our model and this list of datasets. We reduce the number of Markov chains to 2 and specify the control parameter <code>adapt_delpth = 0.99</code>, because we had previously observed that the default value (<code>adapt_delta = 0.8</code>) generates several divergences. Finally, <code>combine = FALSE</code> ensures that <code>brm_multiple</code> produces a list of 200 objects for the results of each model, rather than combining them into a single object.</p>
+<p>We did not specify the number of iterations per string, so <em>brms</em> uses 2000 iterations by default, including 1000 in the warmup period. With two chains, the sample of the posterior distribution will therefore contain 2000 values of each parameter by simulation.</p>
+<pre class="r"><code>res_test &lt;- brm_multiple(Richness ~ NAP + Exposure + (1 | Beach), 
+                         data = rikz_repl, family = poisson,
+                         chains = 2, control = list(adapt_delta = 0.99),
+                         prior = rikz_prior, combine = FALSE)</code></pre>
+<p>Fitting the 200 models takes some time, so in practice this part might require the use of a high-performance computing cluster.</p>
+<p>We will now check how many models contain divergent transitions or have reached the maximum tree depth. The <code>nuts_params</code> function produces the diagnostic values for each iteration of a fitted model. Here, since we have a list of 200 results, we use <code>lapply</code> to apply this function to each element in the list: <code>diags</code> therefore contains a list of 200 data sets.</p>
+<pre class="r"><code>diags &lt;- lapply(res_test, nuts_params)</code></pre>
+<p>We can combine these datasets by stacking them with the <code>bind_rows</code> function of <em>dplyr</em>. The <code>.id</code> argument to this function creates a column (here <code>sim_id</code>) that identifies the original list item from which each row comes. Since the elements in the list have no names, this id here is the number between 1 and 200.</p>
+<pre class="r"><code>diags &lt;- bind_rows(diags, .id = &quot;sim_id&quot;)
+head(diags)</code></pre>
+<pre><code>##   sim_id Iteration     Parameter     Value Chain
+## 1      1         1 accept_stat__ 0.9996518     1
+## 2      1         2 accept_stat__ 0.9945361     1
+## 3      1         3 accept_stat__ 0.9878070     1
+## 4      1         4 accept_stat__ 0.9948456     1
+## 5      1         5 accept_stat__ 0.9973272     1
+## 6      1         6 accept_stat__ 0.9981608     1</code></pre>
+<p>Instead of two columns indicating the parameter and its value, we would like one column per parameter, so we need to pivot the data with <code>pivot_wider</code>.</p>
+<pre class="r"><code>diags &lt;- pivot_wider(diags, names_from = Parameter, values_from = Value)
+head(diags)</code></pre>
+<pre><code>## # A tibble: 6 x 9
+##   sim_id Iteration Chain accept_stat__ stepsize__ treedepth__ n_leapfrog__
+##   &lt;chr&gt;      &lt;int&gt; &lt;int&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;
+## 1 1              1     1         1.00      0.0746           5           63
+## 2 1              2     1         0.995     0.0746           5           31
+## 3 1              3     1         0.988     0.0746           5           31
+## 4 1              4     1         0.995     0.0746           6           63
+## 5 1              5     1         0.997     0.0746           6           63
+## 6 1              6     1         0.998     0.0746           6           63
+## # ... with 2 more variables: divergent__ &lt;dbl&gt;, energy__ &lt;dbl&gt;</code></pre>
+<p>Each row indicates the number of the simulation, the chain and the iteration in that chain, as well as the values of six parameters of the algorithm. We are mainly interested in <code>divergent__</code>, which indicates whether the transition was divergent (1) or not (0), and then in the <code>treedepth__</code>. With <code>summarize</code>, we count the number of divergent transitions per simulation and the number of iterations having reached the maximum tree depth (which is 10 by default). We also attach to this result the <code>prior_params</code> table containing the parameters of each simulation in order to check if some parameter values are associated with the problems identified by the diagnostics.</p>
+<pre class="r"><code>diags &lt;- group_by(diags, sim_id) %&gt;%
+    summarize(div = sum(divergent__), maxtree = sum(treedepth__ == 10)) %&gt;%
+    inner_join(prior_params)</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre><code>## Joining, by = &quot;sim_id&quot;</code></pre>
+<p>Since these are not our real data, but simulations, we do not try to eliminate all problematic diagnoses, but rather to see generally if estimation is difficult for certain ranges of values of the prior parameter distributions.</p>
+<p>When inspecting this dataset, we note that 2 simulations contain 1 or 2 divergent transitions (respectively), while about 10 simulations have sometimes reached the maximum tree depth. Simulations where many iterations reach the maximum depth seem to be characterized by a high intercept or standard deviation of the random effects, but otherwise there is no particular pattern to these results.</p>
+<pre class="r"><code>filter(diags, maxtree &gt; 0 | div &gt; 0) %&gt;%
+  arrange(desc(div), desc(maxtree)) %&gt;%
+  select(div, maxtree, b_Intercept, sd_Beach__Intercept)</code></pre>
+<pre><code>## # A tibble: 13 x 4
+##      div maxtree b_Intercept sd_Beach__Intercept
+##    &lt;dbl&gt;   &lt;int&gt;       &lt;dbl&gt;               &lt;dbl&gt;
+##  1     2       0       2.98               0.0807
+##  2     1       0       2.90               0.0831
+##  3     0     459       4.73               0.884 
+##  4     0     305       2.37               1.20  
+##  5     0      43       1.50               0.656 
+##  6     0      43       2.48               0.851 
+##  7     0       7       1.97               1.37  
+##  8     0       7       2.85               0.635 
+##  9     0       4       1.36               0.859 
+## 10     0       3       2.37               1.20  
+## 11     0       2       3.13               0.730 
+## 12     0       2       0.869              0.515 
+## 13     0       2       2.86               1.02</code></pre>
+<div id="calibration-test" class="section level2">
+<h2>Calibration test</h2>
+<p>For this test, we want to check whether the position of the true value of the parameter used for a simulation is uniformly distributed among the values obtained for the posterior distribution estimated from this simulation. For each result in our list, we can extract these posterior distributions with <code>posterior_samples</code>, which produces a data frame of 2000 iterations x 15 parameters (14 parameters plus the log of the joint probability).</p>
+<pre class="r"><code>test_params &lt;- lapply(res_test, posterior_samples)</code></pre>
+<p>However, the calibration test is based on an independent sample, so we subsample the results by taking one value every 5 iterations, for a total of 399 values between iterations 5 and 1995. As before, we combine the results of the 200 simulations with <code>bind_rows</code> by adding a column identifying the original simulation.</p>
+<pre class="r"><code>test_params &lt;- lapply(res_test, function(x) posterior_samples(x)[seq(5, 1995, 5),])
+test_params &lt;- bind_rows(test_params, .id = &quot;sim_id&quot;)</code></pre>
+<p>We use <code>bind_rows</code> to combine these posterior distributions with the values of the parameters from the prior distribution that were used for the simulations, contained in the <code>prior_params</code> table. With <code>id = "type"</code>, we create a column which indicates whether it is the true value of the parameter (<code>prior</code>) or a value from the posterior distribution (<code>posterior</code>). Finally, we apply a pivot to obtain 4 columns: the type of value, the simulation number, the parameter and its value.</p>
+<pre class="r"><code>test_params &lt;- bind_rows(prior = prior_params, posterior = test_params, .id = &quot;type&quot;)
+test_params &lt;- pivot_longer(test_params, cols = -c(sim_id, type), 
+                            names_to = &quot;param&quot;, values_to = &quot;value&quot;)
+head(test_params)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   type  sim_id param                  value
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;                  &lt;dbl&gt;
+## 1 prior 1      b_Intercept           1.11  
+## 2 prior 1      b_NAP                -0.0686
+## 3 prior 1      b_Exposure10         -0.441 
+## 4 prior 1      b_Exposure11          0.265 
+## 5 prior 1      sd_Beach__Intercept   0.302 
+## 6 prior 1      r_Beach[1,Intercept]  0.342</code></pre>
+<p>For each simulation and each parameter, <code>test_params</code> contains 400 values: the prior value of the parameter that was used to simulate the data, then 399 values of the posterior distribution.</p>
+<p>We still have to group the values by simulation and parameter, determine the rank of the 400 values (with <code>mutate</code>), then keep only the ranks of the original values of the parameters (<code>type == "prior"</code>), which should be uniformly distributed between 1 and 400 if the model is well calibrated.</p>
+<p><em>Note</em>: We eliminate the <code>lp__</code> column because log-probability is not a parameter of the model and is certainly not comparable between the prior and posterior distributions.</p>
+<pre class="r"><code>calib &lt;- group_by(test_params, sim_id, param) %&gt;%
+  mutate(rank = rank(value)) %&gt;%
+  filter(type == &quot;prior&quot;, param != &quot;lp__&quot;) %&gt;%
+  ungroup()
+head(calib)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   type  sim_id param                  value  rank
+##   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;                  &lt;dbl&gt; &lt;dbl&gt;
+## 1 prior 1      b_Intercept           1.11     332
+## 2 prior 1      b_NAP                -0.0686   145
+## 3 prior 1      b_Exposure10         -0.441     64
+## 4 prior 1      b_Exposure11          0.265     42
+## 5 prior 1      sd_Beach__Intercept   0.302    183
+## 6 prior 1      r_Beach[1,Intercept]  0.342    366</code></pre>
+<p>To test the uniformity of the ranks for each parameter, we group the ranks into 10 classes with a histogram: 1 to 40, 41 to 80, etc. (It is important to specify the limits of the classes manually with <code>breaks</code>.) In theory, the number of observations per class is given by a binomial distribution <span class="math inline">\(\text{Bin}(N = 200, p = 0.1)\)</span>, with a mean of 20 (dotted line) and for which 99% of the probability is in the grey zone.</p>
+<pre class="r"><code>ggplot(calib, aes(x = rank)) +
+    geom_rect(ymin = qbinom(0.005, 200, 0.1), ymax = qbinom(0.995, 200, 0.1),
+              xmin = -40, xmax = 440, color = &quot;white&quot;, fill = &quot;grey80&quot;) +
+    geom_hline(yintercept = 20, linetype = &quot;dashed&quot;) +
+    geom_histogram(breaks = seq(0.5, 400.5, 40), fill = &quot;orange&quot;, color = &quot;white&quot;) +
+    facet_wrap(~ param)</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
+<p>The distribution seems uniform and out of 140 bars (14 parameters x 10 classes), only 2 or 3 are out of the 99% range.</p>
+</div>
+<div id="sensitivity-test" class="section level2">
+<h2>Sensitivity test</h2>
+<p>Let us now check whether 45 observations are sufficient to produce accurates estimates of the parameters for each simulation.</p>
+<p>The <code>posterior_summary</code> function of <em>brms</em> produces the summary of the posterior distributions of each parameter, including the mean <code>Estimate</code> and the standard deviation <code>Error</code>.</p>
+<pre class="r"><code>posterior_summary(res_test[[1]])</code></pre>
+<pre><code>##                           Estimate Est.Error          Q2.5        Q97.5
+## b_Intercept             0.73804309 0.3812837   -0.01103903    1.5237741
+## b_NAP                  -0.03361925 0.0889227   -0.20693122    0.1288139
+## b_Exposure10            0.01350677 0.4361814   -0.85850562    0.8661791
+## b_Exposure11            0.74411153 0.4199943   -0.14942175    1.5425583
+## sd_Beach__Intercept     0.33599318 0.1520600    0.09363625    0.6933657
+## r_Beach[1,Intercept]   -0.01540107 0.2678292   -0.57347713    0.5171688
+## r_Beach[2,Intercept]   -0.09866021 0.3071263   -0.80956364    0.4577313
+## r_Beach[3,Intercept]   -0.27225569 0.2568916   -0.81579188    0.1746308
+## r_Beach[4,Intercept]    0.40803088 0.2527743   -0.01824350    0.9602471
+## r_Beach[5,Intercept]    0.09984275 0.2611922   -0.41250694    0.6686724
+## r_Beach[6,Intercept]   -0.12874140 0.2371614   -0.62286951    0.3433624
+## r_Beach[7,Intercept]    0.03781016 0.2324461   -0.39633465    0.5317407
+## r_Beach[8,Intercept]    0.05143366 0.2660621   -0.47575466    0.6039337
+## r_Beach[9,Intercept]   -0.18864904 0.2779928   -0.80830224    0.2940953
+## lp__                 -105.25568957 3.1047764 -112.14681150 -100.1294588</code></pre>
+<p>The format of this result is a matrix where the row names indicate the parameter. We create a function that converts this result into a data frame, adds the row names as a column and renames this column <code>param</code>. Then we can apply this function to each simulation and combine the results with <code>bind_rows</code> (you can ignore the warnings that the <code>add_rownames</code> function is outdated).</p>
+<pre class="r"><code>get_post_sum &lt;- function(x) {
+    posterior_summary(x) %&gt;%
+        as.data.frame() %&gt;%
+        add_rownames() %&gt;%
+        rename(param = rowname)
+}
+
+post_sum &lt;- bind_rows(lapply(res_test, get_post_sum), .id = &quot;sim_id&quot;)
+head(post_sum)</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   sim_id param                Estimate Est.Error    Q2.5 Q97.5
+##   &lt;chr&gt;  &lt;chr&gt;                   &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1 1      b_Intercept            0.738     0.381  -0.0110 1.52 
+## 2 1      b_NAP                 -0.0336    0.0889 -0.207  0.129
+## 3 1      b_Exposure10           0.0135    0.436  -0.859  0.866
+## 4 1      b_Exposure11           0.744     0.420  -0.149  1.54 
+## 5 1      sd_Beach__Intercept    0.336     0.152   0.0936 0.693
+## 6 1      r_Beach[1,Intercept]  -0.0154    0.268  -0.573  0.517</code></pre>
+<p>We still need to add to this data frame the real values of the parameters used to simulate the data. To do this, we pivot the <code>prior_params</code> dataset, then we join the two datasets.</p>
+<pre class="r"><code>prior_params &lt;- pivot_longer(prior_params, cols = -sim_id, 
+                             names_to = &quot;param&quot;, values_to = &quot;true_val&quot;)
+head(prior_params)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   sim_id param                true_val
+##   &lt;chr&gt;  &lt;chr&gt;                   &lt;dbl&gt;
+## 1 1      b_Intercept            1.11  
+## 2 1      b_NAP                 -0.0686
+## 3 1      b_Exposure10          -0.441 
+## 4 1      b_Exposure11           0.265 
+## 5 1      sd_Beach__Intercept    0.302 
+## 6 1      r_Beach[1,Intercept]   0.342</code></pre>
+<pre class="r"><code>post_sum &lt;- inner_join(post_sum, prior_params)</code></pre>
+<pre><code>## Joining, by = c(&quot;sim_id&quot;, &quot;param&quot;)</code></pre>
+<pre class="r"><code>head(post_sum)</code></pre>
+<pre><code>## # A tibble: 6 x 7
+##   sim_id param                Estimate Est.Error    Q2.5 Q97.5 true_val
+##   &lt;chr&gt;  &lt;chr&gt;                   &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+## 1 1      b_Intercept            0.738     0.381  -0.0110 1.52    1.11  
+## 2 1      b_NAP                 -0.0336    0.0889 -0.207  0.129  -0.0686
+## 3 1      b_Exposure10           0.0135    0.436  -0.859  0.866  -0.441 
+## 4 1      b_Exposure11           0.744     0.420  -0.149  1.54    0.265 
+## 5 1      sd_Beach__Intercept    0.336     0.152   0.0936 0.693   0.302 
+## 6 1      r_Beach[1,Intercept]  -0.0154    0.268  -0.573  0.517   0.342</code></pre>
+<p>Finally, we calculate the <span class="math inline">\(z\)</span> score for each estimate, i.e. the difference between the mean and the true value of the parameter, divided by the standard deviation; then the shrinkage factor, i.e. 1 - the ratio between the posterior and prior variances of the parameters (the prior variance is 1 for fixed effects and 0.09 for <code>sd_Beach__Intercept</code>, the latter calculated from the truncated normal distribution).</p>
+<pre class="r"><code>post_sum &lt;- filter(post_sum, param != &quot;lp__&quot;) %&gt;%
+    mutate(zscore = (Estimate - true_val) / Est.Error,
+           prior_var = ifelse(param == &quot;sd_Beach__Intercept&quot;, 0.09, 1),
+           contr = 1 - Est.Error^2/prior_var)</code></pre>
+<p>The following graph shows the distribution of <span class="math inline">\(z\)</span> scores for each parameter. These are centered on 0 and most estimates are within two standard deviations of the true value of the parameter ($-2 &lt; z &lt; $2), showing that the standard deviation of the posterior distribution does represent the uncertainty in the value of each parameter.</p>
+<pre class="r"><code>ggplot(post_sum, aes(x = zscore)) +
+    geom_density() +
+    facet_wrap(~ param)</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-45-1.png" width="672" /></p>
+<p>Then we look at the shrinkage factor as a function of the true value of each parameter. We are not interested in the random effects of each beach for this comparison, since their prior standard deviation depends on <code>sd_Beach__Intercept</code>.</p>
+<pre class="r"><code>post_sum2 &lt;- filter(post_sum, 
+                    param %in% c(&quot;b_Intercept&quot;, &quot;b_NAP&quot;, &quot;b_Exposure10&quot;,
+                                 &quot;b_Exposure11&quot;, &quot;sd_Beach__Intercept&quot;))
+ggplot(post_sum2, aes(x = true_val, y = contr)) +
+    geom_point() +
+    facet_wrap(~ param, scales = &quot;free_x&quot;)</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+<p>Except for <code>b_NAP</code>, we notice that the contraction factor is often low. For example, a factor of 0.5 means that the data only halves the uncertainty with respect to the prior distribution. According to the graph for <code>sd_Beach__Intercept</code>, the higher the standard deviation of random effects, the less accurately we can estimate it. To check if this is the case for the other parameters, we add another column representing the true value of <code>sd_Beach__Intercept</code> for each simulation.</p>
+<pre class="r"><code>sd_true &lt;- filter(post_sum, param == &quot;sd_Beach__Intercept&quot;) %&gt;%
+    select(sim_id, sd_true = true_val)
+post_sum &lt;- inner_join(post_sum, sd_true)</code></pre>
+<pre><code>## Joining, by = &quot;sim_id&quot;</code></pre>
+<pre class="r"><code>post_sum2 &lt;- filter(post_sum, 
+                    param %in% c(&quot;b_Intercept&quot;, &quot;b_NAP&quot;, &quot;b_Exposure10&quot;,
+                                 &quot;b_Exposure11&quot;, &quot;sd_Beach__Intercept&quot;))
+ggplot(post_sum2, aes(x = sd_true, y = contr)) +
+    geom_point() +
+    facet_wrap(~ param, scales = &quot;free_x&quot;)</code></pre>
+<p><img src="09E-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
+<p>Indeed, we find that the greater the variance between beaches, the less precise our estimates are.</p>
 </div>
 </div>
 
