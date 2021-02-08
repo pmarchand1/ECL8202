@@ -29,4 +29,4 @@ Graded lab: [Randomization tests and bootstrap](labos/E02E-Tests_randomisation.h
 
 4. Graded lab: [Robust regression](labos/E04E-Regression_robuste.html) ([PDF](labos/E04E-Regression_robuste.pdf))
 
-5. [Generalized linear mixed models](labos/05E-Modeles_generalises_mixtes.html) ([PDF](labos/05E-Modeles_generalises_mixtes.pdf)) - Data: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_species.csv](donnees/portal_species.csv), [portal_plots.csv](donnees/portal_plots.csv)
+5. [Generalized linear mixed models (solutions)](labos/05RE-Modeles_generalises_mixtes.html) ([PDF](labos/05RE-Modeles_generalises_mixtes.pdf)) - Data: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_species.csv](donnees/portal_species.csv), [portal_plots.csv](donnees/portal_plots.csv)
