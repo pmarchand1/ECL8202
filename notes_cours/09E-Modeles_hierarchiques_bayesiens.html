@@ -279,14 +279,15 @@ div.tocify {
 <p>We have also seen that <span class="math inline">\(p(y)\)</span> corresponds to the integral of the numerator <span class="math inline">\(p(y | \theta) p(\theta)\)</span> for all possible values of <span class="math inline">\(\theta\)</span>. Except in simple cases, we cannot exactly calculate this integral to obtain a mathematical formula of <span class="math inline">\(p(\theta | y)\)</span>.</p>
 <p>To solve this problem, we will use Monte-Carlo methods. As we saw in the first class of the semester, these are methods for approximating a distribution by drawing samples from this distribution.</p>
 <p>It does not seem possible to draw samples from the distribution <span class="math inline">\(p(\theta | y)\)</span> if we do not know <span class="math inline">\(p(y)\)</span>. However, since <span class="math inline">\(p(y)\)</span> does not depend on <span class="math inline">\(\theta\)</span>, it is possible to calculate the <em>ratio</em> of the posterior probabilities of two vectors <span class="math inline">\(\theta\)</span>:</p>
-<p><span class="math display">\[\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} = \frac{p(y | \theta_{(2)}) p(\theta_{(2)})}{p(y | \theta_{(1)}) p(\theta_{(1)})}\]</span> <em>Note</em>: Here, we use indices in parentheses to represent different <span class="math inline">\(\theta\)</span> vectors, in order to avoid confusion with the different elements of a single vector, e.g. if <span class="math inline">\(\theta\)</span> is a vector of <span class="math inline">\(m\)</span> parameters, <span class="math inline">\(\theta_{(1)} = (\theta_{1(1)}, \theta_{2(1)}, ... \theta_{m(1)})\)</span>.</p>
+<p><span class="math display">\[\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)} = \frac{p(y | \theta_{(2)}) p(\theta_{(2)})}{p(y | \theta_{(1)}) p(\theta_{(1)})}\]</span></p>
+<p><em>Note</em>: Here, we use indices in parentheses to represent different <span class="math inline">\(\theta\)</span> vectors, in order to avoid confusion with the different elements of a single vector, e.g. if <span class="math inline">\(\theta\)</span> is a vector of <span class="math inline">\(m\)</span> parameters, <span class="math inline">\(\theta_{(1)} = (\theta_{1(1)}, \theta_{2(1)}, ... \theta_{m(1)})\)</span>.</p>
 <div id="metropolis-hastings-algorithm" class="section level2">
 <h2>Metropolis-Hastings algorithm</h2>
 <p>The Metropolis-Hastings algorithm makes it possible to generate a sample of the distribution <span class="math inline">\(p(\theta | y)\)</span> from these probability ratios. Here is a summary of how this method works.</p>
 <ol style="list-style-type: decimal">
 <li><p>First, we randomly choose a first vector of parameters <span class="math inline">\(\theta_{(1)}\)</span>.</p></li>
 <li><p>Next, we choose a second vector <span class="math inline">\(\theta_{(2)}\)</span>, which depends on <span class="math inline">\(\theta_{(1)}\)</span> according to some transition probability. For example, adding to each of the parameters in <span class="math inline">\(\theta_{(1)}\)</span> an amount drawn from a normal distribution.</p></li>
-<li><p>We compute the posterior probability ratio $ $.</p>
+<li><p>We compute the posterior probability ratio <span class="math inline">\(\frac{p(\theta_{(2)} | y)}{p(\theta_{(1)} | y)}\)</span>.</p>
 <ul>
 <li><p>If the ratio is greater than or equal to 1 (<span class="math inline">\(\theta_{(2)}\)</span> is more likely than <span class="math inline">\(\theta_{(1)}\)</span>), we accept <span class="math inline">\(\theta_{(2)}\)</span>.</p></li>
 <li><p>If the ratio is less than 1, we accept <span class="math inline">\(\theta_{(2)}\)</span> with a probability equal to this ratio; otherwise, we stay at the same point so <span class="math inline">\(\theta_{(2)} = \theta_{(1)}\)</span>.</p></li>
@@ -501,7 +502,7 @@ r_Beach ~ normal(0, sd_Beach)</code></pre>
 <pre class="r"><code>summary(rikz$NAP)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ## -1.3360 -0.3750  0.1670  0.3477  1.1170  2.2550</code></pre>
-<p>Finally, we need to specify a distribution for the standard deviation of the random effects of the beach. The <code>normal(0, 1)</code> distribution, which is actually half-normal because it is truncated to zero, may be too permissive here. A standard deviation of 2 would mean that the species richness would vary by a factor of $e^2 $7 from one beach to another. We therefore use <code>normal(0, 0.5)</code> instead.</p>
+<p>Finally, we need to specify a distribution for the standard deviation of the random effects of the beach. The <code>normal(0, 1)</code> distribution, which is actually half-normal because it is truncated to zero, may be too permissive here. A standard deviation of 2 would mean that the species richness would vary by a factor of <span class="math inline">\(e^2 \approx 7\)</span> from one beach to another. We therefore use <code>normal(0, 0.5)</code> instead.</p>
 <p>Here is how to specify these prior distributions with <em>brms</em>:</p>
 <pre class="r"><code>rikz_prior &lt;- c(set_prior(&quot;normal(0, 1)&quot;, class = &quot;b&quot;),
                 set_prior(&quot;normal(2, 1)&quot;, class = &quot;Intercept&quot;),
@@ -542,7 +543,7 @@ str(prior_params)</code></pre>
 <p>The result is a matrix with one row for each of the 200 iterations of the prior distribution and one column for each of the 45 observations of the original dataset (in the same order as the 45 rows of the original dataset).</p>
 <pre class="r"><code>prior_pred &lt;- posterior_predict(res_prior)
 str(prior_pred)</code></pre>
-<pre><code>##  int [1:200, 1:45] 2 23 5 0 21 0 94 3 30 75 ...
+<pre><code>##  int [1:200, 1:45] 3 14 1 2 27 1 106 3 33 85 ...
 ##  - attr(*, &quot;dimnames&quot;)=List of 2
 ##   ..$ : NULL
 ##   ..$ : NULL</code></pre>
@@ -555,18 +556,18 @@ head(prior_df)</code></pre>
 <pre><code>## # A tibble: 6 x 3
 ##   sim_id obs_id Richness
 ##    &lt;int&gt; &lt;chr&gt;     &lt;int&gt;
-## 1      1 X1            2
-## 2      1 X2            6
-## 3      1 X3            3
-## 4      1 X4            1
+## 1      1 X1            3
+## 2      1 X2            2
+## 3      1 X3            4
+## 4      1 X4            5
 ## 5      1 X5            3
-## 6      1 X6            3</code></pre>
+## 6      1 X6            1</code></pre>
 <pre class="r"><code>summary(prior_df$Richness)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    0.00    2.00    8.00   25.18   20.00 3338.00</code></pre>
+##    0.00    2.00    8.00   25.14   20.00 3394.00</code></pre>
 <p>The maximum simulated value is very high (3458 species), which frequently occurs when the response follows an exponential function of the predictors. However, the vast majority of simulated values are less than 100.</p>
 <pre class="r"><code>mean(prior_df$Richness &lt; 100)</code></pre>
-<pre><code>## [1] 0.9586667</code></pre>
+<pre><code>## [1] 0.9574444</code></pre>
 <p>Here is a way to visualize the distribution of the species richness for each prior simulation of the model. We create a probability density curve (with <code>stat_density</code>) for each simulation (<code>group = sim_id</code>), with a transparency level <code>alpha = 0.3</code> to see the superimposed curves. We apply a square root transformation to the <code>x</code> axis to see more of the data (a log transformation is impossible because of the presence of zeros), then we limit this axis to values between 0 and 200.</p>
 <pre class="r"><code>ggplot(prior_df, aes(x = Richness)) +
     stat_density(aes(group = sim_id), position = &quot;identity&quot;, geom = &quot;line&quot;, alpha = 0.3) +
@@ -578,7 +579,7 @@ head(prior_df)</code></pre>
 </div>
 <div id="fitting-the-model-to-observations" class="section level2">
 <h2>Fitting the model to observations</h2>
-<p>We are now ready to fit the model to the actual observations.</p>
+<p>We are now ready to fit the model to the actual observations with <code>brm</code>. Here, we reduce the number of Markov chains to 2 and specify the control parameter <code>adapt_delpth = 0.99</code>, because we had previously observed that the default value (<code>adapt_delta = 0.8</code>) generates several divergences.</p>
 <pre class="r"><code>res_br &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
               family = poisson, control = list(adapt_delta = 0.99), 
               chains = 2, prior = rikz_prior)</code></pre>
@@ -689,8 +690,8 @@ summary(res_glmm)</code></pre>
 for (i in 1:200) {
     rikz_repl[[i]]$Richness &lt;- prior_pred[i, ] 
 }</code></pre>
-<p>Then we call the <code>brm_multiple</code> function with our model and this list of datasets. We reduce the number of Markov chains to 2 and specify the control parameter <code>adapt_delpth = 0.99</code>, because we had previously observed that the default value (<code>adapt_delta = 0.8</code>) generates several divergences. Finally, <code>combine = FALSE</code> ensures that <code>brm_multiple</code> produces a list of 200 objects for the results of each model, rather than combining them into a single object.</p>
-<p>We did not specify the number of iterations per string, so <em>brms</em> uses 2000 iterations by default, including 1000 in the warmup period. With two chains, the sample of the posterior distribution will therefore contain 2000 values of each parameter by simulation.</p>
+<p>Then we call the <code>brm_multiple</code> function with our model and this list of datasets. Note that <code>combine = FALSE</code> ensures that <code>brm_multiple</code> produces a list of 200 objects for the results of each model, rather than combining them into a single object.</p>
+<p>We did not specify the number of iterations per chain, so <em>brms</em> uses 2000 iterations by default, including 1000 in the warmup period. With two chains, the sample of the posterior distribution will therefore contain 2000 values of each parameter by simulation.</p>
 <pre class="r"><code>res_test &lt;- brm_multiple(Richness ~ NAP + Exposure + (1 | Beach), 
                          data = rikz_repl, family = poisson,
                          chains = 2, control = list(adapt_delta = 0.99),

@@ -436,7 +436,7 @@ As mentioned above, step 3 of the full protocol (fitting the model to the simula
 
 ## Fitting the model to observations
 
-We are now ready to fit the model to the actual observations. 
+We are now ready to fit the model to the actual observations with `brm`. Here, we reduce the number of Markov chains to 2 and specify the control parameter `adapt_delpth = 0.99`, because we had previously observed that the default value (`adapt_delta = 0.8`) generates several divergences.
 
 ```{r, eval = FALSE}
 res_br <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
@@ -519,9 +519,9 @@ for (i in 1:200) {
 rikz_repl <- readRDS("09-savedRDS/rikz_repl.RDS")
 ```
 
-Then we call the `brm_multiple` function with our model and this list of datasets. We reduce the number of Markov chains to 2 and specify the control parameter `adapt_delpth = 0.99`, because we had previously observed that the default value (`adapt_delta = 0.8`) generates several divergences. Finally, `combine = FALSE` ensures that `brm_multiple` produces a list of 200 objects for the results of each model, rather than combining them into a single object. 
+Then we call the `brm_multiple` function with our model and this list of datasets. Note that `combine = FALSE` ensures that `brm_multiple` produces a list of 200 objects for the results of each model, rather than combining them into a single object. 
 
-We did not specify the number of iterations per string, so *brms* uses 2000 iterations by default, including 1000 in the warmup period. With two chains, the sample of the posterior distribution will therefore contain 2000 values of each parameter by simulation.
+We did not specify the number of iterations per chain, so *brms* uses 2000 iterations by default, including 1000 in the warmup period. With two chains, the sample of the posterior distribution will therefore contain 2000 values of each parameter by simulation.
 
 ```{r, eval = FALSE}
 res_test <- brm_multiple(Richness ~ NAP + Exposure + (1 | Beach), 

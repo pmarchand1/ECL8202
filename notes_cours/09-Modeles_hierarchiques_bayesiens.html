@@ -545,7 +545,7 @@ str(prior_params)</code></pre>
 <p>Le résultat est une matrice avec une rangée pour chacune des 200 itérations de la distribution <em>a priori</em> et une colonne pour chacune des 45 observations du jeu de données original (dans le même ordre que les 45 rangées de ce jeu de données original).</p>
 <pre class="r"><code>prior_pred &lt;- posterior_predict(res_prior)
 str(prior_pred)</code></pre>
-<pre><code>##  int [1:200, 1:45] 2 21 2 2 18 1 96 4 42 101 ...
+<pre><code>##  int [1:200, 1:45] 1 15 9 1 22 1 110 2 30 92 ...
 ##  - attr(*, &quot;dimnames&quot;)=List of 2
 ##   ..$ : NULL
 ##   ..$ : NULL</code></pre>
@@ -558,18 +558,18 @@ head(prior_df)</code></pre>
 <pre><code>## # A tibble: 6 x 3
 ##   sim_id obs_id Richness
 ##    &lt;int&gt; &lt;chr&gt;     &lt;int&gt;
-## 1      1 X1            2
-## 2      1 X2            4
-## 3      1 X3            7
-## 4      1 X4            3
-## 5      1 X5            1
-## 6      1 X6            1</code></pre>
+## 1      1 X1            1
+## 2      1 X2            3
+## 3      1 X3            2
+## 4      1 X4            2
+## 5      1 X5            2
+## 6      1 X6            2</code></pre>
 <pre class="r"><code>summary(prior_df$Richness)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##    0.00    2.00    8.00   25.22   20.00 3406.00</code></pre>
+##    0.00    2.00    8.00   25.13   20.00 3330.00</code></pre>
 <p>La valeur maximale simulée est très élevée (3458 espèces), ce qui se produit fréquemment lorsque la réponse suit une fonction exponentielle des prédicteurs. Cependant, la grande majorité des valeurs simulées sont inférieures à 100.</p>
 <pre class="r"><code>mean(prior_df$Richness &lt; 100)</code></pre>
-<pre><code>## [1] 0.9588889</code></pre>
+<pre><code>## [1] 0.957</code></pre>
 <p>Voici une façon de visualiser la distribution de la richesse spécifique pour chaque simulation <em>a priori</em> du modèle. Nous créons une courbe de densité de probabilité (avec <code>stat_density</code>) pour chaque simulation (<code>group = sim_id</code>), avec un niveau de transparence <code>alpha = 0.3</code> pour voir les courbes superposées. Nous appliquons une transformation racine carrée à l’axe des <code>x</code> pour mieux voir toutes les données (une transformation log est impossible en raison de la présence de zéros), puis nous limitons cet axe aux valeurs entre 0 et 200.</p>
 <pre class="r"><code>ggplot(prior_df, aes(x = Richness)) +
     stat_density(aes(group = sim_id), position = &quot;identity&quot;, geom = &quot;line&quot;, alpha = 0.3) +
@@ -581,7 +581,7 @@ head(prior_df)</code></pre>
 </div>
 <div id="ajustement-du-modèle-aux-observations" class="section level2">
 <h2>Ajustement du modèle aux observations</h2>
-<p>Nous sommes maintenant prêts à ajuster le modèle aux observations réelles.</p>
+<p>Nous sommes maintenant prêts à ajuster le modèle aux observations réelles avec <code>brm</code>. Ici, nous réduisons le nombre de chaînes de Markov à 2 et spécifions le paramètre de contrôle <code>adapt_delpth = 0.99</code>, car nous avions observé au préalable que la valeur par défaut (<code>adapt_delta = 0.8</code>) génère plusieurs divergences.</p>
 <pre class="r"><code>res_br &lt;- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
               family = poisson, control = list(adapt_delta = 0.99), 
               chains = 2, prior = rikz_prior)</code></pre>
@@ -692,7 +692,7 @@ summary(res_glmm)</code></pre>
 for (i in 1:200) {
     rikz_repl[[i]]$Richness &lt;- prior_pred[i, ] 
 }</code></pre>
-<p>Ensuite, nous appelons la fonction <code>brm_multiple</code> avec notre modèle et cette liste de jeux de données. Nous réduisons le nombre de chaînes de Markov à 2 et spécifions le paramètre de contrôle <code>adapt_delpth = 0.99</code>, car nous avions observé au préalable que la valeur par défaut (<code>adapt_delta = 0.8</code>) génère plusieurs divergences. Finalement, <code>combine = FALSE</code> assure que <code>brm_multiple</code> produise une liste de 200 objets pour les résultats de chaque modèle, plutôt que de les combiner en un seul objet.</p>
+<p>Ensuite, nous appelons la fonction <code>brm_multiple</code> avec notre modèle et cette liste de jeux de données. Notez que <code>combine = FALSE</code> assure que <code>brm_multiple</code> produise une liste de 200 objets pour les résultats de chaque modèle, plutôt que de les combiner en un seul objet.</p>
 <p>Nous n’avons pas spécifié le nombre d’itérations par chaîne, donc <em>brms</em> utilise par défaut 2000 itérations, dont 1000 dans la période de rodage. Avec deux chaînes, l’échantillon de la distribution <em>a posteriori</em> sera donc composé de 2000 valeurs de chaque paramètre par simulation.</p>
 <pre class="r"><code>res_test &lt;- brm_multiple(Richness ~ NAP + Exposure + (1 | Beach), 
                          data = rikz_repl, family = poisson,

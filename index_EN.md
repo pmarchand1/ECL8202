@@ -16,6 +16,8 @@ title: ECL8202 - Analyses des données complexes
 
 5. [Generalized linear mixed models](notes_cours/05E-Modeles_generalises_mixtes.html) ([PDF](notes_cours/05E-Modeles_generalises_mixtes.pdf)) - Data: [rikz.csv](donnees/rikz.csv)
 
+6. [Generalized linear mixed models 2](notes_cours/06E-Modeles_generalises_mixtes2.html) ([PDF](notes_cours/06E-Modeles_generalises_mixtes2.pdf)) - Data: [acer_transplant.csv](donnees/acer_transplant.csv)
+
 
 ## Exercises
 
@@ -30,3 +32,5 @@ Graded lab: [Randomization tests and bootstrap](labos/E02E-Tests_randomisation.h
 4. Graded lab: [Robust regression](labos/E04E-Regression_robuste.html) ([PDF](labos/E04E-Regression_robuste.pdf))
 
 5. [Generalized linear mixed models (solutions)](labos/05RE-Modeles_generalises_mixtes.html) ([PDF](labos/05RE-Modeles_generalises_mixtes.pdf)) - Data: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_species.csv](donnees/portal_species.csv), [portal_plots.csv](donnees/portal_plots.csv)
+
+6. Graded lab: [Generalized linear mixed models 2](labos/E06E-Modeles_generalises_mixtes2.html) ([PDF](labos/E06E-Modeles_generalises_mixtes2.pdf)) - Data: [aiv_ducks.csv](donnees/aiv_ducks.csv)

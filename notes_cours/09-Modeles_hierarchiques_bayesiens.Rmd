@@ -1,6 +1,7 @@
 ---
 title: "Modèles hiérarchiques bayésiens"
 output:
+    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -439,7 +440,7 @@ Tel que mentionné ci-dessus, l'étape 3 du protocole complet (ajustement du mod
 
 ## Ajustement du modèle aux observations
 
-Nous sommes maintenant prêts à ajuster le modèle aux observations réelles. 
+Nous sommes maintenant prêts à ajuster le modèle aux observations réelles avec `brm`. Ici, nous réduisons le nombre de chaînes de Markov à 2 et spécifions le paramètre de contrôle `adapt_delpth = 0.99`, car nous avions observé au préalable que la valeur par défaut (`adapt_delta = 0.8`) génère plusieurs divergences.
 
 ```{r, eval = FALSE}
 res_br <- brm(Richness ~ NAP + Exposure + (1 | Beach), data = rikz, 
@@ -522,7 +523,7 @@ for (i in 1:200) {
 rikz_repl <- readRDS("09-savedRDS/rikz_repl.RDS")
 ```
 
-Ensuite, nous appelons la fonction `brm_multiple` avec notre modèle et cette liste de jeux de données. Nous réduisons le nombre de chaînes de Markov à 2 et spécifions le paramètre de contrôle `adapt_delpth = 0.99`, car nous avions observé au préalable que la valeur par défaut (`adapt_delta = 0.8`) génère plusieurs divergences. Finalement, `combine = FALSE` assure que `brm_multiple` produise une liste de 200 objets pour les résultats de chaque modèle, plutôt que de les combiner en un seul objet. 
+Ensuite, nous appelons la fonction `brm_multiple` avec notre modèle et cette liste de jeux de données. Notez que `combine = FALSE` assure que `brm_multiple` produise une liste de 200 objets pour les résultats de chaque modèle, plutôt que de les combiner en un seul objet. 
 
 Nous n'avons pas spécifié le nombre d'itérations par chaîne, donc *brms* utilise par défaut 2000 itérations, dont 1000 dans la période de rodage. Avec deux chaînes, l'échantillon de la distribution *a posteriori* sera donc composé de 2000 valeurs de chaque paramètre par simulation.
 
