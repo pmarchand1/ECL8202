@@ -1,6 +1,7 @@
 ---
 title: "Hierarchical Bayesian models, part 2"
 output:
+    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -14,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Contents
@@ -229,9 +231,9 @@ loo1 <- loo(mod1, mod2, compare = TRUE)
 loo1
 ```
 
-The result indicates that model 1 has a higher LOOIC of 6.42 compared to model 2, which seems a big difference, except that the standard error of this difference (column 2) is 5.92. So we cannot be certain that model 2 is the best.
+The result indicates that model 1 has a smaller log predictive density compared to model 2 (difference of 3.6), but the standard error of this difference (column 2) is 3.4. So we cannot be certain that model 2 is the best.
 
-In addition, R warns us that for 3 observations (1 of model 1, 2 of model 2), the PSIS-LOO estimate is unstable with a $ k> 0.7 $ in the Pareto distribution. This warning means that for these observations, the weights used for the approximation of the predictive density of cross validation have too many extreme values to estimate their variance. As suggested by the message, we re-evaluate the LOOIC with the argument `reloo = TRUE`, which will refit the model by omitting each of the problematic observations, to calculate the predictive density of cross validation directly.
+In addition, R warns us that for 4 observations (1 of model 1, 3 of model 2), the PSIS-LOO estimate is unstable with a $ k> 0.7 $ in the Pareto distribution. This warning means that for these observations, the weights used for the approximation of the predictive density of cross validation have too many extreme values to estimate their variance. As suggested by the message, we re-evaluate the LOOIC with the argument `reloo = TRUE`, which will refit the model by omitting each of the problematic observations, to calculate the predictive density of cross validation directly.
 
 ```{r, cache = TRUE}
 loo_corr <- loo(mod1, mod2, compare = TRUE, reloo = TRUE)
@@ -250,7 +252,7 @@ When we fitted these models with GLMMs in course 5, the AIC was lower for model 
 
 - First, the use of prior distributions constrains the values of the parameters so that a more complex model shows less overfitting.
 
-- Then, the AIC and the Bayesian criteria are based on different predictions. Suppose that two models differ by the inclusion or omission of a parameter $\theta$. The AIC compares the predictions when this parameter is omitted, which implies for example $\theta = 0$, with the predictions at the estimated maximum likelihood value $\hat{\theta} $. In contrast, the Bayesian predictions of the model including $\theta$ are an average on the posterior distribution of $\theta$, which will include values close to 0 if the posterior probability of that case is not negligible.
+- Then, the AIC and the Bayesian criteria are based on different predictions. Suppose that two models differ by the inclusion or omission of a parameter $\theta$. The AIC compares the predictions when this parameter is omitted, which implies for example $\theta = 0$, with the predictions at the estimated maximum likelihood value $\hat{\theta}$. In contrast, the Bayesian predictions of the model including $\theta$ are an average on the posterior distribution of $\theta$, which will include values close to 0 if the posterior probability of that case is not negligible.
 
 For these two reasons, the maximum likelihood and Bayesian approach predictions differ except in very specific cases, e.g. a linear model where the prior distribution is of little importance and the posterior distribution for all parameters is symmetrical.
 
@@ -270,12 +272,118 @@ stacking_weights(cbind(loo1$loos$mod1$pointwise[,1], loo1$loos$mod2$pointwise[,1
 stacking_weights(cbind(loo_corr$loos$mod1$pointwise[,1], loo_corr$loos$mod2$pointwise[,1]))
 ```
 
-For the PSIS-LOO estimate with correction of problematic values, we see that almost all the weight is given to model 2, so it is probably enough to make predictions with the more complex model. As mentioned above, since the predictions are based on the whole posterior distribution of `sd_Beach__NAP`, this includes cases where the standard deviation of this random effect approaches 0 and we therefore approach model 1.
+For the PSIS-LOO estimate with correction of problematic values, we see that a much greater weight is given to model 2. As mentioned above, since the predictions are based on the whole posterior distribution of `sd_Beach__NAP`, this includes cases where the standard deviation of this random effect approaches 0 and we therefore approach model 1.
+
+
+# Application: predator-prey model
+
+Rosenbaum et al. (2019) model the population dynamics of a predator-prey-resource system in a controlled environment (chemostat). The predator is a rotifer species (microscopic animal) and the prey is a unicellular alga whose growth depends on the nitrogen concentration (limiting resource).
+
+## Theoretical model
+
+The authors assume that the nitrogen concentration $S$, algae density $A$ and rotifer density $R$ vary over time according to the following equations:
+
+$$\frac{dS}{dt} = \delta S^* - \frac{1}{c_A} \frac{f_A S}{h_A + S} A - \delta S$$
+
+This equation indicates that the rate of change in nitrogen concentration depends on (1) nitrogen influx $\delta S^*$ ($\delta$ is the chemostat flow rate and $S^*$ is the concentration in the incoming solution); (2) nitrogen consumption by the algae ($c_A$ is the conversion factor, $f_A$ is the maximum growth rate and $h_A$ is the half-saturation point) and (3) the output flow $\delta S$.
+
+$$\frac{dA}{dt} = \frac{f_A S}{h_A + S} A - \frac{1}{c_R} \frac{f_R A}{h_R + A} R - \delta A$$
+
+This equation indicates that the rate of change in algae density depends on (1) nitrogen consumption by the algae, (2) algae consumption by the rotifers (conversion factor $c_R$, maximum growth rate $f_R$ and half-saturation point $h_R$) and (3) output flow $\delta A$.
+
+$$\frac{dR}{dt} = \frac{f_R A}{h_R + A} R - \delta R$$
+
+Finally, the rate of change in rotifer density depends on their algae consumption and output flow.
+
+## Data and statistical model
+
+The authors measured the daily concentration of algae and rotifers for about 20 days in 18 replicates of this experiment. In some replicates, the time series showed stable concentrations, while others showed cyclic dynamics.
+
+For this experiment, the parameters $\delta$, $S^*$, $h_A$ and $h_R$ are known, whereas the maximum growth rates of the two organisms ($f_A$ and $f_R$) and the conversion factors ($c_A$ and $c_R$) must be estimated from the data. The following is a summary of the Stan model implementing this model:
+
+- The logarithms of the parameters $f_A$, $f_R$, $c_A$ and $c_R$ vary randomly between the replicates, according to a normal distribution where the mean and standard deviation are parameters to be estimated.
+
+- The concentrations of each element of the system at the beginning of the experiment ($S_0$, $A_0$, and $R_0$) are parameters to be estimated.
+
+- For a given value of the parameters, the above series of three equations is solved numerically to obtain the time series of $S$, $A$ and $R$. (Stan allows solving systems of differential equations in a model.)
+
+- The observations of $A$ and $R$ follow a log-normal distribution around their true value, with a standard deviation to be estimated.
+
+For all parameters to be estimated, the authors assigned prior distributions with weak constraints (*weakly informative prior*) based on past experiences with this type of system. 
+
+## Simulations
+
+The authors carried out simulations from the full model, with parameters drawn from their prior distribution, in order to ensure that the model fitted to the results of these simulations is capable of recovering the true values of the parameters $f_A$, $f_R$, $c_A$ and $c_R$ (in other words, that the parameters are *identifiable*). 
+
+Figure 1 of this study, reproduced below, shows the posterior distribution of the estimation error of the parameters for different simulations. This test allowed the authors to determine that when the populations of the two species are stable rather than cyclical (top green results), three of the four parameters are difficult to estimate precisely.
+
+![](../images/Rosenbaum2019_Fig1.jpg)
+*Source: Rosenbaum et al. 2019, Fig.1*
+
+## Fitting the model
+
+From the model fitted to the observations, the authors produced hindcast estimates of the $S$, $A$, and $R$ concentrations on each day for each of the replicates (Figure 3, reproduced below, with the points corresponding to the observed values of $A$ and $R$). Since the nitrogen concentration $S$ (top row in blue) was not measured, the accuracy of its estimation depends on the accuracy of the model parameters, and is therefore less accurate when populations are stable rather than cyclic (top row).
+
+![](../images/Rosenbaum2019_Fig3.jpg)
+*Source: Rosenbaum et al. 2019, Fig.3.*
+
+By comparing the dynamics estimated by the model to the observation points, we can see that the model follows more precisely the observations of the algae concentrations (middle in green) than those of the rotifers (bottom in red). One of the possible reasons given by the authors to explain these results is that the growth of the algal population depends on the unmeasured nitrogen concentration, so the model has the flexibility to adjust this concentration to reproduce the algal dynamics, which is not the case for rotifers whose growth depends on the algal population.
+
+
+# Application: seed and seedling dispersal
+
+This example presents a study I conducted with collaborators to estimate seed and seedling dispersal curves as a function of distance for different species in the forest of Barro Colorado Island in Panama (Marchand et al. 2020).
+
+## Model and data
+
+The study site is a 50 ha (1 km x 0.5 km) plot of the Smithsonian Tropical Research Institute (STRI) where all trees with a DBH >1 cm have been mapped and measured every 5 years since 1985. STRI researchers have been conducting annual seed collection and seed identification in 500 mesh traps scattered throughout this plot, as well as counting new seedlings in plots around these traps.
+
+Seed dispersal is modelled separately for each of the main tree species. The number of seeds found in trap $j$ during year $t$ follows a negative binomial distribution with a mean $\mu_{jt}$ given by the following equation:
+
+$$\mu_{jt} = a \sum_i Q(b_{it}) F(r_{ij})$$
+
+For each tree $i$ of that species, the seed production $Q$ is multiplied by the dispersal kernel $F$, which gives the probability that a seed will fall within an area of one square meter located at a distance $r_{ij}$. We then sum up the contributions of all the trees and multiply by the trap area $a$.
+
+The seed production of a tree is assumed to be proportional to its basal area $b$.
+
+$$Q(b_{it}) = e^{\beta_t} b_{it}$$
+
+The logarithm of the proportionality constant, $\beta_t$, varies from year to year according to a normal distribution with two parameters to be estimated.
+
+$$\beta_t \sim \text{N}(\mu_{\beta}, \sigma_{\beta})$$
+
+The same model can be used to estimate the dispersal of seedlings in relation to potential parents.
+
+Our main objective was to determine the shape of the dispersal kernel $F$ for seeds and seedlings of different species, as well as the relative germination success (ratio between the number of seedlings and the number of seeds) as a function of the distance from the parent.
+
+The figure below shows the different dispersal kernels we considered. Each one contains two parameters to be fit from the data.
+
+![](../images/Marchand2020_disp_EN.png)
+
+The problem of estimating dispersal kernels poses two challenges for which the Bayesian approach offers interesting solutions:
+
+- Seed dispersal follows a leptokurtic pattern, i.e. most seeds fall close to the parent, but a small proportion can reach extreme distances (several kilometers) under the action of wind and animals. However, our data do not allow us to observe dispersal over long or very short distances. In this situation, an unconstrained fit to the data may lead to an unrealistic dispersal function (e.g. median dispersal distance < 10 cm and mean > 10 km).
+
+- It is likely that none of the dispersal kernels presented above is entirely appropriate. In this case, we would like to estimate dispersal characteristics (mean dispersal distance of seeds and seedlings, relative seed survival as a function of distance) taking into account the uncertainty on the shape of the dispersal kernel.
+
+To solve the second problem, we estimated the parameters of each of the five dispersal kernels for each species and used model stacking to obtain multi-model predictions of the dispersal characteristics of interest. Before the model stacking step, we used posterior predictive checks to eliminate models that were very poorly fitted to the data: for example, those that did not give plausible values for the total number of seeds observed in the traps, or for the number of zeros observed.
+
+To solve the first problem, we chose prior distributions for the parameters of each dispersal kernel, so that the plausible values of the median and mean dispersal distances are of the order of 1 m to 1 km; this does not mean that the posterior distribution is confined to this range, but that these more plausible values are favored unless the data strongly supports more extreme values. We also chose prior distributions based on biological plausibility for seed production parameters.
+
+## Results
+
+The figure below shows an example of the dispersal kernels and relative seed survival rates that we estimated from the model stacking. In both cases, the seedlings are on average further away from the parent than the seeds. For the species on the left, the germination rate increases continuously between 1 and 100 m from the parent, while for the species on the right, it seems to reach a plateau between 10 and 100 m.
+
+![](../images/Marchand2020_res_EN.png)
 
 
 # References
 
-Vehtari, A., Gelman, A. et Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing* 27(5), 1413--1432. doi:10.1007/s11222-016-9696-4.
+Marchand, P., Comita, L. S., Wright, S. J., Condit, R., Hubbell, S. P., & Beckman, N. G. (2020). Seed-to-seedling transitions exhibit distance-dependent mortality but no strong spacing effects in a Neotropical forest. *Ecology*, 101(2), e02926. doi:10.1002/ecy.2926.
 
-Yao, Y., Vehtari, A., Simpson, D. et Gelman, A. (2018) Using stacking to average Bayesian predictive distributions. Bayesian Analysis 13(3), 917--1007. doi:10.1214/17-BA1091.
+Rosenbaum, B., Raatz, M., Weithoff, G., Fussmann, G.F. and Gaedke, U. (2019) Estimating parameters from multiple time series of population dynamics using bayesian inference. *Frontiers in Ecology and Evolution* 6, 234. doi: 10.3389/fevo.2018.00234.
+
+Vehtari, A., Gelman, A. and Gabry, J. (2017) Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC. *Statistics and Computing* 27(5), 1413--1432. doi:10.1007/s11222-016-9696-4.
+
+Yao, Y., Vehtari, A., Simpson, D. and Gelman, A. (2018) Using stacking to average Bayesian predictive distributions. Bayesian Analysis 13(3), 917--1007. doi:10.1214/17-BA1091.
 

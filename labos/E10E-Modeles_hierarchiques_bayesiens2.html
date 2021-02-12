@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Hierarchical Bayesian models 2</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Hierarchical Bayesian models 2</h1>
+
+</div>
+
+
+<p>Answers for this lab must be submitted on Moodle before March 31st at 5pm.</p>
+<blockquote>
+<p><strong>Tip</strong>: In RMarkdown you can add the argument <code>cache = TRUE</code> to a block of code (<code>{r, cache = TRUE}</code>) to save the result of the block. In this case, as long as the code remains the same, the calculation is not repeated every time the RMarkdown document is compiled. This function is especially useful for time-consuming operations, such as fitting a Bayesian model with <code>brm</code>.</p>
+</blockquote>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>We will use the <em>gapminder</em> dataset presented during the exercises on robust regression (lab 4). This data frame includes life expectancy (<em>lifeExp</em>), population (<em>pop)</em> and GDP per capita (<em>gdpPercap</em>) for 142 countries and 12 years (every 5 years between 1952 and 2007).</p>
+<pre class="r"><code>library(gapminder)
+data(gapminder)
+str(gapminder)</code></pre>
+<pre><code>## tibble [1,704 x 6] (S3: tbl_df/tbl/data.frame)
+##  $ country  : Factor w/ 142 levels &quot;Afghanistan&quot;,..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ continent: Factor w/ 5 levels &quot;Africa&quot;,&quot;Americas&quot;,..: 3 3 3 3 3 3 3 3 3 3 ...
+##  $ year     : int [1:1704] 1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+##  $ lifeExp  : num [1:1704] 28.8 30.3 32 34 36.1 ...
+##  $ pop      : int [1:1704] 8425333 9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 ...
+##  $ gdpPercap: num [1:1704] 779 821 853 836 740 ...</code></pre>
+<p>As in lab 4, we first transform the predictors:</p>
+<ul>
+<li><p><em>gdp_norm</em> is the logarithm of <em>gdpPercap</em>, scaled to have a mean of 0 and a standard deviation of 1.</p></li>
+<li><p><em>dyear</em> is the number of years since 1952.</p></li>
+</ul>
+<pre class="r"><code>library(dplyr)
+gapminder &lt;- mutate(gapminder, gdp_norm = scale(log(gdpPercap)), 
+                    dyear = year - 1952)</code></pre>
+</div>
+<div id="bayesian-model-of-life-expectancy-as-a-function-of-gdp-and-time" class="section level2">
+<h2>Bayesian model of life expectancy as a function of GDP and time</h2>
+<p>In lab 4, we first performed a linear regression of <code>lifeExp</code> as a function of <code>gdp_norm</code>, <code>dyear</code> and their interaction. For this first part, we will estimate these same effects in a Bayesian context, by adding random effects of the country on the intercept and the coefficients of <code>gdp_norm</code> and <code>dyear</code>.</p>
+<p><em>Notes</em>:</p>
+<ul>
+<li><p>The model formula in <code>brm</code> follows the same syntax as <code>lmer</code> for the specification of fixed and random effects.</p></li>
+<li><p>Although it would be possible to add a random effect of country on the <code>gdp_norm:dyear</code> interaction, we omit it here in order to reduce model computation time.</p></li>
+</ul>
+<ol style="list-style-type: lower-alpha">
+<li>Choose prior distributions for the model parameters described above. Here is a code sample where only the specification of the distributions is missing. The first four lines define the prior distributions for the intercept and coefficients of the three fixed effects, the next three define the distributions for the standard deviations of the random effects (<code>class = "sd"</code>), while the last line refers to the standard deviation of the individual observations (<code>class = "sigma"</code>).</li>
+</ol>
+<pre class="r"><code>gap_prior &lt;- c(set_prior(&quot;&quot;, class = &quot;Intercept&quot;),
+               set_prior(&quot;&quot;, class = &quot;b&quot;, coef = &quot;gdp_norm&quot;),
+               set_prior(&quot;&quot;, class = &quot;b&quot;, coef = &quot;dyear&quot;),
+               set_prior(&quot;&quot;, class = &quot;b&quot;, coef = &quot;gdp_norm:dyear&quot;),
+               set_prior(&quot;&quot;, class = &quot;sd&quot;, coef = &quot;Intercept&quot;, group = &quot;country&quot;),
+               set_prior(&quot;&quot;, class = &quot;sd&quot;, coef = &quot;gdp_norm&quot;, group = &quot;country&quot;),
+               set_prior(&quot;&quot;, class = &quot;sd&quot;, coef = &quot;dyear&quot;, group = &quot;country&quot;),
+               set_prior(&quot;&quot;, class = &quot;sigma&quot;))</code></pre>
+<p>It is recommended to choose normal distributions in all cases. For “sigma” and “sd”, these distributions will be interpreted as half-normal because it is implied that these parameters are <span class="math inline">\(\geq 0\)</span>. To choose the <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> values for each normal distribution, consider the interpretation of each parameter and in particular the scales of the predictors <code>gdp_norm</code> and <code>dyear</code>.</p>
+<ul>
+<li><p>For the effect of the interaction, we can assume that it is not stronger than the main effects of the two predictors, so <code>gdp_norm:year</code> can take the same prior distribution as the smallest assumed effect between <code>gdp_norm</code> and <code>year</code>.</p></li>
+<li><p>As for the standard deviations of the random effects (“sd”), their prior distribution can have the same width as that of the corresponding coefficient “b”.</p></li>
+</ul>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Now draw a sample of the joint prior distribution of the parameters with <code>brm</code>. I suggest specifying <code>chains = 1, iter = 1500, warmup = 1000</code> to produce a single Markov chain with 1000 warmup iterations and 500 sampling iterations. Then visualize the predicted distribution of <code>lifeExp</code> for each iteration of the prior parameters.</li>
+</ol>
+<p>Due to the large number of estimated effects and the fact that we impose only weak constraints on each prior distribution, extreme or even impossible values (large positive and negative values) are to be expected; the important thing is that the density is greater within a realistic range of values. It may be useful to “zoom” into a part of the <code>ggplot</code> graph by adding <code>coord_cartesian(xlim = c(..., ...), ylim = c(..., ...))</code> with limits in <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Now fit the model with <code>brm</code>. You can reduce the number of Markov chains to 2 to save time, but keep the default values for the number of iterations. (You can ignore the warning that the effective sample size or ESS is small.) How can you assess the convergence of the model?</li>
+</ol>
+</div>
+<div id="robust-regression-with-the-t-distribution" class="section level2">
+<h2>2. Robust regression with the <span class="math inline">\(t\)</span> distribution</h2>
+<p>In lab 4, we saw that a robust regression was preferable for this dataset. In order to allow more extreme residuals in a Bayesian context, we will replace the normal distribution for the residuals by a Student <span class="math inline">\(t\)</span> distribution.</p>
+<ol style="list-style-type: lower-alpha">
+<li>Refit the previous model by adding the argument <code>family = student</code> in <code>brm</code>. This argument indicates that the residuals normalized by <code>sigma</code>, <span class="math inline">\((y - \hat{y})/\sigma\)</span>, follow a <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(\nu\)</span> degrees of freedom.</li>
+</ol>
+<p>Keep the same prior distributions for all parameters of the model. Let <code>brm</code> choose a prior distribution for <span class="math inline">\(\nu\)</span> (<code>nu</code>). By calling the <code>prior_summary</code> function from the fitted model, can you determine what this prior distribution is by default?</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li><p>Describe the main differences between the parameter estimates from this model, compared with those of the model in part 1.</p></li>
+<li><p>Compare the fit of the two models with the PSIS-LOO method. In the context of this assignment, you can ignore the high values of <span class="math inline">\(k\)</span> (in practice, cross-validation should be performed with <code>reloo = TRUE</code>).</p></li>
+<li><p>Apply <code>predict</code> to the fitted model to obtain the mean, standard deviation and 95% credibility interval for the posterior prediction for each point in the data frame and attach these predictions to the original data set with <code>cbind</code>. Select a few countries from the dataset and illustrate the observations, predictions of the two models and their credibility intervals.</p></li>
+</ol>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

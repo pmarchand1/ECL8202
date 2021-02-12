@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -86,7 +86,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -148,6 +147,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -160,48 +160,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -215,6 +176,12 @@ $(document).ready(function ()  {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -250,8 +217,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -292,81 +257,451 @@ div.tocify {
 </div>
 
 
-<div id="donnees" class="section level2">
-<h2>Données</h2>
-<p>Déjà utilisé pour les exercices sur le maximum de vraisemblance, le tableau de données <a href="../donnees/thermal_range.csv">thermal_range.csv</a> représente le résultat d’une expérience visant à déterminer l’effet de la température (<em>temp</em>) sur le nombre d’oeufs (<em>num_eggs</em>) produits par une espèce de moustique. Trois réplicats ont été mesurés pour des valeurs de température entre 10 et 32 degrés Celsius.</p>
-<pre class="r"><code>therm &lt;- read.csv(&quot;../donnees/thermal_range.csv&quot;)
-head(therm)</code></pre>
-<pre><code>##   temp num_eggs
-## 1   10        1
-## 2   10        1
-## 3   10        2
-## 4   12        4
-## 5   12        4
-## 6   12        6</code></pre>
+<p>Dans ce laboratoire, nous verrons comment écrire un modèle hiérarchique bayésien dans le langage Stan.</p>
+<div id="données" class="section level1">
+<h1>Données</h1>
+<p>Comme dans l’exemple réalisé avec <em>brms</em> dans les notes de cours, nous utiliserons le même jeu de données <code>rikz</code>.</p>
+<pre class="r"><code>rikz &lt;- read.csv(&quot;../donnees/rikz.csv&quot;)
+head(rikz)</code></pre>
+<pre><code>##   Sample Richness Exposure    NAP Beach
+## 1      1       11       10  0.045     1
+## 2      2       10       10 -1.036     1
+## 3      3       13       10 -1.336     1
+## 4      4       11       10  0.616     1
+## 5      5       10       10 -0.684     1
+## 6      6        8        8  1.190     2</code></pre>
 </div>
-<div id="estimation-bayesienne-du-modele-doptimum-thermique" class="section level2">
-<h2>Estimation bayésienne du modèle d’optimum thermique</h2>
-<p>Rappelons-nous le modèle utilisé précédemment pour ce jeu de données. Le nombre moyen d’oeufs produits est donné par une courbe gaussienne:</p>
-<p><span class="math display">\[N = N_o \exp \left( - \frac{(T - T_o)^2}{\sigma_T^2} \right)\]</span></p>
-<p>Dans cette équation, <span class="math inline">\(T_o\)</span> est la température optimale, <span class="math inline">\(N_o\)</span> est le nombre d’oeufs produits à cet optimum et <span class="math inline">\(\sigma_T\)</span> représente la tolérance autour de l’optimum (plus <span class="math inline">\(\sigma_T\)</span> est élevé, plus <span class="math inline">\(N\)</span> décroit lentement autour de l’optimum).</p>
-<ol style="list-style-type: lower-alpha">
-<li>Il est possible d’estimer les paramètres d’un modèle non-linéaire comme celui-ci dans <em>brms</em>. Par exemple:</li>
-</ol>
-<pre class="r"><code>brm(bf(num_eggs ~ No * exp(-((temp-To)/sigmaT)^2), No + To + sigmaT ~ 1, nl = TRUE),
-    data = therm)</code></pre>
-<p><em>Note</em>:</p>
+<div id="créer-un-modèle-stan" class="section level1">
+<h1>Créer un modèle Stan</h1>
+<p>Dans RStudio, aller dans <em>File -&gt; New File -&gt; Stan File</em>. RStudio crée un nouveau fichier de code Stan contenant déjà un exemple de modèle. Enregistrez le ficher avec l’extension <code>.stan</code> (ex.: <code>rikz.stan</code>) avant de continuer.</p>
+<p>D’abord, remarquez que le symbole <code>//</code> sert à dénoter des commentaires dans Stan, contrairement à R qui utilise <code>#</code> pour la même fonction. Excepté ces commentaires, le fichier Stan créé contient trois blocs.</p>
 <ul>
-<li><p>Il faut entourer la formule dans une fonction <code>bf</code> et spécifier l’argument <code>nl = TRUE</code> (non-linéaire).</p></li>
-<li><p>Après la formule non-linéaire du modèle, il faut ajouter un terme décrivant les paramètres. Ici, <code>No + To + sigmaT ~ 1</code> signifie seulement que nous estimons un effet fixe pour chaque paramètre. Si un des paramètres variait en fonction d’une variable de groupe, nous pourrions écrire par exemple <code>No ~ (1|groupe), To + sigmaT ~ 1</code>.</p></li>
+<li><code>data</code>: Définit les variables qui seront fournies au modèle comme données à l’entrée.</li>
+<li><code>parameters</code>: Définit les variables qui doivent être estimées par le modèle.</li>
+<li><code>model</code>: Définit le modèle statistique pour les données en fonction des paramères.</li>
 </ul>
-<p>Puisque nous allons utiliser une distribution binomiale négative avec un lien logarithmique pour représenter la moyenne de la réponse (<code>family = negbinomial</code> dans <em>brms</em>), nous devons modifier la formule ci-dessus pour représenter le logarithme du nombre d’oeufs moyen <span class="math inline">\(N\)</span>. Ré-écrivez la fonction <code>bf</code> en appliquant cette transformation.</p>
-<ol start="2" style="list-style-type: lower-alpha">
-<li>Choisissez des distributions <em>a priori</em> appropriées pour trois paramètres de l’équation obtenue précédemment. Dans l’instruction <code>set_prior</code>, le nom du paramètre est spécifié ave <code>nlpar</code> pour un modèle non-linéaire. Par exemple, <code>set_prior("normal(0, 1)", nlpar = "To")</code> assigne une distribution normale centrée réduite au paramètre <code>To</code>.</li>
-</ol>
-<p><em>Note</em>: N’oubliez pas de spécifier la borne inférieure pour <code>sigmaT</code>.</p>
-<p>Ajoutez aussi une distribution <em>a priori</em> pour le paramètre <span class="math inline">\(\theta\)</span> de la distribution binomiale négative avec <code>set_prior("gamma(2, 0.1)", class = "shape")</code>. Vous pouvez visualiser cette distribution dans R avec <code>plot(density(rgamma(1E5, 2, 0.1))</code>. Puisque la variance de la distribution binomiale négative est de <span class="math inline">\(\mu + \mu^2/\theta\)</span>, où <span class="math inline">\(\mu\)</span> est la moyenne, nous voulons éviter les valeurs de <span class="math inline">\(\theta\)</span> trop proches de zéro. Avec les paramètres spécifiés, <span class="math inline">\(\theta\)</span> est petit pour des valeurs proches de 0 et plus grandes que 50 (avec un <span class="math inline">\(\theta\)</span> si grand, la distribution binomiale négative rejoint pratiquement celle de Poisson).</p>
-<ol start="3" style="list-style-type: lower-alpha">
-<li><p>Ajustez avec <code>brm</code> le modèle non-linéaire avec la formule et les distributions <em>a priori</em> spécifiées dans les parties précédentes, en utilisant une distribution binomiale négative de la réponse. Visualisez la forme de la fonction <span class="math inline">\(N\)</span> vs. <span class="math inline">\(T\)</span> estimée avec <code>marginal_effects</code>. Déterminez la valeur moyenne et l’intervalle de crédibilité à 95% pour la distribution <em>a posteriori</em> de chaque paramètre.</p></li>
-<li><p>Comparez les résultats en (c) aux estimés et intervalles de confiance obtenus dans le laboratoire 3 par le maximum de vraisemblance, reproduits dans le tableau ci-dessous.</p></li>
-</ol>
-<table>
-<thead>
-<tr class="header">
-<th>Paramètre</th>
-<th>Estimé</th>
-<th>Intervalle</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><span class="math inline">\(N_o\)</span></td>
-<td>123.2</td>
-<td>(104.2, 147.2)</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(T_o\)</span></td>
-<td>23.9</td>
-<td>(23.4, 24.5)</td>
-</tr>
-<tr class="odd">
-<td><span class="math inline">\(sigma_T\)</span></td>
-<td>6.82</td>
-<td>(6.33, 7.42)</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(k\)</span></td>
-<td>0.103</td>
-<td>(0.059, 0.186)</td>
-</tr>
-</tbody>
-</table>
-<p><em>Note</em>: Le paramètre <span class="math inline">\(k\)</span> correpond à <span class="math inline">\(1 / \theta\)</span> pour la distribution binomiale négative.</p>
-<ol start="5" style="list-style-type: lower-alpha">
-<li><p>Vérifiez les intervalles de prédictions <em>a posteriori</em> avec <code>pp_check(..., type = "intervals")</code>. Les observations semblent-elles cohérentes avec le modèle ajusté?</p></li>
-<li><p>Utilisez l’application <em>shinystan</em> (<code>launch_shinystan</code>) pour visualiser les résultats. Où dans cette application pouvez-vous visualiser les corrélations entre paramètres?</p></li>
-<li><p>Utilisez la distribution <em>a posteriori</em> conjointe des paramètres obtenue avec <code>posterior_samples</code> pour obtenir un estimé du rapport entre la production d’oeufs moyenne à 25 degrés C comparée à celle à 20 degrés C, ainsi qu’un intervalle de crédibilité à 95% pour ce rapport.</p></li>
-</ol>
+<p>La plupart des modèles Stan utilisent au minimum ces trois blocs, bien que d’autres blocs soient possibles: <code>functions</code>, <code>transformed data</code>, <code>transformed parameters</code> et <code>generated quantities</code>. Comme dans R, les blocs sont délimités par des accolades <code>{}</code>.</p>
+<p>Le bloc <code>model</code> ne contient qu’une instruction, <code>y ~ normal(mu, sigma);</code>, qui indique que <code>y</code> suit une distribution normale avec moyenne <code>mu</code> et écart-type <code>sigma</code>. Dans Stan, le symbole <code>~</code> est utilisé pour assigner une certaine distribution de probabilité à une variable (contrairement à R où ce symbole sert à relier la réponse d’un modèle aux prédicteurs).</p>
+<p><em>Note</em>: Dans Stan, toutes les instructions doivent se terminer par un point-virgule <code>;</code>, sauf celles qui débutent un bloc (comme <code>model</code>).</p>
+<div id="déclaration-de-variables" class="section level2">
+<h2>Déclaration de variables</h2>
+<p>Contrairement à R, toutes les variables apparaissant dans un modèle Stan doivent être au préalable “déclarées”. La première ligne de <code>data</code>, <code>int&lt;lower=0&gt; N;</code> déclare la variable <code>N</code> qui est un nombre entier (type <code>int</code> pour <em>integer</em>) prenant une valeur minimale de 0. Il est important de différencier les variables <code>int</code> prenant seulement des valeurs entières des variables pouvant prendre n’importe quelle valeur réelle (<code>real</code>). La spécification de bornes inférieures (<code>lower</code>) ou supérieures (<code>upper</code>) est optionnelle pour les éléments de <code>data</code>, mais elles permettent à Stan de produire une erreur si les données fournies à l’entrée ne respectent pas ces bornes. Dans ce cas-ci, la borne inférieure devrait probablement être de 1 vu que les données contiennent au moins 1 observation.</p>
+<p>La deuxième ligne de <code>data</code>, <code>vector[N] y;</code> déclare la variable <code>y</code> comme un vecteur de <code>N</code> éléments. Notez qu’il était important de déclarer <code>N</code> avant de l’utiliser dans la déclaration de <code>y</code>. Les vecteurs dans Stan fonctionnent de façon similaire à R, excepté qu’ils peuvent seulement être composés de nombres réels (nous verrons plus tard comment définir l’équivalent d’un vecteur pour des nombres entiers).</p>
+<p>Le bloc <code>parameters</code> déclare deux variables réelles, <code>mu</code> et <code>sigma</code>, la deuxième étant contrainte à être supérieure ou égale à 0. Il est important de définir les valeurs minimales et maximales possibles pour les paramètres, sinon Stan pourrait tenter par exemple d’assigner une valeur négative à <code>sigma</code>, ce qui générerait une erreur lorsque celle-ci serait utilisée comme écart-type de la distribution normale dans le modèle.</p>
+</div>
+<div id="vectorisation" class="section level2">
+<h2>Vectorisation</h2>
+<p>Puisque <code>y</code> est un vecteur de <code>N</code> éléments, alors que <code>mu</code> et <code>sigma</code> contiennent chacun une seule valeur, l’instruction <code>y ~ normal(mu, sigma);</code> dans le bloc <code>model</code> indique que chaque élément de <code>y</code> suit la distribution normale avec paramètres <code>mu</code> et <code>sigma</code>. Dans un modèle de régression linéaire par exemple, <code>mu</code> serait aussi un vecteur de taille <code>N</code>, donc la même instruction associerait chaque <code>y</code> au <code>mu</code> correspondant, tandis que tous les éléments partageraient le même <code>sigma</code>.</p>
+</div>
+</div>
+<div id="représentation-du-modèle-pour-les-données-rikz" class="section level1">
+<h1>Représentation du modèle pour les données <em>rikz</em></h1>
+<div id="régression-de-poisson" class="section level2">
+<h2>Régression de Poisson</h2>
+<p>Modifions maintenant le programme pour représenter notre modèle du jeu de données <em>rikz</em>. Commençons par décrire une régression de Poisson de la richesse spécifique en fonction du NAP, en ignorant l’effet de l’indice d’exposition et l’effet aléatoire de la plage.</p>
+<p>Il est préférable de donner aux variables des noms plus descriptifs que <em>x</em>, <em>y</em> ou <em>N</em>. Dans le bloc <code>data</code>, changeons donc <code>N</code> pour <code>n_obs</code> (nombre d’observations) et <code>y</code> pour <code>richesse</code>, le nom de notre variable réponse.</p>
+<p>Pour une variable entière (comme la richesse spécifique), nous ne pouvons pas définir un vecteur, mais plutôt un “tableau” (<em>array</em>) de <code>n_obs</code> éléments, comme suit: <code>int&lt;lower=0&gt; richesse[n_obs];</code>. Notez que dans ce cas, la spécification du nombre d’éléments apparaît après le nom de la variable, contrairement à un vecteur où elle apparaît après le mot <code>vector</code>.</p>
+<p>Nous ajoutons aussi le prédicteur <code>nap</code> qui sera un vecteur de <code>n_obs</code> éléments.</p>
+<p>Remplaçons le contenu du bloc <code>parameters</code> par deux paramètres de notre régression, <code>b0</code> (l’ordonnée à l’origine) et <code>b_nap</code> (l’effet du NAP), tous deux réels.</p>
+<p>Dans le bloc <code>model</code>, nous déclarons d’abord <code>log_lambda</code> comme un vecteur de taille <code>n_obs</code>, qui contiendra le log de la prédiction moyenne pour chaque observation. Les variables déclarées dans le bloc <code>model</code> servent souvent à définir des valeurs “intermédiaires” qui ne sont ni des paramètres du modèle, ni des données.</p>
+<p>Nous pouvons ensuite spécifier l’équation pour le prédicteur linéaire:</p>
+<pre><code>log_lambda = b0 + b_nap * nap;</code></pre>
+<p>Comme dans R, cette équation est vectorisée, c’est-à-dire que chacun des <code>n_obs</code> éléments de <code>log_lambda</code> est calculé à partir de l’élément correspondant de <code>nap</code>, tandis que <code>b0</code> et <code>b_nap</code> ne prennent qu’une valeur.</p>
+<p>Finalement, nous remplaçons la distribution normale pour <code>y</code> par une distribution de <code>poisson</code> pour <code>richesse</code>. Puisque l’unique paramètre de la distribution de Poisson est l’exponentielle de <code>log_lambda</code>, nous pourrions écrire <code>richesse ~ poisson(exp(log_lambda));</code>. Cependant, puisque la régression de Poisson avec un lien log est un modèle courant, Stan nous offre un raccourci, la fonction <code>poisson_log</code>, qui définit une distribution de Poisson en fonction du log de lambda:</p>
+<pre><code>richesse ~ poisson_log(log_lambda);</code></pre>
+<p>Voici à quoi devrait ressembler votre modèle jusqu’à présent:</p>
+<pre><code>data {
+  int&lt;lower=1&gt; n_obs; // Nombre d&#39;observations
+  int&lt;lower=0&gt; richesse[n_obs]; // Richesse spécifique
+  vector[n_obs] nap;
+}
+
+parameters {
+  real b0;
+  real b_nap;
+}
+
+model {
+  vector[n_obs] log_lambda;
+
+  log_lambda = b0 + b_nap * nap;
+  richesse ~ poisson_log(log_lambda);
+} </code></pre>
+<p>En haut à droite de la fenêtre du script, au lieu du bouton <code>Run</code> présent pour un script R, il y a un bouton <code>Check</code> qui permet de vérifier la syntaxe du modèle Stan.</p>
+<div id="vectorisation-et-boucles" class="section level3">
+<h3>Vectorisation et boucles</h3>
+<p>Les fonctions de distribution pour des nombres entiers, comme <code>poisson_log</code>, sont particulières, car elles peuvent être vectorisées (chaque élément de <code>richesse</code> suit une distribution selon le <code>log_lambda</code> correspondant) même si <code>richesse</code> n’est pas un vecteur comme tel. Ce ne sont pas toutes les expressions avec des nombres entiers (type <code>int</code>) qui sont vectorisées dans Stan. Sans vectorisation, il faudrait définir une boucle avec l’instruction <code>for</code>, comme suit:</p>
+<pre><code>for (i in 1:n_obs)
+    richesse[i] ~ poisson_log(log_lambda[i]);</code></pre>
+<p>Il s’agit d’une boucle <code>for</code>, avec une variable de comptage <code>i</code> qui prendra successivement les valeurs de 1 à <code>n_obs</code>. Pour chaque valeur de <code>i</code>, les instructions dans la boucle sont exécutées, donc ici <code>richesse[i]</code> suit une distribution de Poisson avec le paramètre <code>log_lambda[i]</code>.</p>
+<p>En général, les instructions de la boucle (le bloc <code>for</code>) devraient être délimitées par des accolades, mais celles-ci peuvent être omises lorsqu’il n’y a qu’une seule instruction.</p>
+<p>Lorsque la vectorisation est possible, elle permet d’écrire un modèle de façon plus compacte et son exécution sera aussi plus rapide.</p>
+</div>
+</div>
+<div id="modèle-hiérarchique" class="section level2">
+<h2>Modèle hiérarchique</h2>
+<p>Nous pouvons maintenant définir le deuxième niveau de la régression, soit l’effet de chaque plage et de son facteur d’exposition sur l’ordonnée à l’origine <code>b0</code>.</p>
+<p>Tout d’abord, nous devons effectuer quelques modifications à nos données dans R. Dans Stan, une variable catégorielle doit être codée par des nombres entiers allant de 1 à <span class="math inline">\(M\)</span>, où <span class="math inline">\(M\)</span> est le nombre de catégories. C’est déjà le cas pour la variable <code>Beach</code>. Cependant, pour représenter la variable <code>Exposure</code> comme un facteur à trois niveaux, nous devrons la convertir d’abord en facteur, puis en nombre entier.</p>
+<pre class="r"><code>rikz$Exp_cat &lt;- as.integer(as.factor(rikz$Exposure))
+head(rikz)</code></pre>
+<pre><code>##   Sample Richness Exposure    NAP Beach Exp_cat
+## 1      1       11       10  0.045     1       2
+## 2      2       10       10 -1.036     1       2
+## 3      3       13       10 -1.336     1       2
+## 4      4       11       10  0.616     1       2
+## 5      5       10       10 -0.684     1       2
+## 6      6        8        8  1.190     2       1</code></pre>
+<p>Les valeurs 8, 10 et 11 d’<code>Exposure</code> correspondent donc à 1, 2 et 3 dans la nouvelle variable <code>Exp_cat</code>.</p>
+<p>Ensuite, nous créons un jeu de données séparé pour les données au niveau de la plage. La fonction <code>distinct</code> de <em>dplyr</em> conserve les combinaisons uniques de <code>Beach</code> et <code>Exp_cat</code> présentes dans le jeu de données <code>rikz</code>.</p>
+<pre class="r"><code>library(dplyr)
+plages &lt;- distinct(rikz, Beach, Exp_cat) %&gt;%
+    arrange(Beach)
+plages</code></pre>
+<pre><code>##   Beach Exp_cat
+## 1     1       2
+## 2     2       1
+## 3     3       3
+## 4     4       3
+## 5     5       2
+## 6     6       3
+## 7     7       3
+## 8     8       2
+## 9     9       2</code></pre>
+<p>Il est prudent d’ordonner ce deuxième jeu de données par numéro de plage, afin que les valeurs de la variable <code>Exp_cat</code> soient données à Stan dans le bon ordre.</p>
+<p>Nous sommes maintenant prêts à modifier le programme Stan. Sous <code>data</code>, nous devons déclarer les variables suivantes:</p>
+<ul>
+<li><code>int&lt;lower=1&gt; n_plages;</code> qui dénotera le nombre de plages présentes dans le jeu de données;</li>
+<li><code>int&lt;lower=1, upper=n_plages&gt; plage[n_obs];</code>, un tableau contenant pour chaque observation le numéro de la plage correspondante;</li>
+<li><code>int&lt;lower=1&gt; n_exp;</code>, le nombre de niveaux de l’indice d’exposition;</li>
+<li><code>int&lt;lower=1, upper = n_exp&gt; exposure[n_plages];</code>, un tableau contenant le niveau de l’indice d’exposition pour chaque plage (donc la variable <code>Exp_cat</code> ci-dessus).</li>
+</ul>
+<p>Dans le bloc <code>parameters</code>, l’ordonnée à l’origine du modèle <code>b0</code> est maintenant un vecteur de <code>n_plages</code> valeurs et nous devons ajouter les paramètres suivants: <code>b0_exp</code>, un vecteur contenant l’ordonnée à l’origine moyenne pour chaque valeur d’<code>exposure</code> et <code>sigma_b0</code>, un paramètre réel avec borne inférieure à 0, représentant l’écart-type de <code>b0</code> par plage autour de cette moyenne.</p>
+<p>Finalement, dans le bloc <code>model</code>, nous ajoutons l’équation pour la régression de <code>b0</code> par plage, qui suit une distribution normale avec pour moyenne le <code>b0_exp</code> correspondant à son indice d’exposition et pour écart-type <code>sigma_b0</code>.</p>
+<pre><code>b0 ~ normal(b0_exp[exposure], sigma_b0);</code></pre>
+<p>Notez que cette expression est un raccourci pour la boucle:</p>
+<pre><code>for (i in 1:n_plages)
+    b0[i] ~ normal(b0_exp[exposure[i]], sigma_b0);</code></pre>
+<p>Par exemple, pour la première plage <code>i = 1</code>, on prend la valeur <code>exposure[1]</code>, qui est égale à 2, puis on prend <code>b0_exp[2]</code> comme ordonnée à l’origine moyenne pour cette plage.</p>
+<p><em>Note</em>: Pour ce modèle-ci, l’effet aléatoire par plage <code>b0</code> est une valeur intermédiaire que nous aurions pu définir dans le bloc <code>parameters</code> ou <code>model</code>. La différence est qu’à la sortie du programme, Stan fournira des estimés de la distribution des variables définies dans <code>parameters</code>, mais pas celles définies dans <code>model</code>.</p>
+<p>Dans l’équation pour <code>log_lambda</code>, la valeur <code>b0</code> doit être remplacée par celle spécifique à la plage:</p>
+<pre><code>log_lambda = b0[plage] + b_nap * nap;
+</code></pre>
+<p>Encore une fois, il s’agit d’un raccourci remplaçant la boucle:</p>
+<pre><code>for (i in 1:n_obs)
+    log_lambda[i] = b0[plage[i]] + b_nap * nap[i];</code></pre>
+</div>
+<div id="distributions-a-priori" class="section level2">
+<h2>Distributions <em>a priori</em></h2>
+<p>Ce modèle contient trois paramètres actuellement sans distribution: <code>b_nap</code>, <code>b0_exp</code> (un vecteur de trois valeurs) et <code>sigma_b0</code>. Si nous ne spécifions pas de distribution <em>a priori</em> pour ces paramètres, Stan choisit des distributions <em>a priori</em> extrêmement diffuses à l’intérieur des bornes spécifiées, qui produisent des estimés équivalents au maximum de vraisemblance. Cela fonctionne si on a beaucoup de données, mais comme nous avons vu dans le cours, il est recommandé dans l’approche bayésienne de choisir des distributions <em>a priori</em> qui établissent de légères contraintes sur la valeur de nos paramètres.</p>
+<p>Nous utiliserons les mêmes distributions <em>a priori</em> que pour l’exemple avec <em>brms</em> dans les notes de cours:</p>
+<pre><code>b_nap ~ normal(0, 1);
+b0_exp ~ normal(2, 1);
+sigma_b0 ~ normal(0, 0.5);</code></pre>
+<p>Notez que les trois valeurs de <code>b0_exp</code> ont la même distribution <em>a priori</em> que l’ordonnée à l’origine dans les notes de cours. En utilisant <em>brms</em>, le modèle est paramétrisé de façon différente pour le prédicteur catégoriel <code>exposure</code> (avec des contrastes, comme dans R). Ici nous ajustons une ordonnée à l’origine pour chaque valeur d’<code>exposure</code>, plutôt qu’une ordonnée à l’origine pour le niveau de référence et des contrastes pour les différences entre ce niveau et référence et les deux autres niveaux.</p>
+<p><em>Note</em>: Ici, la réponse (sur l’échelle du log) et le prédicteur numérique NAP prennent des valeurs sur une échelle de quelques unités. Si les variables numériques du problèmes ont des ordres de grandeur très différents les unes des autres, il peut être utile de les normaliser, par exemple avec <code>scale</code> dans R, car l’algorithme d’inférence bayésienne fonctionne mieux si toutes les variables ont des échelles comparables, plutôt que de comporter des valeurs très grandes et très petites.</p>
+<p>Voici le programme obtenu jusqu’à maintenant:</p>
+<pre><code>data {
+  int&lt;lower=1&gt; n_obs; // Nombre d&#39;observations
+  int&lt;lower=1&gt; n_plages; // Nombre de plages
+  int&lt;lower=0&gt; richesse[n_obs]; // Richesse spécifique
+  vector[n_obs] nap;
+  int&lt;lower=1, upper=n_plages&gt; plage[n_obs]; // Plage correspondant à chaque obs.
+  int&lt;lower=1&gt; n_exp; // Nombre de niveaux de la variable exposure
+  int&lt;lower=1, upper = n_exp&gt; exposure[n_plages];
+}
+
+parameters {
+  vector[n_plages] b0;
+  real b_nap;
+  vector[n_exp] b0_exp; // Ordonnée à l&#39;origine moyenne pour chaque niveau d&#39;exposure
+  real&lt;lower=0&gt; sigma_b0; // Écart-type de l&#39;ordonnée à l&#39;origine
+}
+
+model {
+  vector[n_obs] log_lambda;
+  
+  b_nap ~ normal(0, 1);
+  b0_exp ~ normal(2, 1);
+  sigma_b0 ~ normal(0, 0.5);
+  
+  b0 ~ normal(b0_exp[exposure], sigma_b0);
+  log_lambda = b0[plage] + b_nap * nap;
+  richesse ~ poisson_log(log_lambda);
+}  </code></pre>
+</div>
+</div>
+<div id="ajustement-du-modèle-dans-r" class="section level1">
+<h1>Ajustement du modèle dans R</h1>
+<p>Pour ajuster un modèle écrit dans le langage Stan, nous utilisons le package <em>rstan</em>.</p>
+<pre class="r"><code>library(rstan)</code></pre>
+<p>D’abord, nous créons une liste de données qui contiendra chaque variable incluse dans le bloc <code>data</code> du modèle. Il est important que le nom des éléments de la liste (avant chaque <code>=</code>) soit le même que le nom de la variable dans le code Stan. Par exemple, ici nous obtenons <code>n_obs</code> à partir du nombre de rangées du jeu de données <code>rikz</code>, <code>richesse</code> à partir de la colonne <code>rikz$Richness</code>, etc.</p>
+<pre class="r"><code>rikz_dat &lt;- list(
+    n_obs = nrow(rikz),
+    n_plages = nrow(plages),
+    richesse = rikz$Richness,
+    nap = rikz$NAP,
+    plage = rikz$Beach,
+    n_exp = max(plages$Exp_cat),
+    exposure = plages$Exp_cat
+)</code></pre>
+<p>Ensuite, l’ajustement du modèle à l’aide de l’algorithme de Monte-Carlo se fait en deux temps. D’abord, nous compilons le programme Stan dans un object <code>rikz_mod</code> avec <code>stan_model</code>, puis nous procédons à l’ajustement à partir de ce modèle et de nos données <code>rikz_dat</code> avec <code>sampling</code>. Nous spécifions un nombre de chaînes (2) plus petit que la valeur par défaut, qui est de 4, mais nous gardons les autres valeurs par défaut (2000 itérations, dont 1000 de rodage).</p>
+<p>La fonction <code>sampling</code> affiche sa progression pour chaque chaîne. Ici, après la compilation qui prend quelques minutes, l’ajustement se fait très rapidement.</p>
+<pre class="r"><code>rikz_mod &lt;- stan_model(&quot;rikz.stan&quot;)
+rikz_res &lt;- sampling(rikz_mod, data = rikz_dat, chains = 2)</code></pre>
+<pre><code>## 
+## SAMPLING FOR MODEL &#39;rikz&#39; NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 0 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.235 seconds (Warm-up)
+## Chain 1:                0.182 seconds (Sampling)
+## Chain 1:                0.417 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL &#39;rikz&#39; NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 0 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.237 seconds (Warm-up)
+## Chain 2:                0.394 seconds (Sampling)
+## Chain 2:                0.631 seconds (Total)
+## Chain 2:</code></pre>
+<pre><code>## Warning: There were 20 divergent transitions after warmup. See
+## http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
+## to find out why this is a problem and how to eliminate them.</code></pre>
+<pre><code>## Warning: Examine the pairs() plot to diagnose sampling problems</code></pre>
+<p>Ici, Stan nous avertit qu’il y a plusieurs transitions divergentes dans la période d’échantillonnage, donc la validité des inférences pourrait être compromise. Pour diagnostiquer ce problème, il peut être utile de lancer l’application interactive ShinyStan, à partir du package du même nom. Notez que l’application ShinyStan est aussi compatible avec la sortie d’un modèle ajusté avec <em>brms</em>.</p>
+<pre class="r"><code>library(shinystan)
+launch_shinystan(rikz_res)</code></pre>
+<p>Pour l’instant, nous nous concentrons sur l’onglet <em>Diagnose</em> de l’application. Vous pouvez voir la distribution d’une variable pour chaque itération et les valeurs correspondant aux itérations divergentes sont données par des points en rouge. En particulier, si vous choisissez la variable <code>sigma_b0</code>, vous verrez que les divergences se produisent pour des petites valeurs de <code>sigma_b0</code>.</p>
+<div id="paramétrisation-non-centrée" class="section level2">
+<h2>Paramétrisation non-centrée</h2>
+<p>Dans le modèle ci-dessus, nous demandions à Stan d’estimer à la fois les effets aléatoires <code>b0</code> de chaque plage, ainsi que leur écart-type <code>sigma_b0</code>. Au niveau de l’algorithme, la dépendance entre ces quantités peut poser problème. Brièvement, cela est dû au fait que quand l’écart-type <code>sigma_b0</code> est très petit, mêmes les très petites déviations de <code>b0</code> autour de leur valeur moyenne deviennent improbables; ainsi les gradients de la vraisemblance sont très abrupts et la chaîne de Markov ne peut progresser normalement.</p>
+<p>Il est donc recommandé d’utiliser une paramétrisation dite “non-centrée” pour les effets aléatoires dans Stan. Autrement dit, si l’ordonnée à l’origine d’un groupe <span class="math inline">\(j\)</span> est tirée d’une distribution normale avec une moyenne <span class="math inline">\(\mu_{\beta_0}\)</span> et un écart-type <span class="math inline">\(\sigma_{\beta_0}\)</span>:</p>
+<p><span class="math display">\[\beta_{0j} \sim \text{N}(\mu_{\beta_0}, \sigma_{\beta_0})\]</span></p>
+<p>nous pouvons représenter le même modèle comme suit:</p>
+<p><span class="math display">\[\beta_{0j} = \mu_{\beta_0} + \sigma_{\beta_0} \nu_j\]</span></p>
+<p>où <span class="math inline">\(\nu_j \sim \text{N}(0, 1)\)</span> est une variable normale centrée réduite. Puisque les effets aléatoires <span class="math inline">\(\nu_j\)</span> sont représentés en multiples de <span class="math inline">\(\sigma_{\beta_0}\)</span>, ces deux paramètres se retrouvent donc découplés.</p>
+<p>Dans le code ci-dessous, nous avons utilisé la variable <code>b0_alea</code> pour <span class="math inline">\(\nu_j\)</span>. Puisque <code>b0</code> est maintenant une valeur dépendant entièrement d’une combinaison d’autres paramètres et de données, nous pouvons la définir dans un nouveau bloc <code>transformed parameters</code>. La distribution des variables dans ce bloc, comme celles de <code>parameters</code>, seront données par Stan à la sortie du programme.</p>
+<pre><code>data {
+  int&lt;lower=1&gt; n_obs; // Nombre d&#39;observations
+  int&lt;lower=1&gt; n_plages; // Nombre de plages
+  int&lt;lower=0&gt; richesse[n_obs]; // Richesse spécifique
+  vector[n_obs] nap;
+  int&lt;lower=1, upper=n_plages&gt; plage[n_obs]; // Plage correspondant à chaque obs.
+  int&lt;lower=1&gt; n_exp; // Nombre de niveaux de la variable exposure
+  int&lt;lower=1, upper = n_exp&gt; exposure[n_plages];
+}
+
+parameters {
+  vector[n_plages] b0_alea; // Effet aléatoire normalisé sur l&#39;ordonnée à l&#39;origine
+  real b_nap;
+  vector[n_exp] b0_exp; // Ordonnée à l&#39;origine moyenne pour chaque niveau d&#39;exposure
+  real&lt;lower=0&gt; sigma_b0; // Écart-type de l&#39;ordonnée à l&#39;origine
+}
+
+transformed parameters {
+  vector[n_plages] b0;
+  b0 = b0_exp[exposure] + sigma_b0 * b0_alea;
+}
+
+model {
+  vector[n_obs] log_lambda;
+  
+  b_nap ~ normal(0, 1);
+  b0_exp ~ normal(2, 1);
+  sigma_b0 ~ normal(0, 0.5);
+  b0_alea ~ normal(0, 1);
+  
+  log_lambda = b0[plage] + b_nap * nap;
+  richesse ~ poisson_log(log_lambda);
+}  </code></pre>
+<p>En ajustant cette nouvelle version du modèle, les divergences sont éliminées ou du moins réduites. (Dans cet exemple particulier où la distribution <em>a posteriori</em> de <code>sigma_b0</code> s’approche de 0, il pourrait être nécessaire d’augmenter <code>adapt_delta</code>, tel que vu dans l’exemple du cours 9, pour complètement éliminer les divergences.)</p>
+<pre class="r"><code># nouvelle version du modèle dans le fichier &quot;rikz2.stan&quot;
+rikz_mod2 &lt;- stan_model(&quot;rikz2.stan&quot;)
+rikz_res2 &lt;- sampling(rikz_mod2, data = rikz_dat, chains = 2)</code></pre>
+<pre><code>## 
+## SAMPLING FOR MODEL &#39;rikz2&#39; NOW (CHAIN 1).
+## Chain 1: 
+## Chain 1: Gradient evaluation took 0 seconds
+## Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Chain 1: Adjust your expectations accordingly!
+## Chain 1: 
+## Chain 1: 
+## Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 1: 
+## Chain 1:  Elapsed Time: 0.334 seconds (Warm-up)
+## Chain 1:                0.267 seconds (Sampling)
+## Chain 1:                0.601 seconds (Total)
+## Chain 1: 
+## 
+## SAMPLING FOR MODEL &#39;rikz2&#39; NOW (CHAIN 2).
+## Chain 2: 
+## Chain 2: Gradient evaluation took 0 seconds
+## Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Chain 2: Adjust your expectations accordingly!
+## Chain 2: 
+## Chain 2: 
+## Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
+## Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+## Chain 2: 
+## Chain 2:  Elapsed Time: 0.336 seconds (Warm-up)
+## Chain 2:                0.337 seconds (Sampling)
+## Chain 2:                0.673 seconds (Total)
+## Chain 2:</code></pre>
+</div>
+<div id="exploration-des-résultats" class="section level2">
+<h2>Exploration des résultats</h2>
+<p>Le résultat produit par <code>sampling</code> est un object de type <code>stanfit</code>. Voici quelques unes des fonctions qui s’appliquent à ces objets.</p>
+<p>La fonction <code>check_hmc_diagnostics</code> vérifie les trois diagnostics de la méthode de Monte-Carlo hamiltonienne.</p>
+<pre class="r"><code>check_hmc_diagnostics(rikz_res2)</code></pre>
+<pre><code>## 
+## Divergences:</code></pre>
+<pre><code>## 0 of 2000 iterations ended with a divergence.</code></pre>
+<pre><code>## 
+## Tree depth:</code></pre>
+<pre><code>## 0 of 2000 iterations saturated the maximum tree depth of 10.</code></pre>
+<pre><code>## 
+## Energy:</code></pre>
+<pre><code>## E-BFMI indicated no pathological behavior.</code></pre>
+<p>La fonction <code>show</code> montre un sommaire de la distribution <em>a posteriori</em> de chaque paramètre.</p>
+<pre class="r"><code>show(rikz_res2)</code></pre>
+<pre><code>## Inference for Stan model: rikz2.
+## 2 chains, each with iter=2000; warmup=1000; thin=1; 
+## post-warmup draws per chain=1000, total post-warmup draws=2000.
+## 
+##              mean se_mean   sd   2.5%    25%    50%    75%  97.5% n_eff Rhat
+## b0_alea[1]   0.53    0.02 0.77  -0.99   0.05   0.54   1.00   2.11  1309    1
+## b0_alea[2]   0.09    0.03 0.97  -1.78  -0.54   0.07   0.72   1.98  1421    1
+## b0_alea[3]  -0.16    0.02 0.81  -1.78  -0.70  -0.16   0.36   1.45  1601    1
+## b0_alea[4]  -0.30    0.02 0.83  -1.90  -0.85  -0.32   0.28   1.38  1810    1
+## b0_alea[5]   0.77    0.02 0.78  -0.77   0.25   0.76   1.29   2.33  1432    1
+## b0_alea[6]   0.26    0.02 0.82  -1.37  -0.25   0.25   0.80   1.90  1624    1
+## b0_alea[7]  -0.11    0.02 0.84  -1.77  -0.69  -0.12   0.47   1.60  2172    1
+## b0_alea[8]  -0.91    0.02 0.81  -2.51  -1.45  -0.92  -0.36   0.60  1568    1
+## b0_alea[9]  -0.42    0.02 0.78  -1.91  -0.94  -0.45   0.06   1.17  1576    1
+## b_nap       -0.50    0.00 0.07  -0.64  -0.55  -0.50  -0.45  -0.36  1619    1
+## b0_exp[1]    2.48    0.01 0.27   1.88   2.33   2.49   2.64   3.03  1132    1
+## b0_exp[2]    1.91    0.00 0.15   1.60   1.82   1.92   2.00   2.19   931    1
+## b0_exp[3]    1.21    0.01 0.18   0.88   1.09   1.20   1.32   1.59   835    1
+## sigma_b0     0.22    0.01 0.13   0.02   0.13   0.21   0.30   0.53   487    1
+## b0[1]        2.03    0.00 0.13   1.79   1.94   2.02   2.11   2.28  1738    1
+## b0[2]        2.51    0.00 0.13   2.25   2.42   2.51   2.60   2.75  2275    1
+## b0[3]        1.17    0.00 0.18   0.80   1.05   1.17   1.29   1.52  3183    1
+## b0[4]        1.13    0.00 0.20   0.72   1.01   1.14   1.26   1.50  2035    1
+## b0[5]        2.08    0.00 0.15   1.80   1.97   2.08   2.18   2.38  1397    1
+## b0[6]        1.27    0.00 0.19   0.91   1.14   1.26   1.39   1.64  2389    1
+## b0[7]        1.18    0.00 0.20   0.73   1.06   1.19   1.31   1.57  2972    1
+## b0[8]        1.70    0.01 0.19   1.29   1.58   1.72   1.84   2.03   982    1
+## b0[9]        1.81    0.00 0.17   1.44   1.72   1.83   1.93   2.11  1933    1
+## lp__       243.83    0.18 3.15 236.95 241.97 244.12 246.12 248.95   296    1
+## 
+## Samples were drawn using NUTS(diag_e) at Mon Feb 08 16:41:22 2021.
+## For each parameter, n_eff is a crude measure of effective sample size,
+## and Rhat is the potential scale reduction factor on split chains (at 
+## convergence, Rhat=1).</code></pre>
+<p>La fonction <code>extract</code> extrait tous les échantillons de la distribution <em>a posteriori</em> des paramètres.</p>
+<pre class="r"><code>rikz_pars &lt;- extract(rikz_res2)
+str(rikz_pars)</code></pre>
+<pre><code>## List of 6
+##  $ b0_alea : num [1:2000, 1:9] 1.028 -1.174 1.093 -0.085 1.244 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 2
+##   .. ..$ iterations: NULL
+##   .. ..$           : NULL
+##  $ b_nap   : num [1:2000(1d)] -0.468 -0.585 -0.374 -0.406 -0.498 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 1
+##   .. ..$ iterations: NULL
+##  $ b0_exp  : num [1:2000, 1:3] 2.68 2.66 2.5 2.36 2.33 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 2
+##   .. ..$ iterations: NULL
+##   .. ..$           : NULL
+##  $ sigma_b0: num [1:2000(1d)] 0.00242 0.18054 0.16915 0.09995 0.1935 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 1
+##   .. ..$ iterations: NULL
+##  $ b0      : num [1:2000, 1:9] 2.1 1.87 2.2 1.97 2 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 2
+##   .. ..$ iterations: NULL
+##   .. ..$           : NULL
+##  $ lp__    : num [1:2000(1d)] 236 240 243 245 245 ...
+##   ..- attr(*, &quot;dimnames&quot;)=List of 1
+##   .. ..$ iterations: NULL</code></pre>
+<p>La fonction <code>plot</code> montre par défaut un graphique des estimés des paramètres donnés par l’argument <code>pars</code>, avec leur intervalle de crédibilité à 80% (ligne en gras) et 95% (ligne plus mince).</p>
+<pre class="r"><code>plot(rikz_res2, pars = c(&quot;b0&quot;, &quot;b_nap&quot;))</code></pre>
+<pre><code>## ci_level: 0.8 (80% intervals)</code></pre>
+<pre><code>## outer_level: 0.95 (95% intervals)</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>D’autres graphiques peuvent être produits en variant l’argument <code>plotfun</code>, comme le tracé des chaînes de Monte-Carlo, ou des histogrammes de la distribution <em>a posteriori</em> des paramètres.</p>
+<pre class="r"><code>plot(rikz_res2, pars = c(&quot;b_nap&quot;, &quot;b0_exp&quot;, &quot;sigma_b0&quot;), 
+     plotfun = &quot;trace&quot;)</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>plot(rikz_res2, pars = c(&quot;b_nap&quot;, &quot;b0_exp&quot;, &quot;sigma_b0&quot;), 
+     plotfun = &quot;hist&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="09-Modeles_hierarchiques_bayesiens_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Tel que vu plus tôt, <code>launch_shinystan</code> lance une application interactive permettant de consulter les diagnostics du modèle, les sommaires et graphiques de la distribution <em>a posteriori</em> des paramètres et d’autres aspects du modèle ajusté.</p>
+</div>
+</div>
+<div id="utilisation-du-package-brms" class="section level1">
+<h1>Utilisation du package <em>brms</em></h1>
+<p>Le package <em>brms</em> permet d’implémenter plusieurs modèles sans écrire le code Stan soi-même. Il est recommandé de l’utiliser lorsque possible, car <em>brms</em> s’occupe automatiquement d’optimiser le code Stan, par exemple normaliser les prédicteurs, adopter une paramétrisation non-centrée, etc.</p>
+</div>
+<div id="références" class="section level1">
+<h1>Références</h1>
+<p>Documentation pour Stan: <a href="https://mc-stan.org/users/documentation/">https://mc-stan.org/users/documentation/</a></p>
+<p>Introduction à Stan par Michael Betancourt: <a href="https://betanalpha.github.io/assets/case_studies/stan_intro.html">https://betanalpha.github.io/assets/case_studies/stan_intro.html</a></p>
 </div>
 
 
@@ -387,6 +722,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

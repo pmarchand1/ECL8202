@@ -165,7 +165,7 @@ $$p(M_1 | T_-) = \frac{p(T_- | M_1)}{p(T_-)}  p(M_1)$$
 
 Considérons maintenant $M_1$ comme une hypothèse selon laquelle un patient donné est atteint de la maladie. La probabilité *a priori* de $M_1$ (avant le test) est égale à $p(M_1)$. Après le test, la probabilité *a posteriori* de $M_1$ est $p(M_1 | T_+)$ ou $p(M_1 | T_-)$, selon le résultat. 
 
-Selon l'interprétation **fréquentiste**, les probabilités représent la fréquence d'événements après un grand nombre de répétitions d'une observation ou d'une expérience. Dans ce cas-ci, nous pouvons assigner une probabilité à $M_1$ car le patient provient d'une population et la maladie a une certaine fréquence de la maladie dans cette population.
+Selon l'interprétation **fréquentiste**, les probabilités représent la fréquence d'événements après un grand nombre de répétitions d'une observation ou d'une expérience. Dans ce cas-ci, nous pouvons assigner une probabilité à $M_1$ car le patient provient d'une population et la maladie a une certaine fréquence dans cette population.
 
 L'interprétation fréquentiste est à la base de la plupart des cours d'introduction aux statistiques, car elle permet notamment de définir des tests d'hypothèse et des intervalles de confiance. Dans cette approche, on peut associer une probabilité aux statistiques basées sur les données, comme la moyenne d'un échantillon $\bar{x}$, mais pas aux paramètres d'un modèle comme la moyenne de la population $\mu$. Quand on définit un intervalle de confiance à 95% autour de $\bar{x}$, ce n'est pas cet intervalle particulier qui a une probabilité de 95% de contenir $\mu$ (après l'échantillonnage, l'intervalle et $\mu$ sont tous les deux fixes), mais c'est 95% des échantillons possibles de $x$ qui produiraient un intervalle contenant la valeur de $\mu$.
 
@@ -259,7 +259,7 @@ On peut considérer le choix de la distribution *a priori* comme une supposition
 
 ## Avantages et désavantages de l'approche bayésienne
 
-Comme le maximum de vraisemblance, l'inférence bayésienne a l'avantage d'être applicable à n'importe quel type de *modèle génératif*, c'est-à-dire un modèle qui décrit mathématiquement comment les observations sont générées à partir des paramètres. Dans une approche bayésienne, les paramètres de divers types de modèles, incluant tous ceux vus dans ce cours (modèles linéaires généralisés, à effets mixtes, additifs, avec dépendance temporelle ou spatiale) peuvent être estimés avec les mêmes algorithmes; nous discuterons davantage de ces algorithmes au prochain cours. Ces algorithmes produisent la distribution *a posteriori* conjointe des paramètres du modèle, à partir de laquelle nous pouvons facilement obtenir la distribution de n'importe quelle quantité dérivée du modèle: combinaison des paramètres, prédiction, etc. À titre de comparaison, le maximum de vraisemblance ne nous indique que la valeur de chaque paramètre maximisant la vraisemblance et l'obtention d'intervalles de confiance sur des valeurs dérivées de plusieurs paramètres peut être très laborieuse. En contrepartie, les méthodes bayésiennes sont beaucoup demandent beaucoup plus de ressources de calcul.
+Comme le maximum de vraisemblance, l'inférence bayésienne a l'avantage d'être applicable à n'importe quel type de *modèle génératif*, c'est-à-dire un modèle qui décrit mathématiquement comment les observations sont générées à partir des paramètres. Dans une approche bayésienne, les paramètres de divers types de modèles, incluant tous ceux vus dans ce cours (modèles linéaires généralisés, à effets mixtes, additifs, avec dépendance temporelle ou spatiale) peuvent être estimés avec les mêmes algorithmes; nous discuterons davantage de ces algorithmes au prochain cours. Ces algorithmes produisent la distribution *a posteriori* conjointe des paramètres du modèle, à partir de laquelle nous pouvons facilement obtenir la distribution de n'importe quelle quantité dérivée du modèle: combinaison des paramètres, prédiction, etc. À titre de comparaison, le maximum de vraisemblance ne nous indique que la valeur de chaque paramètre maximisant la vraisemblance et l'obtention d'intervalles de confiance sur des valeurs dérivées de plusieurs paramètres peut être très laborieuse. En contrepartie, les méthodes bayésiennes produisent plus d'informations, mais demandent beaucoup plus de ressources de calcul.
 
 Du point de vue de la conception du modèle, l'approche bayésienne est aussi plus demandante, car il faut spécifier une distribution *a priori* pour chaque paramètre ajustable. Comme nous avons mentionné ci-dessus, ces distributions *a priori* sont néanmoins utiles pour stabiliser l'estimation de modèles complexes; lorsque les données sont limitées, contraindre la valeur des effets peut être une solution préférable à simplement éliminer ces effets du modèle. 
 
@@ -301,16 +301,16 @@ Dans l'équation ci-dessus, $\beta_1$ est l'exposant de la relation entre le nom
 Dans ce cas, nous choisissons comme distribution *a priori* pour $\beta_1$ une distribution exponentielle avec un paramètre de 4: $\beta_1 \sim \text{Exp}(4)$. La distribution exponentielle a un maximum à 0 et décroît de façon exponentielle; le taux de cette décroissance est donnée par le paramètre ajustable. Ici, avec un paramètre de 4 nous avons environ 2% de probabilité que $\beta_1 > 1$. Ainsi, les valeurs supérieures à 1 sont jugées improbables mais pas impossibles.
 
 ```{r, echo = FALSE}
-ggplot(NULL, aes(x = c(0, 2))) +
+ggplot(NULL) +
     labs(x = expression(beta[1]), y = expression(p(beta[1]))) +
     stat_function(fun = dexp, args = list(rate = 4), color = "#b3452c", size = 1) +
-    scale_x_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0), limits = c(0, 2)) +
     scale_y_continuous(expand = c(0, 0))
 ```
 
 Quant à l'ordonnée à l'origine $\beta_0$, il s'agit du logarithme du nombre d'espèces moyen lorsque $\log A = 0$, autrement dit lorsque la superficie est de 1 km$^2$. 
 
-*Note*: Le package *brms* que nous utiliserons transforme les prédicteurs d'une régression pour les centrer sur leur valeur moyenne. Cela n'affiche pas les résultats produits pour la régression, mais cela nécessite que nous spécifions une distribution *a priori* non pas pour $\beta_0$ tel que défini ici, mais pour une ordonnée à l'origine qui représenterait la valeur moyenne de la réponse si les prédicteurs étaient à leur valeur moyenne. Autrement dit, nous cherchons une distribution *a priori* du log du nombre d'espèces pour une île ayant une log-superficie moyenne.
+*Note*: Le package *brms* que nous utiliserons transforme les prédicteurs d'une régression pour les centrer sur leur valeur moyenne. Cela n'affecte pas les résultats produits pour la régression, mais cela nécessite que nous spécifions une distribution *a priori* non pas pour $\beta_0$ tel que défini ici, mais pour une ordonnée à l'origine qui représenterait la valeur moyenne de la réponse si les prédicteurs étaient à leur valeur moyenne. Autrement dit, nous cherchons une distribution *a priori* du log du nombre d'espèces pour une île ayant une log-superficie moyenne.
 
 Supposons que les valeurs plausibles pour le nombre d'espèces de l'île moyenne sont entre 1 et 1000. En prenant le log de ces valeurs, nous obtenons $\log(1) = 0$ et $\log(1000) = 6.91$. Dans ce cas, nous choisissons une distribution *a priori* normale, avec moyenne de 3 et écart-type de 2: $\beta_0 \sim \text{N}(3, 2)$. Celle-ci place environ 95% de la probabilité entre -1 et 7.
 
@@ -462,7 +462,7 @@ pp_check(bmod, nsamples = 100, type = "stat", stat = "sd")
 
 En effet, l'écart-type observé est extrême par rapport aux prédictions du modèle, ce qui appuie l'idée que les données sont surdisperséees. Une distribution binomiale négative de la réponse serait peut-être plus appropriée ici.
 
-Notez que les statistiques sommaires les plus utiles pour la vérification sont celles qui ne sont pas directement ajustées par le modèle. Par exemple, tous les modèles de régression s'ajustent pour bien représenter la moyenne des observations. Puisque la régression de Poisson n'a pas de paramètre séparé pour ajuster la dispersion des observations autour de leur moyenne, il est possible que celle-ci ne soit pas bien représentée par le modèle, ce qui en fait une bonne statistique à vérifier.
+Notez que les statistiques sommaires les plus utiles pour la vérification sont celles qui ne sont pas directement ajustées par le modèle. Par exemple, tous les modèles de régression s'ajustent pour bien représenter la moyenne des observations. Puisque la régression de Poisson n'a pas de paramètre séparé pour ajuster la dispersion des observations autour de leur moyenne, il est possible que celle-ci ne soit pas bien représentée par le modèle, ce qui fait de l'écart-type une bonne statistique à vérifier.
 
 # Résumé
 

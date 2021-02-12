@@ -1,0 +1,92 @@
+---
+title: "Données spatiales"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Données
+
+Le fichier [bryo_belg.csv](../donnees/bryo_belg.csv) est adapté des données de l'étude: 
+
+> Neyens, T., Diggle, P.J., Faes, C., Beenaerts, N., Artois, T. et Giorgi, E. (2019) Mapping species richness using opportunistic samples: a case study on ground-floor bryophyte species richness in the Belgian province of Limburg. *Scientific Reports* 9, 19122. https://doi.org/10.1038/s41598-019-55593-x
+
+Ce tableau de données indique la richesse spécifique des bryophytes au sol (*richness*) pour différents points d'échantillonnage de la province belge de Limbourg, avec leur position *(x, y)* en km, en plus de l'information sur la proportion de forêts (*forest*) et de milieux humides (*wetland*) dans une cellule de 1 km$^2$ contenant le point d'échantillonnage.
+
+```{r}
+bryo_belg <- read.csv("../donnees/bryo_belg.csv")
+head(bryo_belg)
+```
+
+## Ajustement d'un modèle géostatistique
+
+Pour cet exercice, nous utiliserons la racine carrée de la richesse spécifique comme variable réponse. La transformation racine carrée permet souvent d'homogénéiser la variance des données de comptage afin d'y appliquer une régression linéaire. 
+
+*Note*: Pour modéliser directement les données de comptage, par exemple avec une distribution de Poisson, tout en incluant la dépendance spatiale, il faudrait passer par un modèle de vraisemblance personnalisé ou un modèle bayésien.
+
+a) Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l'effet des deux prédicteurs selon ce modèle?
+
+**Solution**
+
+```{r}
+bryo_belg$sr <- sqrt(bryo_belg$richness)
+
+bryo_lm <- lm(sr ~ forest + wetland, data = bryo_belg)
+summary(bryo_lm)
+```
+
+Il y a un effet positif de la fraction de forêts et négatif de la fraction de milieux humides; tous deux sont significatifs.
+
+b) Calculez le variogramme empirique des résidus du modèle en (a). Semble-t-il y avoir une corrélation spatiale entre les points?
+
+*Note*: L'argument `cutoff` de la fonction `variogram` spécifie la distance maximale à laquelle le variogramme est calculé. Vous pouvez ajuster manuellement cette valeur pour vous assurer que le palier du variogramme soit atteint.
+
+**Solution**
+
+```{r, warning = FALSE, message = FALSE}
+library(gstat)
+vario <- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
+                   cutoff = 50)
+plot(vario)
+```
+
+Oui, la variance est plus faible pour de petites distances et semble augmenter jusqu'à environ 40 m.
+
+c) Ré-ajustez le modèle linéaire en (a) avec la fonction `gls` du package *nlme*, en essayant différents modèles de corrélation spatiale (exponentiel, Gaussien, sphérique). Comparez les modèles (incluant celui sans corrélation spatiale) avec l'AIC.
+
+**Solution**
+
+```{r, message = FALSE, warning = FALSE}
+library(nlme)
+
+bryo_exp <- gls(sr ~ forest + wetland, data = bryo_belg,
+                correlation = corExp(form = ~ x + y, nugget = TRUE))
+
+bryo_gaus <- gls(sr ~ forest + wetland, data = bryo_belg,
+                correlation = corGaus(form = ~ x + y, nugget = TRUE))
+
+bryo_spher <- gls(sr ~ forest + wetland, data = bryo_belg,
+                correlation = corSpher(form = ~ x + y, nugget = TRUE))
+
+rbind(AIC(bryo_lm), AIC(bryo_exp), AIC(bryo_gaus), AIC(bryo_spher))
+```
+
+Le modèle sphérique a l'AIC le plus faible, suivi de près par le modèle exponentiel.
+
+d) Quel est l'effet de la fraction de forêts et de milieux humides selon le meilleur modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a).
+
+**Solution**
+
+```{r}
+summary(bryo_spher)
+```
+
+La magnitude des coefficients est plus faible, leur erreur-type est plus élevée et l'effet des milieux humides n'est plus significatif. En raison des corrélations spatiales, nos différents points ne sont pas indépendants et une partie de l'effet originalement attribué aux variables prédictrices pourrait être une coïncidence due aux corrélations spatiales à la fois de la variable réponse et des variables prédictrices. 

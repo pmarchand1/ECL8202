@@ -280,12 +280,12 @@ head(bryo_belg)</code></pre>
 <p><em>Note</em>: Pour modéliser directement les données de comptage, par exemple avec une distribution de Poisson, tout en incluant la dépendance spatiale, il faudrait passer par un modèle de vraisemblance personnalisé ou un modèle bayésien.</p>
 <ol style="list-style-type: lower-alpha">
 <li><p>Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l’effet des deux prédicteurs selon ce modèle?</p></li>
-<li><p>Calculez le variogramme empirique des résidus du modèle en (a) et ajustez un modèle théorique pour ce variogramme avec les fonctions du package <em>gstat</em>. Parmi les modèles exponentiel, gaussien et sphérique, lequel convient le mieux à ces données?</p></li>
+<li><p>Calculez le variogramme empirique des résidus du modèle en (a). Semble-t-il y avoir une corrélation spatiale entre les points?</p></li>
 </ol>
 <p><em>Note</em>: L’argument <code>cutoff</code> de la fonction <code>variogram</code> spécifie la distance maximale à laquelle le variogramme est calculé. Vous pouvez ajuster manuellement cette valeur pour vous assurer que le palier du variogramme soit atteint.</p>
 <ol start="3" style="list-style-type: lower-alpha">
-<li><p>Ré-ajustez le modèle linéaire en (a) avec la fonction <code>gls</code> du package <em>nlme</em>, puis ajoutez-y un terme de corrélation spatiale basé sur le meilleur modèle déterminé en (b). Comparez l’AIC des modèles avec et sans corrélation spatiale.</p></li>
-<li><p>Quel est l’effet de la fraction de forêts et de milieux humides selon le modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a).</p></li>
+<li><p>Ré-ajustez le modèle linéaire en (a) avec la fonction <code>gls</code> du package <em>nlme</em>, en essayant différents modèles de corrélation spatiale (exponentiel, Gaussien, sphérique). Comparez les modèles (incluant celui sans corrélation spatiale) avec l’AIC.</p></li>
+<li><p>Quel est l’effet de la fraction de forêts et de milieux humides selon le meilleur modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a).</p></li>
 </ol>
 </div>
 

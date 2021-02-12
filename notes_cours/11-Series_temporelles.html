@@ -631,15 +631,15 @@ head(prev_lynx)</code></pre>
 <p>Le prochain exemple illustre l’utilisation d’un modèle ARIMA avec des prédicteurs externes. Nous utiliserons le jeu de données <code>vic_elec</code> inclus avec le package <em>fpp3</em>, qui représente la demande d’électricité (en MW) enregistrée aux demi-heures dans l’état australien du Victoria.</p>
 <pre class="r"><code>data(vic_elec)
 head(vic_elec)</code></pre>
-<pre><code>## # A tsibble: 6 x 5 [30m] &lt;UTC&gt;
+<pre><code>## # A tsibble: 6 x 5 [30m] &lt;Australia/Melbourne&gt;
 ##   Time                Demand Temperature Date       Holiday
 ##   &lt;dttm&gt;               &lt;dbl&gt;       &lt;dbl&gt; &lt;date&gt;     &lt;lgl&gt;  
-## 1 2012-01-01 00:00:00  4263.        21.0 2012-01-01 TRUE   
-## 2 2012-01-01 00:30:00  4049.        20.7 2012-01-01 TRUE   
-## 3 2012-01-01 01:00:00  3878.        20.6 2012-01-01 TRUE   
-## 4 2012-01-01 01:30:00  4036.        20.4 2012-01-01 TRUE   
-## 5 2012-01-01 02:00:00  3866.        20.2 2012-01-01 TRUE   
-## 6 2012-01-01 02:30:00  3694.        20.1 2012-01-01 TRUE</code></pre>
+## 1 2012-01-01 00:00:00  4383.        21.4 2012-01-01 TRUE   
+## 2 2012-01-01 00:30:00  4263.        21.0 2012-01-01 TRUE   
+## 3 2012-01-01 01:00:00  4049.        20.7 2012-01-01 TRUE   
+## 4 2012-01-01 01:30:00  3878.        20.6 2012-01-01 TRUE   
+## 5 2012-01-01 02:00:00  4036.        20.4 2012-01-01 TRUE   
+## 6 2012-01-01 02:30:00  3866.        20.2 2012-01-01 TRUE</code></pre>
 <p>Les autres colonnes indiquent la température au même moment, la date ainsi qu’une variable binaire <em>Holiday</em> indiquant si cette date est un jour férié.</p>
 <p>Pour travailler avec des données à plus grande échelle (quotidienne plutôt qu’aux demi-heures, nous effectuons une agrégation des mesures par date avec <code>index_by</code>. Nous calculons la demande totale et la température moyenne par jour, le statut de jour férié (<code>any(Holiday)</code> signifie qu’il existe au moins une valeur <code>TRUE</code> dans le groupe, mais en réalité cette variable est constante durant une date donnée).</p>
 <pre class="r"><code>vic_elec &lt;- index_by(vic_elec, Date) %&gt;%
@@ -662,7 +662,7 @@ ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
   geom_line(aes(y = fitted(elec_lm))) +
   scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
 <p><img src="11-Series_temporelles_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
-<p>Cependant, en visualisant les résidus du modèle en fonction de la date, nous voyons qu’une corrélation tmporelle persiste. Il serait donc utile de représenter ces résidus par un modèle ARIMA.</p>
+<p>Cependant, en visualisant les résidus du modèle en fonction de la date, nous voyons qu’une corrélation temporelle persiste. Il serait donc utile de représenter ces résidus par un modèle ARIMA.</p>
 <pre class="r"><code>ggplot(vic_elec, aes(x = Date, y = residuals(elec_lm), color = Workday)) +
   geom_point() +
   scale_color_brewer(palette = &quot;Dark2&quot;)</code></pre>
@@ -671,21 +671,21 @@ ggplot(vic_elec, aes(x = Tmean, y = Demand, color = Workday)) +
 <pre class="r"><code>elec_arima &lt;- model(vic_elec, ARIMA(Demand ~ Tmean + I(Tmean^2) + Workday + PDQ(0,0,0)))</code></pre>
 <p>Ici, notez que <code>PDQ(0,0,0)</code> spécifie qu’il n’y a pas de composante saisonnière, car la méthode de sélection automatique choisirait un modèle avec saisonnalité ici, un type de modèle que nous ne couvrons pas dans ce cours.</p>
 <p>Il ne faut pas confondre cette fonction avec <code>pdq</code> (en minuscules), qui spécifie l’ordre du modèle ARIMA de base.</p>
-<p>Le modèle choisi comporte une différence d’ordre 1, donc on modélise la différence de demande en fonction de la différence de température. Il comporte aussi 2 termes d’autorégression et 3 termes de moyenne mobile.</p>
+<p>Le modèle choisi comporte une différence d’ordre 1, donc on modélise la différence de demande en fonction de la différence de température. Il comporte aussi 1 terme d’autorégression et 4 termes de moyenne mobile.</p>
 <pre class="r"><code>report(elec_arima)</code></pre>
 <pre><code>## Series: Demand 
-## Model: LM w/ ARIMA(2,1,3) errors 
+## Model: LM w/ ARIMA(1,1,4) errors 
 ## 
 ## Coefficients:
-##           ar1      ar2     ma1     ma2      ma3     Tmean  I(Tmean^2)
-##       -0.7617  -0.4933  0.3275  0.0870  -0.4584  -12.0692      0.3723
-## s.e.   0.0926   0.0984  0.0884  0.0991   0.0375    0.3607      0.0092
+##           ar1     ma1      ma2      ma3      ma4     Tmean  I(Tmean^2)
+##       -0.7906  0.3727  -0.4266  -0.1977  -0.1488  -11.9062      0.3692
+## s.e.   0.0941  0.0989   0.0481   0.0407   0.0284    0.3775      0.0096
 ##       WorkdayTRUE
-##           33.3255
-## s.e.       0.4456
+##           32.7278
+## s.e.       0.4453
 ## 
-## sigma^2 estimated as 45.4:  log likelihood=-3638.97
-## AIC=7295.94   AICc=7296.11   BIC=7340.93</code></pre>
+## sigma^2 estimated as 46.14:  log likelihood=-3647.85
+## AIC=7313.7   AICc=7313.87   BIC=7358.69</code></pre>
 <p>Les résidus semblent proches de la normale, mais il reste une autocorrélation significative. Notamment, l’autocorrélation positive à 7, 14, 21 et 28 jours suggère qu’il y a un patron hebdomadaire non pris en compte par la distinction entre jours ouvrables et de congé.</p>
 <pre class="r"><code>gg_tsresiduals(elec_arima)</code></pre>
 <p><img src="11-Series_temporelles_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
@@ -743,7 +743,7 @@ autoplot(prev_elec, vic_elec) +
 </div>
 <div id="exemple-séries-dendrochronologiques" class="section level2">
 <h2>Exemple: Séries dendrochronologiques</h2>
-<p>Nous utilisons pour cet exemple le jeu de données <code>wa082</code> du package d’analyse dendrochronologique <em>dplr</em>, qui présente les séries de croissance en surface terrière (basées sur la largeur des cernes) pour 23 individus de l’espèce <em>Abies amabilis</em> (jeu de données <code>wa082</code> du package <em>dplr</em>). Ce jeu de données a déjà été utilisé pour le laboratoire sur les modèles additifs généralisés.</p>
+<p>Nous utilisons pour cet exemple le jeu de données <code>wa082</code> du package d’analyse dendrochronologique <em>dplr</em>, qui présente les séries de croissance en surface terrière (basées sur la largeur des cernes) pour 23 individus de l’espèce <em>Abies amabilis</em>. Ce jeu de données a déjà été utilisé pour le laboratoire sur les modèles additifs généralisés.</p>
 <p>Comme dans ce laboratoire, nous devons d’abord réarranger le jeu de données pour obtenir des colonnes représentant la croissance en surface terrière (<em>cst</em>), la surface terrière cumulative (<em>st</em>) et de l’âge pour chaque arbre à chaque année.</p>
 <pre class="r"><code>library(tidyr)
 
@@ -777,7 +777,7 @@ head(wa)</code></pre>
 gam_wa &lt;- gam(log(cst) ~ log(st) + s(age) + s(id_arbre, bs = &quot;re&quot;), data = wa)
 plot(gam_wa, pages = 1)</code></pre>
 <p><img src="11-Series_temporelles_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
-<p>Afin d’ajouter des corrélations temporelles, nous devons plutôt utiliser la fonction <code>gamm</code>, qui représente les effets aléatoires différemment, car elle est basée sur la fonction <code>lme</code> du package <em>nlme</em>. (Il s’agit d’un autre package pour les effets aléatoires. Comme nous verrons plus tard il comporte des limites par rapport à <code>lme4</code> que nous avons utilisé dans ce cours. Cependant, il a l’avantage d’inclure les corrélations temporelles.)</p>
+<p>Afin d’ajouter des corrélations temporelles, nous devons plutôt utiliser la fonction <code>gamm</code>, qui représente les effets aléatoires différemment, car elle est basée sur la fonction <code>lme</code> du package <em>nlme</em>. (Il s’agit d’un autre package pour les effets aléatoires. Comme nous verrons plus tard il comporte des limites par rapport à <em>lme4</em> que nous avons utilisé dans ce cours. Cependant, il a l’avantage d’inclure les corrélations temporelles.)</p>
 <p>Les effets fixes sont représentés de la même façon dans <code>gamm</code> ou <code>gam</code>, mais l’effet aléatoire apparaît dans une liste sous l’argument <code>random</code>. Ici, <code>id_arbre = ~1</code> signifie un effet aléatoire d’<code>id_arbre</code> sur l’ordonnée à l’origine.</p>
 <pre class="r"><code>gam_wa2 &lt;- gamm(log(cst) ~ log(st) + s(age), data = wa,
                 random = list(id_arbre = ~1))

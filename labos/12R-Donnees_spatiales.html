@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Données spatiales</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Données spatiales</h1>
+
+</div>
+
+
+<div id="données" class="section level2">
+<h2>Données</h2>
+<p>Le fichier <a href="../donnees/bryo_belg.csv">bryo_belg.csv</a> est adapté des données de l’étude:</p>
+<blockquote>
+<p>Neyens, T., Diggle, P.J., Faes, C., Beenaerts, N., Artois, T. et Giorgi, E. (2019) Mapping species richness using opportunistic samples: a case study on ground-floor bryophyte species richness in the Belgian province of Limburg. <em>Scientific Reports</em> 9, 19122. <a href="https://doi.org/10.1038/s41598-019-55593-x" class="uri">https://doi.org/10.1038/s41598-019-55593-x</a></p>
+</blockquote>
+<p>Ce tableau de données indique la richesse spécifique des bryophytes au sol (<em>richness</em>) pour différents points d’échantillonnage de la province belge de Limbourg, avec leur position <em>(x, y)</em> en km, en plus de l’information sur la proportion de forêts (<em>forest</em>) et de milieux humides (<em>wetland</em>) dans une cellule de 1 km<span class="math inline">\(^2\)</span> contenant le point d’échantillonnage.</p>
+<pre class="r"><code>bryo_belg &lt;- read.csv(&quot;../donnees/bryo_belg.csv&quot;)
+head(bryo_belg)</code></pre>
+<pre><code>##   richness    forest   wetland        x        y
+## 1        9 0.2556721 0.5036614 228.9516 220.8869
+## 2        6 0.6449114 0.1172068 227.6714 219.8613
+## 3        5 0.5039905 0.6327003 228.8252 220.1073
+## 4        3 0.5987329 0.2432942 229.2775 218.9035
+## 5        2 0.7600775 0.1163538 209.2435 215.2414
+## 6       10 0.6865434 0.0000000 210.4142 216.5579</code></pre>
+</div>
+<div id="ajustement-dun-modèle-géostatistique" class="section level2">
+<h2>Ajustement d’un modèle géostatistique</h2>
+<p>Pour cet exercice, nous utiliserons la racine carrée de la richesse spécifique comme variable réponse. La transformation racine carrée permet souvent d’homogénéiser la variance des données de comptage afin d’y appliquer une régression linéaire.</p>
+<p><em>Note</em>: Pour modéliser directement les données de comptage, par exemple avec une distribution de Poisson, tout en incluant la dépendance spatiale, il faudrait passer par un modèle de vraisemblance personnalisé ou un modèle bayésien.</p>
+<ol style="list-style-type: lower-alpha">
+<li>Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l’effet des deux prédicteurs selon ce modèle?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>bryo_belg$sr &lt;- sqrt(bryo_belg$richness)
+
+bryo_lm &lt;- lm(sr ~ forest + wetland, data = bryo_belg)
+summary(bryo_lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = sr ~ forest + wetland, data = bryo_belg)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.8847 -0.4622  0.0545  0.4974  2.3116 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.34159    0.08369  27.981  &lt; 2e-16 ***
+## forest       1.11883    0.13925   8.034 9.74e-15 ***
+## wetland     -0.59264    0.17216  -3.442 0.000635 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7095 on 417 degrees of freedom
+## Multiple R-squared:  0.2231, Adjusted R-squared:  0.2193 
+## F-statistic: 59.86 on 2 and 417 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Il y a un effet positif de la fraction de forêts et négatif de la fraction de milieux humides; tous deux sont significatifs.</p>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Calculez le variogramme empirique des résidus du modèle en (a). Semble-t-il y avoir une corrélation spatiale entre les points?</li>
+</ol>
+<p><em>Note</em>: L’argument <code>cutoff</code> de la fonction <code>variogram</code> spécifie la distance maximale à laquelle le variogramme est calculé. Vous pouvez ajuster manuellement cette valeur pour vous assurer que le palier du variogramme soit atteint.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(gstat)
+vario &lt;- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
+                   cutoff = 50)
+plot(vario)</code></pre>
+<p><img src="12R-Donnees_spatiales_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Oui, la variance est plus faible pour de petites distances et semble augmenter jusqu’à environ 40 m.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Ré-ajustez le modèle linéaire en (a) avec la fonction <code>gls</code> du package <em>nlme</em>, en essayant différents modèles de corrélation spatiale (exponentiel, Gaussien, sphérique). Comparez les modèles (incluant celui sans corrélation spatiale) avec l’AIC.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(nlme)
+
+bryo_exp &lt;- gls(sr ~ forest + wetland, data = bryo_belg,
+                correlation = corExp(form = ~ x + y, nugget = TRUE))
+
+bryo_gaus &lt;- gls(sr ~ forest + wetland, data = bryo_belg,
+                correlation = corGaus(form = ~ x + y, nugget = TRUE))
+
+bryo_spher &lt;- gls(sr ~ forest + wetland, data = bryo_belg,
+                correlation = corSpher(form = ~ x + y, nugget = TRUE))
+
+rbind(AIC(bryo_lm), AIC(bryo_exp), AIC(bryo_gaus), AIC(bryo_spher))</code></pre>
+<pre><code>##          [,1]
+## [1,] 908.6358
+## [2,] 867.8220
+## [3,] 870.9592
+## [4,] 866.9117</code></pre>
+<p>Le modèle sphérique a l’AIC le plus faible, suivi de près par le modèle exponentiel.</p>
+<ol start="4" style="list-style-type: lower-alpha">
+<li>Quel est l’effet de la fraction de forêts et de milieux humides selon le meilleur modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a).</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>summary(bryo_spher)</code></pre>
+<pre><code>## Generalized least squares fit by REML
+##   Model: sr ~ forest + wetland 
+##   Data: bryo_belg 
+##        AIC      BIC    logLik
+##   866.9117 891.1102 -427.4558
+## 
+## Correlation Structure: Spherical spatial correlation
+##  Formula: ~x + y 
+##  Parameter estimate(s):
+##      range     nugget 
+## 43.1725287  0.6063165 
+## 
+## Coefficients:
+##                  Value Std.Error   t-value p-value
+## (Intercept)  2.0368778 0.2481637  8.207800   0.000
+## forest       0.6989832 0.1481690  4.717471   0.000
+## wetland     -0.2441125 0.1809119 -1.349344   0.178
+## 
+##  Correlation: 
+##         (Intr) forest
+## forest  -0.251       
+## wetland -0.235  0.241
+## 
+## Standardized residuals:
+##         Min          Q1         Med          Q3         Max 
+## -1.75204008 -0.06568726  0.61415414  1.15240184  3.23322262 
+## 
+## Residual standard error: 0.7998274 
+## Degrees of freedom: 420 total; 417 residual</code></pre>
+<p>La magnitude des coefficients est plus faible, leur erreur-type est plus élevée et l’effet des milieux humides n’est plus significatif. En raison des corrélations spatiales, nos différents points ne sont pas indépendants et une partie de l’effet originalement attribué aux variables prédictrices pourrait être une coïncidence due aux corrélations spatiales à la fois de la variable réponse et des variables prédictrices.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

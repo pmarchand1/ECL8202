@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(cowplot)
 theme_set(theme_cowplot())
+set.seed(8202)
 ```
 
 # Contenu du cours
@@ -231,9 +232,9 @@ loo1 <- loo(mod1, mod2, compare = TRUE)
 loo1
 ```
 
-Le résultat indique que le modèle 1 a un LOOIC plus élevé de 6.42 comparé au modèle 2, ce qui semble une grande différence, sauf que l'erreur-type de cette différence (2e colonne) est de 5.92. Donc il n'est peut-être pas certain que le modèle 2 soit le meilleur. 
+Le résultat indique que le modèle 1 a un log de la densité prédictive inférieur de 3.6 comparé au modèle 2, sauf que l'erreur-type de cette différence (2e colonne) est de 3.4. Donc il n'est peut-être pas certain que le modèle 2 soit le meilleur. 
 
-De plus, R nous avertit que pour 3 observations (1 du modèle 1, 2 du modèle 2), l'estimé PSIS-LOO est instable avec un $k > 0.7$ dans la distribution de Pareto. Cet avertissement signifie que pour ces observations, les poids utilisés pour l'approximation de la densité prédictive de validation croisée ont trop de valeurs extrêmes pour estimer leur variance. Tel que suggéré par le message, nous ré-évaluons le LOOIC avec l'argument `reloo = TRUE`, qui va réajuster le modèle en omettant chacune des observations problématiques, pour calculer la densité prédictive de validation croisée directement. 
+De plus, R nous avertit que pour 4 observations (1 du modèle 1, 3 du modèle 2), l'estimé PSIS-LOO est instable avec un $k > 0.7$ dans la distribution de Pareto. Cet avertissement signifie que pour ces observations, les poids utilisés pour l'approximation de la densité prédictive de validation croisée ont trop de valeurs extrêmes pour estimer leur variance. Tel que suggéré par le message, nous ré-évaluons le LOOIC avec l'argument `reloo = TRUE`, qui va réajuster le modèle en omettant chacune des observations problématiques, pour calculer la densité prédictive de validation croisée directement. 
 
 ```{r, cache = TRUE}
 loo_corr <- loo(mod1, mod2, compare = TRUE, reloo = TRUE)
@@ -261,18 +262,18 @@ Pour ces deux raisons, les prédictions du maximum de vraisemblance et de l'appr
 Le résultat de `loo` contient un élément pour chacun des modèles comparés. Chacun de ces éléments contient une matrice `pointwise` qui présente notamment la valeur estimée du log de la densité prédictive $\log p(y_i | y_{-i})$ pour chaque point $i$ (`elpd_loo`) et l'erreur-type de cet estimé (`mcse_elpd_loo`).
 
 ```{r}
-head(loo1$mod1$pointwise)
+head(loo1$loos$mod1$pointwise)
 ```
 
 Si nous voulions faire combiner les prédictions de ces deux modèles, la fonction `stacking_weights` du package *loo* permet de déterminer les poids pour la superposition optimale des deux modèles. Cette fonction requière une matrice avec une colonne par modèle, correspondant à la colonne `elpd_loo` de la matrice `pointwise` mentionnée ci-dessus.
 
 ```{r, warning = FALSE, message = FALSE}
 library(loo)
-stacking_weights(cbind(loo1$mod1$pointwise[,1], loo1$mod2$pointwise[,1]))
-stacking_weights(cbind(loo_corr$mod1$pointwise[,1], loo_corr$mod2$pointwise[,1]))
+stacking_weights(cbind(loo1$loos$mod1$pointwise[,1], loo1$loos$mod2$pointwise[,1]))
+stacking_weights(cbind(loo_corr$loos$mod1$pointwise[,1], loo_corr$loos$mod2$pointwise[,1]))
 ```
 
-Pour l'estimé du PSIS-LOO avec correction des valeurs problématiques, nous voyons que presque tout le poids est donné au modèle 2, donc il suffit probablement de faire des prédictions avec le modèle plus complexe. Tel que mentionné plus haut, puisque les prédictions sont basées sur la distribution *a posteriori* entière de `sd_Beach__NAP`, cela inclut des cas où l'écart-type de cet effet aléatoire s'approche de 0 et on s'approche donc du modèle 1. 
+Pour l'estimé du PSIS-LOO avec correction des valeurs problématiques, nous voyons qu'un poids beaucoup plus grand est donné au modèle 2. Tel que mentionné plus haut, puisque les prédictions du modèle 2 sont basées sur la distribution *a posteriori* entière de `sd_Beach__NAP`, cela inclut des cas où l'écart-type de cet effet aléatoire s'approche de 0 et on s'approche donc du modèle 1. 
 
 Nous terminons ce cours en présentant des exemples récents d'application des modèles hiérarchiques bayésiens avec Stan en écologie.
 

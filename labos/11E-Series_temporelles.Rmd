@@ -1,0 +1,74 @@
+---
+title: "Time series"
+output:
+    html_document:
+        self_contained: false
+        lib_dir: libs
+        theme: spacelab
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+
+The [oak_seeds.csv](../donnees/oak_seeds.csv) dataset shows the number of seeds of *Quercus crispula* oak collected annually (1980-2017) by 16 traps located in a stand of this species in Japan.
+
+```{r}
+seed <- read.csv("../donnees/oak_seeds.csv")
+head(seed)
+```
+
+The [oak_weather.csv](../donnees/oak_weather.csv) file contains annual weather data for that same site:
+
+```{r}
+weather <- read.csv("../donnees/oak_weather.csv")
+head(weather)
+```
+
+- *temp_fl*: Mean temperature ($^{\circ}$C) during the flowering period of the tree.
+- *temp_gr*: Mean temperature ($^{\circ}$C) during the growing season.
+- *rain_fl*: Total amount of rain (in mm) during the flowering period of the tree.
+- *rain_gr*: Total amount of rain (in mm) during the growing season.
+
+These data come from the following study:
+
+> Shibata, M., Masaki, T., Yagihashi, T., Shimada, T., & Saitoh, T. (2019). Data from: Decadal changes in masting behaviour of oak trees with rising temperature. Dryad Digital Repository. [https://doi.org/10.5061/dryad.v6wwpzgrb](https://doi.org/10.5061/dryad.v6wwpzgrb)
+
+
+## 1. Site-level time series
+
+(a) Calculate the total number of seeds collected per year (all traps combined) and apply a square root transformation to the result. Convert the result into a temporal data frame (*tsibble*) and view the resulting time series.
+
+*Note*: Since we will be using linear rather than generalized models in this exercise, the square root transformation is intended to stabilize the variance of the count data.
+
+(b) Visualize the temporal correlations for this series. What type of ARIMA model (AR and/or MA, as well as their order) might be appropriate here?
+
+(c) Fit an ARIMA model by letting the function automatically choose the type and order of the model. What do the estimated coefficients mean?
+
+(d) Join the `weather` dataset and fit an ARIMA model with the four weather variables as external predictors. Do these variables help to better predict the number of seeds produced per year?
+
+(e) What type of model is chosen by `ARIMA()` if you consider only the sub-series starting in the year 2000, without an external predictor? Explain this choice from the graph in (a) and the temporal correlations for this subseries.
+
+(f) Calculate the forecasts from the models in (c) and (e) for the next five years. How do these forecasts differ?
+
+
+## 2. Trap-level time series
+
+(a) Go back to the original table showing the number of seeds per year and trap, then apply the square root transformation to the number of seeds. Then use the `lme` function from the *nlme* package to fit a linear mixed model including: the fixed effect of weather variables, the random effect of the trap and the temporal correlations from one year to another. 
+
+Here is an example of how to specify a random effect of a `GROUP` variable on the intercept of a `lme` model, as well as an ARMA correlation between successive elements of the same `GROUP`:
+
+```{r, eval = FALSE}
+library(nlme)
+mod_lme <- lme(..., data = ...,
+             random = list(GROUP = ~1), 
+             correlation = corARMA(p = ..., q = ..., form = ~ 1 | GROUP))
+```
+
+(b) Compare the accuracy of the fixed effects in this model in (a) to the model in 1(d). What is the reason for this difference?
+
+
