@@ -1,5 +1,5 @@
 ---
-title: ECL8202 - Analyses des données complexes
+title: "ECL8202 - Analyses des données complexes"
 ---
 
 [Recorded lectures (YouTube)](https://www.youtube.com/channel/UCfU-xwzWWTo3G_sTkquzOQg/playlists?view=50&sort=dd&shelf_id=2&view_as=subscriber)
@@ -18,6 +18,8 @@ title: ECL8202 - Analyses des données complexes
 
 6. [Generalized linear mixed models 2](notes_cours/06E-Modeles_generalises_mixtes2.html) ([PDF](notes_cours/06E-Modeles_generalises_mixtes2.pdf)) - Data: [acer_transplant.csv](donnees/acer_transplant.csv)
 
+7. [Generalized additive models](notes_cours/07E-Modeles_additifs_generalises.html) ([PDF](notes_cours/07E-Modeles_additifs_generalises.pdf))
+
 
 ## Exercises
 
@@ -34,3 +36,5 @@ Graded lab: [Randomization tests and bootstrap](labos/E02E-Tests_randomisation.h
 5. [Generalized linear mixed models (solutions)](labos/05RE-Modeles_generalises_mixtes.html) ([PDF](labos/05RE-Modeles_generalises_mixtes.pdf)) - Data: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_species.csv](donnees/portal_species.csv), [portal_plots.csv](donnees/portal_plots.csv)
 
 6. Graded lab: [Generalized linear mixed models 2](labos/E06E-Modeles_generalises_mixtes2.html) ([PDF](labos/E06E-Modeles_generalises_mixtes2.pdf)) - Data: [aiv_ducks.csv](donnees/aiv_ducks.csv)
+
+7. [Generalized additive models](labos/07E-Modeles_additifs_generalises.html) ([PDF](labos/07E-Modeles_additifs_generalises.pdf)) - Data: [dendro_wa082.csv](donnees/dendro_wa082.csv)
