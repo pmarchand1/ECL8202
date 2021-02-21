@@ -37,3 +37,5 @@ Labo évalué: [Tests de randomisation et bootstrap](labos/E02-Tests_randomisati
 6. Labo évalué: [Modèles linéaires généralisés à effets mixtes 2](labos/E06-Modeles_generalises_mixtes2.html) ([PDF](labos/E06-Modeles_generalises_mixtes2.pdf)) - Données: [aiv_ducks.csv](donnees/aiv_ducks.csv)
 
 7. [Modeles additifs generalises](labos/07-Modeles_additifs_generalises.html) ([PDF](labos/07-Modeles_additifs_generalises.pdf)) - Données: [dendro_wa082.csv](donnees/dendro_wa082.csv)
+
+Labo évalué: [Modeles additifs generalises](labos/E07-Modeles_additifs_generalises.html) ([PDF](labos/E07-Modeles_additifs_generalises.pdf)) - Données: [portal_ot.csv](donnees/portal_ot.csv)
