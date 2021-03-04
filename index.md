@@ -20,6 +20,8 @@ title: "ECL8202 - Analyses des données complexes"
 
 7. [Modeles additifs generalises](notes_cours/07-Modeles_additifs_generalises.html) ([PDF](notes_cours/07-Modeles_additifs_generalises.pdf))
 
+8. [Introduction a l'analyse bayesienne](notes_cours/08-Intro_Bayes.html) ([PDF](notes_cours/08-Intro_Bayes.pdf)) - Données: [galapagos.csv](donnees/galapagos.csv)
+
 ## Exercices
 
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01R-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
@@ -36,6 +38,8 @@ Labo évalué: [Tests de randomisation et bootstrap](labos/E02-Tests_randomisati
 
 6. Labo évalué: [Modèles linéaires généralisés à effets mixtes 2](labos/E06-Modeles_generalises_mixtes2.html) ([PDF](labos/E06-Modeles_generalises_mixtes2.pdf)) - Données: [aiv_ducks.csv](donnees/aiv_ducks.csv)
 
-7. [Modeles additifs generalises](labos/07-Modeles_additifs_generalises.html) ([PDF](labos/07-Modeles_additifs_generalises.pdf)) - Données: [dendro_wa082.csv](donnees/dendro_wa082.csv)
+7. [Modeles additifs generalises (solutions)](labos/07R-Modeles_additifs_generalises.html) ([PDF](labos/07R-Modeles_additifs_generalises.pdf)) - Données: [dendro_wa082.csv](donnees/dendro_wa082.csv)
 
 Labo évalué: [Modeles additifs generalises](labos/E07-Modeles_additifs_generalises.html) ([PDF](labos/E07-Modeles_additifs_generalises.pdf)) - Données: [portal_ot.csv](donnees/portal_ot.csv)
+
+8. [Introduction a l'analyse bayesienne](labos/08-Intro_Bayes.html) ([PDF](labos/08-Intro_Bayes.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
