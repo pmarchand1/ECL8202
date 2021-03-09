@@ -22,6 +22,8 @@ title: "ECL8202 - Analyses des données complexes"
 
 8. [Introduction a l'analyse bayesienne](notes_cours/08-Intro_Bayes.html) ([PDF](notes_cours/08-Intro_Bayes.pdf)) - Données: [galapagos.csv](donnees/galapagos.csv)
 
+9. [Modeles hierarchiques bayesiens](notes_cours/09-Modeles_hierarchiques_bayesiens.html) ([PDF](notes_cours/09-Modeles_hierarchiques_bayesiens.pdf)) - Data: [rikz.csv](donnees/rikz.csv)
+
 ## Exercices
 
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01R-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
@@ -42,4 +44,6 @@ Labo évalué: [Tests de randomisation et bootstrap](labos/E02-Tests_randomisati
 
 Labo évalué: [Modeles additifs generalises](labos/E07-Modeles_additifs_generalises.html) ([PDF](labos/E07-Modeles_additifs_generalises.pdf)) - Données: [portal_ot.csv](donnees/portal_ot.csv)
 
-8. [Introduction a l'analyse bayesienne](labos/08-Intro_Bayes.html) ([PDF](labos/08-Intro_Bayes.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
+8. [Introduction a l'analyse bayesienne (solutions)](labos/08R-Intro_Bayes.html) ([PDF](labos/08R-Intro_Bayes.pdf)) - Données: [thermal_range.csv](donnees/thermal_range.csv)
+
+9. [Modeles hierarchiques bayesiens](labos/09-Modeles_hierarchiques_bayesiens.html) ([PDF](labos/09-Modeles_hierarchiques_bayesiens.pdf)) - Data: [rikz.csv](donnees/rikz.csv)
