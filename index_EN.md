@@ -24,6 +24,8 @@ title: "ECL8202 - Analyses des données complexes"
 
 9. [Hierarchical Bayesian models](notes_cours/09E-Modeles_hierarchiques_bayesiens.html) ([PDF](notes_cours/09E-Modeles_hierarchiques_bayesiens.pdf)) - Data: [rikz.csv](donnees/rikz.csv)
 
+10. [Hierarchical Bayesian models 2](notes_cours/10E-Modeles_hierarchiques_bayesiens2.html) ([PDF](notes_cours/10E-Modeles_hierarchiques_bayesiens2.pdf)) - Data: [rikz.csv](donnees/rikz.csv)
+
 ## Exercises
 
 1. [The bootstrap method (solutions)](labos/01RE-Bootstrap.html) ([PDF](labos/01RE-Bootstrap.pdf)) - Data: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
@@ -47,3 +49,5 @@ Graded lab: [Generalized additive models](labos/E07E-Modeles_additifs_generalise
 8. [Introduction to Bayesian analysis (solutions)](labos/08RE-Intro_Bayes.html) ([PDF](labos/08RE-Intro_Bayes.pdf)) - Data: [thermal_range.csv](donnees/thermal_range.csv)
 
 9. [Hierarchical Bayesian models](labos/09E-Modeles_hierarchiques_bayesiens.html) ([PDF](labos/09E-Modeles_hierarchiques_bayesiens.pdf)) - Data: [rikz.csv](donnees/rikz.csv)
+
+10. Graded lab: [Hierarchical Bayesian models 2](labos/E10E-Modeles_hierarchiques_bayesiens2.html) ([PDF](labos/E10E-Modeles_hierarchiques_bayesiens2.pdf))
