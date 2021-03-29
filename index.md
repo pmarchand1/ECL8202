@@ -54,5 +54,5 @@ Labo évalué: [Modeles additifs generalises](labos/E07-Modeles_additifs_general
 
 10. Labo évalué: [Modeles hierarchiques bayesiens 2](labos/E10-Modeles_hierarchiques_bayesiens2.html) ([PDF](labos/E10-Modeles_hierarchiques_bayesiens2.pdf))
 
-11. [Series temporelles](labos/11-Series_temporelles.html) ([PDF](labos/11-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
+11. [Series temporelles (solutions)](labos/11R-Series_temporelles.html) ([PDF](labos/11R-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 

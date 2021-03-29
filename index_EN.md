@@ -54,5 +54,5 @@ Graded lab: [Generalized additive models](labos/E07E-Modeles_additifs_generalise
 
 10. Graded lab: [Hierarchical Bayesian models 2](labos/E10E-Modeles_hierarchiques_bayesiens2.html) ([PDF](labos/E10E-Modeles_hierarchiques_bayesiens2.pdf))
 
-11. [Time series](labos/11E-Series_temporelles.html) ([PDF](labos/11E-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
+11. [Time series (solutions)](labos/11RE-Series_temporelles.html) ([PDF](labos/11RE-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 
