@@ -56,3 +56,5 @@ Graded lab: [Generalized additive models](labos/E07E-Modeles_additifs_generalise
 
 11. [Time series (solutions)](labos/11RE-Series_temporelles.html) ([PDF](labos/11RE-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 
+Graded lab: [Time series](labos/E11E-Series_temporelles.html) ([PDF](labos/E11E-Series_temporelles.pdf)) - Data: [EOBS_fluxnet2.csv](donnees/EOBS_fluxnet2.csv), [EOBS_fluxnet_inmet2.txt](donnees/EOBS_fluxnet_inmet2.txt)
+

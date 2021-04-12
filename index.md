@@ -56,3 +56,5 @@ Labo évalué: [Modeles additifs generalises](labos/E07-Modeles_additifs_general
 
 11. [Series temporelles (solutions)](labos/11R-Series_temporelles.html) ([PDF](labos/11R-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 
+Labo évalué: [Series temporelles](labos/E11-Series_temporelles.html) ([PDF](labos/E11-Series_temporelles.pdf)) - Données: [EOBS_fluxnet2.csv](donnees/EOBS_fluxnet2.csv), [EOBS_fluxnet_inmet2.txt](donnees/EOBS_fluxnet_inmet2.txt)
+
