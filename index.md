@@ -28,6 +28,8 @@ title: "ECL8202 - Analyses des données complexes"
 
 11. [Series temporelles](notes_cours/11-Series_temporelles.html) ([PDF](notes_cours/11-Series_temporelles.pdf)) - Data: [sea_ice.txt](donnees/sea_ice.txt), [dendro_wa082.csv](donnees/dendro_wa082.csv)
 
+12. [Spatial data](notes_cours/12-Donnees_spatiales.html) ([PDF](notes_cours/12-Donnees_spatiales.pdf)) - Data: [semis_xy.csv](donnees/semis_xy.csv)
+
 ## Exercices
 
 1. [La méthode du bootstrap (solutions)](labos/01R-Bootstrap.html) ([PDF](labos/01R-Bootstrap.pdf)) - Données: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
@@ -57,4 +59,6 @@ Labo évalué: [Modeles additifs generalises](labos/E07-Modeles_additifs_general
 11. [Series temporelles (solutions)](labos/11R-Series_temporelles.html) ([PDF](labos/11R-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 
 Labo évalué: [Series temporelles](labos/E11-Series_temporelles.html) ([PDF](labos/E11-Series_temporelles.pdf)) - Données: [EOBS_fluxnet2.csv](donnees/EOBS_fluxnet2.csv), [EOBS_fluxnet_inmet2.txt](donnees/EOBS_fluxnet_inmet2.txt)
+
+12. [Spatial data](labos/12-Donnees_spatiales.html) ([PDF](labos/12-Donnees_spatiales.pdf)) - Data: [bryo_belg.csv](donnees/bryo_belg.csv)
 
