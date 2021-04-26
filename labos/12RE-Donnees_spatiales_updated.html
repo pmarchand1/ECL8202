@@ -11,7 +11,7 @@
 
 
 
-<title>Données spatiales</title>
+<title>Spatial data</title>
 
 <script src="libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -262,18 +262,18 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Données spatiales</h1>
+<h1 class="title toc-ignore">Spatial data</h1>
 
 </div>
 
 
-<div id="données" class="section level2">
-<h2>Données</h2>
-<p>Le fichier <a href="../donnees/bryo_belg.csv">bryo_belg.csv</a> est adapté des données de l’étude:</p>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>The <a href="data/bryo_belg.csv">bryo_belg.csv</a> dataset is adapted from the data of this study:</p>
 <blockquote>
 <p>Neyens, T., Diggle, P.J., Faes, C., Beenaerts, N., Artois, T. et Giorgi, E. (2019) Mapping species richness using opportunistic samples: a case study on ground-floor bryophyte species richness in the Belgian province of Limburg. <em>Scientific Reports</em> 9, 19122. <a href="https://doi.org/10.1038/s41598-019-55593-x" class="uri">https://doi.org/10.1038/s41598-019-55593-x</a></p>
 </blockquote>
-<p>Ce tableau de données indique la richesse spécifique des bryophytes au sol (<em>richness</em>) pour différents points d’échantillonnage de la province belge de Limbourg, avec leur position <em>(x, y)</em> en km, en plus de l’information sur la proportion de forêts (<em>forest</em>) et de milieux humides (<em>wetland</em>) dans une cellule de 1 km<span class="math inline">\(^2\)</span> contenant le point d’échantillonnage.</p>
+<p>This data frame shows the specific richness of ground bryophytes (<em>richness</em>) for different sampling points in the Belgian province of Limburg, with their position <em>(x, y)</em> in km, in addition to information on the proportion of forest (<em>forest</em>) and wetlands (<em>wetland</em>) in a 1 km<span class="math inline">\(^2\)</span> cell containing the sampling point.</p>
 <pre class="r"><code>bryo_belg &lt;- read.csv(&quot;../donnees/bryo_belg.csv&quot;)
 head(bryo_belg)</code></pre>
 <pre><code>##   richness    forest   wetland        x        y
@@ -284,21 +284,124 @@ head(bryo_belg)</code></pre>
 ## 5        2 0.7600775 0.1163538 209.2435 215.2414
 ## 6       10 0.6865434 0.0000000 210.4142 216.5579</code></pre>
 </div>
-<div id="ajustement-dun-modèle-géostatistique" class="section level2">
-<h2>Ajustement d’un modèle géostatistique</h2>
-<p>Pour cet exercice, nous utiliserons la racine carrée de la richesse spécifique comme variable réponse. La transformation racine carrée permet souvent d’homogénéiser la variance des données de comptage afin d’y appliquer une régression linéaire.</p>
-<p><em>Note</em>: Pour modéliser directement les données de comptage, par exemple avec une distribution de Poisson, tout en incluant la dépendance spatiale, il faudrait passer par un modèle de vraisemblance personnalisé ou un modèle bayésien.</p>
+<div id="fitting-a-geostatistical-model" class="section level2">
+<h2>Fitting a geostatistical model</h2>
+<p>For this exercise, we will use the square root of the specific richness as the response variable. The square root transformation often allows to homogenize the variance of the count data in order to apply a linear regression.</p>
+<p><em>Note</em>: To model the count data directly, for example with a Poisson distribution, and also include spatial dependence, we would need to use a custom likelihood model or a Bayesian model.</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>Visualisez le patron spatial de la richesse des bryophytes du sol (points de taille différente selon la richesse des espèces). Ensuite, visualisez la relation entre la richesse des bryophytes du sol et le couvert forestier. Calculez la corrélation entre ces variables.</p></li>
-<li><p>Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l’effet des deux prédicteurs selon ce modèle?</p></li>
-<li><p>Calculez le variogramme empirique des résidus du modèle en (b). Semble-t-il y avoir une corrélation spatiale entre les points?</p></li>
+<li>Visualize the spatial pattern of the richness of ground bryophytes (dots of different size according to species richness). Then, visualize the the relationship between richness of ground bryophytes and forest cover. Compute the correlation between these variables.</li>
 </ol>
-<p><em>Note</em>: L’argument <code>cutoff</code> de la fonction <code>variogram</code> spécifie la distance maximale à laquelle le variogramme est calculé. Vous pouvez ajuster manuellement cette valeur pour vous assurer que le palier du variogramme soit atteint.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>bryo_belg$sr &lt;- sqrt(bryo_belg$richness)
+
+library(ggplot2)
+
+ggplot(bryo_belg, aes(x = x, y = y, size = sr)) +
+  geom_point() +
+  coord_fixed()</code></pre>
+<p><img src="12RE-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(bryo_belg, aes(x = forest, y = sr)) +
+  geom_point()</code></pre>
+<p><img src="12RE-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code>cor(bryo_belg$sr,bryo_belg$forest)</code></pre>
+<pre><code>## [1] 0.4483081</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Fit a linear model of the transformed species richness to the proportion of forest and wetlands, without taking into account spatial correlations. What is the effect of the two predictors in this model?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>bryo_lm &lt;- lm(sr ~ forest + wetland, data = bryo_belg)
+summary(bryo_lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = sr ~ forest + wetland, data = bryo_belg)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.8847 -0.4622  0.0545  0.4974  2.3116 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.34159    0.08369  27.981  &lt; 2e-16 ***
+## forest       1.11883    0.13925   8.034 9.74e-15 ***
+## wetland     -0.59264    0.17216  -3.442 0.000635 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7095 on 417 degrees of freedom
+## Multiple R-squared:  0.2231, Adjusted R-squared:  0.2193 
+## F-statistic: 59.86 on 2 and 417 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>There is a positive effect of the fraction of forests and a negative effect of the fraction of wetlands, both significant.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Calculate the empirical variogram of the model residuals in (b). Does there appear to be a spatial correlation between the points?</li>
+</ol>
+<p><em>Note</em>: The <code>cutoff</code> argument to the <code>variogram</code> function specifies the maximum distance at which the variogram is calculated. You can manually adjust this value to get a good view of the sill.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(gstat)
+vario &lt;- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
+                   cutoff = 50)
+plot(vario)</code></pre>
+<p><img src="12RE-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Yes, the variance is smaller for short distances and seems to increase up to ~ 40 m</p>
 <ol start="4" style="list-style-type: lower-alpha">
-<li><p>Essayez d’ajuster plusieurs modèles paramétriques au variogramme empirique (exponentiel, gaussien, sphérique). Quel est celui sélectionné? Tracez le modèle choisi sur le variogramme empirique.</p></li>
-<li><p>Ré-ajustez le modèle linéaire en (b) avec la fonction <code>gls</code> du package <em>nlme</em>, en essayant aussi d’aujuter une corrélation spatiale selon le modèle sélectionné an (d). Comparez les modèles (sans et avec corrélation spatiale) avec l’AIC.</p></li>
-<li><p>Quel est l’effet de la fraction de forêts et de milieux humides selon le modèle en (e)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (b).</p></li>
+<li>Try to fit several parametric models to the empirical variogram (exponential, Gaussian, spherical). Which is the selected one? Plot the theoretical model on the plot of the empirical variogram.</li>
 </ol>
+<pre class="r"><code>vfit &lt;- fit.variogram(vario, vgm(c(&quot;Exp&quot;, &quot;Gau&quot;, &quot;Sph&quot;)))
+vfit</code></pre>
+<pre><code>##   model     psill    range
+## 1   Nug 0.4083577  0.00000
+## 2   Gau 0.1865780 25.19052</code></pre>
+<pre class="r"><code>plot(vario, vfit, col = &quot;black&quot;)</code></pre>
+<p><img src="12RE-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Re-fit the linear model in (b) with the <code>gls</code> function in the <em>nlme</em> package, trying the spatial correlation with the model selected in (d). Compare the models (with and without spatial correlation) with the AIC.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(nlme)
+mod1e_1 &lt;- gls(sr ~ forest + wetland, data = bryo_belg)
+
+mod1e_Gaus &lt;- gls(sr ~ forest + wetland, data = bryo_belg,
+               correlation = corGaus(form = ~ x + y, nugget = TRUE))
+
+AIC(mod1e_1,mod1e_Gaus)</code></pre>
+<pre><code>##            df      AIC
+## mod1e_1     4 917.5085
+## mod1e_Gaus  6 870.9592</code></pre>
+<p>The model including the spatial correlation has the smallest AIC.</p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>What is the effect of the proportion of forests and wetlands according to the model in (e)? Explain the differences between the conclusions of this model and the model in (b).</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>summary(mod1e_Gaus)</code></pre>
+<pre><code>## Generalized least squares fit by REML
+##   Model: sr ~ forest + wetland 
+##   Data: bryo_belg 
+##        AIC      BIC    logLik
+##   870.9592 895.1577 -429.4796
+## 
+## Correlation Structure: Gaussian spatial correlation
+##  Formula: ~x + y 
+##  Parameter estimate(s):
+##      range     nugget 
+## 14.7381332  0.7409514 
+## 
+## Coefficients:
+##                  Value Std.Error   t-value p-value
+## (Intercept)  2.1279925 0.1758710 12.099734  0.0000
+## forest       0.7052987 0.1456888  4.841134  0.0000
+## wetland     -0.2276565 0.1802216 -1.263203  0.2072
+## 
+##  Correlation: 
+##         (Intr) forest
+## forest  -0.350       
+## wetland -0.327  0.245
+## 
+## Standardized residuals:
+##        Min         Q1        Med         Q3        Max 
+## -1.9997519 -0.1987275  0.5301851  1.1031378  3.3177771 
+## 
+## Residual standard error: 0.7498226 
+## Degrees of freedom: 420 total; 417 residual</code></pre>
+<p>The magnitude of the coefficients is smaller, their standard error is larger, and the effect of wetlands is no longer significant. Because of the spatial correlations, our different points are not independent and part of the effect originally attributed to the predictor variables could be a coincidence due to the spatial correlations of both the response variable and the predictor variables.</p>
 </div>
 
 

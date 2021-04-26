@@ -36,14 +36,82 @@ Pour cet exercice, nous utiliserons la racine carrée de la richesse spécifique
 
 a) Visualisez le patron spatial de la richesse des bryophytes du sol (points de taille différente selon la richesse des espèces). Ensuite, visualisez la relation entre la richesse des bryophytes du sol et le couvert forestier. Calculez la corrélation entre ces variables. 
 
+**Solution**
+
+```{r}
+bryo_belg$sr <- sqrt(bryo_belg$richness)
+
+library(ggplot2)
+
+ggplot(bryo_belg, aes(x = x, y = y, size = sr)) +
+  geom_point() +
+  coord_fixed()
+
+ggplot(bryo_belg, aes(x = forest, y = sr)) +
+  geom_point()
+
+cor(bryo_belg$sr,bryo_belg$forest)
+```
+
 b) Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l'effet des deux prédicteurs selon ce modèle?
+
+**Solution**
+
+```{r}
+bryo_lm <- lm(sr ~ forest + wetland, data = bryo_belg)
+summary(bryo_lm)
+```
+
+Il y a un effet positif de la fraction de forêts et négatif de la fraction de milieux humides; tous deux sont significatifs.
 
 c) Calculez le variogramme empirique des résidus du modèle en (b). Semble-t-il y avoir une corrélation spatiale entre les points?
 
 *Note*: L'argument `cutoff` de la fonction `variogram` spécifie la distance maximale à laquelle le variogramme est calculé. Vous pouvez ajuster manuellement cette valeur pour vous assurer que le palier du variogramme soit atteint.
 
-d) Essayez d'ajuster plusieurs modèles paramétriques au variogramme empirique (exponentiel, gaussien, sphérique). Quel est celui sélectionné? Tracez le modèle choisi sur le variogramme empirique. 
+**Solution**
 
-e) Ré-ajustez le modèle linéaire en (b) avec la fonction `gls` du package *nlme*, en essayant aussi d'aujuter une corrélation spatiale selon le modèle sélectionné an (d). Comparez les modèles (sans et avec corrélation spatiale) avec l'AIC.
+```{r, warning = FALSE, message = FALSE}
+library(gstat)
+vario <- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
+                   cutoff = 50)
+plot(vario)
+```
 
-f) Quel est l'effet de la fraction de forêts et de milieux humides selon le modèle en (e)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (b).
+Oui, la variance est plus faible pour de petites distances et semble augmenter jusqu'à environ 40 m.
+
+d) Essayez d'ajuster plusieurs modèles paramétriques au variogramme empirique (exponentiel, gaussien, sphérique). Quel est celui sélectionné? Tracez le modèle choisi sur le variogramme empirique.
+
+**Solution**
+
+```{r, warning = FALSE, message = FALSE}
+vfit <- fit.variogram(vario, vgm(c("Exp", "Gau", "Sph")))
+vfit
+
+plot(vario, vfit, col = "black")
+```
+
+e) Ré-ajustez le modèle linéaire en (a) avec la fonction `gls` du package *nlme*, en essayant différents modèles de corrélation spatiale (exponentiel, Gaussien, sphérique). Comparez les modèles (incluant celui sans corrélation spatiale) avec l'AIC.
+
+**Solution**
+
+```{r, message = FALSE, warning = FALSE}
+library(nlme)
+mod1e_1 <- gls(sr ~ forest + wetland, data = bryo_belg)
+
+mod1e_Gaus <- gls(sr ~ forest + wetland, data = bryo_belg,
+               correlation = corGaus(form = ~ x + y, nugget = TRUE))
+
+AIC(mod1e_1,mod1e_Gaus)
+```
+
+Le modèle avec corrélation spatiale a l'AIC le plus faible. Il est préferable.
+
+f) Quel est l'effet de la fraction de forêts et de milieux humides selon le meilleur modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a).
+
+**Solution**
+
+```{r}
+summary(mod1e_Gaus)
+```
+
+La magnitude des coefficients est plus faible, leur erreur-type est plus élevée et l'effet des milieux humides n'est plus significatif. En raison des corrélations spatiales, nos différents points ne sont pas indépendants et une partie de l'effet originalement attribué aux variables prédictrices pourrait être une coïncidence due aux corrélations spatiales à la fois de la variable réponse et des variables prédictrices. 

@@ -289,16 +289,120 @@ head(bryo_belg)</code></pre>
 <p>Pour cet exercice, nous utiliserons la racine carrée de la richesse spécifique comme variable réponse. La transformation racine carrée permet souvent d’homogénéiser la variance des données de comptage afin d’y appliquer une régression linéaire.</p>
 <p><em>Note</em>: Pour modéliser directement les données de comptage, par exemple avec une distribution de Poisson, tout en incluant la dépendance spatiale, il faudrait passer par un modèle de vraisemblance personnalisé ou un modèle bayésien.</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>Visualisez le patron spatial de la richesse des bryophytes du sol (points de taille différente selon la richesse des espèces). Ensuite, visualisez la relation entre la richesse des bryophytes du sol et le couvert forestier. Calculez la corrélation entre ces variables.</p></li>
-<li><p>Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l’effet des deux prédicteurs selon ce modèle?</p></li>
-<li><p>Calculez le variogramme empirique des résidus du modèle en (b). Semble-t-il y avoir une corrélation spatiale entre les points?</p></li>
+<li>Visualisez le patron spatial de la richesse des bryophytes du sol (points de taille différente selon la richesse des espèces). Ensuite, visualisez la relation entre la richesse des bryophytes du sol et le couvert forestier. Calculez la corrélation entre ces variables.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>bryo_belg$sr &lt;- sqrt(bryo_belg$richness)
+
+library(ggplot2)
+
+ggplot(bryo_belg, aes(x = x, y = y, size = sr)) +
+  geom_point() +
+  coord_fixed()</code></pre>
+<p><img src="12R-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(bryo_belg, aes(x = forest, y = sr)) +
+  geom_point()</code></pre>
+<p><img src="12R-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code>cor(bryo_belg$sr,bryo_belg$forest)</code></pre>
+<pre><code>## [1] 0.4483081</code></pre>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Ajustez un modèle linéaire de la richesse spécifique transformée en fonction de la fraction de forêt et de milieux humides, sans tenir compte des corrélations spatiales. Quel est l’effet des deux prédicteurs selon ce modèle?</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>bryo_lm &lt;- lm(sr ~ forest + wetland, data = bryo_belg)
+summary(bryo_lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = sr ~ forest + wetland, data = bryo_belg)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.8847 -0.4622  0.0545  0.4974  2.3116 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  2.34159    0.08369  27.981  &lt; 2e-16 ***
+## forest       1.11883    0.13925   8.034 9.74e-15 ***
+## wetland     -0.59264    0.17216  -3.442 0.000635 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.7095 on 417 degrees of freedom
+## Multiple R-squared:  0.2231, Adjusted R-squared:  0.2193 
+## F-statistic: 59.86 on 2 and 417 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Il y a un effet positif de la fraction de forêts et négatif de la fraction de milieux humides; tous deux sont significatifs.</p>
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Calculez le variogramme empirique des résidus du modèle en (b). Semble-t-il y avoir une corrélation spatiale entre les points?</li>
 </ol>
 <p><em>Note</em>: L’argument <code>cutoff</code> de la fonction <code>variogram</code> spécifie la distance maximale à laquelle le variogramme est calculé. Vous pouvez ajuster manuellement cette valeur pour vous assurer que le palier du variogramme soit atteint.</p>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(gstat)
+vario &lt;- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
+                   cutoff = 50)
+plot(vario)</code></pre>
+<p><img src="12R-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Oui, la variance est plus faible pour de petites distances et semble augmenter jusqu’à environ 40 m.</p>
 <ol start="4" style="list-style-type: lower-alpha">
-<li><p>Essayez d’ajuster plusieurs modèles paramétriques au variogramme empirique (exponentiel, gaussien, sphérique). Quel est celui sélectionné? Tracez le modèle choisi sur le variogramme empirique.</p></li>
-<li><p>Ré-ajustez le modèle linéaire en (b) avec la fonction <code>gls</code> du package <em>nlme</em>, en essayant aussi d’aujuter une corrélation spatiale selon le modèle sélectionné an (d). Comparez les modèles (sans et avec corrélation spatiale) avec l’AIC.</p></li>
-<li><p>Quel est l’effet de la fraction de forêts et de milieux humides selon le modèle en (e)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (b).</p></li>
+<li>Essayez d’ajuster plusieurs modèles paramétriques au variogramme empirique (exponentiel, gaussien, sphérique). Quel est celui sélectionné? Tracez le modèle choisi sur le variogramme empirique.</li>
 </ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>vfit &lt;- fit.variogram(vario, vgm(c(&quot;Exp&quot;, &quot;Gau&quot;, &quot;Sph&quot;)))
+vfit</code></pre>
+<pre><code>##   model     psill    range
+## 1   Nug 0.4083577  0.00000
+## 2   Gau 0.1865780 25.19052</code></pre>
+<pre class="r"><code>plot(vario, vfit, col = &quot;black&quot;)</code></pre>
+<p><img src="12R-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<ol start="5" style="list-style-type: lower-alpha">
+<li>Ré-ajustez le modèle linéaire en (a) avec la fonction <code>gls</code> du package <em>nlme</em>, en essayant différents modèles de corrélation spatiale (exponentiel, Gaussien, sphérique). Comparez les modèles (incluant celui sans corrélation spatiale) avec l’AIC.</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>library(nlme)
+mod1e_1 &lt;- gls(sr ~ forest + wetland, data = bryo_belg)
+
+mod1e_Gaus &lt;- gls(sr ~ forest + wetland, data = bryo_belg,
+               correlation = corGaus(form = ~ x + y, nugget = TRUE))
+
+AIC(mod1e_1,mod1e_Gaus)</code></pre>
+<pre><code>##            df      AIC
+## mod1e_1     4 917.5085
+## mod1e_Gaus  6 870.9592</code></pre>
+<p>Le modèle avec corrélation spatiale a l’AIC le plus faible. Il est préferable.</p>
+<ol start="6" style="list-style-type: lower-alpha">
+<li>Quel est l’effet de la fraction de forêts et de milieux humides selon le meilleur modèle en (c)? Expliquez les différences entre les conclusions de ce modèle et du modèle en (a).</li>
+</ol>
+<p><strong>Solution</strong></p>
+<pre class="r"><code>summary(mod1e_Gaus)</code></pre>
+<pre><code>## Generalized least squares fit by REML
+##   Model: sr ~ forest + wetland 
+##   Data: bryo_belg 
+##        AIC      BIC    logLik
+##   870.9592 895.1577 -429.4796
+## 
+## Correlation Structure: Gaussian spatial correlation
+##  Formula: ~x + y 
+##  Parameter estimate(s):
+##      range     nugget 
+## 14.7381332  0.7409514 
+## 
+## Coefficients:
+##                  Value Std.Error   t-value p-value
+## (Intercept)  2.1279925 0.1758710 12.099734  0.0000
+## forest       0.7052987 0.1456888  4.841134  0.0000
+## wetland     -0.2276565 0.1802216 -1.263203  0.2072
+## 
+##  Correlation: 
+##         (Intr) forest
+## forest  -0.350       
+## wetland -0.327  0.245
+## 
+## Standardized residuals:
+##        Min         Q1        Med         Q3        Max 
+## -1.9997519 -0.1987275  0.5301851  1.1031378  3.3177771 
+## 
+## Residual standard error: 0.7498226 
+## Degrees of freedom: 420 total; 417 residual</code></pre>
+<p>La magnitude des coefficients est plus faible, leur erreur-type est plus élevée et l’effet des milieux humides n’est plus significatif. En raison des corrélations spatiales, nos différents points ne sont pas indépendants et une partie de l’effet originalement attribué aux variables prédictrices pourrait être une coïncidence due aux corrélations spatiales à la fois de la variable réponse et des variables prédictrices.</p>
 </div>
 
 

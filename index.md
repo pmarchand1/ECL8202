@@ -60,5 +60,5 @@ Labo évalué: [Modeles additifs generalises](labos/E07-Modeles_additifs_general
 
 Labo évalué: [Series temporelles](labos/E11-Series_temporelles.html) ([PDF](labos/E11-Series_temporelles.pdf)) - Données: [EOBS_fluxnet2.csv](donnees/EOBS_fluxnet2.csv), [EOBS_fluxnet_inmet2.txt](donnees/EOBS_fluxnet_inmet2.txt)
 
-12. [Données spatiales](labos/12-Donnees_spatiales_updated.html) ([PDF](labos/12-Donnees_spatiales_updated.pdf)) - Data: [bryo_belg.csv](donnees/bryo_belg.csv)
+12. [Données spatiales](labos/12R-Donnees_spatiales_updated.html) ([PDF](labos/12R-Donnees_spatiales_updated.pdf)) - Data: [bryo_belg.csv](donnees/bryo_belg.csv)
 
