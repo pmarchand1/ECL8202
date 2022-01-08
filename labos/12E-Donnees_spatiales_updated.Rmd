@@ -1,0 +1,49 @@
+---
+title: "Spatial data"
+output:
+  html_document:
+    self_contained: no
+    lib_dir: libs
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data
+
+The [bryo_belg.csv](data/bryo_belg.csv) dataset is adapted from the data of this study:
+
+> Neyens, T., Diggle, P.J., Faes, C., Beenaerts, N., Artois, T. et Giorgi, E. (2019) Mapping species richness using opportunistic samples: a case study on ground-floor bryophyte species richness in the Belgian province of Limburg. *Scientific Reports* 9, 19122. https://doi.org/10.1038/s41598-019-55593-x
+
+This data frame shows the specific richness of ground bryophytes (*richness*) for different sampling points in the Belgian province of Limburg, with their position *(x, y)* in km, in addition to information on the proportion of forest (*forest*) and wetlands (*wetland*) in a 1 km$^2$ cell containing the sampling point.
+
+```{r}
+bryo_belg <- read.csv("../donnees/bryo_belg.csv")
+head(bryo_belg)
+```
+
+## Fitting a geostatistical model
+
+For this exercise, we will use the square root of the specific richness as the response variable. The square root transformation often allows to homogenize the variance of the count data in order to apply a linear regression. 
+
+*Note*: To model the count data directly, for example with a Poisson distribution, and also include spatial dependence, we would need to use a custom likelihood model or a Bayesian model.
+
+a) Visualize the spatial pattern of the richness of ground bryophytes (dots of different size according to species richness). Then, visualize the the relationship between richness of ground bryophytes and forest cover. Compute the correlation between these variables.
+
+b) Fit a linear model of the transformed species richness to the proportion of forest and wetlands, without taking into account spatial correlations. What is the effect of the two predictors in this model?
+
+c) Calculate the empirical variogram of the model residuals in (b). Does there appear to be a spatial correlation between the points?
+
+*Note*: The `cutoff` argument to the `variogram` function specifies the maximum distance at which the variogram is calculated. You can manually adjust this value to get a good view of the sill.
+
+d) Try to fit several parametric models to the empirical variogram (exponential, Gaussian, spherical). Which is the selected one? Plot the theoretical model on the plot of the empirical variogram.
+
+e) Re-fit the linear model in (b) with the `gls` function in the *nlme* package, trying the spatial correlation with the model selected in (d). Compare the models (with and without spatial correlation) with the AIC.
+
+f) What is the effect of the proportion of forests and wetlands according to the model in (e)? Explain the differences between the conclusions of this model and the model in (b).

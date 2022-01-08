@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Laboratoire évalué : séries temporelles</title>
+
+<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
+<script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="libs/navigation-1.1/tabsets.js"></script>
+<link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Laboratoire évalué : séries temporelles</h1>
+
+</div>
+
+
+<p>Ce laboratoire devra être soumis sur Moodle le 21 avril.</p>
+<div id="données" class="section level2">
+<h2>Données</h2>
+<p>Pour cet exercice, nous utiliserons les données d’une tour à flux située dans une forêt d’épinettes noires près de Chibougamau.</p>
+<blockquote>
+<p><strong>Référence bibliographique</strong>: Bergeron, Margolis, Black, Coursolle, Dunn, Barr, &amp; Wofsy. (2007). Comparison of carbon dioxide fluxes over three boreal black spruce forests in Canada. Global Change Biology, 13(1), 89–107. <a href="https://doi.org/10.1111/j.1365-2486.2006.01281.x" class="uri">https://doi.org/10.1111/j.1365-2486.2006.01281.x</a>.</p>
+</blockquote>
+<p>Les tours à flux mesurent la productivité nette d’un écosystème et la quantité de gaz (CO2, H2O et CH4) échangée entre l’atmosphère et l’écosystème à l’aide de la méthode de covariance des tourbillons (<em>eddy covariance</em>).</p>
+<blockquote>
+<p><strong>Weblink</strong>: <a href="https://www.battelleecology.org/data-collection/flux-tower-measurements" class="uri">https://www.battelleecology.org/data-collection/flux-tower-measurements</a></p>
+</blockquote>
+<p>Nous commencerons par charger les packages requis et les données.</p>
+<pre class="r"><code>library(fpp3)
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+EOBS_fluxnet &lt;- read.csv(&quot;../donnees/EOBS_fluxnet2.csv&quot;)
+head(EOBS_fluxnet)</code></pre>
+<pre><code>##   Year Day GapFilled_NEP GapFilled_R GapFilled_GEP TimeSteps
+## 1 2004   1    -0.3702583   0.3702583             0        48
+## 2 2004   2    -0.3226569   0.3226569             0        48
+## 3 2004   3    -0.3143513   0.3143513             0        48
+## 4 2004   4    -0.3108769   0.3108769             0        48
+## 5 2004   5    -0.3105173   0.3105173             0        48
+## 6 2004   6    -0.3069446   0.3069446             0        48</code></pre>
+<p>Les colonnes sont :</p>
+<ul>
+<li><p><em>Year</em> est l’année de l’observation</p></li>
+<li><p><em>Day</em> est le jour de l’année (1-365)</p></li>
+<li><p><em>GapFilled_NEP</em> est la productivité nette quotidienne de l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
+<li><p><em>GapFilled_R</em> est la respiration quotidienne de l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
+<li><p><em>GapFilled_GEP</em> est la productivité brute quotidienne de l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
+<li><p><em>TimeSteps</em> est un entier indiquant le nombre de données demi-horaires qui composent les moyennes quotidiennes</p></li>
+</ul>
+</div>
+<div id="modèle-arima-pour-le-nep" class="section level2">
+<h2>1. Modèle ARIMA pour le NEP</h2>
+<p>(1a) Créez un tableau de données temporelles (<em>tsibble</em>). Dans un premier temps, vous devez ajouter une colonne contenant la date en utilisant les informations dans les colonnes <em>Year</em> et <em>Day</em>. Consultez le site Web suivant pour comprendre comment gérer les données temporelles dans <em>R</em> : <a href="https://www.stat.berkeley.edu/~s133/dates.html" class="uri">https://www.stat.berkeley.edu/~s133/dates.html</a></p>
+<p>(1b) L’un des problèmes de l’utilisation des données journalières est la gestion des années bissextiles. Dans ce cas, nous avons des données avec un nombre de jours constant par année (365 jours par an). Il s’agit d’une solution courante pour simplifier le traitement des données, notamment en modélisation. Afin d’ajouter un jour de plus pour les années bissextiles, nous pouvons utiliser les fonctions <em>fill_gaps</em> (<a href="https://www.rdocumentation.org/packages/tsibble/versions/1.0.0/topics/fill_gaps" class="uri">https://www.rdocumentation.org/packages/tsibble/versions/1.0.0/topics/fill_gaps</a>) et <em>tidyr::fill</em> (<a href="https://www.rdocumentation.org/packages/tidyr/versions/1.1.3/topics/fill" class="uri">https://www.rdocumentation.org/packages/tidyr/versions/1.1.3/topics/fill</a>). Nous pouvons spécifier que les lignes ajoutées ont <em>Day</em> égal à 366 et <em>GapFilled_NEP</em>, <em>GapFilled_R</em>, <em>GapFilled_GEP</em> et <em>Year</em> égaux à la valeur de la ligne précédente.</p>
+<p>(1c) Obtenez un nouveau tableau de données temporelles (<em>tsibble</em>) contenant les valeurs mensuelles moyennes de <em>GapFilled_NEP</em>. Tracez la série chronologique obtenue et commentez-la. Comment la série chronologique varie-t-elle dans le temps ? Que signifient les valeurs négatives ?</p>
+<p>(1d) Tracez les 3 séries chronologiques des valeurs quotidiennes (<em>GapFilled_NEP</em>, <em>GapFilled_R</em>, <em>GapFilled_GEP</em>), la saisonnalité annuelle de <em>GapFilled_NEP</em> (utilisez le jeu de données journalières ainsi que le jeu de données mensuelles en produisant deux graphiques distincts), et la tendance des données <em>GapFilled_NEP</em> pour chaque mois sur la période d’observation (utilisez le jeu de données mensuelles). Quand la saison de croissance commence-t-elle et se termine-t-elle au site d’étude ? Quand se produit le pic de photosynthèse ? Y a-t-il une tendance évidente dans les valeurs mensuelles moyennes ?</p>
+<p>(1e) Extraire les différentes composantes de la série chronologique journalière de <em>GapFilled_NEP</em> (tendance, saisonnalité et résidus). Quelle est l’importance relative des composantes ? Qu’est-ce que ça veut dire ? Enfin, stockez les composants dans un nouveau tableau de données temporelles (<em>tsibble</em>).</p>
+<p>(1f) Analyser l’autocorrélation et l’autocorrélation partielle de la série chronologique journalière de <em>GapFilled_NEP</em> et de la composante résiduelle extraite en 1e. Que déduisez-vous de ces graphiques ?</p>
+<p>(1g) Ajustez un modèle ARIMA à la série chronologique journalière de <em>GapFilled_NEP</em>. Laissez le modèle choisir le modèle ARIMA approprié. Quel type de modèle ARIMA est automatiquement sélectionné ? Les résidus du modèle ARIMA respectent-ils les hypothèses du modèle ?</p>
+<p>(1h) Effectuez des prévisions et tracez une année supplémentaire de données journalières de <em>GapFilled_NEP</em> en utilisant le modèle sélectionné à l’étape précédente.</p>
+</div>
+<div id="modèle-arima-pour-le-nep-avec-prédicteurs-externes" class="section level2">
+<h2>2. Modèle ARIMA pour le NEP avec prédicteurs externes</h2>
+<p>Nous commencerons par charger des données météorologiques pour le site de la tour à flux.</p>
+<pre class="r"><code>My_meteo=read.delim(&quot;../donnees/EOBS_fluxnet_inmet2.txt&quot;,skip=1,header=F)
+names(My_meteo)= c(&quot;Year&quot;,&quot;Day&quot;,&quot;Tmax&quot;,&quot;Tmin&quot;,&quot;Precip&quot;,&quot;CO2&quot;)
+head(My_meteo)</code></pre>
+<pre><code>##   Year Day       Tmax      Tmin Precip      CO2
+## 1 2004   1 -14.280000 -20.70000  0.306 384.4005
+## 2 2004   2 -13.340000 -17.90000  0.203 384.3611
+## 3 2004   3  -1.859991 -13.34000  0.401 384.3216
+## 4 2004   4  -8.299994 -24.65999  0.000 384.2822
+## 5 2004   5 -18.000010 -28.14001  0.157 384.2427
+## 6 2004   6 -17.900000 -20.32000  0.109 384.2033</code></pre>
+<p>Les colonnes sont :</p>
+<ul>
+<li><p><em>Year</em> est l’année de l’observation</p></li>
+<li><p><em>Day</em> est le jour de l’année (1-365)</p></li>
+<li><p><em>Tmax</em> est la température maximale journalière (<em>°C</em>)</p></li>
+<li><p><em>Tmin</em> est la température minimale journalière (<em>°C</em>)</p></li>
+<li><p><em>Precip</em> est la somme des précipitations journalières (<em>cm</em>)</p></li>
+<li><p><em>CO2</em> est la concentration en CO2 de l’atmosphère (<em>ppm</em>)</p></li>
+</ul>
+<p>Une fois que vous avez chargé les données météorologiques, vous devez créer un tableau de données temporelles avec ces données (même procédure qu’au point 1a) et combler les années bissextiles en ajoutant un jour (même procédure qu’au point 1b).</p>
+<p>(2a) Trouvez la variable météorologique ou environnementale (<em>Tmax</em>, <em>Tmin</em>, <em>Precip</em> ou <em>CO2</em>) qui corrèle le plus à la série chronologique journalière de <em>GapFilled_NEP</em>.</p>
+<p>(2b) Joignez les données de flux et météorologiques (<em>inner_join</em>) et tracez la relation (nuage de points) entre la variable trouvée en 2a (axe des x) et <em>GapFilled_NEP</em> (axe des y). Commentez cette relation.</p>
+<p>(2c) Appliquer un modèle linéaire sans aucun terme ARIMA incluant un terme quadratique pour la variable trouvée en 2a. Ensuite, tracez les prévisions du modèle sur le graphique du point 2b. Enfin, tracez les résidus de ce modèle en fonction du temps. Le modèle représente-t-il correctement les données ? Essayez d’expliquer pourquoi les résidus semblent être principalement positif au début de la saison de croissance.</p>
+<p>(2d) Ajouter des termes ARIMA au modèle du point 2c et comparer l’AIC de ce modèle avec l’AIC du modèle en 1g. Comparez les termes ARIMA sélectionnés ici et en 1g.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

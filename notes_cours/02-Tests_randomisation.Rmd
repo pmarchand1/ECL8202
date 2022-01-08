@@ -316,7 +316,7 @@ f_null <- replicate(nperm, f_perm())
 
 ```{r, message = FALSE}
 ggplot(NULL, aes(x = f_null)) + 
-    labs(x = "Différence de couverture moyenne (Re - Dr)", y = "Fréquence") +
+    labs(x = "Différence de couverture moyenne (Re - Dr)", y = "Fréquence") +  # Not sure the x lab is rigth, it should be F
     geom_histogram(color = "black", fill = "white") +
     geom_vline(xintercept = f_obs, linetype = "dashed", color = "#b3452c", size = 1) +
     scale_y_continuous(expand = c(0, 0))
