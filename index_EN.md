@@ -8,7 +8,13 @@ title: "ECL8202 - Analyses des données complexes"
 
 1. [The bootstrap method](notes_cours/01E-Bootstrap.html) ([PDF](notes_cours/01E-Bootstrap.pdf)) - Data: [pruche.csv](donnees/pruche.csv)
 
+2. [Randomization tests](notes_cours/02E-Tests_randomisation.html) ([PDF](notes_cours/02E-Tests_randomisation.pdf)) - Data: [sphagnum_cover.csv](donnees/sphagnum_cover.csv), [environment.csv](donnees/environment.csv)
+
 
 ## Exercises
 
-1. [The bootstrap method](labos/01E-Bootstrap.html) ([PDF](labos/01E-Bootstrap.pdf)) - Data: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
+1. [The bootstrap method (solutions)](labos/01RE-Bootstrap.html) ([PDF](labos/01RE-Bootstrap.pdf)) - Data: [sphagnum_cover.csv](donnees/sphagnum_cover.csv)
+
+2. [Randomization tests](labos/02E-Tests_randomisation.html) ([PDF](labos/02E-Tests_randomisation.pdf)) - Data: [sablefish.csv](donnees/sablefish.csv)
+
+Graded lab: [Randomization tests and bootstrap](labos/E02E-Tests_randomisation.html) ([PDF](labos/E02E-Tests_randomisation.pdf)) - Data: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_plots.csv](donnees/portal_plots.csv)
