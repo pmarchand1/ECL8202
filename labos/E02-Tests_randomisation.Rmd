@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Ce travail doit être remis avant le **27 janvier à 17h** sur Moodle.
+Ce travail doit être remis avant le **4 février à 17h** sur Moodle.
 
 ## Données
 

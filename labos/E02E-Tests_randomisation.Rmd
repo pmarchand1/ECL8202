@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This assignment must be submitted before **January 27th at 5pm** on Moodle.
+This assignment must be submitted before **February 4th at 5pm** on Moodle.
 
 ## Data
 
