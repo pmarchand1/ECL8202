@@ -13,12 +13,22 @@
 
 <title>Modèles linéaires généralisés à effets mixtes 2</title>
 
-<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -26,12 +36,16 @@
 <link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -44,32 +58,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -79,10 +68,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -99,6 +84,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -111,7 +99,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -237,7 +224,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -248,21 +235,30 @@ div.tocify {
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
-<h1 class="title toc-ignore">Modèles linéaires généralisés à effets mixtes 2</h1>
+<h1 class="title toc-ignore">Modèles linéaires généralisés à effets
+mixtes 2</h1>
 
 </div>
 
 
-<p>Ce laboratoire doit être remis le 24 février à 17h sur Moodle.</p>
+<p>Ce laboratoire doit être remis le 11 mars à 17h sur Moodle.</p>
 <div id="données" class="section level2">
 <h2>Données</h2>
-<p>Le jeu de données <a href="../donnees/aiv_ducks.csv">aiv_ducks.csv</a> contient une partie des données de l’étude de Papp et al. (2017) sur la présence de la grippe aviaire (AIV pour <em>avian influenza virus</em>) dans les populations de différentes espèces de canards dans l’est du Canada.</p>
+<p>Le jeu de données <a
+href="../donnees/aiv_ducks.csv">aiv_ducks.csv</a> contient une partie
+des données de l’étude de Papp et al. (2017) sur la présence de la
+grippe aviaire (AIV pour <em>avian influenza virus</em>) dans les
+populations de différentes espèces de canards dans l’est du Canada.</p>
 <blockquote>
-<p>Papp, Z., Clark, R.G., Parmley, E.J., Leighton, F.A., Waldner, C., Soos, C. (2017) The ecology of avian influenza viruses in wild dabbling ducks (Anas spp.) in Canada. PLoS ONE 12: e0176297. <a href="https://doi.org/10.1371/journal.pone.0176297" class="uri">https://doi.org/10.1371/journal.pone.0176297</a>.</p>
+<p>Papp, Z., Clark, R.G., Parmley, E.J., Leighton, F.A., Waldner, C.,
+Soos, C. (2017) The ecology of avian influenza viruses in wild dabbling
+ducks (Anas spp.) in Canada. PLoS ONE 12: e0176297. <a
+href="https://doi.org/10.1371/journal.pone.0176297"
+class="uri">https://doi.org/10.1371/journal.pone.0176297</a>.</p>
 </blockquote>
 <pre class="r"><code>aiv &lt;- read.csv(&quot;../donnees/aiv_ducks.csv&quot;)
 str(aiv)</code></pre>
@@ -279,33 +275,76 @@ str(aiv)</code></pre>
 ##  $ Population_Density: num  1.2 1.16 1.16 1.16 1.16 ...</code></pre>
 <p>Voici la description des champs de données:</p>
 <ul>
-<li><em>Species</em>: Code d’espèce (ABDU = canard noir, AGWT = sarcelle à ailes vertes, AMWI = canard d’Amérique, BWTE = sarcelle à ailes bleues, MALL = canard mallard, MBDH = hybride canard noir / mallard, NOPI = canard pilet)</li>
-<li><em>Age</em>: Âge (HY = année d’éclosion, AHY = après l’année d’éclosion)</li>
+<li><em>Species</em>: Code d’espèce (ABDU = canard noir, AGWT = sarcelle
+à ailes vertes, AMWI = canard d’Amérique, BWTE = sarcelle à ailes
+bleues, MALL = canard mallard, MBDH = hybride canard noir / mallard,
+NOPI = canard pilet)</li>
+<li><em>Age</em>: Âge (HY = année d’éclosion, AHY = après l’année
+d’éclosion)</li>
 <li><em>Sex</em>: Sexe (F/M)</li>
-<li><em>AIV</em>: Présence (1) ou absence (0) du virus de la grippe aviaire</li>
+<li><em>AIV</em>: Présence (1) ou absence (0) du virus de la grippe
+aviaire</li>
 <li><em>Site</em>: Site d’échantillonnage</li>
-<li><em>Latitude</em> et <em>Longitude</em>: Coordonnées géographiques du site</li>
+<li><em>Latitude</em> et <em>Longitude</em>: Coordonnées géographiques
+du site</li>
 <li><em>Year</em>: Année d’échantillonnage</li>
-<li><em>Temperature</em>: Température moyenne dans les 2 semaines précédant l’échantillonnage</li>
-<li><em>Population_Density</em>: Densité de population de canards (toutes espèces confondues) estimée pour le site et l’année</li>
+<li><em>Temperature</em>: Température moyenne dans les 2 semaines
+précédant l’échantillonnage</li>
+<li><em>Population_Density</em>: Densité de population de canards
+(toutes espèces confondues) estimée pour le site et l’année</li>
 </ul>
 </div>
 <div id="ajustement-du-modèle" class="section level2">
 <h2>1. Ajustement du modèle</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>Estimez les paramètres d’un modèle complet visant à prédire la présence/absence de l’AIV, incluant: les effets fixes de l’âge et du sexe des canards, de la température et de la densité de population du site; ainsi que les effets aléatoires de l’espèce, du site, de l’année et de l’interaction site x année (cette dernière est notée <code>(1 | Site:Year)</code> dans le modèle). Faut-il vérifier s’il y a surdispersion pour ce modèle?</p></li>
-<li><p>Quelle est la raison d’inclure chacun des effets aléatoires du modèle en (a)? Vérifiez si ces effets aléatoires suivent une distribution normale.</p></li>
-<li><p>Produisez un graphique de la probabilité de présence de l’AIV prédite par le modèle en (a) en fonction de la température pour chacune des quatre catégories d’âge et de sexe (HY/F, HY/M, AHY/F, AHY/M). La densité de population n’apparaîtra pas dans le graphique, mais vous pouvez la fixer à sa valeur moyenne pour les prédictions.</p></li>
-<li><p>À partir du modèle complet, utilisez l’AIC pour déterminer s’il est préférable d’inclure ou non chacun des effets suivants: température, densité de population, ainsi que l’effet aléatoire pour l’interaction site x année.</p></li>
-<li><p>Les auteurs de l’étude originale ont déterminé un effet significatif de la densité de population en ajustant un modèle avec effets aléatoires du site et de l’année, mais sans leur interaction. Pour quelle raison les conclusions de votre modèle pourraient-elles différer de ce résultat?</p></li>
+<li><p>Estimez les paramètres d’un modèle complet visant à prédire la
+présence/absence de l’AIV, incluant: les effets fixes de l’âge et du
+sexe des canards, de la température et de la densité de population du
+site; ainsi que les effets aléatoires de l’espèce, du site, de l’année
+et de l’interaction site x année (cette dernière est notée
+<code>(1 | Site:Year)</code> dans le modèle). Faut-il vérifier s’il y a
+surdispersion pour ce modèle?</p></li>
+<li><p>Quelle est la raison d’inclure chacun des effets aléatoires du
+modèle en (a)? Vérifiez si ces effets aléatoires suivent une
+distribution normale.</p></li>
+<li><p>Produisez un graphique de la probabilité de présence de l’AIV
+prédite par le modèle en (a) en fonction de la température pour chacune
+des quatre catégories d’âge et de sexe (HY/F, HY/M, AHY/F, AHY/M). La
+densité de population n’apparaîtra pas dans le graphique, mais vous
+pouvez la fixer à sa valeur moyenne pour les prédictions.</p></li>
+<li><p>À partir du modèle complet, utilisez l’AIC pour déterminer s’il
+est préférable d’inclure ou non chacun des effets suivants: température,
+densité de population, ainsi que l’effet aléatoire pour l’interaction
+site x année.</p></li>
+<li><p>Les auteurs de l’étude originale ont déterminé un effet
+significatif de la densité de population en ajustant un modèle avec
+effets aléatoires du site et de l’année, mais sans leur interaction.
+Pour quelle raison les conclusions de votre modèle pourraient-elles
+différer de ce résultat?</p></li>
 </ol>
 </div>
 <div id="prédictions-du-modèle" class="section level2">
 <h2>2. Prédictions du modèle</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>Ajoutez au jeu de données original des colonnes représentant la prédiction de la probabilité de présence de l’AIV (1) en fonction seulement des effets fixes du modèle; (2) en fonction des effets fixes et aléatoires. Utilisez le meilleur modèle identifié dans la partie précédente.</p></li>
-<li><p>Pour chaque type de prédictions obtenues (effets fixes; effets fixes et aléatoires), déterminez la probabilité moyenne prédite de présence de l’AIV pour les observations avec AIV = 1, ainsi que la probabilité moyenne prédite de présence pour les observations avec AIV = 0. D’après vos résultats, les effets fixes du modèle permettent-ils de bien départager les cas de présence et d’absence? Qu’en est-il des effets aléatoires?</p></li>
-<li><p>Groupez le jeu de données par site et année, puis calculez la moyenne de la longitude, de la latitude et de la probabilité d’AIV prédite par le modèle complet pour chaque combinaison site-année. En utilisant ces variables, produisez une carte des sites avec leur probabilité d’AIV prédite pour chaque année. (Vous pouvez utiliser les facettes dans <em>ggplot2</em> pour séparer le graphique en panneaux pour chaque année.)</p></li>
+<li><p>Ajoutez au jeu de données original des colonnes représentant la
+prédiction de la probabilité de présence de l’AIV (1) en fonction
+seulement des effets fixes du modèle; (2) en fonction des effets fixes
+et aléatoires. Utilisez le meilleur modèle identifié dans la partie
+précédente.</p></li>
+<li><p>Pour chaque type de prédictions obtenues (effets fixes; effets
+fixes et aléatoires), déterminez la probabilité moyenne prédite de
+présence de l’AIV pour les observations avec AIV = 1, ainsi que la
+probabilité moyenne prédite de présence pour les observations avec AIV =
+0. D’après vos résultats, les effets fixes du modèle permettent-ils de
+bien départager les cas de présence et d’absence? Qu’en est-il des
+effets aléatoires?</p></li>
+<li><p>Groupez le jeu de données par site et année, puis calculez la
+moyenne de la longitude, de la latitude et de la probabilité d’AIV
+prédite par le modèle complet pour chaque combinaison site-année. En
+utilisant ces variables, produisez une carte des sites avec leur
+probabilité d’AIV prédite pour chaque année. (Vous pouvez utiliser les
+facettes dans <em>ggplot2</em> pour séparer le graphique en panneaux
+pour chaque année.)</p></li>
 </ol>
 </div>
 
@@ -320,7 +359,7 @@ str(aiv)</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -338,7 +377,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -347,6 +386,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')
@@ -359,7 +401,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

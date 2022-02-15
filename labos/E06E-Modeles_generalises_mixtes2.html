@@ -13,12 +13,22 @@
 
 <title>Generalized linear mixed models 2</title>
 
-<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -26,12 +36,16 @@
 <link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -44,32 +58,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -79,10 +68,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -99,6 +84,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -111,7 +99,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -237,7 +224,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -248,7 +235,7 @@ div.tocify {
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -257,12 +244,20 @@ div.tocify {
 </div>
 
 
-<p>Answers for this lab must be submitted on Moodle before February 24th at 5pm.</p>
+<p>Answers for this lab must be submitted on Moodle before March 11th at
+5pm.</p>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>The <a href="../donnees/aiv_ducks.csv">aiv_ducks.csv</a> dataset contains some of the data from the study by Papp et al. (2017) on the occurrence of avian influenza (AIV) in populations of different species of ducks in eastern Canada.</p>
+<p>The <a href="../donnees/aiv_ducks.csv">aiv_ducks.csv</a> dataset
+contains some of the data from the study by Papp et al. (2017) on the
+occurrence of avian influenza (AIV) in populations of different species
+of ducks in eastern Canada.</p>
 <blockquote>
-<p>Papp, Z., Clark, R.G., Parmley, E.J., Leighton, F.A., Waldner, C., Soos, C. (2017) The ecology of avian influenza viruses in wild dabbling ducks (Anas spp.) in Canada. PLoS ONE 12: e0176297. <a href="https://doi.org/10.1371/journal.pone.0176297" class="uri">https://doi.org/10.1371/journal.pone.0176297</a>.</p>
+<p>Papp, Z., Clark, R.G., Parmley, E.J., Leighton, F.A., Waldner, C.,
+Soos, C. (2017) The ecology of avian influenza viruses in wild dabbling
+ducks (Anas spp.) in Canada. PLoS ONE 12: e0176297. <a
+href="https://doi.org/10.1371/journal.pone.0176297"
+class="uri">https://doi.org/10.1371/journal.pone.0176297</a>.</p>
 </blockquote>
 <pre class="r"><code>aiv &lt;- read.csv(&quot;../donnees/aiv_ducks.csv&quot;)
 str(aiv)</code></pre>
@@ -279,33 +274,70 @@ str(aiv)</code></pre>
 ##  $ Population_Density: num  1.2 1.16 1.16 1.16 1.16 ...</code></pre>
 <p>Here is the description of the data fields:</p>
 <ul>
-<li><em>Species</em>: Species code (ABDU = black duck, AGWT = green-winged teal, AMWI = American wigeon, BWTE = blue-winged teal, MALL = mallard, MBDH = black duck / mallard hybrid, NOPI = northern pintail)</li>
-<li><em>Age</em>: Age (HY = hatching year, AHY = after hatching year)</li>
+<li><em>Species</em>: Species code (ABDU = black duck, AGWT =
+green-winged teal, AMWI = American wigeon, BWTE = blue-winged teal, MALL
+= mallard, MBDH = black duck / mallard hybrid, NOPI = northern
+pintail)</li>
+<li><em>Age</em>: Age (HY = hatching year, AHY = after hatching
+year)</li>
 <li><em>Sex</em>: Sex (F/M)</li>
-<li><em>AIV</em>: Presence (1) or absence (0) of avian influenza virus</li>
+<li><em>AIV</em>: Presence (1) or absence (0) of avian influenza
+virus</li>
 <li><em>Site</em>: Sampling site</li>
-<li><em>Latitude</em> and <em>Longitude</em>: Geographical coordinates of the site</li>
+<li><em>Latitude</em> and <em>Longitude</em>: Geographical coordinates
+of the site</li>
 <li><em>Year</em>: Year of sampling</li>
-<li><em>Temperature</em>: Mean temperature in the 2 weeks prior to sampling</li>
-<li><em>Population_Density</em>: Estimated duck population density (all species) for the site and year.</li>
+<li><em>Temperature</em>: Mean temperature in the 2 weeks prior to
+sampling</li>
+<li><em>Population_Density</em>: Estimated duck population density (all
+species) for the site and year.</li>
 </ul>
 </div>
 <div id="fitting-the-model" class="section level2">
 <h2>1. Fitting the model</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>Estimate the parameters of a comprehensive model to predict the presence/absence of AIV, including: the fixed effects of duck age and sex, temperature, and site population density; and the random effects of species, site, year, and site x year interaction (the latter is denoted as <code>(1 | Site:Year)</code> in the model). Should we check for overdispersion in this model?</p></li>
-<li><p>What is the reason for including each of the random effects of the model in (a)? Check whether these random effects follow a normal distribution.</p></li>
-<li><p>Produce a graph of the model-predicted probability of occurrence of AIV in (a) as a function of temperature for each of the four age and sex categories (HY/F, HY/M, AHY/F, AHY/M). The population density will not appear in the graph, but you can set it to its mean value for the predictions.</p></li>
-<li><p>Starting from the full model, use the AIC to determine whether or not to include each of the following effects: temperature, population density, and the random effect for site x year interaction.</p></li>
-<li><p>The authors of the original study determined a significant effect of population density by fitting a model with random site and year effects, but without their interaction. Why might the conclusions of your model differ from this result?</p></li>
+<li><p>Estimate the parameters of a comprehensive model to predict the
+presence/absence of AIV, including: the fixed effects of duck age and
+sex, temperature, and site population density; and the random effects of
+species, site, year, and site x year interaction (the latter is denoted
+as <code>(1 | Site:Year)</code> in the model). Should we check for
+overdispersion in this model?</p></li>
+<li><p>What is the reason for including each of the random effects of
+the model in (a)? Check whether these random effects follow a normal
+distribution.</p></li>
+<li><p>Produce a graph of the model-predicted probability of occurrence
+of AIV in (a) as a function of temperature for each of the four age and
+sex categories (HY/F, HY/M, AHY/F, AHY/M). The population density will
+not appear in the graph, but you can set it to its mean value for the
+predictions.</p></li>
+<li><p>Starting from the full model, use the AIC to determine whether or
+not to include each of the following effects: temperature, population
+density, and the random effect for site x year interaction.</p></li>
+<li><p>The authors of the original study determined a significant effect
+of population density by fitting a model with random site and year
+effects, but without their interaction. Why might the conclusions of
+your model differ from this result?</p></li>
 </ol>
 </div>
 <div id="model-predictions" class="section level2">
 <h2>2. Model predictions</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>Add columns to the original dataset representing the prediction of the probability of occurrence of AIV (1) based only on the fixed effects of the model; (2) based on both fixed and random effects. Use the best model identified in the previous section.</p></li>
-<li><p>For each type of prediction obtained (fixed effects; fixed and random effects), determine the predicted mean probability of occurrence of AIV for observations with AIV = 1 and the predicted mean probability of occurrence for observations with A AIV = 0. Based on your results, do the model’s fixed effects provide a good distinction between presence and absence? What about random effects?</p></li>
-<li><p>Group the dataset by site and year, then calculate the mean longitude, latitude, and probability of AIV predicted by the full model for each site-year combination. Using these variables, produce a map of the sites with their predicted probability of AIV for each year. (You can use the facets in <em>ggplot2</em> to separate the graph into panels for each year).</p></li>
+<li><p>Add columns to the original dataset representing the prediction
+of the probability of occurrence of AIV (1) based only on the fixed
+effects of the model; (2) based on both fixed and random effects. Use
+the best model identified in the previous section.</p></li>
+<li><p>For each type of prediction obtained (fixed effects; fixed and
+random effects), determine the predicted mean probability of occurrence
+of AIV for observations with AIV = 1 and the predicted mean probability
+of occurrence for observations with A AIV = 0. Based on your results, do
+the model’s fixed effects provide a good distinction between presence
+and absence? What about random effects?</p></li>
+<li><p>Group the dataset by site and year, then calculate the mean
+longitude, latitude, and probability of AIV predicted by the full model
+for each site-year combination. Using these variables, produce a map of
+the sites with their predicted probability of AIV for each year. (You
+can use the facets in <em>ggplot2</em> to separate the graph into panels
+for each year).</p></li>
 </ol>
 </div>
 
@@ -320,7 +352,7 @@ str(aiv)</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -338,7 +370,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -347,6 +379,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')
@@ -359,7 +394,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
