@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Answers for this lab must be submitted on Moodle before March 10th at 5pm.
+Answers for this lab must be submitted on Moodle before March 25th at 5pm.
 
 ## Data
 

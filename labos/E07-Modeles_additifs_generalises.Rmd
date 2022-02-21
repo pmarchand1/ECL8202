@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Ce laboratoire doit être remis le 10 mars à 17h sur Moodle.
+Ce laboratoire doit être remis le 25 mars à 17h sur Moodle.
 
 ## Données
 

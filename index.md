@@ -18,6 +18,8 @@ title: "ECL8202 - Analyses des données complexes"
 
 6. [Modèles linéaires généralisés à effets mixtes 2](notes_cours/06-Modeles_generalises_mixtes2.html) ([PDF](notes_cours/06-Modeles_generalises_mixtes2.pdf)) - Données: [acer_transplant.csv](donnees/acer_transplant.csv)
 
+7. [Modèles additifs généralisés](notes_cours/07-Modeles_additifs_generalises.html) ([PDF](notes_cours/07-Modeles_additifs_generalises.pdf))
+
 
 ## Exercices
 
@@ -34,4 +36,8 @@ Labo évalué: [Tests de randomisation et bootstrap](labos/E02-Tests_randomisati
 5. [Modèles linéaires généralisés à effets mixtes (solutions)](labos/05R-Modeles_generalises_mixtes.html) ([PDF](labos/05R-Modeles_generalises_mixtes.pdf)) - Données: [portal_surveys.csv](donnees/portal_surveys.csv), [portal_species.csv](donnees/portal_species.csv), [portal_plots.csv](donnees/portal_plots.csv)
 
 6. Labo évalué: [Modèles linéaires généralisés à effets mixtes 2](labos/E06-Modeles_generalises_mixtes2.html) ([PDF](labos/E06-Modeles_generalises_mixtes2.pdf)) - Données: [aiv_ducks.csv](donnees/aiv_ducks.csv)
+
+7. [Modèles additifs généralisés](labos/07-Modeles_additifs_generalises.html) ([PDF](labos/07-Modeles_additifs_generalises.pdf)) - Données: [dendro_wa082.csv](donnees/dendro_wa082.csv)
+
+Labo évalué: [Modèles additifs généralisés](labos/E07-Modeles_additifs_generalises.html) ([PDF](labos/E07-Modeles_additifs_generalises.pdf)) - Données: [portal_ot.csv](donnees/portal_ot.csv)
 

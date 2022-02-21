@@ -13,12 +13,22 @@
 
 <title>Generalized additive models</title>
 
-<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -26,12 +36,16 @@
 <link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -44,32 +58,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -79,10 +68,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -99,6 +84,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -111,7 +99,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -237,7 +224,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -248,7 +235,7 @@ div.tocify {
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -257,10 +244,16 @@ div.tocify {
 </div>
 
 
-<p>Answers for this lab must be submitted on Moodle before March 10th at 5pm.</p>
+<p>Answers for this lab must be submitted on Moodle before March 25th at
+5pm.</p>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>The file <a href="../donnees/portal_ot.csv">portal_ot.csv</a> is a subset of the Portal database (used for labs 2 and 5) which contains the number of observed individuals (<em>n</em>) of the species <em>Onychomys torridus</em> (southern grasshopper mouse) in each plot for the years 1988 to 2002. Each plot was subjected to a treatment (<em>plot_type</em>) to exclude some or all rodents from the plot.</p>
+<p>The file <a href="../donnees/portal_ot.csv">portal_ot.csv</a> is a
+subset of the Portal database (used for labs 2 and 5) which contains the
+number of observed individuals (<em>n</em>) of the species <em>Onychomys
+torridus</em> (southern grasshopper mouse) in each plot for the years
+1988 to 2002. Each plot was subjected to a treatment
+(<em>plot_type</em>) to exclude some or all rodents from the plot.</p>
 <pre class="r"><code>portal_ot &lt;- read.csv(&quot;../donnees/portal_ot.csv&quot;)
 portal_ot$plot_type &lt;- as.factor(portal_ot$plot_type)
 portal_ot$plot_id &lt;- as.factor(portal_ot$plot_id)
@@ -272,25 +265,60 @@ head(portal_ot)</code></pre>
 ## 4         OT       1 1991 3 Spectab exclosure
 ## 5         OT       1 1992 3 Spectab exclosure
 ## 6         OT       1 1993 1 Spectab exclosure</code></pre>
-<p><em>Note</em>: As indicated in the code above, the <code>plot_type</code> and <code>plot_id</code> categorical variables must be converted to factors before adjusting a GAM.</p>
+<p><em>Note</em>: As indicated in the code above, the
+<code>plot_type</code> and <code>plot_id</code> categorical variables
+must be converted to factors before adjusting a GAM.</p>
 </div>
-<div id="estimating-the-overall-population-trend" class="section level2">
+<div id="estimating-the-overall-population-trend"
+class="section level2">
 <h2>1. Estimating the overall population trend</h2>
-<p>For all questions in this section, you must fit a generalized additive model to estimate the demographic trend of the species taking into account the effect of treatments: <code>n ~ plot_type + s(year)</code>. For now, we will ignore the grouping of measurements in plots.</p>
+<p>For all questions in this section, you must fit a generalized
+additive model to estimate the demographic trend of the species taking
+into account the effect of treatments:
+<code>n ~ plot_type + s(year)</code>. For now, we will ignore the
+grouping of measurements in plots.</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>First fit a GAM where the observations follow a Poisson distribution. Briefly describe how the number of individuals varies by year and treatment. Considering the linkage function used for this model, what does the additivity of the <code>plot_type' and</code>s(year)` effects mean?</p></li>
-<li><p>Is the default value of the number of basis functions <span class="math inline">\(k\)</span> sufficient to represent <code>s(year)</code> in the model in (a)? If necessary, refit the model with a higher <span class="math inline">\(k\)</span>. What is the maximum value of <span class="math inline">\(k\)</span> you can use here?</p></li>
+<li><p>First fit a GAM where the observations follow a Poisson
+distribution. Briefly describe how the number of individuals varies by
+year and treatment. Considering the linkage function used for this
+model, what does the additivity of the
+<code>plot_type' and</code>s(year)` effects mean?</p></li>
+<li><p>Is the default value of the number of basis functions <span
+class="math inline">\(k\)</span> sufficient to represent
+<code>s(year)</code> in the model in (a)? If necessary, refit the model
+with a higher <span class="math inline">\(k\)</span>. What is the
+maximum value of <span class="math inline">\(k\)</span> you can use
+here?</p></li>
 <li><p>Is the data overdispersed with respect to your model?</p></li>
-<li><p>Fit a new GAM with the negative binomial distribution, specified as <code>family = "nb"</code> in the <code>gam</code> function. What is the estimate of the parameter <span class="math inline">\(\theta\)</span> for this model? Does the fit seem better than for the Poisson model? Are there still fit problems?</p></li>
+<li><p>Fit a new GAM with the negative binomial distribution, specified
+as <code>family = "nb"</code> in the <code>gam</code> function. What is
+the estimate of the parameter <span
+class="math inline">\(\theta\)</span> for this model? Does the fit seem
+better than for the Poisson model? Are there still fit
+problems?</p></li>
 </ol>
 </div>
 <div id="adding-a-plot-random-effect" class="section level2">
 <h2>2. Adding a plot random effect</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>From the negative binomial model in 1(d), include a random effect of plots on the intercept. Check the fit of the model, including the normality of the random effects and the presence or absence of overdispersion.</p></li>
-<li><p>Now fit a model with a random effect of plots on the mean demographic trend <code>s(year)</code>, using a term of type <code>bs = "fs"</code> as seen in the course. Compare this model to the model in (a) with the AIC. <em>Note</em>: The <em>AICcmodavg</em> package is not compatible with GAM, but you can calculate the AIC for each model with the <code>AIC</code> function.</p></li>
-<li><p>What is the fraction of deviance explained by the best model as determined in (b)?</p></li>
-<li><p>Finally, illustrate the estimated population trend for this species in each plot. To do so, add to the <code>portal_ot</code> dataset the values predicted by the best model in (b) and a 95% confidence interval, and then plot the observed data, the estimated temporal trends and their confidence intervals for each plot in the same graph.</p></li>
+<li><p>From the negative binomial model in 1(d), include a random effect
+of plots on the intercept. Check the fit of the model, including the
+normality of the random effects and the presence or absence of
+overdispersion.</p></li>
+<li><p>Now fit a model with a random effect of plots on the mean
+demographic trend <code>s(year)</code>, using a term of type
+<code>bs = "fs"</code> as seen in the course. Compare this model to the
+model in (a) with the AIC. <em>Note</em>: The <em>AICcmodavg</em>
+package is not compatible with GAM, but you can calculate the AIC for
+each model with the <code>AIC</code> function.</p></li>
+<li><p>What is the fraction of deviance explained by the best model as
+determined in (b)?</p></li>
+<li><p>Finally, illustrate the estimated population trend for this
+species in each plot. To do so, add to the <code>portal_ot</code>
+dataset the values predicted by the best model in (b) and a 95%
+confidence interval, and then plot the observed data, the estimated
+temporal trends and their confidence intervals for each plot in the same
+graph.</p></li>
 </ol>
 </div>
 
@@ -305,7 +333,7 @@ head(portal_ot)</code></pre>
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -323,7 +351,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -332,6 +360,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')
@@ -344,7 +375,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
