@@ -1,7 +1,6 @@
 ---
 title: "Generalized additive models - Solutions"
 output:
-    pdf_document:
     html_document:
         self_contained: false
         lib_dir: libs
@@ -71,14 +70,14 @@ The annual growth of a tree depends on both intrinsic (e.g. age and current size
 
 ```{r, message = FALSE, warning = FALSE}
 library(mgcv)
-wa_gam <- gam(log(bai) ~ log(ba) + s(age), data = wa)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age), data = wa, method = "REML")
 gam.check(wa_gam)
 ```
 
 The $k$ diagnostic test gives a significant result with an `edf` close to the chosen $k$. In this case, it is useful to increase the value of $k$ so that the test is no longer significant.
 
 ```{r, message = FALSE, warning = FALSE}
-wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa, method = "REML")
 gam.check(wa_gam)
 ```
 
@@ -94,7 +93,7 @@ The growth rate decreases with the age of the tree.
 
 ```{r, message = FALSE, warning = FALSE}
 wa$tree <- as.factor(wa$tree)
-wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = "re"), data = wa)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = "re"), data = wa, method = "REML")
 gam.check(wa_gam)
 ```
 
@@ -120,10 +119,10 @@ According to the adjusted $R^2$, about 87% of the variance of the BAI is explain
 ```{r}
 wa$year_fac <- as.factor(wa$year)
 wa_gam2 <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year) + 
-                   s(tree, bs = "re"), data = wa)
+                   s(tree, bs = "re"), data = wa, method = "REML")
 plot(wa_gam2, pages = 1)
 wa_gam3 <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year_fac, bs = "re") +
-                   s(tree, bs = "re"), data = wa)
+                   s(tree, bs = "re"), data = wa, method = "REML")
 plot(wa_gam3, pages = 1)
 ```
 

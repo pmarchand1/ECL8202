@@ -13,12 +13,22 @@
 
 <title>Generalized additive models - Solutions</title>
 
-<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -26,12 +36,16 @@
 <link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -44,32 +58,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -79,10 +68,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -99,6 +84,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -111,7 +99,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -237,7 +224,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -248,18 +235,26 @@ div.tocify {
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
-<h1 class="title toc-ignore">Generalized additive models - Solutions</h1>
+<h1 class="title toc-ignore">Generalized additive models -
+Solutions</h1>
 
 </div>
 
 
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>The <a href="../donnees/dendro_wa082.csv">dendro_wa082.csv</a> dataset, based on the <em>wa082</em> dataset included in the <em>dplR</em> package, contains dendrochronological series of 23 Pacific silver firs (<em>Abies amabilis</em>) sampled in the state of Washington (northwestern USA). The first column represents the year and each other column represents the annual basal area increment (BAI) of a tree, as determined by tree rings. Missing values (<code>NA</code>) represent years prior to the formation of the first tree ring.</p>
+<p>The <a href="../donnees/dendro_wa082.csv">dendro_wa082.csv</a>
+dataset, based on the <em>wa082</em> dataset included in the
+<em>dplR</em> package, contains dendrochronological series of 23 Pacific
+silver firs (<em>Abies amabilis</em>) sampled in the state of Washington
+(northwestern USA). The first column represents the year and each other
+column represents the annual basal area increment (BAI) of a tree, as
+determined by tree rings. Missing values (<code>NA</code>) represent
+years prior to the formation of the first tree ring.</p>
 <pre class="r"><code>wa &lt;- read.csv(&quot;../donnees/dendro_wa082.csv&quot;)
 wa[1:5, 1:8]</code></pre>
 <pre><code>##   year X712011 X712012 X712021 X712022 X712031 X712032 X712041
@@ -272,7 +267,9 @@ wa[1:5, 1:8]</code></pre>
 <div id="data-preparation" class="section level2">
 <h2>1. Data preparation</h2>
 <ol style="list-style-type: lower-alpha">
-<li>Use the <code>pivot_longer</code> function of the <em>tidyr</em> package to transform <code>wa</code> in a table with three columns: year, tree and basal area increment (bai).</li>
+<li>Use the <code>pivot_longer</code> function of the <em>tidyr</em>
+package to transform <code>wa</code> in a table with three columns:
+year, tree and basal area increment (bai).</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>library(tidyr)
@@ -289,7 +286,11 @@ head(wa)</code></pre>
 ## 5  1702 X712101 12.4 
 ## 6  1702 X712122 28.9</code></pre>
 <ol start="2" style="list-style-type: lower-alpha">
-<li>Add columns to represent the age and basal area (cumulative growth) for each tree-year pair. With the <em>dplyr</em> package, you can sort the data by tree and year, group the data by tree, then calculate the age with <code>row_number</code> and the basal area with <code>cumsum</code> (cumulative sum).</li>
+<li>Add columns to represent the age and basal area (cumulative growth)
+for each tree-year pair. With the <em>dplyr</em> package, you can sort
+the data by tree and year, group the data by tree, then calculate the
+age with <code>row_number</code> and the basal area with
+<code>cumsum</code> (cumulative sum).</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>library(dplyr)
@@ -308,7 +309,8 @@ head(wa)</code></pre>
 ## 5  1815 X712011 58.5      5 166.  
 ## 6  1816 X712011 67.4      6 233.</code></pre>
 <ol start="3" style="list-style-type: lower-alpha">
-<li>Illustrate the growth series of each tree. It is recommended to show the logarithm of the basal area increment.</li>
+<li>Illustrate the growth series of each tree. It is recommended to show
+the logarithm of the basal area increment.</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>library(ggplot2)
@@ -318,73 +320,98 @@ ggplot(wa, aes(x = year, y = log(bai), color = tree)) +
 </div>
 <div id="growth-according-to-age-and-basal-area" class="section level2">
 <h2>2. Growth according to age and basal area</h2>
-<p>The annual growth of a tree depends on both intrinsic (e.g. age and current size of the tree) and extrinsic factors, including climatic conditions. In order to isolate the effect of climate on growth, it is therefore necessary to remove from the growth series the trend due to the age and size of each tree. Here we will use a GAM to estimate this trend, with a form of the model similar to that proposed in the study by Girardin et al. (2016).</p>
+<p>The annual growth of a tree depends on both intrinsic (e.g. age and
+current size of the tree) and extrinsic factors, including climatic
+conditions. In order to isolate the effect of climate on growth, it is
+therefore necessary to remove from the growth series the trend due to
+the age and size of each tree. Here we will use a GAM to estimate this
+trend, with a form of the model similar to that proposed in the study by
+Girardin et al. (2016).</p>
 <ol style="list-style-type: lower-alpha">
-<li>Fit an additive model with the formula <code>log(bai) ~ log(ba) + s(age)</code>, where <em>bai</em> is the basal area increment of the year and <em>ba</em> is the basal area. Make sure that the <span class="math inline">\(k\)</span> parameter of the spline is high enough. How do you interpret the coefficient of <code>log(ba)</code>? How do you (briefly) describe the effect of age?</li>
+<li>Fit an additive model with the formula
+<code>log(bai) ~ log(ba) + s(age)</code>, where <em>bai</em> is the
+basal area increment of the year and <em>ba</em> is the basal area. Make
+sure that the <span class="math inline">\(k\)</span> parameter of the
+spline is high enough. How do you interpret the coefficient of
+<code>log(ba)</code>? How do you (briefly) describe the effect of
+age?</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>library(mgcv)
-wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age), data = wa)
+wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age), data = wa, method = &quot;REML&quot;)
 gam.check(wa_gam)</code></pre>
 <p><img src="07RE-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <pre><code>## 
-## Method: GCV   Optimizer: magic
-## Smoothing parameter selection converged after 8 iterations.
-## The RMS GCV score gradient at convergence was 3.33104e-07 .
-## The Hessian was positive definite.
+## Method: REML   Optimizer: outer newton
+## full convergence after 6 iterations.
+## Gradient range [-0.002176761,0.001913562]
+## (score 2379.275 &amp; scale 0.1645973).
+## Hessian positive definite, eigenvalue range [3.740538,2266.509].
 ## Model rank =  11 / 11 
 ## 
 ## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
 ## indicate that k is too low, especially if edf is close to k&#39;.
 ## 
 ##          k&#39;  edf k-index p-value    
-## s(age) 9.00 8.97    0.94  &lt;2e-16 ***
+## s(age) 9.00 8.92    0.94  &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>The <span class="math inline">\(k\)</span> diagnostic test gives a significant result with an <code>edf</code> close to the chosen <span class="math inline">\(k\)</span>. In this case, it is useful to increase the value of <span class="math inline">\(k\)</span> so that the test is no longer significant.</p>
-<pre class="r"><code>wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa)
+<p>The <span class="math inline">\(k\)</span> diagnostic test gives a
+significant result with an <code>edf</code> close to the chosen <span
+class="math inline">\(k\)</span>. In this case, it is useful to increase
+the value of <span class="math inline">\(k\)</span> so that the test is
+no longer significant.</p>
+<pre class="r"><code>wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa, method = &quot;REML&quot;)
 gam.check(wa_gam)</code></pre>
 <p><img src="07RE-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <pre><code>## 
-## Method: GCV   Optimizer: magic
-## Smoothing parameter selection converged after 7 iterations.
-## The RMS GCV score gradient at convergence was 8.075291e-07 .
-## The Hessian was positive definite.
+## Method: REML   Optimizer: outer newton
+## full convergence after 5 iterations.
+## Gradient range [-3.704099e-08,1.570066e-08]
+## (score 2313.319 &amp; scale 0.1583401).
+## Hessian positive definite, eigenvalue range [7.664169,2266.557].
 ## Model rank =  31 / 31 
 ## 
 ## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
 ## indicate that k is too low, especially if edf is close to k&#39;.
 ## 
 ##          k&#39;  edf k-index p-value
-## s(age) 29.0 26.5    0.99    0.17</code></pre>
+## s(age) 29.0 23.7    0.98    0.15</code></pre>
 <pre class="r"><code>plot(wa_gam, pages = 1)</code></pre>
 <p><img src="07RE-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>The growth rate decreases with the age of the tree.</p>
 <ol start="2" style="list-style-type: lower-alpha">
-<li>Now add a random effect of the tree on the intercept of the model in (a). Check the fit of the model, including the normality of the random effects. What is the fraction of the variance of <code>log(bai)</code> explained by this model?</li>
+<li>Now add a random effect of the tree on the intercept of the model in
+(a). Check the fit of the model, including the normality of the random
+effects. What is the fraction of the variance of <code>log(bai)</code>
+explained by this model?</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>wa$tree &lt;- as.factor(wa$tree)
-wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = &quot;re&quot;), data = wa)
+wa_gam &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = &quot;re&quot;), data = wa, method = &quot;REML&quot;)
 gam.check(wa_gam)</code></pre>
 <p><img src="07RE-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <pre><code>## 
-## Method: GCV   Optimizer: magic
-## Smoothing parameter selection converged after 11 iterations.
-## The RMS GCV score gradient at convergence was 5.633129e-07 .
-## The Hessian was positive definite.
+## Method: REML   Optimizer: outer newton
+## full convergence after 5 iterations.
+## Gradient range [-0.0004022263,0.0003553361]
+## (score 1860.646 &amp; scale 0.1267303).
+## Hessian positive definite, eigenvalue range [8.990974,2266.619].
 ## Model rank =  54 / 54 
 ## 
 ## Basis dimension (k) checking results. Low p-value (k-index&lt;1) may
 ## indicate that k is too low, especially if edf is close to k&#39;.
 ## 
 ##           k&#39;  edf k-index p-value
-## s(age)  29.0 27.6    1.06       1
-## s(tree) 23.0 21.7      NA      NA</code></pre>
-<p>Except for the portion to the left of -0.6 on the <span class="math inline">\(x\)</span> axis, the residuals approximately follow a normal distribution.</p>
+## s(age)  29.0 25.6    1.06       1
+## s(tree) 23.0 21.5      NA      NA</code></pre>
+<p>Except for the portion to the left of -0.6 on the <span
+class="math inline">\(x\)</span> axis, the residuals approximately
+follow a normal distribution.</p>
 <pre class="r"><code>plot(wa_gam, pages = 1)</code></pre>
 <p><img src="07RE-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
-<p>Random effects deviate slightly from normal for the smallest values (bottom left).</p>
+<p>Random effects deviate slightly from normal for the smallest values
+(bottom left).</p>
 <pre class="r"><code>summary(wa_gam)</code></pre>
 <pre><code>## 
 ## Family: gaussian 
@@ -395,49 +422,61 @@ gam.check(wa_gam)</code></pre>
 ## 
 ## Parametric coefficients:
 ##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  -4.6166     0.1883  -24.52   &lt;2e-16 ***
-## log(ba)       1.0698     0.0181   59.12   &lt;2e-16 ***
+## (Intercept) -4.48838    0.18094  -24.81   &lt;2e-16 ***
+## log(ba)      1.05700    0.01763   59.96   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Approximate significance of smooth terms:
 ##           edf Ref.df     F p-value    
-## s(age)  27.59  28.76 73.96  &lt;2e-16 ***
-## s(tree) 21.69  22.00 51.27  &lt;2e-16 ***
+## s(age)  25.63  27.92 76.55  &lt;2e-16 ***
+## s(tree) 21.49  22.00 50.60  &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## R-sq.(adj) =  0.872   Deviance explained = 87.4%
-## GCV = 0.12806  Scale est. = 0.12661   n = 4536</code></pre>
-<p>According to the adjusted <span class="math inline">\(R^2\)</span>, about 87% of the variance of the BAI is explained by this model.</p>
+## -REML = 1860.6  Scale est. = 0.12673   n = 4536</code></pre>
+<p>According to the adjusted <span class="math inline">\(R^2\)</span>,
+about 87% of the variance of the BAI is explained by this model.</p>
 <ol start="3" style="list-style-type: lower-alpha">
-<li>Compare two ways of including interannual growth variation in the model in (b): (1) a spline by year (with year as a numerical variable) or (2) a random effect of year (with year as a factor) on the intercept. What are the differences between the assumptions of the two versions of the model?</li>
+<li>Compare two ways of including interannual growth variation in the
+model in (b): (1) a spline by year (with year as a numerical variable)
+or (2) a random effect of year (with year as a factor) on the intercept.
+What are the differences between the assumptions of the two versions of
+the model?</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>wa$year_fac &lt;- as.factor(wa$year)
 wa_gam2 &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year) + 
-                   s(tree, bs = &quot;re&quot;), data = wa)
+                   s(tree, bs = &quot;re&quot;), data = wa, method = &quot;REML&quot;)
 plot(wa_gam2, pages = 1)</code></pre>
 <p><img src="07RE-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <pre class="r"><code>wa_gam3 &lt;- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year_fac, bs = &quot;re&quot;) +
-                   s(tree, bs = &quot;re&quot;), data = wa)
+                   s(tree, bs = &quot;re&quot;), data = wa, method = &quot;REML&quot;)
 plot(wa_gam3, pages = 1)</code></pre>
 <p><img src="07RE-Modeles_additifs_generalises_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
-<p>The term <code>s(year)</code> indicates that the average growth varies continuously and non-linearly with the year of the ring, so it cannot vary “abruptly” from one year to the next.</p>
-<p>A random year effect (taken as a factor) means that the interannual variations come from a normal distribution, but there is no constraint that years close together have a similar effect.</p>
+<p>The term <code>s(year)</code> indicates that the average growth
+varies continuously and non-linearly with the year of the ring, so it
+cannot vary “abruptly” from one year to the next.</p>
+<p>A random year effect (taken as a factor) means that the interannual
+variations come from a normal distribution, but there is no constraint
+that years close together have a similar effect.</p>
 <ol start="4" style="list-style-type: lower-alpha">
-<li>With the function <code>predict(..., type = "terms")</code>, we can obtain the contribution of each term in the model to the predicted response. Use this method to illustrate the random year effects estimated for the second model in (c).</li>
+<li>With the function <code>predict(..., type = "terms")</code>, we can
+obtain the contribution of each term in the model to the predicted
+response. Use this method to illustrate the random year effects
+estimated for the second model in (c).</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>wa_pred &lt;- as.data.frame(predict(wa_gam3, type = &quot;terms&quot;))
 head(wa_pred)</code></pre>
-<pre><code>##    log(ba)   s(age) s(year_fac)     s(tree)
-## 1 2.154846 4.318109  0.16692648 -0.09191234
-## 2 3.543452 4.082687  0.11482261 -0.09191234
-## 3 4.401851 3.848813  0.08749526 -0.09191234
-## 4 5.051727 3.618789  0.20494460 -0.09191234
-## 5 5.521118 3.395505  0.11918325 -0.09191234
-## 6 5.889021 3.182077  0.19920168 -0.09191234</code></pre>
+<pre><code>##    log(ba)   s(age) s(year_fac)    s(tree)
+## 1 2.125729 4.183970  0.17187951 -0.1028175
+## 2 3.495571 3.963411  0.11955750 -0.1028175
+## 3 4.342371 3.744199  0.09155797 -0.1028175
+## 4 4.983465 3.528336  0.21191525 -0.1028175
+## 5 5.446513 3.318353  0.12360307 -0.1028175
+## 6 5.809445 3.116985  0.20527496 -0.1028175</code></pre>
 <pre class="r"><code>wa_pred$year &lt;- wa$year
 ggplot(wa_pred, aes(x = year, y = `s(year_fac)`)) +
     geom_line()</code></pre>
@@ -445,7 +484,9 @@ ggplot(wa_pred, aes(x = year, y = `s(year_fac)`)) +
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
-<p>Girardin, M.P. et al. (2016) No growth stimulation of Canada’s boreal forest under half-century of combined warming and CO2 fertilization. PNAS 113, E8406-E8414.</p>
+<p>Girardin, M.P. et al. (2016) No growth stimulation of Canada’s boreal
+forest under half-century of combined warming and CO2 fertilization.
+PNAS 113, E8406-E8414.</p>
 </div>
 
 
@@ -459,7 +500,7 @@ ggplot(wa_pred, aes(x = year, y = `s(year_fac)`)) +
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -477,7 +518,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -486,6 +527,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')
@@ -498,7 +542,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

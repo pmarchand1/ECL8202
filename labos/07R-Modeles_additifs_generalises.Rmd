@@ -70,14 +70,14 @@ La croissance annuelle d'un arbre dépend de facteurs intrinsèques (ex.: âge e
 
 ```{r, message = FALSE, warning = FALSE}
 library(mgcv)
-wa_gam <- gam(log(bai) ~ log(ba) + s(age), data = wa)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age), data = wa, method = "REML")
 gam.check(wa_gam)
 ```
 
 Le test diagnostic de $k$ donne un résultat significatif avec un `edf` proche du $k$ choisi. Dans ce cas, il est utile d'augmenter la valeur de $k$ suffisamment pour que le test ne soit plus significatif.
 
 ```{r, message = FALSE, warning = FALSE}
-wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30), data = wa, method = "REML")
 gam.check(wa_gam)
 ```
 
@@ -93,7 +93,7 @@ Le taux de croissance diminue avec l'âge de l'arbre.
 
 ```{r, message = FALSE, warning = FALSE}
 wa$tree <- as.factor(wa$tree)
-wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = "re"), data = wa)
+wa_gam <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(tree, bs = "re"), data = wa, method = "REML")
 gam.check(wa_gam)
 ```
 
@@ -119,10 +119,10 @@ Selon le $R^2$ ajusté, environ 87% de la variance de croissance en surface terr
 ```{r}
 wa$year_fac <- as.factor(wa$year)
 wa_gam2 <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year) + 
-                   s(tree, bs = "re"), data = wa)
+                   s(tree, bs = "re"), data = wa, method = "REML")
 plot(wa_gam2, pages = 1)
 wa_gam3 <- gam(log(bai) ~ log(ba) + s(age, k = 30) + s(year_fac, bs = "re") +
-                   s(tree, bs = "re"), data = wa)
+                   s(tree, bs = "re"), data = wa, method = "REML")
 plot(wa_gam3, pages = 1)
 ```
 
