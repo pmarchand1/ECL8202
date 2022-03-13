@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Answers for this lab must be submitted on Moodle before March 31st at 5pm.
+Answers for this lab must be submitted on Moodle before April 8th at 5pm.
 
 > **Tip**: In RMarkdown you can add the argument `cache = TRUE` to a block of code (`{r, cache = TRUE}`) to save the result of the block. In this case, as long as the code remains the same, the calculation is not repeated every time the RMarkdown document is compiled. This function is especially useful for time-consuming operations, such as fitting a Bayesian model with `brm`.
 
@@ -76,6 +76,8 @@ Due to the large number of estimated effects and the fact that we impose only we
 
 c) Now fit the model with `brm`. You can reduce the number of Markov chains to 2 to save time, but keep the default values for the number of iterations. (You can ignore the warning that the effective sample size or ESS is small.) How can you assess the convergence of the model?
 
+d) Compare the magnitude of the coefficients of `gdp_norm` and `dyear` to the magnitude of the random effects of country on those coefficients. What do you learn from that comparison?
+
 
 ## 2. Robust regression with the $t$ distribution
 
@@ -87,6 +89,4 @@ Keep the same prior distributions for all parameters of the model. Let `brm` cho
 
 b) Describe the main differences between the parameter estimates from this model, compared with those of the model in part 1.
 
-c) Compare the fit of the two models with the PSIS-LOO method. In the context of this assignment, you can ignore the high values of $k$ (in practice, cross-validation should be performed with `reloo = TRUE`).
-
-d) Apply `predict` to the fitted model to obtain the mean, standard deviation and 95%  credibility interval for the posterior prediction for each point in the data frame and attach these predictions to the original data set with `cbind`. Select a few countries from the dataset and illustrate the observations, predictions of the two models and their credibility intervals.
+c) Apply `predict` to the two models to obtain the mean, standard deviation and 95%  credibility interval for the posterior prediction for each point in the data frame and attach these predictions to the original data set with `cbind`. Select a few countries from the dataset and illustrate the observations, predictions of the two models and their credibility intervals.

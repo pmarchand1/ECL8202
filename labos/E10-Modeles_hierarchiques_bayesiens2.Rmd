@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Ce laboratoire doit être remis le 31 mars à 17h sur Moodle.
+Ce laboratoire doit être remis le 8 avril à 17h sur Moodle.
 
 > **Truc**: Dans RMarkdown, vous pouvez ajouter l'argument `cache = TRUE` à un bloc de code (`{r, cache = TRUE}`) pour enregistrer le résultat du bloc. Dans ce cas, tant que le code reste le même, le calcul n'est pas répété à chaque compilation du document RMarkdown. Cette fonction est particulièrement utile pour les opérations qui prennent beaucoup de temps, comme l'ajustement d'un modèle bayésien avec `brm`.
 
@@ -76,6 +76,8 @@ En raison du grand nombre d'effets estimés et du fait que nous n'imposons que d
 
 c) Ajustez maintenant le modèle avec `brm`. Vous pouvez réduire le nombre de chaînes de Markov à 2 pour sauver du temps, mais conservez les valeurs par défaut pour le nombre d'itérations. (Vous pouvez ignorer l'avertissement selon lequel la taille effective de l'échantillon ou ESS est faible.) Comment pouvez-vous évaluer la convergence du modèle?
 
+d) Comparez la magnitude des coefficients de `gdp_norm` et `dyear` à celle des effets aléatoires du pays sur ces coefficients. Qu'est-ce que cette comparaison vous apprend?
+
 
 ## 2. Régression robuste avec la distribution $t$
 
@@ -87,9 +89,7 @@ Conservez les mêmes distributions *a priori* pour tous les paramètres du modè
 
 b) Décrivez les principales différences entre les estimés des paramètres de ce modèle, comparés à ceux du modèle en 1.
 
-c) Comparez l'ajustement des deux modèles avec la méthode PSIS-LOO. Dans le contexte de ce devoir, vous pouvez ignorer les valeurs élevées de $k$ (dans la pratique, il faudrait effectuer la validation croisée avec `reloo = TRUE`).
-
-d) Appliquez `predict` au modèle ajusté pour obtenir la moyenne, l'écart-type et l'intervalle à 95% pour la prédiction *a posteriori* de chaque point du tableau de données et rattachez ces prédictions au jeu de données original avec `cbind`. Choisissez quelques pays du jeu de données et illustrez les observations, les prédictions des deux modèles et leurs intervalles de crédibilité.
+c) Appliquez `predict` aux deux modèles pour obtenir la moyenne, l'écart-type et l'intervalle à 95% pour la prédiction *a posteriori* de chaque point du tableau de données et rattachez ces prédictions au jeu de données original avec `cbind`. Choisissez quelques pays du jeu de données et illustrez les observations, les prédictions des deux modèles et leurs intervalles de crédibilité.
 
 
 

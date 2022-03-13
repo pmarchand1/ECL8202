@@ -13,12 +13,22 @@
 
 <title>Modèles hiérarchiques bayésiens 2</title>
 
-<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -26,12 +36,16 @@
 <link href="libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="libs/highlightjs-9.12.0/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -44,32 +58,7 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
+
 
 
 
@@ -79,10 +68,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -99,6 +84,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -111,7 +99,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -237,7 +224,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -248,7 +235,7 @@ div.tocify {
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -257,13 +244,24 @@ div.tocify {
 </div>
 
 
-<p>Ce laboratoire doit être remis le 31 mars à 17h sur Moodle.</p>
+<p>Ce laboratoire doit être remis le 8 avril à 17h sur Moodle.</p>
 <blockquote>
-<p><strong>Truc</strong>: Dans RMarkdown, vous pouvez ajouter l’argument <code>cache = TRUE</code> à un bloc de code (<code>{r, cache = TRUE}</code>) pour enregistrer le résultat du bloc. Dans ce cas, tant que le code reste le même, le calcul n’est pas répété à chaque compilation du document RMarkdown. Cette fonction est particulièrement utile pour les opérations qui prennent beaucoup de temps, comme l’ajustement d’un modèle bayésien avec <code>brm</code>.</p>
+<p><strong>Truc</strong>: Dans RMarkdown, vous pouvez ajouter l’argument
+<code>cache = TRUE</code> à un bloc de code
+(<code>{r, cache = TRUE}</code>) pour enregistrer le résultat du bloc.
+Dans ce cas, tant que le code reste le même, le calcul n’est pas répété
+à chaque compilation du document RMarkdown. Cette fonction est
+particulièrement utile pour les opérations qui prennent beaucoup de
+temps, comme l’ajustement d’un modèle bayésien avec
+<code>brm</code>.</p>
 </blockquote>
 <div id="données" class="section level2">
 <h2>Données</h2>
-<p>Nous utiliserons le jeu de données <em>gapminder</em> présenté lors des exercices sur la régression robuste (labo 4). Ce tableau inclut l’espérance de vie (<em>lifeExp</em>), la population (<em>pop)</em> et le PIB par habitant (<em>gdpPercap</em>) pour 142 pays et 12 années (aux 5 ans entre 1952 et 2007).</p>
+<p>Nous utiliserons le jeu de données <em>gapminder</em> présenté lors
+des exercices sur la régression robuste (labo 4). Ce tableau inclut
+l’espérance de vie (<em>lifeExp</em>), la population (<em>pop)</em> et
+le PIB par habitant (<em>gdpPercap</em>) pour 142 pays et 12 années (aux
+5 ans entre 1952 et 2007).</p>
 <pre class="r"><code>library(gapminder)
 data(gapminder)
 str(gapminder)</code></pre>
@@ -276,23 +274,45 @@ str(gapminder)</code></pre>
 ##  $ gdpPercap: num [1:1704] 779 821 853 836 740 ...</code></pre>
 <p>Comme pour le labo 4, nous transformons d’abord les prédicteurs:</p>
 <ul>
-<li><p><em>gdp_norm</em> est le logarithme de <em>gdpPercap</em>, normalisé pour avoir une moyenne de 0 et un écart-type de 1.</p></li>
-<li><p><em>dyear</em> est le nombre d’années écoulées depuis 1952.</p></li>
+<li><p><em>gdp_norm</em> est le logarithme de <em>gdpPercap</em>,
+normalisé pour avoir une moyenne de 0 et un écart-type de 1.</p></li>
+<li><p><em>dyear</em> est le nombre d’années écoulées depuis
+1952.</p></li>
 </ul>
 <pre class="r"><code>library(dplyr)
 gapminder &lt;- mutate(gapminder, gdp_norm = scale(log(gdpPercap)), 
                     dyear = year - 1952)</code></pre>
 </div>
-<div id="modèle-bayésien-de-lespérance-de-vie-en-fonction-du-pib-et-du-temps" class="section level2">
-<h2>1. Modèle bayésien de l’espérance de vie en fonction du PIB et du temps</h2>
-<p>Dans le labo 4, nous avions d’abord effectué une régression linéaire de <code>lifeExp</code> en fonction de <code>gdp_norm</code>, <code>dyear</code> et leur interaction. Pour cette première partie, nous estimerons ces mêmes effets dans un contexte bayésien, en ajoutant des effets aléatoires du pays sur l’ordonnée à l’origine et sur les coefficients de <code>gdp_norm</code> et <code>dyear</code>.</p>
+<div
+id="modèle-bayésien-de-lespérance-de-vie-en-fonction-du-pib-et-du-temps"
+class="section level2">
+<h2>1. Modèle bayésien de l’espérance de vie en fonction du PIB et du
+temps</h2>
+<p>Dans le labo 4, nous avions d’abord effectué une régression linéaire
+de <code>lifeExp</code> en fonction de <code>gdp_norm</code>,
+<code>dyear</code> et leur interaction. Pour cette première partie, nous
+estimerons ces mêmes effets dans un contexte bayésien, en ajoutant des
+effets aléatoires du pays sur l’ordonnée à l’origine et sur les
+coefficients de <code>gdp_norm</code> et <code>dyear</code>.</p>
 <p><em>Notes</em>:</p>
 <ul>
-<li><p>La formule du modèle dans <code>brm</code> suit la même syntaxe que <code>lmer</code> pour la spécification des effets fixes et aléatoires.</p></li>
-<li><p>Bien qu’il serait possible d’ajouter un effet aléatoire du pays sur l’interaction <code>gdp_norm:dyear</code>, nous l’omettons ici afin de réduire le temps de calcul des modèles.</p></li>
+<li><p>La formule du modèle dans <code>brm</code> suit la même syntaxe
+que <code>lmer</code> pour la spécification des effets fixes et
+aléatoires.</p></li>
+<li><p>Bien qu’il serait possible d’ajouter un effet aléatoire du pays
+sur l’interaction <code>gdp_norm:dyear</code>, nous l’omettons ici afin
+de réduire le temps de calcul des modèles.</p></li>
 </ul>
 <ol style="list-style-type: lower-alpha">
-<li>Choisissez des distributions <em>a priori</em> pour les paramètres du modèle décrit ci-dessus. Voici un exemple de code où il ne manque que la spécification des distributions. Les quatre premières lignes définissent les distributions <em>a priori</em> pour l’ordonnée à l’origine et les coefficients des trois effets fixes, les trois suivantes définissent les distributions pour les écarts-types des effets aléatoires (<code>class = "sd"</code>), tandis que la dernière réfère à l’écart-type des observations individuelles (<code>class = "sigma"</code>).</li>
+<li>Choisissez des distributions <em>a priori</em> pour les paramètres
+du modèle décrit ci-dessus. Voici un exemple de code où il ne manque que
+la spécification des distributions. Les quatre premières lignes
+définissent les distributions <em>a priori</em> pour l’ordonnée à
+l’origine et les coefficients des trois effets fixes, les trois
+suivantes définissent les distributions pour les écarts-types des effets
+aléatoires (<code>class = "sd"</code>), tandis que la dernière réfère à
+l’écart-type des observations individuelles
+(<code>class = "sigma"</code>).</li>
 </ol>
 <pre class="r"><code>gap_prior &lt;- c(set_prior(&quot;&quot;, class = &quot;Intercept&quot;),
                set_prior(&quot;&quot;, class = &quot;b&quot;, coef = &quot;gdp_norm&quot;),
@@ -302,30 +322,87 @@ gapminder &lt;- mutate(gapminder, gdp_norm = scale(log(gdpPercap)),
                set_prior(&quot;&quot;, class = &quot;sd&quot;, coef = &quot;gdp_norm&quot;, group = &quot;country&quot;),
                set_prior(&quot;&quot;, class = &quot;sd&quot;, coef = &quot;dyear&quot;, group = &quot;country&quot;),
                set_prior(&quot;&quot;, class = &quot;sigma&quot;))</code></pre>
-<p>Il est recommandé de choisir des distributions normales dans tous les cas. Pour “sigma” et “sd”, ces distributions seront interprétées comme des demi-normales car il est sous-entendu que ces paramètres sont <span class="math inline">\(\geq 0\)</span>. Pour choisir la moyenne et l’écart-type de chaque distribution normale, considérez l’interprétation de chaque paramètre et en particulier les échelles des prédicteurs <code>gdp_norm</code> et <code>dyear</code>.</p>
+<p>Il est recommandé de choisir des distributions normales dans tous les
+cas. Pour “sigma” et “sd”, ces distributions seront interprétées comme
+des demi-normales car il est sous-entendu que ces paramètres sont <span
+class="math inline">\(\geq 0\)</span>. Pour choisir la moyenne et
+l’écart-type de chaque distribution normale, considérez l’interprétation
+de chaque paramètre et en particulier les échelles des prédicteurs
+<code>gdp_norm</code> et <code>dyear</code>.</p>
 <ul>
-<li><p>Pour l’effet de l’interaction, on peut supposer que celui-ci n’est pas plus fort que les effets principaux des deux prédicteurs, donc <code>gdp_norm:year</code> peut prendre la même distribution <em>a priori</em> que l’effet supposé le plus petit entre <code>gdp_norm</code> et <code>year</code>.</p></li>
-<li><p>Quant aux écarts-types des effets aléatoires (“sd”), leur distribution <em>a priori</em> peut avoir la même largeur que celle du coefficient “b” correspondant.</p></li>
+<li><p>Pour l’effet de l’interaction, on peut supposer que celui-ci
+n’est pas plus fort que les effets principaux des deux prédicteurs, donc
+<code>gdp_norm:year</code> peut prendre la même distribution <em>a
+priori</em> que l’effet supposé le plus petit entre
+<code>gdp_norm</code> et <code>year</code>.</p></li>
+<li><p>Quant aux écarts-types des effets aléatoires (“sd”), leur
+distribution <em>a priori</em> peut avoir la même largeur que celle du
+coefficient “b” correspondant.</p></li>
 </ul>
 <ol start="2" style="list-style-type: lower-alpha">
-<li>Tirez maintenant un échantillon de la distribution conjointe <em>a priori</em> des paramètres avec <code>brm</code>. Je suggère de spécifier <code>chains = 1, iter = 1500, warmup = 1000</code> pour produire une seule chaîne de Markov avec 1000 itérations de rodage et 500 itérations d’échantillonnage. Visualisez ensuite la distribution de <code>lifeExp</code> prédite pour chaque itération des paramètres <em>a priori</em>.</li>
+<li>Tirez maintenant un échantillon de la distribution conjointe <em>a
+priori</em> des paramètres avec <code>brm</code>. Je suggère de
+spécifier <code>chains = 1, iter = 1500, warmup = 1000</code> pour
+produire une seule chaîne de Markov avec 1000 itérations de rodage et
+500 itérations d’échantillonnage. Visualisez ensuite la distribution de
+<code>lifeExp</code> prédite pour chaque itération des paramètres <em>a
+priori</em>.</li>
 </ol>
-<p>En raison du grand nombre d’effets estimés et du fait que nous n’imposons que des contraintes légères sur chaque distribution <em>a priori</em>, on doit s’attendre à des valeurs extrêmes voire impossibles (grandes valeurs positives et négatives); l’important est que la densité soit plus grande dans une plage de valeurs réalistes. Il peut être utile de faire un “zoom” sur une partie du graphique <code>ggplot</code> en y ajoutant <code>coord_cartesian(xlim = c(..., ...), ylim = c(..., ...))</code> avec des limites en <span class="math inline">\(x\)</span> et <span class="math inline">\(y\)</span>.</p>
+<p>En raison du grand nombre d’effets estimés et du fait que nous
+n’imposons que des contraintes légères sur chaque distribution <em>a
+priori</em>, on doit s’attendre à des valeurs extrêmes voire impossibles
+(grandes valeurs positives et négatives); l’important est que la densité
+soit plus grande dans une plage de valeurs réalistes. Il peut être utile
+de faire un “zoom” sur une partie du graphique <code>ggplot</code> en y
+ajoutant
+<code>coord_cartesian(xlim = c(..., ...), ylim = c(..., ...))</code>
+avec des limites en <span class="math inline">\(x\)</span> et <span
+class="math inline">\(y\)</span>.</p>
 <ol start="3" style="list-style-type: lower-alpha">
-<li>Ajustez maintenant le modèle avec <code>brm</code>. Vous pouvez réduire le nombre de chaînes de Markov à 2 pour sauver du temps, mais conservez les valeurs par défaut pour le nombre d’itérations. (Vous pouvez ignorer l’avertissement selon lequel la taille effective de l’échantillon ou ESS est faible.) Comment pouvez-vous évaluer la convergence du modèle?</li>
+<li><p>Ajustez maintenant le modèle avec <code>brm</code>. Vous pouvez
+réduire le nombre de chaînes de Markov à 2 pour sauver du temps, mais
+conservez les valeurs par défaut pour le nombre d’itérations. (Vous
+pouvez ignorer l’avertissement selon lequel la taille effective de
+l’échantillon ou ESS est faible.) Comment pouvez-vous évaluer la
+convergence du modèle?</p></li>
+<li><p>Comparez la magnitude des coefficients de <code>gdp_norm</code>
+et <code>dyear</code> à celle des effets aléatoires du pays sur ces
+coefficients. Qu’est-ce que cette comparaison vous apprend?</p></li>
 </ol>
 </div>
-<div id="régression-robuste-avec-la-distribution-t" class="section level2">
-<h2>2. Régression robuste avec la distribution <span class="math inline">\(t\)</span></h2>
-<p>Dans le labo 4, nous avions vu qu’une régression robuste était préférable pour ce jeu de données. Afin de permettre des résidus plus extrêmes dans un contexte bayésien, nous allons remplacer la distribution normale pour les résidus par une distribution <span class="math inline">\(t\)</span> de Student.</p>
+<div id="régression-robuste-avec-la-distribution-t"
+class="section level2">
+<h2>2. Régression robuste avec la distribution <span
+class="math inline">\(t\)</span></h2>
+<p>Dans le labo 4, nous avions vu qu’une régression robuste était
+préférable pour ce jeu de données. Afin de permettre des résidus plus
+extrêmes dans un contexte bayésien, nous allons remplacer la
+distribution normale pour les résidus par une distribution <span
+class="math inline">\(t\)</span> de Student.</p>
 <ol style="list-style-type: lower-alpha">
-<li>Réajustez le modèle précédent en ajoutant l’argument <code>family = student</code> dans <code>brm</code>. Cet argument indique que les résidus normalisés par <code>sigma</code>, <span class="math inline">\((y - \hat{y})/\sigma\)</span>, suivent une distribution <span class="math inline">\(t\)</span> avec <span class="math inline">\(\nu\)</span> degrés de liberté.</li>
+<li>Réajustez le modèle précédent en ajoutant l’argument
+<code>family = student</code> dans <code>brm</code>. Cet argument
+indique que les résidus normalisés par <code>sigma</code>, <span
+class="math inline">\((y - \hat{y})/\sigma\)</span>, suivent une
+distribution <span class="math inline">\(t\)</span> avec <span
+class="math inline">\(\nu\)</span> degrés de liberté.</li>
 </ol>
-<p>Conservez les mêmes distributions <em>a priori</em> pour tous les paramètres du modèle. Laissez <code>brm</code> choisir une distribution <em>a priori</em> pour <span class="math inline">\(\nu\)</span> (<code>nu</code>). En appelant la fonction <code>prior_summary</code> à partir du modèle ajusté, pouvez-vous déterminer quelle est cette distribution <em>a priori</em> par défaut?</p>
+<p>Conservez les mêmes distributions <em>a priori</em> pour tous les
+paramètres du modèle. Laissez <code>brm</code> choisir une distribution
+<em>a priori</em> pour <span class="math inline">\(\nu\)</span>
+(<code>nu</code>). En appelant la fonction <code>prior_summary</code> à
+partir du modèle ajusté, pouvez-vous déterminer quelle est cette
+distribution <em>a priori</em> par défaut?</p>
 <ol start="2" style="list-style-type: lower-alpha">
-<li><p>Décrivez les principales différences entre les estimés des paramètres de ce modèle, comparés à ceux du modèle en 1.</p></li>
-<li><p>Comparez l’ajustement des deux modèles avec la méthode PSIS-LOO. Dans le contexte de ce devoir, vous pouvez ignorer les valeurs élevées de <span class="math inline">\(k\)</span> (dans la pratique, il faudrait effectuer la validation croisée avec <code>reloo = TRUE</code>).</p></li>
-<li><p>Appliquez <code>predict</code> au modèle ajusté pour obtenir la moyenne, l’écart-type et l’intervalle à 95% pour la prédiction <em>a posteriori</em> de chaque point du tableau de données et rattachez ces prédictions au jeu de données original avec <code>cbind</code>. Choisissez quelques pays du jeu de données et illustrez les observations, les prédictions des deux modèles et leurs intervalles de crédibilité.</p></li>
+<li><p>Décrivez les principales différences entre les estimés des
+paramètres de ce modèle, comparés à ceux du modèle en 1.</p></li>
+<li><p>Appliquez <code>predict</code> aux deux modèles pour obtenir la
+moyenne, l’écart-type et l’intervalle à 95% pour la prédiction <em>a
+posteriori</em> de chaque point du tableau de données et rattachez ces
+prédictions au jeu de données original avec <code>cbind</code>.
+Choisissez quelques pays du jeu de données et illustrez les
+observations, les prédictions des deux modèles et leurs intervalles de
+crédibilité.</p></li>
 </ol>
 </div>
 
@@ -340,7 +417,7 @@ gapminder &lt;- mutate(gapminder, gdp_norm = scale(log(gdpPercap)),
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
@@ -358,7 +435,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -367,6 +444,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')
@@ -379,7 +459,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
