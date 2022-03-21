@@ -26,6 +26,8 @@ title: "ECL8202 - Analyses des données complexes"
 
 10. [Modèles hiérarchiques bayésiens (supplément)](notes_cours/10-Modeles_hierarchiques_bayesiens2.html) ([PDF](notes_cours/10-Modeles_hierarchiques_bayesiens2.pdf)) - Données: [rikz.csv](donnees/rikz.csv)
 
+11. [Séries temporelles](notes_cours/11-Series_temporelles.html) ([PDF](notes_cours/11-Series_temporelles.pdf)) - Data: [sea_ice.txt](donnees/sea_ice.txt), [dendro_wa082.csv](donnees/dendro_wa082.csv)
+
 
 ## Exercices
 
@@ -52,4 +54,6 @@ Labo évalué: [Modèles additifs généralisés](labos/E07-Modeles_additifs_gen
 9. Labo évalué: [Modèles hiérarchiques bayésiens](labos/E10-Modeles_hierarchiques_bayesiens2.html) ([PDF](labos/E10-Modeles_hierarchiques_bayesiens2.pdf))
 
 10. Supplément: [Exemple de codage avec Stan](labos/09-Modeles_hierarchiques_bayesiens.html) ([PDF](labos/09-Modeles_hierarchiques_bayesiens.pdf)) - Data: [rikz.csv](donnees/rikz.csv)
+
+11. [Séries temporelles](labos/11-Series_temporelles.html) ([PDF](labos/11-Series_temporelles.pdf)) - Data: [oak_seeds.csv](donnees/oak_seeds.csv), [oak_weather.csv](donnees/oak_weather.csv)
 
