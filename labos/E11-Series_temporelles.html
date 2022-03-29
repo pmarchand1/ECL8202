@@ -13,12 +13,22 @@
 
 <title>Laboratoire évalué : séries temporelles</title>
 
-<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -36,11 +46,6 @@
     </style>
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -53,32 +58,6 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
 
 
 
@@ -89,10 +68,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -109,6 +84,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -121,7 +99,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -247,7 +224,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -258,25 +235,37 @@ div.tocify {
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
-<h1 class="title toc-ignore">Laboratoire évalué : séries temporelles</h1>
+<h1 class="title toc-ignore">Laboratoire évalué : séries
+temporelles</h1>
 
 </div>
 
 
-<p>Ce laboratoire devra être soumis sur Moodle le 21 avril.</p>
+<p>Ce laboratoire devra être soumis sur Moodle le 22 avril.</p>
 <div id="données" class="section level2">
 <h2>Données</h2>
-<p>Pour cet exercice, nous utiliserons les données d’une tour à flux située dans une forêt d’épinettes noires près de Chibougamau.</p>
+<p>Pour cet exercice, nous utiliserons les données d’une tour à flux
+située dans une forêt d’épinettes noires près de Chibougamau.</p>
 <blockquote>
-<p><strong>Référence bibliographique</strong>: Bergeron, Margolis, Black, Coursolle, Dunn, Barr, &amp; Wofsy. (2007). Comparison of carbon dioxide fluxes over three boreal black spruce forests in Canada. Global Change Biology, 13(1), 89–107. <a href="https://doi.org/10.1111/j.1365-2486.2006.01281.x" class="uri">https://doi.org/10.1111/j.1365-2486.2006.01281.x</a>.</p>
+<p><strong>Référence bibliographique</strong>: Bergeron, Margolis,
+Black, Coursolle, Dunn, Barr, &amp; Wofsy. (2007). Comparison of carbon
+dioxide fluxes over three boreal black spruce forests in Canada. Global
+Change Biology, 13(1), 89–107. <a
+href="https://doi.org/10.1111/j.1365-2486.2006.01281.x"
+class="uri">https://doi.org/10.1111/j.1365-2486.2006.01281.x</a>.</p>
 </blockquote>
-<p>Les tours à flux mesurent la productivité nette d’un écosystème et la quantité de gaz (CO2, H2O et CH4) échangée entre l’atmosphère et l’écosystème à l’aide de la méthode de covariance des tourbillons (<em>eddy covariance</em>).</p>
+<p>Les tours à flux mesurent la productivité nette d’un écosystème et la
+quantité de gaz (CO2, H2O et CH4) échangée entre l’atmosphère et
+l’écosystème à l’aide de la méthode de covariance des tourbillons
+(<em>eddy covariance</em>).</p>
 <blockquote>
-<p><strong>Weblink</strong>: <a href="https://www.battelleecology.org/data-collection/flux-tower-measurements" class="uri">https://www.battelleecology.org/data-collection/flux-tower-measurements</a></p>
+<p><strong>Weblink</strong>: <a
+href="https://www.battelleecology.org/data-collection/flux-tower-measurements"
+class="uri">https://www.battelleecology.org/data-collection/flux-tower-measurements</a></p>
 </blockquote>
 <p>Nous commencerons par charger les packages requis et les données.</p>
 <pre class="r"><code>library(fpp3)
@@ -296,26 +285,79 @@ head(EOBS_fluxnet)</code></pre>
 <ul>
 <li><p><em>Year</em> est l’année de l’observation</p></li>
 <li><p><em>Day</em> est le jour de l’année (1-365)</p></li>
-<li><p><em>GapFilled_NEP</em> est la productivité nette quotidienne de l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
-<li><p><em>GapFilled_R</em> est la respiration quotidienne de l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
-<li><p><em>GapFilled_GEP</em> est la productivité brute quotidienne de l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
-<li><p><em>TimeSteps</em> est un entier indiquant le nombre de données demi-horaires qui composent les moyennes quotidiennes</p></li>
+<li><p><em>GapFilled_NEP</em> est la productivité nette quotidienne de
+l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
+<li><p><em>GapFilled_R</em> est la respiration quotidienne de
+l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
+<li><p><em>GapFilled_GEP</em> est la productivité brute quotidienne de
+l’écosystème (<em>umol C m-2 of stand s-1</em>)</p></li>
+<li><p><em>TimeSteps</em> est un entier indiquant le nombre de données
+demi-horaires qui composent les moyennes quotidiennes</p></li>
 </ul>
 </div>
 <div id="modèle-arima-pour-le-nep" class="section level2">
 <h2>1. Modèle ARIMA pour le NEP</h2>
-<p>(1a) Créez un tableau de données temporelles (<em>tsibble</em>). Dans un premier temps, vous devez ajouter une colonne contenant la date en utilisant les informations dans les colonnes <em>Year</em> et <em>Day</em>. Consultez le site Web suivant pour comprendre comment gérer les données temporelles dans <em>R</em> : <a href="https://www.stat.berkeley.edu/~s133/dates.html" class="uri">https://www.stat.berkeley.edu/~s133/dates.html</a></p>
-<p>(1b) L’un des problèmes de l’utilisation des données journalières est la gestion des années bissextiles. Dans ce cas, nous avons des données avec un nombre de jours constant par année (365 jours par an). Il s’agit d’une solution courante pour simplifier le traitement des données, notamment en modélisation. Afin d’ajouter un jour de plus pour les années bissextiles, nous pouvons utiliser les fonctions <em>fill_gaps</em> (<a href="https://www.rdocumentation.org/packages/tsibble/versions/1.0.0/topics/fill_gaps" class="uri">https://www.rdocumentation.org/packages/tsibble/versions/1.0.0/topics/fill_gaps</a>) et <em>tidyr::fill</em> (<a href="https://www.rdocumentation.org/packages/tidyr/versions/1.1.3/topics/fill" class="uri">https://www.rdocumentation.org/packages/tidyr/versions/1.1.3/topics/fill</a>). Nous pouvons spécifier que les lignes ajoutées ont <em>Day</em> égal à 366 et <em>GapFilled_NEP</em>, <em>GapFilled_R</em>, <em>GapFilled_GEP</em> et <em>Year</em> égaux à la valeur de la ligne précédente.</p>
-<p>(1c) Obtenez un nouveau tableau de données temporelles (<em>tsibble</em>) contenant les valeurs mensuelles moyennes de <em>GapFilled_NEP</em>. Tracez la série chronologique obtenue et commentez-la. Comment la série chronologique varie-t-elle dans le temps ? Que signifient les valeurs négatives ?</p>
-<p>(1d) Tracez les 3 séries chronologiques des valeurs quotidiennes (<em>GapFilled_NEP</em>, <em>GapFilled_R</em>, <em>GapFilled_GEP</em>), la saisonnalité annuelle de <em>GapFilled_NEP</em> (utilisez le jeu de données journalières ainsi que le jeu de données mensuelles en produisant deux graphiques distincts), et la tendance des données <em>GapFilled_NEP</em> pour chaque mois sur la période d’observation (utilisez le jeu de données mensuelles). Quand la saison de croissance commence-t-elle et se termine-t-elle au site d’étude ? Quand se produit le pic de photosynthèse ? Y a-t-il une tendance évidente dans les valeurs mensuelles moyennes ?</p>
-<p>(1e) Extraire les différentes composantes de la série chronologique journalière de <em>GapFilled_NEP</em> (tendance, saisonnalité et résidus). Quelle est l’importance relative des composantes ? Qu’est-ce que ça veut dire ? Enfin, stockez les composants dans un nouveau tableau de données temporelles (<em>tsibble</em>).</p>
-<p>(1f) Analyser l’autocorrélation et l’autocorrélation partielle de la série chronologique journalière de <em>GapFilled_NEP</em> et de la composante résiduelle extraite en 1e. Que déduisez-vous de ces graphiques ?</p>
-<p>(1g) Ajustez un modèle ARIMA à la série chronologique journalière de <em>GapFilled_NEP</em>. Laissez le modèle choisir le modèle ARIMA approprié. Quel type de modèle ARIMA est automatiquement sélectionné ? Les résidus du modèle ARIMA respectent-ils les hypothèses du modèle ?</p>
-<p>(1h) Effectuez des prévisions et tracez une année supplémentaire de données journalières de <em>GapFilled_NEP</em> en utilisant le modèle sélectionné à l’étape précédente.</p>
+<p>(1a) Créez un tableau de données temporelles (<em>tsibble</em>). Dans
+un premier temps, vous devez ajouter une colonne contenant la date en
+utilisant les informations dans les colonnes <em>Year</em> et
+<em>Day</em>. Consultez le site Web suivant pour comprendre comment
+gérer les données temporelles dans <em>R</em> : <a
+href="https://www.stat.berkeley.edu/~s133/dates.html"
+class="uri">https://www.stat.berkeley.edu/~s133/dates.html</a></p>
+<p>(1b) L’un des problèmes de l’utilisation des données journalières est
+la gestion des années bissextiles. Dans ce cas, nous avons des données
+avec un nombre de jours constant par année (365 jours par an). Il s’agit
+d’une solution courante pour simplifier le traitement des données,
+notamment en modélisation. Afin d’ajouter un jour de plus pour les
+années bissextiles, nous pouvons utiliser les fonctions
+<em>fill_gaps</em> (<a
+href="https://www.rdocumentation.org/packages/tsibble/versions/1.0.0/topics/fill_gaps"
+class="uri">https://www.rdocumentation.org/packages/tsibble/versions/1.0.0/topics/fill_gaps</a>)
+et <em>tidyr::fill</em> (<a
+href="https://www.rdocumentation.org/packages/tidyr/versions/1.1.3/topics/fill"
+class="uri">https://www.rdocumentation.org/packages/tidyr/versions/1.1.3/topics/fill</a>).
+Nous pouvons spécifier que les lignes ajoutées ont <em>Day</em> égal à
+366 et <em>GapFilled_NEP</em>, <em>GapFilled_R</em>,
+<em>GapFilled_GEP</em> et <em>Year</em> égaux à la valeur de la ligne
+précédente.</p>
+<p>(1c) Obtenez un nouveau tableau de données temporelles
+(<em>tsibble</em>) contenant les valeurs mensuelles moyennes de
+<em>GapFilled_NEP</em>. Tracez la série chronologique obtenue et
+commentez-la. Comment la série chronologique varie-t-elle dans le temps
+? Que signifient les valeurs négatives ?</p>
+<p>(1d) Tracez les 3 séries chronologiques des valeurs quotidiennes
+(<em>GapFilled_NEP</em>, <em>GapFilled_R</em>, <em>GapFilled_GEP</em>),
+la saisonnalité annuelle de <em>GapFilled_NEP</em> (utilisez le jeu de
+données journalières ainsi que le jeu de données mensuelles en
+produisant deux graphiques distincts), et la tendance des données
+<em>GapFilled_NEP</em> pour chaque mois sur la période d’observation
+(utilisez le jeu de données mensuelles). Quand la saison de croissance
+commence-t-elle et se termine-t-elle au site d’étude ? Quand se produit
+le pic de photosynthèse ? Y a-t-il une tendance évidente dans les
+valeurs mensuelles moyennes ?</p>
+<p>(1e) Extraire les différentes composantes de la série chronologique
+journalière de <em>GapFilled_NEP</em> (tendance, saisonnalité et
+résidus). Quelle est l’importance relative des composantes ? Qu’est-ce
+que ça veut dire ? Enfin, stockez les composants dans un nouveau tableau
+de données temporelles (<em>tsibble</em>).</p>
+<p>(1f) Analyser l’autocorrélation et l’autocorrélation partielle de la
+série chronologique journalière de <em>GapFilled_NEP</em> et de la
+composante résiduelle extraite en 1e. Que déduisez-vous de ces
+graphiques ?</p>
+<p>(1g) Ajustez un modèle ARIMA à la série chronologique journalière de
+<em>GapFilled_NEP</em>. Laissez le modèle choisir le modèle ARIMA
+approprié. Quel type de modèle ARIMA est automatiquement sélectionné ?
+Les résidus du modèle ARIMA respectent-ils les hypothèses du modèle
+?</p>
+<p>(1h) Effectuez des prévisions et tracez une année supplémentaire de
+données journalières de <em>GapFilled_NEP</em> en utilisant le modèle
+sélectionné à l’étape précédente.</p>
 </div>
-<div id="modèle-arima-pour-le-nep-avec-prédicteurs-externes" class="section level2">
+<div id="modèle-arima-pour-le-nep-avec-prédicteurs-externes"
+class="section level2">
 <h2>2. Modèle ARIMA pour le NEP avec prédicteurs externes</h2>
-<p>Nous commencerons par charger des données météorologiques pour le site de la tour à flux.</p>
+<p>Nous commencerons par charger des données météorologiques pour le
+site de la tour à flux.</p>
 <pre class="r"><code>My_meteo=read.delim(&quot;../donnees/EOBS_fluxnet_inmet2.txt&quot;,skip=1,header=F)
 names(My_meteo)= c(&quot;Year&quot;,&quot;Day&quot;,&quot;Tmax&quot;,&quot;Tmin&quot;,&quot;Precip&quot;,&quot;CO2&quot;)
 head(My_meteo)</code></pre>
@@ -330,16 +372,37 @@ head(My_meteo)</code></pre>
 <ul>
 <li><p><em>Year</em> est l’année de l’observation</p></li>
 <li><p><em>Day</em> est le jour de l’année (1-365)</p></li>
-<li><p><em>Tmax</em> est la température maximale journalière (<em>°C</em>)</p></li>
-<li><p><em>Tmin</em> est la température minimale journalière (<em>°C</em>)</p></li>
-<li><p><em>Precip</em> est la somme des précipitations journalières (<em>cm</em>)</p></li>
-<li><p><em>CO2</em> est la concentration en CO2 de l’atmosphère (<em>ppm</em>)</p></li>
+<li><p><em>Tmax</em> est la température maximale journalière
+(<em>°C</em>)</p></li>
+<li><p><em>Tmin</em> est la température minimale journalière
+(<em>°C</em>)</p></li>
+<li><p><em>Precip</em> est la somme des précipitations journalières
+(<em>cm</em>)</p></li>
+<li><p><em>CO2</em> est la concentration en CO2 de l’atmosphère
+(<em>ppm</em>)</p></li>
 </ul>
-<p>Une fois que vous avez chargé les données météorologiques, vous devez créer un tableau de données temporelles avec ces données (même procédure qu’au point 1a) et combler les années bissextiles en ajoutant un jour (même procédure qu’au point 1b).</p>
-<p>(2a) Trouvez la variable météorologique ou environnementale (<em>Tmax</em>, <em>Tmin</em>, <em>Precip</em> ou <em>CO2</em>) qui corrèle le plus à la série chronologique journalière de <em>GapFilled_NEP</em>.</p>
-<p>(2b) Joignez les données de flux et météorologiques (<em>inner_join</em>) et tracez la relation (nuage de points) entre la variable trouvée en 2a (axe des x) et <em>GapFilled_NEP</em> (axe des y). Commentez cette relation.</p>
-<p>(2c) Appliquer un modèle linéaire sans aucun terme ARIMA incluant un terme quadratique pour la variable trouvée en 2a. Ensuite, tracez les prévisions du modèle sur le graphique du point 2b. Enfin, tracez les résidus de ce modèle en fonction du temps. Le modèle représente-t-il correctement les données ? Essayez d’expliquer pourquoi les résidus semblent être principalement positif au début de la saison de croissance.</p>
-<p>(2d) Ajouter des termes ARIMA au modèle du point 2c et comparer l’AIC de ce modèle avec l’AIC du modèle en 1g. Comparez les termes ARIMA sélectionnés ici et en 1g.</p>
+<p>Une fois que vous avez chargé les données météorologiques, vous devez
+créer un tableau de données temporelles avec ces données (même procédure
+qu’au point 1a) et combler les années bissextiles en ajoutant un jour
+(même procédure qu’au point 1b).</p>
+<p>(2a) Trouvez la variable météorologique ou environnementale
+(<em>Tmax</em>, <em>Tmin</em>, <em>Precip</em> ou <em>CO2</em>) qui
+corrèle le plus à la série chronologique journalière de
+<em>GapFilled_NEP</em>.</p>
+<p>(2b) Joignez les données de flux et météorologiques
+(<em>inner_join</em>) et tracez la relation (nuage de points) entre la
+variable trouvée en 2a (axe des x) et <em>GapFilled_NEP</em> (axe des
+y). Commentez cette relation.</p>
+<p>(2c) Appliquer un modèle linéaire sans aucun terme ARIMA incluant un
+terme quadratique pour la variable trouvée en 2a. Ensuite, tracez les
+prévisions du modèle sur le graphique du point 2b. Enfin, tracez les
+résidus de ce modèle en fonction du temps. Le modèle représente-t-il
+correctement les données ? Essayez d’expliquer pourquoi les résidus
+semblent être principalement positif au début de la saison de
+croissance.</p>
+<p>(2d) Ajouter des termes ARIMA au modèle du point 2c et comparer l’AIC
+de ce modèle avec l’AIC du modèle en 1g. Comparez les termes ARIMA
+sélectionnés ici et en 1g.</p>
 </div>
 
 
@@ -371,7 +434,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -380,6 +443,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')

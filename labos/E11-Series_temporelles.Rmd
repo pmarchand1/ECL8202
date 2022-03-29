@@ -15,7 +15,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Ce laboratoire devra être soumis sur Moodle le 21 avril.
+Ce laboratoire devra être soumis sur Moodle le 22 avril.
 
 ## Données
 
