@@ -61,4 +61,4 @@ Graded lab: [Generalized additive models](labos/E07E-Modeles_additifs_generalise
 
 Graded lab: [Time series](labos/E11E-Series_temporelles.html) ([PDF](labos/E11E-Series_temporelles.pdf)) - Data: [EOBS_fluxnet2.csv](donnees/EOBS_fluxnet2.csv), [EOBS_fluxnet_inmet2.txt](donnees/EOBS_fluxnet_inmet2.txt)
 
-12. [Spatial data](labos/12E-Donnees_spatiales_updated.html) ([PDF](labos/12E-Donnees_spatiales_updated.pdf)) - Data: [bryo_belg.csv](donnees/bryo_belg.csv)
+12. [Spatial data (solutions)](labos/12RE-Donnees_spatiales_updated.html) ([PDF](labos/12RE-Donnees_spatiales_updated.pdf)) - Data: [bryo_belg.csv](donnees/bryo_belg.csv)

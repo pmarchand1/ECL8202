@@ -13,12 +13,22 @@
 
 <title>Spatial data</title>
 
-<script src="libs/jquery-1.11.3/jquery.min.js"></script>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="libs/bootstrap-3.3.5/css/spacelab.min.css" rel="stylesheet" />
 <script src="libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
 <script src="libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="libs/tocify-1.9.1/jquery.tocify.js"></script>
@@ -36,11 +46,6 @@
     </style>
 
 <style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
 <script type="text/javascript">
 if (window.hljs) {
   hljs.configure({languages: []});
@@ -53,32 +58,6 @@ if (window.hljs) {
 
 
 
-<style type="text/css">
-h1 {
-  font-size: 34px;
-}
-h1.title {
-  font-size: 38px;
-}
-h2 {
-  font-size: 30px;
-}
-h3 {
-  font-size: 24px;
-}
-h4 {
-  font-size: 18px;
-}
-h5 {
-  font-size: 16px;
-}
-h6 {
-  font-size: 12px;
-}
-.table th:not([align]) {
-  text-align: left;
-}
-</style>
 
 
 
@@ -89,10 +68,6 @@ h6 {
   max-width: 940px;
   margin-left: auto;
   margin-right: auto;
-}
-code {
-  color: inherit;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 img {
   max-width:100%;
@@ -109,6 +84,9 @@ button.code-folding-btn:focus {
 summary {
   display: list-item;
 }
+pre code {
+  padding: 0;
+}
 </style>
 
 
@@ -121,7 +99,6 @@ summary {
   max-height: 500px;
   min-height: 44px;
   overflow-y: auto;
-  background: white;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
@@ -247,7 +224,7 @@ div.tocify {
 
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
+<div class="row">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
 </div>
@@ -258,7 +235,7 @@ div.tocify {
 
 
 
-<div class="fluid-row" id="header">
+<div id="header">
 
 
 
@@ -269,11 +246,23 @@ div.tocify {
 
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>The <a href="data/bryo_belg.csv">bryo_belg.csv</a> dataset is adapted from the data of this study:</p>
+<p>The <a href="data/bryo_belg.csv">bryo_belg.csv</a> dataset is adapted
+from the data of this study:</p>
 <blockquote>
-<p>Neyens, T., Diggle, P.J., Faes, C., Beenaerts, N., Artois, T. et Giorgi, E. (2019) Mapping species richness using opportunistic samples: a case study on ground-floor bryophyte species richness in the Belgian province of Limburg. <em>Scientific Reports</em> 9, 19122. <a href="https://doi.org/10.1038/s41598-019-55593-x" class="uri">https://doi.org/10.1038/s41598-019-55593-x</a></p>
+<p>Neyens, T., Diggle, P.J., Faes, C., Beenaerts, N., Artois, T. et
+Giorgi, E. (2019) Mapping species richness using opportunistic samples:
+a case study on ground-floor bryophyte species richness in the Belgian
+province of Limburg. <em>Scientific Reports</em> 9, 19122. <a
+href="https://doi.org/10.1038/s41598-019-55593-x"
+class="uri">https://doi.org/10.1038/s41598-019-55593-x</a></p>
 </blockquote>
-<p>This data frame shows the specific richness of ground bryophytes (<em>richness</em>) for different sampling points in the Belgian province of Limburg, with their position <em>(x, y)</em> in km, in addition to information on the proportion of forest (<em>forest</em>) and wetlands (<em>wetland</em>) in a 1 km<span class="math inline">\(^2\)</span> cell containing the sampling point.</p>
+<p>This data frame shows the specific richness of ground bryophytes
+(<em>richness</em>) for different sampling points in the Belgian
+province of Limburg, with their position <em>(x, y)</em> in km, in
+addition to information on the proportion of forest (<em>forest</em>)
+and wetlands (<em>wetland</em>) in a 1 km<span
+class="math inline">\(^2\)</span> cell containing the sampling
+point.</p>
 <pre class="r"><code>bryo_belg &lt;- read.csv(&quot;../donnees/bryo_belg.csv&quot;)
 head(bryo_belg)</code></pre>
 <pre><code>##   richness    forest   wetland        x        y
@@ -286,10 +275,18 @@ head(bryo_belg)</code></pre>
 </div>
 <div id="fitting-a-geostatistical-model" class="section level2">
 <h2>Fitting a geostatistical model</h2>
-<p>For this exercise, we will use the square root of the specific richness as the response variable. The square root transformation often allows to homogenize the variance of the count data in order to apply a linear regression.</p>
-<p><em>Note</em>: To model the count data directly, for example with a Poisson distribution, and also include spatial dependence, we would need to use a custom likelihood model or a Bayesian model.</p>
+<p>For this exercise, we will use the square root of the specific
+richness as the response variable. The square root transformation often
+allows to homogenize the variance of the count data in order to apply a
+linear regression.</p>
+<p><em>Note</em>: To model the count data directly, for example with a
+Poisson distribution, and also include spatial dependence, we would need
+to use a custom likelihood model or a Bayesian model.</p>
 <ol style="list-style-type: lower-alpha">
-<li>Visualize the spatial pattern of the richness of ground bryophytes (dots of different size according to species richness). Then, visualize the the relationship between richness of ground bryophytes and forest cover. Compute the correlation between these variables.</li>
+<li>Visualize the spatial pattern of the richness of ground bryophytes
+(dots of different size according to species richness). Then, visualize
+the the relationship between richness of ground bryophytes and forest
+cover. Compute the correlation between these variables.</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>bryo_belg$sr &lt;- sqrt(bryo_belg$richness)
@@ -306,7 +303,10 @@ ggplot(bryo_belg, aes(x = x, y = y, size = sr)) +
 <pre class="r"><code>cor(bryo_belg$sr,bryo_belg$forest)</code></pre>
 <pre><code>## [1] 0.4483081</code></pre>
 <ol start="2" style="list-style-type: lower-alpha">
-<li>Fit a linear model of the transformed species richness to the proportion of forest and wetlands, without taking into account spatial correlations. What is the effect of the two predictors in this model?</li>
+<li>Fit a linear model of the transformed species richness to the
+proportion of forest and wetlands, without taking into account spatial
+correlations. What is the effect of the two predictors in this
+model?</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>bryo_lm &lt;- lm(sr ~ forest + wetland, data = bryo_belg)
@@ -330,20 +330,28 @@ summary(bryo_lm)</code></pre>
 ## Residual standard error: 0.7095 on 417 degrees of freedom
 ## Multiple R-squared:  0.2231, Adjusted R-squared:  0.2193 
 ## F-statistic: 59.86 on 2 and 417 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>There is a positive effect of the fraction of forests and a negative effect of the fraction of wetlands, both significant.</p>
+<p>There is a positive effect of the fraction of forests and a negative
+effect of the fraction of wetlands, both significant.</p>
 <ol start="3" style="list-style-type: lower-alpha">
-<li>Calculate the empirical variogram of the model residuals in (b). Does there appear to be a spatial correlation between the points?</li>
+<li>Calculate the empirical variogram of the model residuals in (b).
+Does there appear to be a spatial correlation between the points?</li>
 </ol>
-<p><em>Note</em>: The <code>cutoff</code> argument to the <code>variogram</code> function specifies the maximum distance at which the variogram is calculated. You can manually adjust this value to get a good view of the sill.</p>
+<p><em>Note</em>: The <code>cutoff</code> argument to the
+<code>variogram</code> function specifies the maximum distance at which
+the variogram is calculated. You can manually adjust this value to get a
+good view of the sill.</p>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>library(gstat)
 vario &lt;- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
                    cutoff = 50)
 plot(vario)</code></pre>
 <p><img src="12RE-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>Yes, the variance is smaller for short distances and seems to increase up to ~ 40 m</p>
+<p>Yes, the variance is smaller for short distances and seems to
+increase up to ~ 40 km.</p>
 <ol start="4" style="list-style-type: lower-alpha">
-<li>Try to fit several parametric models to the empirical variogram (exponential, Gaussian, spherical). Which is the selected one? Plot the theoretical model on the plot of the empirical variogram.</li>
+<li>Try to fit several parametric models to the empirical variogram
+(exponential, Gaussian, spherical). Which is the selected one? Plot the
+theoretical model on the plot of the empirical variogram.</li>
 </ol>
 <pre class="r"><code>vfit &lt;- fit.variogram(vario, vgm(c(&quot;Exp&quot;, &quot;Gau&quot;, &quot;Sph&quot;)))
 vfit</code></pre>
@@ -353,7 +361,10 @@ vfit</code></pre>
 <pre class="r"><code>plot(vario, vfit, col = &quot;black&quot;)</code></pre>
 <p><img src="12RE-Donnees_spatiales_updated_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <ol start="5" style="list-style-type: lower-alpha">
-<li>Re-fit the linear model in (b) with the <code>gls</code> function in the <em>nlme</em> package, trying the spatial correlation with the model selected in (d). Compare the models (with and without spatial correlation) with the AIC.</li>
+<li>Re-fit the linear model in (b) with the <code>gls</code> function in
+the <em>nlme</em> package, trying the spatial correlation with the model
+selected in (d). Compare the models (with and without spatial
+correlation) with the AIC.</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>library(nlme)
@@ -368,7 +379,9 @@ AIC(mod1e_1,mod1e_Gaus)</code></pre>
 ## mod1e_Gaus  6 870.9592</code></pre>
 <p>The model including the spatial correlation has the smallest AIC.</p>
 <ol start="6" style="list-style-type: lower-alpha">
-<li>What is the effect of the proportion of forests and wetlands according to the model in (e)? Explain the differences between the conclusions of this model and the model in (b).</li>
+<li>What is the effect of the proportion of forests and wetlands
+according to the model in (e)? Explain the differences between the
+conclusions of this model and the model in (b).</li>
 </ol>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>summary(mod1e_Gaus)</code></pre>
@@ -401,7 +414,12 @@ AIC(mod1e_1,mod1e_Gaus)</code></pre>
 ## 
 ## Residual standard error: 0.7498226 
 ## Degrees of freedom: 420 total; 417 residual</code></pre>
-<p>The magnitude of the coefficients is smaller, their standard error is larger, and the effect of wetlands is no longer significant. Because of the spatial correlations, our different points are not independent and part of the effect originally attributed to the predictor variables could be a coincidence due to the spatial correlations of both the response variable and the predictor variables.</p>
+<p>The magnitude of the coefficients is smaller, their standard error is
+larger, and the effect of wetlands is no longer significant. Because of
+the spatial correlations, our different points are not independent and
+part of the effect originally attributed to the predictor variables
+could be a coincidence due to the spatial correlations of both the
+response variable and the predictor variables.</p>
 </div>
 
 
@@ -433,7 +451,7 @@ $(document).ready(function () {
 
 $(document).ready(function () {
   $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
+    $(this).parent().toggleClass('nav-tabs-open');
   });
 });
 </script>
@@ -442,6 +460,9 @@ $(document).ready(function () {
 
 <script>
 $(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
 
     // move toc-ignore selectors from section div to header
     $('div.section.toc-ignore')

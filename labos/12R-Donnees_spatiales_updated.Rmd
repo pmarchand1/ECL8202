@@ -77,7 +77,7 @@ vario <- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
 plot(vario)
 ```
 
-Oui, la variance est plus faible pour de petites distances et semble augmenter jusqu'à environ 40 m.
+Oui, la variance est plus faible pour de petites distances et semble augmenter jusqu'à environ 40 km.
 
 d) Essayez d'ajuster plusieurs modèles paramétriques au variogramme empirique (exponentiel, gaussien, sphérique). Quel est celui sélectionné? Tracez le modèle choisi sur le variogramme empirique.
 

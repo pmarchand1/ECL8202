@@ -77,7 +77,7 @@ vario <- variogram(sr ~ forest + wetland, locations = ~ x + y, data = bryo_belg,
 plot(vario)
 ```
 
-Yes, the variance is smaller for short distances and seems to increase up to ~ 40 m
+Yes, the variance is smaller for short distances and seems to increase up to ~ 40 km.
 
 d) Try to fit several parametric models to the empirical variogram (exponential, Gaussian, spherical). Which is the selected one? Plot the theoretical model on the plot of the empirical variogram.
 
